@@ -62,7 +62,7 @@ void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, const FVector& W
     ReturnToPatrol = PatrolOrigin +
         FVector(FMath::Clamp(GetActorLocation().X - PatrolOrigin.X, -180.f, 180.f), 0.f, 0.f);
     DistractionPhase = EDistractionPhase::React;
-    DistractionTimer = FMath::Max(0.22f, 0.45f - ConsecutiveKnocks * 0.06f);
+    DistractionTimer = FMath::Max(0.31f, 0.52f - ConsecutiveKnocks * 0.07f);
     InvestigationStuckTimer = 0.f;
     Suspicion = FMath::Max(Suspicion, 0.24f);
     AwarenessState = FMath::Max(AwarenessState, 1u);
@@ -111,7 +111,7 @@ bool AMGGuardActor::AdvanceNoiseInvestigation(float DeltaSeconds)
         if (After < 82.f || InvestigationStuckTimer > 1.5f)
         {
             DistractionPhase = EDistractionPhase::Search;
-            DistractionTimer = 2.5f + 0.85f * ConsecutiveKnocks;
+            DistractionTimer = 4.5f + 1.25f * ConsecutiveKnocks;
         }
     }
     else if (DistractionPhase == EDistractionPhase::Search)
