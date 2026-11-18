@@ -24,3 +24,8 @@ unreal/MGRemaster/Content/Legacy/
 *.jad
 *.zip
 .DS_Store
+
+# Packaged game distributions
+dist/
+*.pak
+*.exe
