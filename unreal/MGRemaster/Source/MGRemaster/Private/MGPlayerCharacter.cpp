@@ -17,8 +17,10 @@
 AMGPlayerCharacter::AMGPlayerCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
-    GetCapsuleComponent()->InitCapsuleSize(35.f, 88.f);
+    GetCapsuleComponent()->InitCapsuleSize(35.f, 89.f);
+    // Reference height: 178 cm (official MG2 profile; provisional for 1995).
     GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
+    GetCharacterMovement()->CrouchedHalfHeight = 55.f;
     GetCharacterMovement()->MaxWalkSpeed = 350.f;
     GetCharacterMovement()->MaxAcceleration = 1800.f;
     GetCharacterMovement()->BrakingDecelerationWalking = 2200.f;
@@ -30,8 +32,8 @@ AMGPlayerCharacter::AMGPlayerCharacter()
     PrototypeBody = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PrototypeBody"));
     PrototypeBody->SetupAttachment(GetCapsuleComponent());
     PrototypeBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    // UE BasicShapes Cylinder: 100 cm high at scale 1; standing proxy = 176 cm.
-    PrototypeBody->SetRelativeScale3D(FVector(0.7f, 0.7f, 1.76f));
+    // UE BasicShapes Cylinder: 100 cm high at scale 1; Snake proxy = 178 cm.
+    PrototypeBody->SetRelativeScale3D(FVector(0.7f, 0.7f, 1.78f));
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
     if (Cylinder.Succeeded()) PrototypeBody->SetStaticMesh(Cylinder.Object);
 
@@ -80,7 +82,7 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     const FVector TargetSocket = FVector(0.f, ShoulderSign * (bAiming ? 58.f : 65.f), bAiming ? 18.f : 10.f);
     const FVector TargetPivot(0.f, 0.f, bIsCrouched ? 40.f : 65.f);
     CameraBoom->SetRelativeLocation(FMath::VInterpTo(CameraBoom->GetRelativeLocation(), TargetPivot, DeltaSeconds, 12.f));
-    const FVector TargetProxyScale(0.7f, 0.7f, bIsCrouched ? 1.10f : 1.76f);
+    const FVector TargetProxyScale(0.7f, 0.7f, bIsCrouched ? 1.10f : 1.78f);
     PrototypeBody->SetRelativeScale3D(FMath::VInterpTo(PrototypeBody->GetRelativeScale3D(), TargetProxyScale, DeltaSeconds, 12.f));
     CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, TargetLength, DeltaSeconds, 10.f);
     CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetSocket, DeltaSeconds, 10.f);
