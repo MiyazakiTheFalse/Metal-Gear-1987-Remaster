@@ -59,9 +59,17 @@ AStaticMeshActor* AMGGrayFoxMission::SpawnBlock(
     AStaticMeshActor* Actor = GetWorld()->SpawnActor<AStaticMeshActor>(Centre, FRotator::ZeroRotator);
     if (!Actor) return nullptr;
     Actor->Tags.Add(Tag);
+    // Breakable mission geometry must remain an interaction, never automatic cover.
+    if (Tag.ToString().StartsWith(TEXT("WeakWall_")))
+        Actor->Tags.Add(TEXT("MG_Breachable"));
     UStaticMeshComponent* Mesh = Actor->GetStaticMeshComponent();
     Mesh->SetMobility(EComponentMobility::Movable);
     Mesh->SetStaticMesh(BlockMesh);
+    // Optional acoustics metadata on greybox walls; independently replaceable by artists.
+    if (Tag.ToString().Contains(TEXT("Boundary")) || Tag == FName(TEXT("Divider")))
+        Mesh->ComponentTags.Add(TEXT("MG_Surface_Metal"));
+    else if (Tag == FName(TEXT("Bed")))
+        Mesh->ComponentTags.Add(TEXT("MG_Surface_Wood"));
     Mesh->SetWorldScale3D(Scale);
     Mesh->SetCollisionProfileName(bBlockMovement ? TEXT("BlockAll") : TEXT("NoCollision"));
     return Actor;
