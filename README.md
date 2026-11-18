@@ -125,7 +125,7 @@ mission-specific save slot and reopens the current level. Capture confiscates th
 prototype stun weapon; mission flags and checkpoint positions persist.
 
 Rust now holds the ordered Gray Fox transition rules and a non-blocking pacing
-model (14/35-second optional hints, quiet narrative beat, escalating escape).
+model (experimental 28/75-second optional hint candidates, exploration-aware suppression, quiet narrative beat, escalating escape).
 The Unreal scene has a reduced fallback state machine for iteration without Rust.
 See [pacing doctrine](docs/DOCTRINE_003_PACING.md) and
 [rescue implementation notes](docs/GRAY_FOX_RESCUE_IMPLEMENTATION.md).
