@@ -125,11 +125,17 @@ bool AMGGuardActor::AdvanceNoiseInvestigation(float DeltaSeconds)
     }
     else if (DistractionPhase == EDistractionPhase::Return)
     {
+        const float Before = FVector::Dist2D(ReturnToPatrol, GetActorLocation());
         MoveToward(ReturnToPatrol, 90.f, DeltaSeconds);
-        if (FVector::Dist2D(ReturnToPatrol, GetActorLocation()) < 28.f)
+        const float After = FVector::Dist2D(ReturnToPatrol, GetActorLocation());
+        InvestigationStuckTimer = After >= Before - 0.5f ?
+            InvestigationStuckTimer + DeltaSeconds : 0.f;
+        // A blocked path cannot strand the actor indefinitely in Return.
+        if (After < 28.f || InvestigationStuckTimer > 2.0f)
         {
             DistractionPhase = EDistractionPhase::None;
             ConsecutiveKnocks = 0;
+            InvestigationStuckTimer = 0.f;
         }
     }
     return true;
