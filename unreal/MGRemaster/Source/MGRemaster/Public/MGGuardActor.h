@@ -19,6 +19,7 @@ public:
 
     bool IsIncapacitated() const { return bIncapacitated; }
     uint32 GetAwarenessState() const { return AwarenessState; }
+    float GetSuspicion() const { return Suspicion; }
 
 private:
     UPROPERTY(VisibleAnywhere, Category="Prototype")
@@ -32,5 +33,8 @@ private:
     bool bPatrolForward = true;
     bool bIncapacitated = false;
     float Suspicion = 0.f;
+    float Health = 100.f;
+    float StaggerSeconds = 0.f;
+    float AttackCooldown = 0.f;
     uint32 AwarenessState = 0;
 };

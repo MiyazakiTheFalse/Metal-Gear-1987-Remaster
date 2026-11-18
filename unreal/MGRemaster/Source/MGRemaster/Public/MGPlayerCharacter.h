@@ -7,6 +7,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UStaticMeshComponent;
+class UMGEquipmentComponent;
 
 UCLASS()
 class MGREMASTER_API AMGPlayerCharacter : public ACharacter
@@ -22,6 +23,12 @@ public:
     bool IsSprinting() const { return bSprinting && !bIsCrouched && !bAiming; }
     bool IsMissionLogVisible() const { return bShowMissionLog; }
     float GetNoiseFactor() const;
+    float GetHealth() const { return Health; }
+    UMGEquipmentComponent* GetEquipment() const { return Equipment; }
+    virtual float TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent,
+        AController* EventInstigator, AActor* DamageCauser) override;
+    void NotifyFeedback(const FString& Message, FName CueName = NAME_None);
+
     float GetVisibilityFactor() const;
 
 private:
@@ -31,12 +38,20 @@ private:
     UCameraComponent* FollowCamera;
     UPROPERTY(VisibleAnywhere, Category="Prototype")
     UStaticMeshComponent* PrototypeBody;
+    UPROPERTY(VisibleAnywhere, Category="Equipment")
+    UMGEquipmentComponent* Equipment;
 
     bool bShowMissionLog = false;
     bool bAiming = false;
     bool bSprinting = false;
     float ShoulderSign = 1.f;
     int32 QualityPreset = 0;
+    float Health = 100.f;
+    float MeleeNextTime = 0.f;
+    float LastMeleeTime = -100.f;
+    float MeleeVisualTimer = 0.f;
+    float CombatNoiseTimer = 0.f;
+    int32 MeleeComboStep = 0;
 
     void MoveForward(float Value);
     void MoveRight(float Value);
@@ -55,5 +70,14 @@ private:
     void RestartRescue();
     void ToggleMissionLog();
     void CycleGraphicsQuality();
+    void WeaponWindowStart();
+    void WeaponWindowStop();
+    void ItemWindowStart();
+    void ItemWindowStop();
+    void SelectionPrevious();
+    void SelectionNext();
+    void UseItem();
+    void MeleeAttack();
+
     void UpdateMovementState();
 };

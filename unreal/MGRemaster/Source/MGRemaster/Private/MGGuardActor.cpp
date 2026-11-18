@@ -40,14 +40,22 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
     const float Accepted = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
     if (DamageAmount > 0.f && !bIncapacitated)
     {
-        // This first vertical slice has a single nonlethal stun weapon.
-        bIncapacitated = true;
-        Suspicion = 0.f;
-        AwarenessState = 0;
-        ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-        CollisionCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-        ProxyBody->SetRelativeRotation(FRotator(0.f, 0.f, 80.f));
-        SetActorTickEnabled(false);
+        Health = FMath::Max(0.f, Health - DamageAmount);
+        StaggerSeconds = 0.22f;
+        // A victim can react and report contact; damage never silently vanishes.
+        Suspicion = 1.f;
+        AwarenessState = 3;
+        if (DamageCauser) LastKnownPlayerPosition = DamageCauser->GetActorLocation();
+        if (Health <= 0.f)
+        {
+            bIncapacitated = true;
+            Suspicion = 0.f;
+            AwarenessState = 0;
+            ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            CollisionCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            ProxyBody->SetRelativeRotation(FRotator(0.f, 0.f, 80.f));
+            SetActorTickEnabled(false);
+        }
     }
     return Accepted;
 }
@@ -56,6 +64,11 @@ void AMGGuardActor::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     if (bIncapacitated || !GetWorld()) return;
+    StaggerSeconds = FMath::Max(0.f, StaggerSeconds - DeltaSeconds);
+    AttackCooldown = FMath::Max(0.f, AttackCooldown - DeltaSeconds);
+    ProxyBody->SetRelativeRotation(FMath::RInterpTo(ProxyBody->GetRelativeRotation(),
+        StaggerSeconds > 0.f ? FRotator(0.f, 0.f, 12.f) : FRotator::ZeroRotator,
+        DeltaSeconds, 9.f));
     const AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (!Player) return;
 
@@ -106,6 +119,16 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     if (bVisible || bAudible) LastKnownPlayerPosition = Player->GetActorLocation();
 #endif
 
+    // Enemy attack only after an actual alert and physical approach.
+    // Player health and HUD are authoritative; no invisible instant failure.
+    if (AwarenessState == 3 && Distance < 145.f && AttackCooldown <= 0.f)
+    {
+        UGameplayStatics::ApplyDamage(const_cast<AMGPlayerCharacter*>(Player),
+            12.f, nullptr, this, UDamageType::StaticClass());
+        AttackCooldown = 1.2f;
+    }
+
+    if (StaggerSeconds > 0.f) return;
     if (AwarenessState == 3)
     {
         const FVector Direction = (LastKnownPlayerPosition - GetActorLocation()).GetSafeNormal2D();

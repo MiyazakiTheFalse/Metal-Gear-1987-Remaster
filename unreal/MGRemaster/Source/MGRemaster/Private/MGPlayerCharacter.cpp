@@ -1,5 +1,7 @@
 #include "MGPlayerCharacter.h"
 #include "MGGrayFoxMission.h"
+#include "MGGuardActor.h"
+#include "MGEquipmentComponent.h"
 
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
@@ -7,6 +9,8 @@
 #include "Components/InputComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/Engine.h"
+#include "EngineUtils.h"
+#include "Sound/SoundBase.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
@@ -19,6 +23,7 @@ AMGPlayerCharacter::AMGPlayerCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
     GetCapsuleComponent()->InitCapsuleSize(35.f, 89.f);
+    Equipment = CreateDefaultSubobject<UMGEquipmentComponent>(TEXT("Equipment"));
     // Reference height: 178 cm (official MG2 profile; provisional for 1995).
     GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
     GetCharacterMovement()->CrouchedHalfHeight = 55.f;
@@ -78,6 +83,8 @@ void AMGPlayerCharacter::BeginPlay()
 void AMGPlayerCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    CombatNoiseTimer = FMath::Max(0.f, CombatNoiseTimer - DeltaSeconds);
+    MeleeVisualTimer = FMath::Max(0.f, MeleeVisualTimer - DeltaSeconds);
     const float TargetLength = bAiming ? 190.f : 420.f;
     const float TargetFOV = bAiming ? 65.f : 85.f;
     const FVector TargetSocket = FVector(0.f, ShoulderSign * (bAiming ? 58.f : 65.f), bAiming ? 18.f : 10.f);
@@ -85,6 +92,12 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     CameraBoom->SetRelativeLocation(FMath::VInterpTo(CameraBoom->GetRelativeLocation(), TargetPivot, DeltaSeconds, 12.f));
     const FVector TargetProxyScale(0.7f, 0.7f, bIsCrouched ? 1.10f : 1.78f);
     PrototypeBody->SetRelativeScale3D(FMath::VInterpTo(PrototypeBody->GetRelativeScale3D(), TargetProxyScale, DeltaSeconds, 12.f));
+    // Clear visual windup/recovery cue until a source-accurate animation rig exists.
+    const float AttackOffset = MeleeVisualTimer > 0.f ?
+        17.f * FMath::Sin(FMath::Clamp(MeleeVisualTimer / 0.22f, 0.f, 1.f) * PI) : 0.f;
+    PrototypeBody->SetRelativeLocation(FMath::VInterpTo(
+        PrototypeBody->GetRelativeLocation(), FVector(AttackOffset, 0.f, 0.f),
+        DeltaSeconds, 19.f));
     CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, TargetLength, DeltaSeconds, 10.f);
     CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetSocket, DeltaSeconds, 10.f);
     FollowCamera->SetFieldOfView(FMath::FInterpTo(FollowCamera->FieldOfView, TargetFOV, DeltaSeconds, 11.f));
@@ -110,6 +123,14 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
     Input->BindAction("Interact", IE_Pressed, this, &AMGPlayerCharacter::Interact);
     Input->BindAction("RestartRescue", IE_Pressed, this, &AMGPlayerCharacter::RestartRescue);
     Input->BindAction("MissionLog", IE_Pressed, this, &AMGPlayerCharacter::ToggleMissionLog);
+    Input->BindAction("WeaponWindow", IE_Pressed, this, &AMGPlayerCharacter::WeaponWindowStart);
+    Input->BindAction("WeaponWindow", IE_Released, this, &AMGPlayerCharacter::WeaponWindowStop);
+    Input->BindAction("ItemWindow", IE_Pressed, this, &AMGPlayerCharacter::ItemWindowStart);
+    Input->BindAction("ItemWindow", IE_Released, this, &AMGPlayerCharacter::ItemWindowStop);
+    Input->BindAction("SelectPrevious", IE_Pressed, this, &AMGPlayerCharacter::SelectionPrevious);
+    Input->BindAction("SelectNext", IE_Pressed, this, &AMGPlayerCharacter::SelectionNext);
+    Input->BindAction("UseItem", IE_Pressed, this, &AMGPlayerCharacter::UseItem);
+    Input->BindAction("Melee", IE_Pressed, this, &AMGPlayerCharacter::MeleeAttack);
 }
 void AMGPlayerCharacter::MoveForward(float Value)
 {
@@ -171,6 +192,7 @@ float AMGPlayerCharacter::GetNoiseFactor() const
 {
     const float Speed = GetVelocity().Size2D();
     if (Speed < 15.f) return 0.f;
+    if (CombatNoiseTimer > 0.f) return 0.95f;
     if (bIsCrouched) return 0.08f;
     if (IsSprinting()) return 0.95f;
     return bAiming ? 0.14f : 0.30f;
@@ -185,7 +207,15 @@ void AMGPlayerCharacter::Interact()
     if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
     {
-        Mission->TryInteract(this);
+        const uint32 PreviousFlags = Mission->GetMissionFlags();
+        if (Mission->TryInteract(this))
+        {
+            const uint32 Changed = PreviousFlags ^ Mission->GetMissionFlags();
+            if (Changed & 4u) NotifyFeedback(TEXT("WALL BREACHED — NEW ROUTE"), TEXT("breach"));
+            else if (Changed & 8u) NotifyFeedback(TEXT("GRAY FOX RESCUED — INTEL LOG UPDATED"), TEXT("rescue"));
+            else if (Changed & 16u) NotifyFeedback(TEXT("ESCAPE ROUTE OPEN"), TEXT("breach"));
+        }
+        else NotifyFeedback(TEXT("NO ACTION AVAILABLE — MOVE CLOSER AND FACE TARGET"), TEXT("denied"));
     }
 }
 
@@ -205,13 +235,25 @@ void AMGPlayerCharacter::RestartRescue()
 
 void AMGPlayerCharacter::FireStun()
 {
-    if (!bAiming || !GetWorld() || !Controller) return;
-    if (const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
-        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+    if (!GetWorld() || !Controller) return;
+    if (!bAiming)
     {
-        // The captured Snake loses equipment; don't silently restore a gun.
-        if (Mission->HasEquipmentConfiscated()) return;
+        NotifyFeedback(TEXT("HOLD AIM BEFORE FIRING"), TEXT("denied"));
+        return;
     }
+    if (!Equipment || !Equipment->IsStunEquipped())
+    {
+        NotifyFeedback(Equipment && Equipment->IsConfiscated() ?
+            TEXT("WEAPONS CONFISCATED") : TEXT("NO WEAPON EQUIPPED"), TEXT("denied"));
+        return;
+    }
+    if (!Equipment->ConsumeStunRound())
+    {
+        NotifyFeedback(TEXT("OUT OF AMMUNITION"), TEXT("denied"));
+        return;
+    }
+    NotifyFeedback(TEXT("STUN ROUND FIRED"), TEXT("stun"));
+    CombatNoiseTimer = 0.55f;
     // Camera ray determines crosshair target; a second ray enforces obstruction
     // between the character and target. Prototype nonlethal incapacitation only.
     const FVector CameraStart = FollowCamera->GetComponentLocation();
@@ -227,6 +269,133 @@ void AMGPlayerCharacter::FireStun()
         UGameplayStatics::ApplyDamage(MuzzleHit.GetActor(), 100.f, Controller, this, UDamageType::StaticClass());
     }
 }
+
+void AMGPlayerCharacter::NotifyFeedback(const FString& Message, FName CueName)
+{
+    if (Equipment) Equipment->SetFeedback(Message);
+    if (CueName.IsNone()) return;
+    // Asset pipeline imports original placeholder WAVs to /Game/Feedback.
+    // Absence is safe: visible feedback still works. No extracted licensed SFX
+    // are included in the public repository.
+    const FString Name = CueName.ToString();
+    const FString ObjectRef = FString::Printf(
+        TEXT("/Game/Feedback/%s.%s"), *Name, *Name);
+    if (USoundBase* Sound = LoadObject<USoundBase>(nullptr, *ObjectRef))
+        UGameplayStatics::PlaySound2D(this, Sound, 0.65f);
+}
+void AMGPlayerCharacter::WeaponWindowStart()
+{
+    if (Equipment) { Equipment->OpenWeaponWindow(); NotifyFeedback(TEXT("WEAPON SELECTION"), TEXT("menu")); }
+}
+void AMGPlayerCharacter::WeaponWindowStop()
+{
+    if (Equipment)
+    {
+        const int32 Selected = Equipment->GetWeaponSelection();
+        Equipment->CloseWeaponWindow();
+        NotifyFeedback(Equipment->GetEquippedWeaponIndex() == Selected ?
+            TEXT("WEAPON CONFIRMED") : TEXT("WEAPON UNAVAILABLE"), 
+            Equipment->GetEquippedWeaponIndex() == Selected ? TEXT("select") : TEXT("denied"));
+    }
+}
+void AMGPlayerCharacter::ItemWindowStart()
+{
+    if (Equipment) { Equipment->OpenItemWindow(); NotifyFeedback(TEXT("ITEM SELECTION"), TEXT("menu")); }
+}
+void AMGPlayerCharacter::ItemWindowStop()
+{
+    if (Equipment)
+    {
+        const int32 Selected = Equipment->GetItemSelection();
+        Equipment->CloseItemWindow();
+        NotifyFeedback(Equipment->GetEquippedItemIndex() == Selected ?
+            TEXT("ITEM CONFIRMED") : TEXT("ITEM UNAVAILABLE"),
+            Equipment->GetEquippedItemIndex() == Selected ? TEXT("select") : TEXT("denied"));
+    }
+}
+void AMGPlayerCharacter::SelectionPrevious()
+{
+    if (Equipment && (Equipment->IsItemWindowOpen() || Equipment->IsWeaponWindowOpen()))
+    { Equipment->SelectionPrevious(); NotifyFeedback(TEXT("SELECTION MOVED"), TEXT("menu")); }
+}
+void AMGPlayerCharacter::SelectionNext()
+{
+    if (Equipment && (Equipment->IsItemWindowOpen() || Equipment->IsWeaponWindowOpen()))
+    { Equipment->SelectionNext(); NotifyFeedback(TEXT("SELECTION MOVED"), TEXT("menu")); }
+}
+void AMGPlayerCharacter::UseItem()
+{
+    if (!Equipment || Equipment->IsConfiscated())
+    { NotifyFeedback(TEXT("ITEMS CONFISCATED"), TEXT("denied")); return; }
+    if (Health >= 100.f)
+    { NotifyFeedback(TEXT("HEALTH FULL"), TEXT("denied")); return; }
+    if (Equipment->ConsumeRation())
+    {
+        Health = FMath::Min(100.f, Health + 45.f);
+        NotifyFeedback(TEXT("RATION USED — HEALTH RESTORED"), TEXT("select"));
+    }
+    else NotifyFeedback(TEXT("EQUIP A RATION FIRST"), TEXT("denied"));
+}
+void AMGPlayerCharacter::MeleeAttack()
+{
+    if (!GetWorld() || !Controller) return;
+    const float Now = GetWorld()->GetTimeSeconds();
+    if (Now < MeleeNextTime) return;
+    MeleeNextTime = Now + 0.35f;
+    MeleeComboStep = (Now - LastMeleeTime > 1.0f) ? 1 : (MeleeComboStep % 3) + 1;
+    LastMeleeTime = Now;
+    MeleeVisualTimer = 0.22f;
+    CombatNoiseTimer = 0.45f;
+    const FVector Forward = FRotator(0.f, Controller->GetControlRotation().Yaw, 0.f).Vector();
+    const FVector Origin = GetActorLocation();
+    AMGGuardActor* Target = nullptr;
+    float Best = 165.f;
+    for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
+    {
+        AMGGuardActor* Guard = *It;
+        if (!IsValid(Guard) || Guard->IsIncapacitated()) continue;
+        const FVector Diff = Guard->GetActorLocation() - Origin;
+        const float Distance = Diff.Size2D();
+        if (Distance >= Best || Distance < 20.f) continue;
+        if (FVector::DotProduct(Forward.GetSafeNormal2D(), Diff.GetSafeNormal2D()) < 0.58f)
+            continue;
+        FHitResult Hit;
+        FCollisionQueryParams Query(SCENE_QUERY_STAT(MGUnarmedLOS), false, this);
+        const bool bBlocked = GetWorld()->LineTraceSingleByChannel(Hit,
+            Origin + FVector(0.f, 0.f, 44.f),
+            Guard->GetActorLocation() + FVector(0.f, 0.f, 44.f),
+            ECC_Visibility, Query);
+        if (bBlocked && Hit.GetActor() != Guard) continue;
+        Target = Guard;
+        Best = Distance;
+    }
+    if (Target)
+    {
+        const float ComboDamage[3] = {35.f, 35.f, 40.f};
+        UGameplayStatics::ApplyDamage(Target, ComboDamage[MeleeComboStep - 1],
+            Controller, this, UDamageType::StaticClass());
+        NotifyFeedback(Target->IsIncapacitated() ?
+            TEXT("GUARD INCAPACITATED") : TEXT("MELEE IMPACT"), TEXT("impact"));
+    }
+    else NotifyFeedback(TEXT("UNARMED STRIKE — NO TARGET"), TEXT("whoosh"));
+}
+float AMGPlayerCharacter::TakeDamage(float Amount, const FDamageEvent& Event,
+                                     AController* Instigator, AActor* Causer)
+{
+    const float Accepted = Super::TakeDamage(Amount, Event, Instigator, Causer);
+    if (Amount <= 0.f || Health <= 0.f) return Accepted;
+    Health = FMath::Max(0.f, Health - Amount);
+    NotifyFeedback(Health <= 0.f ? TEXT("SNAKE DOWN — RELOADING CHECKPOINT")
+                                  : TEXT("INJURED — TAKE COVER"), TEXT("hurt"));
+    if (Health <= 0.f && GetWorld())
+    {
+        // A full failure flow will add death animation/AI reset; checkpoint
+        // reload retains the versioned mission save.
+        UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
+    }
+    return Accepted;
+}
+
 void AMGPlayerCharacter::CycleGraphicsQuality()
 {
     if (!GEngine) return;
