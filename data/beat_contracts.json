@@ -65,10 +65,13 @@
         "non_audio_equivalent": "Subtitles and readable transcript"
       },
       "timing": {
-        "start_event": "Player manually opens C/Start; optional visual radio prompt only when hints become eligible",
+        "start_event": "Optional manual player request at any time; unobtrusive incoming prompt only when pacing hint is eligible.",
         "feedback_target_ms": 150,
         "max_forced_lock_seconds": 0,
-        "optional_hint_seconds": [],
+        "optional_hint_seconds": [
+          28,
+          75
+        ],
         "timing_status": "hypothesis_until_playtested"
       },
       "state": {
@@ -109,14 +112,14 @@
         "non_audio_equivalent": "Visible wear and descriptive caption or inspect affordance"
       },
       "timing": {
-        "start_event": "First inspection or contact",
+        "start_event": "First mission progress checkpoint; hints at 28s/75s since advance, held while actively exploring until 6s/10s quiet (anti-stall overrides after 100s/150s).",
         "feedback_target_ms": 120,
         "max_forced_lock_seconds": 0,
         "optional_hint_seconds": [
-          14,
-          35
+          28,
+          75
         ],
-        "timing_status": "hypothesis_until_playtested"
+        "timing_status": "research_informed_hypothesis_not_measured"
       },
       "state": {
         "transaction": "No hidden timer unlock; wall is eligible immediately",
@@ -130,7 +133,8 @@
         "alerts"
       ],
       "verification": [
-        "Early solver can breach at t=0; hints only after inactivity; compare acoustic/visual comprehension"
+        "Early solver can breach at t=0; hints only after inactivity; compare acoustic/visual comprehension",
+        "Under active movement or camera scan, early hints must be held back; immediate solver can breach with no delay."
       ]
     },
     {
@@ -194,7 +198,7 @@
         "non_audio_equivalent": "Persist key information to mission log"
       },
       "timing": {
-        "start_event": "Rescue transaction commits",
+        "start_event": "On rescue flag commit; 7-second temporary subtitle holds but no forced control lock.",
         "feedback_target_ms": 150,
         "max_forced_lock_seconds": 0,
         "optional_hint_seconds": [],
@@ -212,7 +216,8 @@
         "save_reload"
       ],
       "verification": [
-        "Immediate next move available; read log after interrupt"
+        "Immediate next move available; read log after interrupt",
+        "Transcript must remain available if seven seconds are insufficient for the reader; actual voice duration pending."
       ]
     },
     {
@@ -317,11 +322,11 @@
         "non_audio_equivalent": "Subtitles/visible body facing and radar caution state"
       },
       "timing": {
-        "start_event": "Hearing event accepted",
+        "start_event": "On an audible wall impact, 0.31-0.52s reaction followed by collision-limited approach, 4.5s search plus 1.25s per renewed knock, then return.",
         "feedback_target_ms": 150,
         "max_forced_lock_seconds": 0,
         "optional_hint_seconds": [],
-        "timing_status": "hypothesis_until_playtested"
+        "timing_status": "research_informed_hypothesis_not_measured"
       },
       "state": {
         "transaction": "No mission objective commit",
@@ -335,7 +340,8 @@
         "combat_alert"
       ],
       "verification": [
-        "Investigate sound not player transform; alert overrides; no collision phasing"
+        "Investigate sound not player transform; alert overrides; no collision phasing",
+        "Investigate long enough to let a player exploit the distraction; confirm actual timings with mixed-skill playtests."
       ]
     },
     {
@@ -379,5 +385,7 @@
         "No replay of completed rescue/escape; player control returns"
       ]
     }
-  ]
+  ],
+  "supreme_doctrine": "DOCTRINE_000",
+  "spatial_doctrine": "DOCTRINE_005"
 }
