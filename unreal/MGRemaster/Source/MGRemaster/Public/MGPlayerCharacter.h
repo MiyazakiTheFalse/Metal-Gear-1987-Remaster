@@ -28,6 +28,11 @@ public:
     float GetEquipmentTimeScale() const { return EquipmentTimeScale; }
     float GetNoiseFactor() const;
     float GetHealth() const { return Health; }
+    bool IsProne() const { return bIsProne; }
+    bool IsInCover() const { return bInCover; }
+    FString GetPostureText() const;
+    bool TryEnterCover();
+    void LeaveCover();
     UMGEquipmentComponent* GetEquipment() const { return Equipment; }
     virtual float TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent,
         AController* EventInstigator, AActor* DamageCauser) override;
@@ -48,6 +53,11 @@ private:
     UPROPERTY(EditAnywhere, Category="Controls|Time")
     float EquipmentTimeScale = 0.20f; // Engineering default, not a canonical franchise speed.
     bool bCodecOpen = false;
+    bool bIsProne = false;
+    bool bPendingProne = false;
+    bool bInCover = false;
+    FVector CoverNormal = FVector::ZeroVector;
+    float PreferredShoulderSign = 1.f;
     FString CodecStatus;
     bool bShowMissionLog = false;
     bool bAiming = false;
@@ -86,6 +96,11 @@ private:
     void SelectionNext();
     void UseItem();
     void MeleeAttack();
+    void ToggleProne();
+    void ToggleCover();
+    void EnterProneAfterCrouch();
+    bool ExitProneSafely();
+    void ApplyCoverMovement(float Value, const FVector& WorldDirection);
     void ToggleCodec();
     void ApplyMenuTimeState();
     bool IsCombatAlertActive() const;
