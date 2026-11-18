@@ -22,6 +22,11 @@ pub const REVELATION: u32 = 3;
 pub const ESCAPE_PRESSURE: u32 = 4;
 pub const RECOVERY: u32 = 5;
 
+// Provisional tuning candidates, NOT empirically optimal delays. The engine
+// further suppresses hints while the player is meaningfully investigating.
+pub const SOFT_HINT_AFTER_SECONDS: f32 = 28.0;
+pub const STRONG_HINT_AFTER_SECONDS: f32 = 75.0;
+
 /// 'Under alert' is an AI fact, not an editor pacing request. Never cancel
 /// legitimate detection just because a narrative beat wants a quiet moment.
 pub fn evaluate(flags: u32, seconds_without_progress: f32, under_alert: bool)
@@ -46,9 +51,9 @@ pub fn evaluate(flags: u32, seconds_without_progress: f32, under_alert: bool)
     } else { 0.0 };
     let hint = if under_alert || phase == CAPTURE_BEAT || phase == RECOVERY {
         0
-    } else if since >= 35.0 {
+    } else if since >= STRONG_HINT_AFTER_SECONDS {
         2
-    } else if since >= 14.0 {
+    } else if since >= SOFT_HINT_AFTER_SECONDS {
         1
     } else {
         0
@@ -97,9 +102,10 @@ mod tests {
 
     #[test] fn hints_are_optional_and_avoid_combat_overlay() {
         let state = CAPTURED | EQUIPMENT_CONFISCATED;
-        assert_eq!(evaluate(state, 13.9, false).unwrap().hint_level, 0);
-        assert_eq!(evaluate(state, 14.0, false).unwrap().hint_level, 1);
-        assert_eq!(evaluate(state, 35.0, false).unwrap().hint_level, 2);
+        assert_eq!(evaluate(state, 27.9, false).unwrap().hint_level, 0);
+        assert_eq!(evaluate(state, 28.0, false).unwrap().hint_level, 1);
+        assert_eq!(evaluate(state, 74.9, false).unwrap().hint_level, 1);
+        assert_eq!(evaluate(state, 75.0, false).unwrap().hint_level, 2);
         assert_eq!(evaluate(state, 100.0, true).unwrap().hint_level, 0);
     }
 

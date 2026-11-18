@@ -59,9 +59,17 @@ AStaticMeshActor* AMGGrayFoxMission::SpawnBlock(
     AStaticMeshActor* Actor = GetWorld()->SpawnActor<AStaticMeshActor>(Centre, FRotator::ZeroRotator);
     if (!Actor) return nullptr;
     Actor->Tags.Add(Tag);
+    // Breakable mission geometry must remain an interaction, never automatic cover.
+    if (Tag.ToString().StartsWith(TEXT("WeakWall_")))
+        Actor->Tags.Add(TEXT("MG_Breachable"));
     UStaticMeshComponent* Mesh = Actor->GetStaticMeshComponent();
     Mesh->SetMobility(EComponentMobility::Movable);
     Mesh->SetStaticMesh(BlockMesh);
+    // Optional acoustics metadata on greybox walls; independently replaceable by artists.
+    if (Tag.ToString().Contains(TEXT("Boundary")) || Tag == FName(TEXT("Divider")))
+        Mesh->ComponentTags.Add(TEXT("MG_Surface_Metal"));
+    else if (Tag == FName(TEXT("Bed")))
+        Mesh->ComponentTags.Add(TEXT("MG_Surface_Wood"));
     Mesh->SetWorldScale3D(Scale);
     Mesh->SetCollisionProfileName(bBlockMovement ? TEXT("BlockAll") : TEXT("NoCollision"));
     return Actor;
@@ -204,6 +212,8 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
 #endif
     Flags = Next;
     ElapsedSinceBeat = 0.f;
+    SecondsSinceExploration = 0.f;
+    bHasObservedPlayer = false;
     SaveProgress(Player);
 
     switch (Action)
@@ -228,7 +238,8 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         break;
     default: break;
     }
-    DialogueTimeRemaining = Action == MG_FOX_RESCUE ? 11.f : 5.f;
+    // Short subtitle holds are placeholder reading windows; dialogue never locks control.
+    DialogueTimeRemaining = Action == MG_FOX_RESCUE ? 7.f : 4.5f;
     return true;
 }
 
@@ -307,13 +318,22 @@ uint32 AMGGrayFoxMission::GetPacingPhase() const
 uint32 AMGGrayFoxMission::GetHintLevel() const
 {
     if (bUnderAlert || (Flags & MG_FOX_LEFT_PRISON)) return 0;
+    // Engine and Rust use matching candidates. These are hypotheses pending
+    // first-time player tests, not canonical 'correct' hint delays.
+    uint32 Level = ElapsedSinceBeat >= 75.f ? 2u : (ElapsedSinceBeat >= 28.f ? 1u : 0u);
 #if MG_WITH_RUST
     MgGrayFoxPacing Report = {};
     if (mg_core_abi_version() == 1 &&
         mg_gray_fox_pacing(Flags, ElapsedSinceBeat, bUnderAlert ? 1u : 0u, &Report))
-        return Report.hint_level;
+        Level = Report.hint_level;
 #endif
-    return ElapsedSinceBeat >= 35.f ? 2 : (ElapsedSinceBeat >= 14.f ? 1 : 0);
+    // Sustained navigation / looking around means the player is still testing
+    // hypotheses. Delay help until they pause; hard caps avoid indefinite silence.
+    if (Level >= 2 && SecondsSinceExploration < 10.f && ElapsedSinceBeat < 150.f)
+        Level = 1;
+    if (Level >= 1 && SecondsSinceExploration < 6.f && ElapsedSinceBeat < 100.f)
+        Level = 0;
+    return Level;
 }
 
 FString AMGGrayFoxMission::GetPhaseText() const
@@ -332,11 +352,11 @@ FString AMGGrayFoxMission::GetPhaseText() const
 FString AMGGrayFoxMission::GetObjectiveText() const
 {
     if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
-        return TEXT("Find a weakness in the cell wall. Face it and press E.");
+        return TEXT("Search your cell for a way out.");
     if (!(Flags & MG_FOX_RESCUED))
         return TEXT("Find Gray Fox in the adjacent cell. Face him and press E.");
     if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
-        return TEXT("Look for another weak wall and press E to breach it.");
+        return TEXT("Find a route into the outer passage.");
     if (!(Flags & MG_FOX_LEFT_PRISON))
         return TEXT("Get past the guards and reach the far side of the corridor.");
     return TEXT("Gray Fox rescued. You have escaped the prison.");
@@ -347,14 +367,14 @@ FString AMGGrayFoxMission::GetPacingHint() const
     const uint32 Level = GetHintLevel();
     if (!Level) return FString();
     if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
-        return Level == 1 ? TEXT("Look for a damaged section in the east wall.")
-                          : TEXT("Approach the centre of the wall ahead, face it and press E.");
+        return Level == 1 ? TEXT("The concrete has not all aged the same way.")
+                          : TEXT("Look for an altered join in the wall. Examine it up close.");
     if (!(Flags & MG_FOX_RESCUED))
         return Level == 1 ? TEXT("Someone is waiting further inside this room.")
                           : TEXT("The prisoner near the middle of the room is Gray Fox.");
     if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
-        return Level == 1 ? TEXT("The next barrier may have another weak section.")
-                          : TEXT("Approach the centre of the east wall, face it and press E.");
+        return Level == 1 ? TEXT("Old work and new repairs might meet again.")
+                          : TEXT("Investigate the unusual section of the next barrier.");
     return Level == 1 ? TEXT("Keep low and use the obstacles to break line of sight.")
                       : TEXT("Move east to the end of the passage, beyond the guards.");
 }
@@ -372,6 +392,52 @@ FString AMGGrayFoxMission::GetRecentDialogue() const
     return DialogueTimeRemaining > 0.f ? Dialogue : FString();
 }
 
+
+FString AMGGrayFoxMission::GetTransceiverDialogue(int32 Channel) const
+{
+    // Remake-authored dialogue; Schneider knows architecture, not this prison layout.
+    if (Channel == 0)
+    {
+        if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
+            return TEXT("SCHNEIDER: I helped design parts of Outer Heaven.\n"
+                        "SCHNEIDER: Before they altered the plans.\n"
+                        "SNAKE: Altered how?\n"
+                        "SCHNEIDER: They sealed old passages with new work.\n"
+                        "SCHNEIDER: Some of it was rushed. I never saw\n"
+                        "SCHNEIDER: the prison plans, Snake.\n"
+                        "SNAKE: Understood.");
+        if (!(Flags & MG_FOX_RESCUED))
+            return TEXT("SCHNEIDER: You found a way through?\n"
+                        "SCHNEIDER: Keep your bearings. I never saw the\n"
+                        "SCHNEIDER: prison plans. I can't map your route.");
+        if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
+            return TEXT("SCHNEIDER: If they've modified this area,\n"
+                        "SCHNEIDER: the original structure might show it.\n"
+                        "SCHNEIDER: I can't tell you where.");
+        return TEXT("SCHNEIDER: Stay alert. I don't know this area.\n"
+                    "SCHNEIDER: Use what the building tells you.");
+    }
+
+    if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
+        return TEXT("BIG BOSS: Snake, you're in a tight spot.\n"
+                    "BIG BOSS: Check the wall. There may be a way through.\n"
+                    "SNAKE: How do you know?\n"
+                    "BIG BOSS: You're on site. See what you can find.");
+    if (!(Flags & MG_FOX_RESCUED))
+        return TEXT("BIG BOSS: Find Gray Fox. Don't lose sight of\n"
+                    "BIG BOSS: the objective.");
+    return TEXT("BIG BOSS: Continue the mission, Snake.\n"
+                "BIG BOSS: Stay alert.");
+}
+
+bool AMGGrayFoxMission::HasIncomingTransceiverPrompt() const
+{
+    // Optional prompt, never an automatic/interruption-triggered radio call.
+    return bPlayerInitialised && !bUnderAlert && (Flags & MG_FOX_CAPTURED) &&
+           !(Flags & MG_FOX_FIRST_WALL_BREACHED) && GetHintLevel() >= 1;
+}
+
+
 void AMGGrayFoxMission::Tick(float Dt)
 {
     Super::Tick(Dt);
@@ -382,6 +448,23 @@ void AMGGrayFoxMission::Tick(float Dt)
     UpdateGuardAlert();
     AMGPlayerCharacter* Player =
         Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+    if (Player)
+    {
+        const FVector CurrentPosition = Player->GetActorLocation();
+        const APlayerController* PC = Cast<APlayerController>(Player->GetController());
+        const FRotator View = PC ? PC->GetControlRotation() : Player->GetActorRotation();
+        // Count purposeful movement or camera scanning as engagement. No hint
+        // is given just because a curious player spends 28 seconds exploring.
+        const bool bExploring = bHasObservedPlayer &&
+            (FVector::Dist2D(CurrentPosition, LastObservedPlayerLocation) > 2.5f ||
+             FMath::Abs(FMath::FindDeltaAngleDegrees(View.Yaw, LastObservedViewRotation.Yaw)) > 0.35f ||
+             FMath::Abs(View.Pitch - LastObservedViewRotation.Pitch) > 0.35f);
+        SecondsSinceExploration = bExploring ? 0.f :
+            SecondsSinceExploration + FMath::Max(0.f, Dt);
+        LastObservedPlayerLocation = CurrentPosition;
+        LastObservedViewRotation = View;
+        bHasObservedPlayer = true;
+    }
     if (Player && (Flags & MG_FOX_EXIT_WALL_BREACHED) &&
         !(Flags & MG_FOX_LEFT_PRISON) &&
         FVector::Dist2D(Player->GetActorLocation(), ExitPoint) < 190.f)

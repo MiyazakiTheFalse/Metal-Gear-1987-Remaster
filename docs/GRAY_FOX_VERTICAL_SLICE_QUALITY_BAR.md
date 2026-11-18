@@ -3,6 +3,10 @@
 **Status:** Required acceptance specification. This document is a release gate, **not** evidence that work is finished.
 **Game:** Outer Heaven, 1995 — Gray Fox prison rescue. Original Connect2Media J2ME geometry/events remain pending direct verification.
 
+## Global acceptance requirement
+
+The entire vertical slice must pass [Doctrine 004](DOCTRINE_004_INTEGRATED_EXPERIENCE.md), with integrated beat contracts in [data/beat_contracts.json](../data/beat_contracts.json). An animation, a dialogue clip or a guard action cannot be individually signed off if its audio/visual/input/timing/mission-state relationship is untested. The beat registry is currently a seed only; production assets and packaged-video evidence remain missing.
+
 ## What currently works only as source
 
 - Unreal: collision capsule movement, free-look over-shoulder spring-arm camera, crouch, experimental prone + wall cover, limited melee, basic stealth and guard patrol, rescue state progression, HUD source and placeholder props.
@@ -83,6 +87,7 @@ A vertical slice can be called complete only after:
 - [ ] Distinct surface footsteps, room ambience, adaptive music and polished subtitles
 - [ ] Checkpoints and control mapping test on Xbox controller and keyboard
 - [ ] Performance tested in packaged **Windows** build on a modest PC
+- [ ] Every shippable beat has a validated Doctrine 004 contract and recorded synchronized input/video/audio playtest evidence, including failure and replay paths
 - [ ] Accessibility checks for subtitles, controls, HUD and camera options
 
 **Non-goal:** “AAA” is not a rendering preset. Prioritise consistent physical interaction, precise animation and camera feel, usable feedback and authored pacing ahead of arbitrary polycount or texture resolution.

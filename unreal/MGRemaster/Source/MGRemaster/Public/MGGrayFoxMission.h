@@ -26,6 +26,9 @@ public:
     FString GetObjectiveText() const;
     FString GetPacingHint() const;
     FString GetRecentDialogue() const;
+    // Optional 1995-era transceiver: dialogue is remake-authored, not original transcription.
+    FString GetTransceiverDialogue(int32 Channel) const;
+    bool HasIncomingTransceiverPrompt() const;
     FString GetMissionLogText() const;
     FString GetPhaseText() const;
     void RestartMission();
@@ -47,6 +50,11 @@ private:
     bool bHasLoadedSave = false;
     bool bUnderAlert = false;
     float ElapsedSinceBeat = 0.f;
+    // Hints are offered when exploration stalls, not simply after entering a room.
+    float SecondsSinceExploration = 0.f;
+    FVector LastObservedPlayerLocation = FVector::ZeroVector;
+    FRotator LastObservedViewRotation = FRotator::ZeroRotator;
+    bool bHasObservedPlayer = false;
     float DialogueTimeRemaining = 0.f;
     FVector SavedPosition = FVector::ZeroVector;
     FString Dialogue;

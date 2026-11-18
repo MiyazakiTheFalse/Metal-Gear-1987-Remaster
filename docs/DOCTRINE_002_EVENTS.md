@@ -1,6 +1,6 @@
 # DOCTRINE 002 — In-Game Events and Player Agency (binding)
 
-Status: ACTIVE. Companion to 2D-to-3D map doctrine. The J2ME a1 archive remains the authoritative **target edition**, while MSX2 scripts are **comparative** until reproduced in J2ME gameplay or decoded event data.
+Status: ACTIVE. Governed by supreme [Doctrine 000](DOCTRINE_000_HOW_WE_BUILD.md) and spatial [Doctrine 005](DOCTRINE_005_SPATIAL_STRUCTURE.md). Companion to 2D-to-3D map doctrine. The J2ME a1 archive remains the authoritative **target edition**, while MSX2 scripts are **comparative** until reproduced in J2ME gameplay or decoded event data.
 
 ## Decision rule
 
@@ -12,6 +12,10 @@ Research basis:
 - Epic Gameplay Tags: https://dev.epicgames.com/documentation/unreal-engine/using-gameplay-tags-in-unreal-engine
 - Epic StateTree: https://dev.epicgames.com/documentation/unreal-engine/overview-of-state-tree-in-unreal-engine
 - MSX2 comparative script: https://metalgear.dr-sunny.info/?lang=en&page=script
+
+## Integrated player experience is mandatory
+
+All event records are also subject to the binding game-wide [Doctrine 004](DOCTRINE_004_INTEGRATED_EXPERIENCE.md). Every event must have one integrated sight/sound/action/timing/AI/state/interrupt contract in data/beat_contracts.json, even when production assets are placeholders. Story flags cannot be owned by cinematic timing, and cues must express actual world state.
 
 ## Every event requires six records
 

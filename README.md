@@ -23,10 +23,18 @@ These features are unverified source implementation, not finished gameplay or pr
 - `scripts/build_windows.ps1` — packaging entrypoint on a Windows UE5.7 build host.
 - `docs/` — source audit, gameplay scope, graphics policy and build notes.
 
+## Global production doctrine — binding
+
+**Doctrine 000 — [How We Build](docs/DOCTRINE_000_HOW_WE_BUILD.md)** governs every other doctrine. Product quality is defined by the *method*: research and provenance, player-first intent, integrated execution, actual evidence, accessibility, source fidelity, performance and maintainability. Its [Doctrine 005 — Spatial Structure](docs/DOCTRINE_005_SPATIAL_STRUCTURE.md) companion binds topology and room rhythm to the same standards, with [area contracts](data/area_contracts.json). When requirements conflict, record an explicit decision and test the player's experience instead of allowing undocumented shortcuts.
+
+Every player-facing beat must be designed as **one synchronized audiovisual, interactive and temporal experience**, not mechanics first and cosmetic polish later. See [Doctrine 004](docs/DOCTRINE_004_INTEGRATED_EXPERIENCE.md) and the [beat registry](data/beat_contracts.json). Visual foreshadowing, spatial sound, inputs, timing, AI knowledge, durable state, interruptions and accessibility must agree; a polished asset is not proof of a finished beat. The registry begins with nine source/design-stage contracts and is not exhaustive. Local regression checks are required before packaging; Unreal playtesting is still outstanding.
+
 ## Local checks
 
 ```sh
 python -m unittest discover -s tools -p 'test_*.py'
+python tools/validate_beat_contracts.py
+python tools/validate_area_contracts.py
 python tools/inspect_and_extract.py /path/to/Metal-Gear_J2ME_EN_v330.zip --output content
 cd rust && cargo test && cargo build --release
 ```
@@ -41,6 +49,8 @@ On a Windows machine with UE5.7, Rust MSVC, Visual Studio C++:
 
 The resulting `dist/Windows/` package must be smoke-tested before distribution. No UE-capable runner is currently connected; **no executable has been generated**.
 
+The prison source prototype now includes a non-pausing, optional 1995-style transceiver with architectural dialogue from Kyle Schneider (120.79) and separate Big Boss guidance (120.85); C/Start opens it even when weapons are confiscated. The dialogue is remake-authored and currently displayed as text, not recorded VO. The early mission objective no longer gives away the wall. The prison's destructible mission walls intentionally **do not** trigger automatic cover: E/X breach interaction retains priority. Knocking is a sound-location distraction, not a direct player-position reveal. See [wall/knock implementation contract](docs/WALL_KNOCK_AND_BREACH_CONTRACT.md). No UE5.7 build validation or finished skeletal animations are claimed.
+
 ## Prototype controls
 
 | Action | Keyboard/mouse | Gamepad |
@@ -51,7 +61,12 @@ The resulting `dist/Windows/` package must be smoke-tested before distribution. 
 | Stun | LMB while aiming | RT while aiming |
 | Sprint | Shift | Press left stick |
 | Crouch | Ctrl | B/Circle |
-| Swap shoulder | Q | Press right stick |
+| Wall cover | Move into full-height wall; V manual | Move into full-height wall |
+| Knock (in cover) | F | A / face-bottom |
+| Corner peek | Hold aim + slide towards wall end | Hold LT + move towards wall end |
+| Breach mission wall | E (in reach, face wall) | X / face-left |
+| Swap shoulder | Q (outside radio) | Press right stick (outside radio) |
+| Optional transceiver | C to open/close; Q to tune | Start/left special to open/close; press right stick to tune |
 | Graphics quality | F6 | Options menu pending |
 
 ## Event architecture — Doctrine 002
@@ -110,7 +125,7 @@ mission-specific save slot and reopens the current level. Capture confiscates th
 prototype stun weapon; mission flags and checkpoint positions persist.
 
 Rust now holds the ordered Gray Fox transition rules and a non-blocking pacing
-model (14/35-second optional hints, quiet narrative beat, escalating escape).
+model (experimental 28/75-second optional hint candidates, exploration-aware suppression, quiet narrative beat, escalating escape).
 The Unreal scene has a reduced fallback state machine for iteration without Rust.
 See [pacing doctrine](docs/DOCTRINE_003_PACING.md) and
 [rescue implementation notes](docs/GRAY_FOX_RESCUE_IMPLEMENTATION.md).

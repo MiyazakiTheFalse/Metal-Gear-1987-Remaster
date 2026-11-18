@@ -1,8 +1,10 @@
 # DOCTRINE 003 — Mission Pacing and Dramatic Agency
 
-**Status: BINDING.** Applies to cinematic and emergent events, stealth spaces, camera direction, encounter difficulty, and checkpoint placement; complements DOCTRINE 001 and 002.
+**Status: BINDING, subordinate to [Doctrine 000](DOCTRINE_000_HOW_WE_BUILD.md) and [Doctrine 005](DOCTRINE_005_SPATIAL_STRUCTURE.md) for spatial pacing.** Applies to cinematic and emergent events, stealth spaces, camera direction, encounter difficulty, and checkpoint placement; complements DOCTRINE 001 and 002.
 
 ## The rule
+
+Game-wide [Doctrine 004](DOCTRINE_004_INTEGRATED_EXPERIENCE.md) requires audiovisual cues, control affordances, event state and their exact relative timing to be designed and validated together for every beat; the pacing doctrine cannot be satisfied by a timing-only checklist.
 
 **Pace the experience through space, information and consequence, not artificial waiting.** Design the intended tension curve but let the player vary speed and tactics. Preserve original story/event dependencies. If the game forces a stop, it must be needed for a meaningful interaction, not for a timer or animation budget.
 
@@ -20,7 +22,7 @@
 ### Behaviour constraints
 
 1. **No compulsory dwell times.** The first wall and rescue interactives are actionable as soon as prerequisites are met. Narrative cue playback must not gate the state transaction.
-2. **Hints only after inactivity.** First soft environmental nudge after 14 seconds without progress, stronger non-spoiler hint after 35 seconds. Values are tuning hypotheses and require playtests; never overlay during a real guard alert.
+2. **Hints only after inactivity.** First optional environmental nudge no earlier than 28 seconds since mission progress and only after 6 seconds without meaningful movement/camera scanning; stronger hint no earlier than 75 seconds and after 10 seconds quiet. Anti-stall overrides allow a soft hint after 100 seconds and stronger one after 150 seconds, even if the player is still moving. All values are *untested tuning hypotheses*, and manual radio is available immediately. Values are tuning hypotheses and require playtests; never overlay during a real guard alert.
 3. **Earned quiet.** The revelation phase should not spontaneously spawn unrelated combatants. It does not magically erase guards who actually saw or heard Snake.
 4. **Play-space is pacing.** Player cell supports observation; first breach is short; Fox cell has room to stand and hear dialogue; escape route supports cover, camera clearance and an approaching threat. Verified J2ME geometry remains source-of-truth; greybox coordinates are provisional.
 5. **Interrupt safely.** If danger, death, save/reload or fast repeat interrupts a cue, committed flags remain correct; uncommitted state must roll back.
@@ -35,7 +37,7 @@
 - Rust \`gray_fox.rs\` owns ordered event flags; \`pacing.rs\` maps committed flags and time since last advance to optional pacing guidance; neither renders nor spawns enemies.
 - Unreal owns geometry, camera, prompts, audio, animation and guard behaviour; it must not treat a target-intensity number as an order to fabricate detection.
 - Progression is independent of elapsed time. Timing only affects optional hints and presentation.
-- Test: correct order, no duplicate rescue, all steps usable immediately, rising/relaxing intensity phases, hint thresholds, suppression during alert, save/load no replay.
+- Test: correct order, no duplicate rescue, all steps usable immediately, rising/relaxing intensity phases, hint threshold candidates, suppression during active exploration and alert, save/load no replay.
 - Status: implementation source in progress. Unreal integration and playtests are **not** certified by document creation.
 
 ## Rationale and references

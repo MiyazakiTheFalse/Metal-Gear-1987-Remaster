@@ -139,6 +139,11 @@ void AMGPrototypeHUD::DrawHUD()
         if (!Hint.IsEmpty())
             DrawText(Hint, HudAmber, Margin + 12.f * UiScale,
                      Margin + 187.f * UiScale, nullptr, 0.78f * UiScale, false);
+        // Never seize the player's camera just to deliver an optional clue.
+        if (Mission->HasIncomingTransceiverPrompt() && !Player->IsCodecOpen())
+            DrawText(TEXT("OPTIONAL RADIO CONTACT: C / START"), HudGreen,
+                Margin + 12.f * UiScale, Margin + 210.f * UiScale,
+                nullptr, 0.70f * UiScale, false);
         const FString Intel = Mission->GetMissionLogText();
         if (Player->IsMissionLogVisible() && !Intel.IsEmpty())
         {
@@ -216,6 +221,37 @@ void AMGPrototypeHUD::DrawHUD()
                      Height - 145.f * UiScale, nullptr, 0.9f * UiScale, false);
     }
 
+    if (Player->IsCodecOpen())
+    {
+        // Non-pausing 1995 transceiver: readable at 720p, no camera seizure,
+        // player can keep walking; real VO/spectrum treatment is still missing.
+        const int32 Channel = Player->GetTransceiverChannel();
+        const FString Transcript = Mission ?
+            Mission->GetTransceiverDialogue(Channel) :
+            TEXT("NO SIGNAL — LOCAL CONTACTS UNAVAILABLE");
+        TArray<FString> Lines;
+        Transcript.ParseIntoArrayLines(Lines, true);
+        const float PanelWidth = FMath::Min(580.f * UiScale, Width - 2.f * Margin);
+        const float PanelX = Width - Margin - PanelWidth;
+        const float PanelY = Height * 0.31f;
+        const int32 VisibleLines = FMath::Min(Lines.Num(), 8);
+        const float PanelHeight = (71.f + 23.f * VisibleLines) * UiScale;
+        DrawRect(HudPanel, PanelX, PanelY, PanelWidth, PanelHeight);
+        DrawText(Channel == 0 ? TEXT("TRANSCEIVER / 120.79 / KYLE SCHNEIDER")
+                              : TEXT("TRANSCEIVER / 120.85 / BIG BOSS"),
+                 HudGreen, PanelX + 12.f * UiScale, PanelY + 8.f * UiScale,
+                 nullptr, 0.82f * UiScale, false);
+        for (int32 Index = 0; Index < VisibleLines; ++Index)
+            DrawText(Lines[Index], FLinearColor::White,
+                     PanelX + 12.f * UiScale,
+                     PanelY + (34.f + 23.f * Index) * UiScale,
+                     nullptr, 0.74f * UiScale, false);
+        DrawText(TEXT("Q / RS: TUNE     C / START: CLOSE     MOVE: CONTINUE"),
+                 HudMuted, PanelX + 12.f * UiScale,
+                 PanelY + (49.f + 23.f * VisibleLines) * UiScale,
+                 nullptr, 0.66f * UiScale, false);
+    }
+
     if (Player->IsAiming())
     {
         const float X = Width * 0.5f;
@@ -226,6 +262,9 @@ void AMGPrototypeHUD::DrawHUD()
         DrawLine(X, Y + 3.f, X, Y + 11.f, FLinearColor::White, 1.f);
     }
 
-    DrawText(TEXT("E / X: INTERACT   Z / DPAD-DOWN: PRONE   V: COVER   F / A: MELEE"),
+    const FString CoverHelp = Player->IsInCover() ?
+        TEXT("WALL: F / A KNOCK   AIM + SLIDE: CORNER PEEK   MOVE AWAY: RELEASE") :
+        TEXT("E / X: BREACH / INTERACT   MOVE INTO WALL: COVER   F / A: MELEE");
+    DrawText(CoverHelp,
              HudMuted, Margin, Height - 27.f * UiScale, nullptr, 0.69f * UiScale, false);
 }

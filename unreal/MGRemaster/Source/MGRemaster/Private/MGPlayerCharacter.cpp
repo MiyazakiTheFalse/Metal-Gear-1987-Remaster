@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/PrimitiveComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "CollisionShape.h"
 #include "Engine/Engine.h"
@@ -82,7 +83,7 @@ void AMGPlayerCharacter::BeginPlay()
     }
     if (APlayerController* PC = Cast<APlayerController>(GetController()))
     {
-        // A paused Codec must still accept its close button.
+        // Retain pause-compatible input for future UI; the transceiver itself never pauses play.
         PC->PrimaryActorTick.bTickEvenWhenPaused = true;
     }
     ApplyMenuTimeState();
@@ -105,6 +106,8 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     CombatNoiseTimer = FMath::Max(0.f, CombatNoiseTimer - DeltaSeconds);
     MeleeVisualTimer = FMath::Max(0.f, MeleeVisualTimer - DeltaSeconds);
+    WallKnockVisualTimer = FMath::Max(0.f, WallKnockVisualTimer - DeltaSeconds);
+    CoverReattachCooldown = FMath::Max(0.f, CoverReattachCooldown - DeltaSeconds);
     // Start prone only once CharacterMovement has established a valid crouch
     // base position. Never fake a prone pose with a standing collision capsule.
     if (bPendingProne && bIsCrouched && !bIsProne)
@@ -119,8 +122,10 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
         (bAiming ? 190.f : (bInCover ? 320.f : 420.f));
     const float TargetFOV = bAiming ? 65.f : 85.f;
     const float ShoulderWidth = bIsProne ? 24.f : (bInCover ? 46.f : (bAiming ? 58.f : 65.f));
+    const float CornerCameraReach = (bInCover && bAiming) ? 18.f * CoverPeekAlpha : 0.f;
     const FVector PivotLocal(0.f, 0.f, bIsProne ? 18.f : (bIsCrouched ? 40.f : 65.f));
-    FVector TargetSocket(0.f, ShoulderSign * ShoulderWidth, bIsProne ? 8.f : (bAiming ? 18.f : 10.f));
+    FVector TargetSocket(0.f, ShoulderSign * (ShoulderWidth + CornerCameraReach),
+                         bIsProne ? 8.f : (bAiming ? 18.f : 10.f));
 
     // Shoulder offset must also respect nearby cover. Spring-arm probe alone
     // handles camera distance, but the sideways socket needs its own sweep.
@@ -150,8 +155,10 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     // Clear visual windup/recovery cue until a source-accurate animation rig exists.
     const float AttackOffset = MeleeVisualTimer > 0.f ?
         17.f * FMath::Sin(FMath::Clamp(MeleeVisualTimer / 0.22f, 0.f, 1.f) * PI) : 0.f;
+    const float KnockOffset = WallKnockVisualTimer > 0.f ?
+        4.f * FMath::Sin(FMath::Clamp(WallKnockVisualTimer / 0.30f, 0.f, 1.f) * PI) : 0.f;
     PrototypeBody->SetRelativeLocation(FMath::VInterpTo(
-        PrototypeBody->GetRelativeLocation(), FVector(AttackOffset, 0.f, 0.f),
+        PrototypeBody->GetRelativeLocation(), FVector(AttackOffset, 0.f, 0.f) + CoverNormal * KnockOffset,
         DeltaSeconds, 19.f));
     CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, TargetLength, DeltaSeconds, 10.f);
     CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetSocket, DeltaSeconds, 10.f);
@@ -172,8 +179,9 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
             LeaveCover();
         else
             SetActorRotation(FMath::RInterpTo(GetActorRotation(),
-                (-CoverNormal).Rotation(), DeltaSeconds, 14.f));
+                CoverNormal.Rotation(), DeltaSeconds, 14.f)); // Back against wall.
     }
+    UpdateCornerPeek(DeltaSeconds);
 }
 
 void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
@@ -230,7 +238,8 @@ void AMGPlayerCharacter::MoveForward(float Value)
                 ECC_Pawn, FCollisionShape::MakeBox(FVector(74.f, 29.f, 27.f)), Query);
             if (!bHit) AddMovementInput(Direction, Value);
         }
-        else AddMovementInput(Direction, Value);
+        else if (!TryAutoEnterCover(Direction * FMath::Sign(Value)))
+            AddMovementInput(Direction, Value);
     }
 }
 void AMGPlayerCharacter::MoveRight(float Value)
@@ -251,7 +260,8 @@ void AMGPlayerCharacter::MoveRight(float Value)
                 ECC_Pawn, FCollisionShape::MakeBox(FVector(74.f, 29.f, 27.f)), Query);
             if (!bHit) AddMovementInput(Direction, Value);
         }
-        else AddMovementInput(Direction, Value);
+        else if (!TryAutoEnterCover(Direction * FMath::Sign(Value)))
+            AddMovementInput(Direction, Value);
     }
 }
 void AMGPlayerCharacter::Turn(float Value) { AddControllerYawInput(Value); }
@@ -294,7 +304,20 @@ void AMGPlayerCharacter::CrouchToggle()
     else Crouch();
     UpdateMovementState();
 }
-void AMGPlayerCharacter::ShoulderSwap() { ShoulderSign = -ShoulderSign; }
+void AMGPlayerCharacter::ShoulderSwap()
+{
+    // While manually receiving a transceiver contact, Q / right-stick press
+    // changes the station. Snake keeps movement/camera control.
+    if (bCodecOpen)
+    {
+        TransceiverChannel = (TransceiverChannel + 1) % 2;
+        NotifyFeedback(TransceiverChannel == 0 ?
+            TEXT("RADIO TUNED — SCHNEIDER / 120.79") :
+            TEXT("RADIO TUNED — BIG BOSS / 120.85"), TEXT("select"));
+        return;
+    }
+    ShoulderSign = -ShoulderSign;
+}
 
 void AMGPlayerCharacter::UpdateMovementState()
 {
@@ -304,7 +327,8 @@ void AMGPlayerCharacter::UpdateMovementState()
     Movement->MaxWalkSpeed = bIsProne ? 95.f :
         (bInCover ? 120.f : (bIsCrouched ? 170.f :
             (bAiming ? 210.f : (bSprinting ? 600.f : 350.f))));
-    Movement->MaxWalkSpeedCrouched = 170.f;
+    // Crouched/prone cover must not bypass the current slow movement cap.
+    Movement->MaxWalkSpeedCrouched = bIsProne ? 95.f : (bInCover ? 120.f : 170.f);
 }
 float AMGPlayerCharacter::GetNoiseFactor() const
 {
@@ -333,6 +357,8 @@ void AMGPlayerCharacter::Interact()
         if (Mission->TryInteract(this))
         {
             const uint32 Changed = PreviousFlags ^ Mission->GetMissionFlags();
+            // A destroyed wall must never leave Snake attached to nonexistent cover.
+            if (bInCover && (Changed & (4u | 16u))) LeaveCover();
             if (Changed & 4u) NotifyFeedback(TEXT("WALL BREACHED — NEW ROUTE"), TEXT("breach"));
             else if (Changed & 8u) NotifyFeedback(TEXT("GRAY FOX RESCUED — INTEL LOG UPDATED"), TEXT("rescue"));
             else if (Changed & 16u) NotifyFeedback(TEXT("ESCAPE ROUTE OPEN"), TEXT("breach"));
@@ -372,9 +398,18 @@ FString AMGPlayerCharacter::GetPostureText() const
 void AMGPlayerCharacter::ApplyCoverMovement(float Value, const FVector& Direction)
 {
     if (FMath::IsNearlyZero(Value)) return;
+    const FVector Desired = Direction.GetSafeNormal2D() * Value;
+    if (FVector::DotProduct(Desired, CoverNormal) > 0.76f)
+    {
+        LeaveCover();
+        AddMovementInput(Direction, Value);
+        return;
+    }
     const FVector Tangent = FVector::CrossProduct(FVector::UpVector, CoverNormal).GetSafeNormal2D();
-    const float AlongWall = FVector::DotProduct(Direction.GetSafeNormal2D(), Tangent);
-    AddMovementInput(Tangent, AlongWall * Value);
+    const float AlongWall = FVector::DotProduct(Desired, Tangent);
+    CoverIntent = AlongWall;
+    CoverShuffleDirection = AlongWall;
+    AddMovementInput(Tangent, AlongWall);
 }
 void AMGPlayerCharacter::EnterProneAfterCrouch()
 {
@@ -459,30 +494,120 @@ void AMGPlayerCharacter::ToggleProne()
     else EnterProneAfterCrouch();
     UpdateMovementState();
 }
+bool AMGPlayerCharacter::FindContactWall(const FVector& Direction, float Reach, FHitResult& OutHit) const
+{
+    if (!GetWorld()) return false;
+    const FVector Dir = Direction.GetSafeNormal2D();
+    if (Dir.IsNearlyZero()) return false;
+    FCollisionQueryParams Query(SCENE_QUERY_STAT(MGWallContact), false, this);
+    Query.bReturnPhysicalMaterial = true;
+    const FVector Waist = GetActorLocation() + FVector(0.f, 0.f, 40.f);
+    if (!GetWorld()->LineTraceSingleByChannel(OutHit, Waist, Waist + Dir * Reach,
+                                              ECC_Visibility, Query) ||
+        !OutHit.bBlockingHit ||
+        (IsValid(OutHit.GetActor()) && OutHit.GetActor()->ActorHasTag(TEXT("MG_Breachable"))) ||
+        FMath::Abs(OutHit.ImpactNormal.Z) > 0.22f ||
+        FVector::DotProduct(Dir, OutHit.ImpactNormal.GetSafeNormal2D()) > -0.72f)
+        return false;
+    // A low obstacle is not a full-height wall and must not attach Snake's back.
+    FHitResult Chest;
+    const FVector Upper = GetActorLocation() + FVector(0.f, 0.f, 105.f);
+    return GetWorld()->LineTraceSingleByChannel(Chest, Upper, Upper + Dir * (Reach + 10.f),
+                ECC_Visibility, Query) && Chest.bBlockingHit &&
+           Chest.GetActor() == OutHit.GetActor();
+}
+
+bool AMGPlayerCharacter::TryAutoEnterCover(const FVector& WorldDirection)
+{
+    if (bInCover || bIsProne || bAiming || bSprinting || bCodecOpen ||
+        CoverReattachCooldown > 0.f || !GetCharacterMovement()->IsMovingOnGround())
+        return false;
+    FHitResult Hit;
+    // Attach only when the capsule is close enough to plausibly touch the wall.
+    if (!FindContactWall(WorldDirection, 46.f, Hit)) return false;
+    CoverNormal = Hit.ImpactNormal.GetSafeNormal2D();
+    if (CoverNormal.IsNearlyZero()) return false;
+    bInCover = true;
+    UpdateMovementState();
+    NotifyFeedback(TEXT("WALL CONTACT — F / A TO KNOCK"), TEXT("select"));
+    return true;
+}
+
 bool AMGPlayerCharacter::TryEnterCover()
 {
-    if (!GetWorld() || bIsProne || !Controller) return false;
-    const FVector Eye = GetActorLocation() + FVector(0.f, 0.f, bIsCrouched ? 20.f : 36.f);
+    if (bIsProne || !Controller) return false;
     const FVector TowardWall = FRotator(0.f, Controller->GetControlRotation().Yaw, 0.f).Vector();
-    FCollisionQueryParams Query(SCENE_QUERY_STAT(MGTakeCover), false, this);
     FHitResult Hit;
-    if (!GetWorld()->SweepSingleByChannel(Hit, Eye, Eye + TowardWall * 98.f,
-        FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(12.f), Query)
-        || FMath::Abs(Hit.ImpactNormal.Z) > 0.22f)
-        return false;
+    if (!FindContactWall(TowardWall, 100.f, Hit)) return false;
     CoverNormal = Hit.ImpactNormal.GetSafeNormal2D();
     bInCover = !CoverNormal.IsNearlyZero();
     bSprinting = false;
     UpdateMovementState();
-    if (bInCover) NotifyFeedback(TEXT("COVER TAKEN — MOVE ALONG WALL"), TEXT("select"));
+    if (bInCover) NotifyFeedback(TEXT("WALL CONTACT — F / A TO KNOCK"), TEXT("select"));
     return bInCover;
 }
+
 void AMGPlayerCharacter::LeaveCover()
 {
     bInCover = false;
     CoverNormal = FVector::ZeroVector;
+    CoverPeekAlpha = 0.f;
+    CoverIntent = 0.f;
+    CoverShuffleDirection = 0.f;
+    CoverReattachCooldown = 0.50f;
     UpdateMovementState();
 }
+
+void AMGPlayerCharacter::UpdateCornerPeek(float DeltaSeconds)
+{
+    float Target = 0.f;
+    if (bInCover && bAiming && FMath::Abs(CoverIntent) > 0.25f && GetWorld())
+    {
+        const FVector Tangent = FVector::CrossProduct(FVector::UpVector, CoverNormal).GetSafeNormal2D();
+        const FVector Ahead = GetActorLocation() +
+            Tangent * (FMath::Sign(CoverIntent) * 78.f) + FVector(0.f, 0.f, 50.f);
+        FHitResult Hit;
+        FCollisionQueryParams Query(SCENE_QUERY_STAT(MGPeekCorner), false, this);
+        const bool bWallContinues = GetWorld()->LineTraceSingleByChannel(
+            Hit, Ahead, Ahead - CoverNormal * 105.f, ECC_Visibility, Query) &&
+            FVector::DotProduct(Hit.ImpactNormal.GetSafeNormal2D(), CoverNormal) > 0.65f;
+        Target = bWallContinues ? 0.f : 1.f;
+    }
+    CoverPeekAlpha = FMath::FInterpTo(CoverPeekAlpha, Target, DeltaSeconds, 9.f);
+    if (FMath::Abs(CoverIntent) < 0.05f)
+        CoverShuffleDirection = FMath::FInterpTo(CoverShuffleDirection, 0.f, DeltaSeconds, 10.f);
+    CoverIntent = 0.f;
+}
+
+void AMGPlayerCharacter::KnockOnWall()
+{
+    if (!bInCover || !GetWorld()) return;
+    const float Now = GetWorld()->GetTimeSeconds();
+    if (Now < NextWallKnockTime) return;
+    FHitResult Hit;
+    if (!FindContactWall(-CoverNormal, 115.f, Hit))
+    {
+        LeaveCover();
+        return;
+    }
+    NextWallKnockTime = Now + 0.70f;
+    WallKnockVisualTimer = 0.30f;
+    CoverPeekAlpha = 0.f;
+    const UPrimitiveComponent* Wall = Hit.GetComponent();
+    const bool bMetal = Wall && Wall->ComponentHasTag(TEXT("MG_Surface_Metal"));
+    const bool bWood = Wall && Wall->ComponentHasTag(TEXT("MG_Surface_Wood"));
+    const TCHAR* SoundKey = bMetal ? TEXT("knock_metal") :
+                            (bWood ? TEXT("knock_wood") : TEXT("knock_concrete"));
+    const float HearingRadius = bMetal ? 1150.f : (bWood ? 650.f : 850.f);
+    const FString SoundPath = FString::Printf(TEXT("/Game/Feedback/%s.%s"), SoundKey, SoundKey);
+    if (USoundBase* Sound = LoadObject<USoundBase>(nullptr, *SoundPath))
+        UGameplayStatics::PlaySoundAtLocation(this, Sound, Hit.ImpactPoint, 0.80f);
+    NotifyFeedback(TEXT("KNOCK — LISTEN FOR THE GUARD'S RESPONSE"));
+    // A sound stimulus reports the wall's impact point, not Snake's location.
+    for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
+        if (IsValid(*It)) It->HearWallKnock(Hit.ImpactPoint, CoverNormal, HearingRadius, this);
+}
+
 void AMGPlayerCharacter::ToggleCover()
 {
     if (bInCover)
@@ -616,6 +741,7 @@ void AMGPlayerCharacter::UseItem()
 void AMGPlayerCharacter::MeleeAttack()
 {
     if (!GetWorld() || !Controller) return;
+    if (bInCover) { KnockOnWall(); return; }
     if (bIsProne)
     {
         NotifyFeedback(TEXT("UNABLE TO STRIKE WHILE PRONE"), TEXT("denied"));
@@ -714,41 +840,20 @@ void AMGPlayerCharacter::ToggleCodec()
     {
         bCodecOpen = false;
         CodecStatus.Empty();
-        UGameplayStatics::SetGamePaused(this, false);
         ApplyMenuTimeState();
-        NotifyFeedback(TEXT("CODEC CLOSED — INFILTRATION RESUMED"), TEXT("select"));
+        NotifyFeedback(TEXT("TRANSCEIVER CLOSED"), TEXT("select"));
         return;
     }
 
-    // The initial prison slice is an equipment-loss checkpoint. It has no
-    // verified working 1995 transceiver until a later source-confirmed event.
-    const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
-        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
-    if (Mission && (Mission->GetMissionFlags() & 8u) == 0)
-    {
-        NotifyFeedback(TEXT("CODEC OFFLINE — TRANSMITTER CONFISCATED"), TEXT("denied"));
-        return;
-    }
-    if (IsCombatAlertActive())
-    {
-        NotifyFeedback(TEXT("TRANSMISSION DELAYED — UNDER FIRE"), TEXT("denied"));
-        return;
-    }
-    // For the provisional slice this is a read-only after-rescue intelligence
-    // playback, NOT a fabricated new Gray Fox radio contact.
+    // 1995 transceiver: separate from seized inventory and weapons, and never
+    // treated as an implanted 2005-era Codec. Manual, optional, replayable,
+    // non-pausing: players remain free to move and solve the wall immediately.
     CloseEquipmentWindows();
     ApplyMenuTimeState();
-    CodecStatus = Mission ? TEXT("FOXHOUND INTELLIGENCE FILE — PLAYBACK")
-                          : TEXT("RADIO CONTACTS — NONE VERIFIED");
     bCodecOpen = true;
-    const bool bPaused = UGameplayStatics::SetGamePaused(this, true);
-    if (!bPaused)
-    {
-        bCodecOpen = false;
-        CodecStatus.Empty();
-        NotifyFeedback(TEXT("CODEC PAUSE FAILED — TRY AGAIN"), TEXT("denied"));
-    }
-    else NotifyFeedback(TEXT("CODEC OPEN — WORLD PAUSED"), TEXT("menu"));
+    TransceiverChannel = 0; // Kyle Schneider; Q changes to Big Boss.
+    CodecStatus = TEXT("TRANSCEIVER ACTIVE — CHANGE CHANNEL Q / RS; CLOSE C / START");
+    NotifyFeedback(TEXT("TRANSCEIVER OPEN — SCHNEIDER / 120.79"), TEXT("select"));
 }
 
 void AMGPlayerCharacter::CycleGraphicsQuality()
