@@ -109,6 +109,7 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
     Input->BindAction("GraphicsPreset", IE_Pressed, this, &AMGPlayerCharacter::CycleGraphicsQuality);
     Input->BindAction("Interact", IE_Pressed, this, &AMGPlayerCharacter::Interact);
     Input->BindAction("RestartRescue", IE_Pressed, this, &AMGPlayerCharacter::RestartRescue);
+    Input->BindAction("MissionLog", IE_Pressed, this, &AMGPlayerCharacter::ToggleMissionLog);
 }
 void AMGPlayerCharacter::MoveForward(float Value)
 {
@@ -186,6 +187,11 @@ void AMGPlayerCharacter::Interact()
     {
         Mission->TryInteract(this);
     }
+}
+
+void AMGPlayerCharacter::ToggleMissionLog()
+{
+    bShowMissionLog = !bShowMissionLog;
 }
 
 void AMGPlayerCharacter::RestartRescue()

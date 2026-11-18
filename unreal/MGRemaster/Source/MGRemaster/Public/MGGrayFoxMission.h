@@ -26,6 +26,7 @@ public:
     FString GetObjectiveText() const;
     FString GetPacingHint() const;
     FString GetRecentDialogue() const;
+    FString GetMissionLogText() const;
     FString GetPhaseText() const;
     void RestartMission();
 

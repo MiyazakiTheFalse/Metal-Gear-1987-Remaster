@@ -14,7 +14,7 @@ void AMGPrototypeHUD::DrawHUD()
     if (!Player) return;
     DrawText(TEXT("GRAY FOX RESCUE — PROVISIONAL GREYBOX  |  WASD: Move   Mouse: Camera   E: Interact   Ctrl: Crouch   Shift: Sprint   F9: Restart"),
         FLinearColor::White, 18.f, 18.f, nullptr, 0.78f, false);
-    DrawText(TEXT("RMB: Aim   Q: Swap shoulder   F6: Opt-in graphics   |  Captivity: weapons confiscated"),
+    DrawText(TEXT("RMB: Aim   Q: Swap shoulder   J / D-pad Up: Intel log   F6: Graphics   |  Captivity: unarmed"),
         FLinearColor::White, 18.f, 38.f, nullptr, 0.80f, false);
 
     const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
@@ -29,6 +29,13 @@ void AMGPrototypeHUD::DrawHUD()
         if (!Hint.IsEmpty())
             DrawText(Hint, FLinearColor(0.88f, 0.85f, 0.6f, 1.f),
                      20.f, 131.f, nullptr, 0.93f, false);
+        if (Player->IsMissionLogVisible())
+        {
+            const FString Intel = Mission->GetMissionLogText();
+            if (!Intel.IsEmpty())
+                DrawText(Intel, FLinearColor(0.65f, 0.92f, 1.f, 1.f),
+                    20.f, Canvas->ClipY - 143.f, nullptr, 0.92f, false);
+        }
         const FString Cue = Mission->GetRecentDialogue();
         if (!Cue.IsEmpty())
             DrawText(Cue, FLinearColor::White, 24.f,

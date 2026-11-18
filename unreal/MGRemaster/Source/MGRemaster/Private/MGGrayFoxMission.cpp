@@ -349,6 +349,14 @@ FString AMGGrayFoxMission::GetPacingHint() const
                       : TEXT("Move east to the end of the passage, beyond the guards.");
 }
 
+FString AMGGrayFoxMission::GetMissionLogText() const
+{
+    if (!(Flags & MG_FOX_RESCUED)) return FString();
+    // Temporary paraphrase; not a verbatim line from the licensed J2ME script.
+    return TEXT("GRAY FOX INTEL: Metal Gear is real. Seek the scientist who designed it. "
+                "Your equipment is still missing. Continue the infiltration.");
+}
+
 FString AMGGrayFoxMission::GetRecentDialogue() const
 {
     return DialogueTimeRemaining > 0.f ? Dialogue : FString();

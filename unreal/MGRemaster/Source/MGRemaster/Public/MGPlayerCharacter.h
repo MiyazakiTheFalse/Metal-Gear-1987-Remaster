@@ -20,6 +20,7 @@ public:
 
     bool IsAiming() const { return bAiming; }
     bool IsSprinting() const { return bSprinting && !bIsCrouched && !bAiming; }
+    bool IsMissionLogVisible() const { return bShowMissionLog; }
     float GetNoiseFactor() const;
     float GetVisibilityFactor() const;
 
@@ -31,6 +32,7 @@ private:
     UPROPERTY(VisibleAnywhere, Category="Prototype")
     UStaticMeshComponent* PrototypeBody;
 
+    bool bShowMissionLog = false;
     bool bAiming = false;
     bool bSprinting = false;
     float ShoulderSign = 1.f;
@@ -51,6 +53,7 @@ private:
     void FireStun();
     void Interact();
     void RestartRescue();
+    void ToggleMissionLog();
     void CycleGraphicsQuality();
     void UpdateMovementState();
 };

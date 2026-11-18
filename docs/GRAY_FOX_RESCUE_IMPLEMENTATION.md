@@ -29,7 +29,7 @@ Pacing functions in Rust are *guidance*, never a hidden timer, enemy spawn manda
 - Rust ABI \`mg_gray_fox_transition\` provides ordered, once-only state changes. Unreal C++ has a matching fallback when \`MG_WITH_RUST=0\`; the Rust native lib is preferable.
 - The two walls remain solid until their respective events; actor collision is removed only when the state transaction commits.
 - Snake begins unarmed. Existing stun is disabled while equipment remains confiscated.
-- Gray Fox dialogue is temporary, authored placeholder text; there is no voice, performance animation or complete scene localization yet.
+- Gray Fox dialogue is temporary, authored placeholder text; there is no voice, performance animation or complete scene localization yet. After rescue, J / gamepad D-pad Up toggles a replayable intel log so advancing quickly never loses essential information.
 - The escape lane has pre-existing guards, now with solid blocking capsules (they cannot phase through walls). Guard behaviour remains a basic prototype.
 - \`UMGGrayFoxSaveGame\` persists bitflags and a checkpoint position after each accepted action. Save/load does not replay one-shot actions.
 - F9 deletes the slice checkpoint and reopens the map for replay. This is a developer/test shortcut, not final gameplay UI.
