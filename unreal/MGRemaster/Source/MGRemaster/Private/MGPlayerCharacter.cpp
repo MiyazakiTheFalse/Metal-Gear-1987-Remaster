@@ -478,30 +478,117 @@ void AMGPlayerCharacter::ToggleProne()
     else EnterProneAfterCrouch();
     UpdateMovementState();
 }
+bool AMGPlayerCharacter::FindContactWall(const FVector& Direction, float Reach, FHitResult& OutHit) const
+{
+    if (!GetWorld()) return false;
+    const FVector Dir = Direction.GetSafeNormal2D();
+    if (Dir.IsNearlyZero()) return false;
+    FCollisionQueryParams Query(SCENE_QUERY_STAT(MGWallContact), false, this);
+    Query.bReturnPhysicalMaterial = true;
+    const FVector Waist = GetActorLocation() + FVector(0.f, 0.f, 40.f);
+    if (!GetWorld()->LineTraceSingleByChannel(OutHit, Waist, Waist + Dir * Reach,
+                                              ECC_Visibility, Query) ||
+        !OutHit.bBlockingHit || FMath::Abs(OutHit.ImpactNormal.Z) > 0.22f ||
+        FVector::DotProduct(Dir, OutHit.ImpactNormal.GetSafeNormal2D()) > -0.72f)
+        return false;
+    // A low obstacle is not a full-height wall and must not attach Snake's back.
+    FHitResult Chest;
+    const FVector Upper = GetActorLocation() + FVector(0.f, 0.f, 105.f);
+    return GetWorld()->LineTraceSingleByChannel(Chest, Upper, Upper + Dir * (Reach + 10.f),
+                ECC_Visibility, Query) && Chest.bBlockingHit &&
+           Chest.GetActor() == OutHit.GetActor();
+}
+
+bool AMGPlayerCharacter::TryAutoEnterCover(const FVector& WorldDirection)
+{
+    if (bInCover || bIsProne || bAiming || bSprinting || bCodecOpen ||
+        CoverReattachCooldown > 0.f || !GetCharacterMovement()->IsMovingOnGround())
+        return false;
+    FHitResult Hit;
+    if (!FindContactWall(WorldDirection, 62.f, Hit)) return false;
+    CoverNormal = Hit.ImpactNormal.GetSafeNormal2D();
+    if (CoverNormal.IsNearlyZero()) return false;
+    bInCover = true;
+    UpdateMovementState();
+    NotifyFeedback(TEXT("WALL CONTACT — F / A TO KNOCK"), TEXT("select"));
+    return true;
+}
+
 bool AMGPlayerCharacter::TryEnterCover()
 {
-    if (!GetWorld() || bIsProne || !Controller) return false;
-    const FVector Eye = GetActorLocation() + FVector(0.f, 0.f, bIsCrouched ? 20.f : 36.f);
+    if (bIsProne || !Controller) return false;
     const FVector TowardWall = FRotator(0.f, Controller->GetControlRotation().Yaw, 0.f).Vector();
-    FCollisionQueryParams Query(SCENE_QUERY_STAT(MGTakeCover), false, this);
     FHitResult Hit;
-    if (!GetWorld()->SweepSingleByChannel(Hit, Eye, Eye + TowardWall * 98.f,
-        FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(12.f), Query)
-        || FMath::Abs(Hit.ImpactNormal.Z) > 0.22f)
-        return false;
+    if (!FindContactWall(TowardWall, 100.f, Hit)) return false;
     CoverNormal = Hit.ImpactNormal.GetSafeNormal2D();
     bInCover = !CoverNormal.IsNearlyZero();
     bSprinting = false;
     UpdateMovementState();
-    if (bInCover) NotifyFeedback(TEXT("COVER TAKEN — MOVE ALONG WALL"), TEXT("select"));
+    if (bInCover) NotifyFeedback(TEXT("WALL CONTACT — F / A TO KNOCK"), TEXT("select"));
     return bInCover;
 }
+
 void AMGPlayerCharacter::LeaveCover()
 {
     bInCover = false;
     CoverNormal = FVector::ZeroVector;
+    CoverPeekAlpha = 0.f;
+    CoverIntent = 0.f;
+    CoverShuffleDirection = 0.f;
+    CoverReattachCooldown = 0.50f;
     UpdateMovementState();
 }
+
+void AMGPlayerCharacter::UpdateCornerPeek(float DeltaSeconds)
+{
+    float Target = 0.f;
+    if (bInCover && bAiming && FMath::Abs(CoverIntent) > 0.25f && GetWorld())
+    {
+        const FVector Tangent = FVector::CrossProduct(FVector::UpVector, CoverNormal).GetSafeNormal2D();
+        const FVector Ahead = GetActorLocation() +
+            Tangent * (FMath::Sign(CoverIntent) * 78.f) + FVector(0.f, 0.f, 50.f);
+        FHitResult Hit;
+        FCollisionQueryParams Query(SCENE_QUERY_STAT(MGPeekCorner), false, this);
+        const bool bWallContinues = GetWorld()->LineTraceSingleByChannel(
+            Hit, Ahead, Ahead - CoverNormal * 105.f, ECC_Visibility, Query) &&
+            FVector::DotProduct(Hit.ImpactNormal.GetSafeNormal2D(), CoverNormal) > 0.65f;
+        Target = bWallContinues ? 0.f : 1.f;
+    }
+    CoverPeekAlpha = FMath::FInterpTo(CoverPeekAlpha, Target, DeltaSeconds, 9.f);
+    if (FMath::Abs(CoverIntent) < 0.05f)
+        CoverShuffleDirection = FMath::FInterpTo(CoverShuffleDirection, 0.f, DeltaSeconds, 10.f);
+    CoverIntent = 0.f;
+}
+
+void AMGPlayerCharacter::KnockOnWall()
+{
+    if (!bInCover || !GetWorld()) return;
+    const float Now = GetWorld()->GetTimeSeconds();
+    if (Now < NextWallKnockTime) return;
+    FHitResult Hit;
+    if (!FindContactWall(-CoverNormal, 115.f, Hit))
+    {
+        LeaveCover();
+        return;
+    }
+    NextWallKnockTime = Now + 0.70f;
+    WallKnockVisualTimer = 0.30f;
+    CoverPeekAlpha = 0.f;
+    const UPrimitiveComponent* Wall = Hit.GetComponent();
+    const bool bMetal = Wall && Wall->ComponentHasTag(TEXT("MG_Surface_Metal"));
+    const bool bWood = Wall && Wall->ComponentHasTag(TEXT("MG_Surface_Wood"));
+    const TCHAR* SoundKey = bMetal ? TEXT("knock_metal") :
+                            (bWood ? TEXT("knock_wood") : TEXT("knock_concrete"));
+    const float HearingRadius = bMetal ? 1150.f : (bWood ? 650.f : 850.f);
+    const FString SoundPath = FString::Printf(TEXT("/Game/Feedback/%s.%s"), SoundKey, SoundKey);
+    if (USoundBase* Sound = LoadObject<USoundBase>(nullptr, *SoundPath))
+        UGameplayStatics::PlaySoundAtLocation(this, Sound, Hit.ImpactPoint, 0.80f);
+    NotifyFeedback(TEXT("KNOCK — LISTEN FOR THE GUARD'S RESPONSE"));
+    // A sound stimulus reports the wall's impact point, not Snake's location.
+    for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
+        if (IsValid(*It)) It->HearWallKnock(Hit.ImpactPoint, HearingRadius, this);
+}
+
 void AMGPlayerCharacter::ToggleCover()
 {
     if (bInCover)
