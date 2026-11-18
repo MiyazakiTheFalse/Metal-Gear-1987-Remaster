@@ -1,0 +1,26 @@
+# Unreal build output and caches
+**/Binaries/
+**/Build/
+**/Intermediate/
+**/Saved/
+**/DerivedDataCache/
+**/.vs/
+**/.idea/
+*.sln
+*.suo
+*.VC.db
+
+# Rust and Python artifacts
+rust/target/
+__pycache__/
+*.pyc
+.venv/
+
+# Original game bytecode, assets and locally derived imports.
+# Import these from the authorised reference archive on developer machines.
+content/
+unreal/MGRemaster/Content/Legacy/
+*.jar
+*.jad
+*.zip
+.DS_Store

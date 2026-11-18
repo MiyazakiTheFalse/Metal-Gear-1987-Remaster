@@ -1,0 +1,15 @@
+[package]
+name = "mg_legacy_core"
+version = "0.1.0"
+edition = "2021"
+description = "Portable stealth simulation and checked J2ME record reader"
+
+[lib]
+name = "mg_legacy_core"
+crate-type = ["rlib", "staticlib", "cdylib"]
+
+[[bin]]
+name = "mg_probe"
+path = "src/bin/mg_probe.rs"
+
+[dependencies]
