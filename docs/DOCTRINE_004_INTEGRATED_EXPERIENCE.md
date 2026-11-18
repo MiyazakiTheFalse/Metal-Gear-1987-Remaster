@@ -1,6 +1,6 @@
 # DOCTRINE 004 — Integrated Experience and Temporal Coherence
 
-**Status: BINDING, GAME-WIDE.** Applies to every player action, environmental affordance, AI response, mission event, camera transition, menu, radio exchange, cutscene, tutorial and checkpoint. Complements Doctrine 002 (events) and Doctrine 003 (pacing); it does not override story/source verification.
+**Status: BINDING, GAME-WIDE, subordinate to [Doctrine 000](DOCTRINE_000_HOW_WE_BUILD.md).** Spatial implementations also obey [Doctrine 005](DOCTRINE_005_SPATIAL_STRUCTURE.md). Applies to every player action, environmental affordance, AI response, mission event, camera transition, menu, radio exchange, cutscene, tutorial and checkpoint. Complements Doctrine 002 (events) and Doctrine 003 (pacing); it does not override story/source verification.
 
 ## Non-negotiable rule
 
