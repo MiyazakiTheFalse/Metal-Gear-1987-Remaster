@@ -10,6 +10,9 @@ class MGREMASTER_API UMGGrayFoxSaveGame : public USaveGame
     GENERATED_BODY()
 public:
     UPROPERTY(SaveGame)
+    uint32 SchemaVersion = 1;
+
+    UPROPERTY(SaveGame)
     uint32 MissionFlags = 0;
 
     UPROPERTY(SaveGame)

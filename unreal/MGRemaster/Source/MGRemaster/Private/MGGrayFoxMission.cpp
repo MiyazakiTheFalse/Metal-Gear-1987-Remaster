@@ -127,7 +127,16 @@ void AMGGrayFoxMission::BeginPlay()
             && (!(F & MG_FOX_RESCUED) || (F & MG_FOX_FIRST_WALL_BREACHED))
             && (!(F & MG_FOX_EXIT_WALL_BREACHED) || (F & MG_FOX_RESCUED))
             && (!(F & MG_FOX_LEFT_PRISON) || (F & MG_FOX_EXIT_WALL_BREACHED));
-        if (bValid && (F & MG_FOX_CAPTURED))
+        const FVector P = Save->CheckpointLocation;
+        const bool bPositionSafe = !P.ContainsNaN()
+            && P.X >= -1160.f && P.X <= 1310.f
+            && FMath::Abs(P.Y) < 410.f
+            && P.Z >= -95.f && P.Z <= 180.f
+            // A stale save must not place the player beyond a solid, unopened wall.
+            && ((F & MG_FOX_FIRST_WALL_BREACHED) || P.X < -350.f)
+            && ((F & MG_FOX_EXIT_WALL_BREACHED) || P.X < 420.f);
+        if (bValid && bPositionSafe && Save->SchemaVersion == 1
+            && (F & MG_FOX_CAPTURED))
         {
             Flags = F;
             SavedPosition = Save->CheckpointLocation;
@@ -176,6 +185,7 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
         UGameplayStatics::CreateSaveGameObject(UMGGrayFoxSaveGame::StaticClass()));
     if (!Save) return;
+    Save->SchemaVersion = 1;
     Save->MissionFlags = Flags;
     Save->CheckpointLocation = Player ? Player->GetActorLocation() : CellStart;
     if (!UGameplayStatics::SaveGameToSlot(Save, SaveSlot, 0))
@@ -296,7 +306,7 @@ uint32 AMGGrayFoxMission::GetPacingPhase() const
 
 uint32 AMGGrayFoxMission::GetHintLevel() const
 {
-    if (bUnderAlert || Flags & MG_FOX_LEFT_PRISON) return 0;
+    if (bUnderAlert || (Flags & MG_FOX_LEFT_PRISON)) return 0;
 #if MG_WITH_RUST
     MgGrayFoxPacing Report = {};
     if (mg_core_abi_version() == 1 &&
