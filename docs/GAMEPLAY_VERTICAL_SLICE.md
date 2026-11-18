@@ -1,6 +1,8 @@
 # Third-person gameplay vertical slice (source milestone)
 
 ## Intended feel
+
+All source work follows [Doctrine 000 — How We Build](DOCTRINE_000_HOW_WE_BUILD.md), and spatial layout follows [Doctrine 005](DOCTRINE_005_SPATIAL_STRUCTURE.md). Source-only improvements require Unreal compilation and synchronized audio/visual playtesting before acceptance.
 Modern, freely controlled third-person camera with quick aim transition and tactical stealth; **not a claim of MGS4/MGSV-equivalent polish yet**. Source-only implementation still requires compilation and playtesting.
 
 ## First-pass implemented in source
@@ -27,9 +29,9 @@ Modern, freely controlled third-person camera with quick aim transition and tact
 | F6 | (menu pending) | Cycle Performance / Balanced / High / Ultra |
 
 ## Not implemented yet
-- Final Snake model, locomotion animation graphs, traversal, vault, prone, adaptive cover and CQC.
-- Original room geometry/script import, codec, UI, story and inventory.
-- Advanced guard squad coordination, search routes, object interactions, audio and save system.
+- Final Snake model, authored locomotion animation graphs, traversal, vault, production-ready prone, rigged wall cover and CQC. Auto wall contact and corner peeking currently exist only as prototype C++ and camera logic.
+- Original room geometry/script import, final transceiver portraits and recorded VO, finalized UI, narrative sequences and complete inventory. An optional source-only transceiver text UI and basic mission events now exist.
+- Advanced guard squad coordination, NavMesh-aware search routes, complete object interactions, authored spatial audio and full-game saving. Basic source-only sound distraction and Gray Fox checkpoint saving exist.
 - Weapon assets / ballistics; current stun is a placeholder.
 - User-facing graphics options menu and separately downloadable HD texture pack.
 - Windows packaging, performance testing or Switch builds.
