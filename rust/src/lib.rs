@@ -1,6 +1,7 @@
 //! Engine-neutral stealth simulation for the Metal Gear remaster.
 //! Java ME bytecode is a reference, NOT something this crate pretends to execute.
 pub mod resource;
+pub mod mission_events;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
