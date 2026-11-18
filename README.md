@@ -63,3 +63,22 @@ The resulting `dist/Windows/` package must be smoke-tested before distribution. 
 5. Introduce UI, saves, audio, advanced guard tactics, accessibility and console performance plans.
 
 Switch requires official Nintendo SDK access, Unreal console integration and devkit testing. GitHub Actions paid CI has not been configured.
+
+## Asset proportions and source-of-truth ledger
+
+The first six independently authored greybox OBJ modules live in assets/greybox,
+with scale specifications in assets/asset_dimensions.json and original/later-game
+source claims recorded in data/reference_ledger.json.
+
+Run the dimension/provenance checks before every asset import:
+
+    python tools/validate_asset_dimensions.py
+    python -m unittest discover -s tools -p 'test_*.py'
+
+On an Unreal-equipped workstation, enable the PythonScriptPlugin and run
+unreal/MGRemaster/Python/import_greybox_assets.py from Unreal's Python console.
+It imports the source OBJ models and rejects bounds that differ from the ledger by more
+than 1 cm. Imported meshes do not constitute a completed level or a playable game.
+
+See docs/ASSET_REFERENCE_AND_SCALING.md. The J2ME 30x24 tile hypothesis is
+not a confirmed real-world room measurement; no fabricated metres-per-tile is used.
