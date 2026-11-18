@@ -22,6 +22,8 @@ Write-Host 'Validating source and integrated experience contracts...'
 if ($LASTEXITCODE -ne 0) { throw "Source contract tests failed: $LASTEXITCODE" }
 & python (Join-Path $Repo 'tools\validate_beat_contracts.py')
 if ($LASTEXITCODE -ne 0) { throw "Beat contract validation failed: $LASTEXITCODE" }
+& python (Join-Path $Repo 'tools\validate_area_contracts.py')
+if ($LASTEXITCODE -ne 0) { throw "Area contract validation failed: $LASTEXITCODE" }
 Write-Host 'Building Rust gameplay core...'
 & cargo build --release --manifest-path $Manifest
 if ($LASTEXITCODE -ne 0) { throw "Rust build failed: $LASTEXITCODE" }
