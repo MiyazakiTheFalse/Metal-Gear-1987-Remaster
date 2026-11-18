@@ -1,6 +1,6 @@
 # DOCTRINE 001 — 2D-to-3D Map Reconstruction (binding)
 
-**Status: ACTIVE / NON-OPTIONAL.** Applies to all converted Metal Gear rooms, maps, encounters, camera zones and progression changes. The goal is a faithful but fully playable free-camera third-person game. This policy takes precedence over speed, visual ambition, or asset convenience. Changes to doctrine require an explicit design-decision record.
+**Status: ACTIVE / NON-OPTIONAL, governed by [Doctrine 000 — How We Build](DOCTRINE_000_HOW_WE_BUILD.md).** All level layouts also follow [Doctrine 005 — Spatial Structure](DOCTRINE_005_SPATIAL_STRUCTURE.md). Applies to all converted Metal Gear rooms, maps, encounters, camera zones and progression changes. The goal is a faithful but fully playable free-camera third-person game. This policy takes precedence over speed, visual ambition, or asset convenience. Changes to doctrine require an explicit design-decision record.
 
 ## Immutable design invariants
 
