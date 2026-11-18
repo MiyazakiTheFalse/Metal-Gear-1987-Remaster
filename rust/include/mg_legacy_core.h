@@ -28,6 +28,20 @@ typedef struct MgGuardResult {
     float sound_threat;
 } MgGuardResult;
 
+/* Gray Fox first mission-slice events. Use stable 32-bit bitfield flags. */
+#define MG_FOX_CAPTURED 1u
+#define MG_FOX_CONFISCATED 2u
+#define MG_FOX_FIRST_WALL_BREACHED 4u
+#define MG_FOX_RESCUED 8u
+#define MG_FOX_EXIT_WALL_BREACHED 16u
+#define MG_FOX_LEFT_PRISON 32u
+#define MG_FOX_CAPTURE 1u
+#define MG_FOX_BREACH_FIRST_WALL 2u
+#define MG_FOX_RESCUE 3u
+#define MG_FOX_BREACH_EXIT_WALL 4u
+#define MG_FOX_ESCAPE 5u
+uint32_t mg_gray_fox_transition(uint32_t flags, uint32_t action, uint32_t* next_flags);
+
 uint32_t mg_core_abi_version(void);
 uint32_t mg_step_guard(const MgGuardFrame* frame, MgGuardResult* output);
 #ifdef __cplusplus

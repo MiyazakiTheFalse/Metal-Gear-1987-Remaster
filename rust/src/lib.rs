@@ -2,6 +2,7 @@
 //! Java ME bytecode is a reference, NOT something this crate pretends to execute.
 pub mod resource;
 pub mod mission_events;
+pub mod gray_fox;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
