@@ -20,8 +20,21 @@ public:
     bool IsIncapacitated() const { return bIncapacitated; }
     uint32 GetAwarenessState() const { return AwarenessState; }
     float GetSuspicion() const { return Suspicion; }
+    // Sound stimulus carries a world location, never Snake's position.
+    void HearWallKnock(const FVector& SoundLocation, float HearingRadius, AActor* SoundInstigator);
+    bool IsInvestigatingNoise() const { return DistractionPhase != EDistractionPhase::None; }
 
 private:
+    enum class EDistractionPhase : uint8 { None, React, Approach, Search, Return };
+    EDistractionPhase DistractionPhase = EDistractionPhase::None;
+    FVector DistractionLocation = FVector::ZeroVector;
+    FVector ReturnToPatrol = FVector::ZeroVector;
+    float DistractionTimer = 0.f;
+    float InvestigationStuckTimer = 0.f;
+    int32 ConsecutiveKnocks = 0;
+    bool AdvanceNoiseInvestigation(float DeltaSeconds);
+    void MoveToward(const FVector& Destination, float Speed, float DeltaSeconds);
+
     UPROPERTY(VisibleAnywhere, Category="Prototype")
     UCapsuleComponent* CollisionCapsule;
 
