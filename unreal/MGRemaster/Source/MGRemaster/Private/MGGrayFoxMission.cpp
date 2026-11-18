@@ -105,9 +105,9 @@ void AMGGrayFoxMission::SpawnPerimeterGuards()
 {
     // Existing hostile patrols outside confinement. No surprise wave on rescue.
     if (!GetWorld()) return;
-    GetWorld()->SpawnActor<AMGGuardActor>(FVector(910.f, 270.f, -11.f),
+    GetWorld()->SpawnActor<AMGGuardActor>(FVector(840.f, 360.f, -11.f),
                                            FRotator(0.f, 180.f, 0.f));
-    GetWorld()->SpawnActor<AMGGuardActor>(FVector(1140.f, -220.f, -11.f),
+    GetWorld()->SpawnActor<AMGGuardActor>(FVector(1120.f, -340.f, -11.f),
                                            FRotator(0.f, 180.f, 0.f));
 }
 

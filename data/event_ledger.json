@@ -31,7 +31,38 @@
       "control_policy": "retain_where_safe",
       "interruption_policy": "resumable",
       "spoiler_gate": "original_story_progression",
-      "developer_notes": "No assumed location, item gating or forced single route. Source-specific placement TBD."
+      "developer_notes": "Prototype begins at captivity, with confiscation, first weakened wall, Gray Fox interaction, second weakened wall and escape. This ordering is supported by comparative MSX2 guides; exact Connect2Media J2ME placement and stage gates are NOT decoded. No time lock or fabricated story flag is claimed original.",
+      "prototype": {
+        "status": "source_implemented_uncompiled",
+        "implementation_paths": [
+          "rust/src/gray_fox.rs",
+          "rust/src/pacing.rs",
+          "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+        ],
+        "actions": [
+          "capture",
+          "breach_first_wall",
+          "rescue_gray_fox",
+          "breach_exit_wall",
+          "escape"
+        ],
+        "pacing_phases": [
+          "capture",
+          "cell_discovery",
+          "breakthrough",
+          "revelation",
+          "escape_pressure",
+          "recovery"
+        ],
+        "hint_seconds": [
+          14,
+          35
+        ],
+        "no_mandatory_wait": true,
+        "source_map_geometry_verified": false,
+        "unreal_compiled": false,
+        "playtested": false
+      }
     },
     {
       "id": "ev.story.madnar_ellen",
