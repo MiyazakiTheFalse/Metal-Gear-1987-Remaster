@@ -212,6 +212,8 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
 #endif
     Flags = Next;
     ElapsedSinceBeat = 0.f;
+    SecondsSinceExploration = 0.f;
+    bHasObservedPlayer = false;
     SaveProgress(Player);
 
     switch (Action)
@@ -236,7 +238,8 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         break;
     default: break;
     }
-    DialogueTimeRemaining = Action == MG_FOX_RESCUE ? 11.f : 5.f;
+    // Short subtitle holds are placeholder reading windows; dialogue never locks control.
+    DialogueTimeRemaining = Action == MG_FOX_RESCUE ? 7.f : 4.5f;
     return true;
 }
 
@@ -315,13 +318,22 @@ uint32 AMGGrayFoxMission::GetPacingPhase() const
 uint32 AMGGrayFoxMission::GetHintLevel() const
 {
     if (bUnderAlert || (Flags & MG_FOX_LEFT_PRISON)) return 0;
+    // Engine and Rust use matching candidates. These are hypotheses pending
+    // first-time player tests, not canonical 'correct' hint delays.
+    uint32 Level = ElapsedSinceBeat >= 75.f ? 2u : (ElapsedSinceBeat >= 28.f ? 1u : 0u);
 #if MG_WITH_RUST
     MgGrayFoxPacing Report = {};
     if (mg_core_abi_version() == 1 &&
         mg_gray_fox_pacing(Flags, ElapsedSinceBeat, bUnderAlert ? 1u : 0u, &Report))
-        return Report.hint_level;
+        Level = Report.hint_level;
 #endif
-    return ElapsedSinceBeat >= 35.f ? 2 : (ElapsedSinceBeat >= 14.f ? 1 : 0);
+    // Sustained navigation / looking around means the player is still testing
+    // hypotheses. Delay help until they pause; hard caps avoid indefinite silence.
+    if (Level >= 2 && SecondsSinceExploration < 10.f && ElapsedSinceBeat < 150.f)
+        Level = 1;
+    if (Level >= 1 && SecondsSinceExploration < 6.f && ElapsedSinceBeat < 100.f)
+        Level = 0;
+    return Level;
 }
 
 FString AMGGrayFoxMission::GetPhaseText() const
@@ -436,6 +448,23 @@ void AMGGrayFoxMission::Tick(float Dt)
     UpdateGuardAlert();
     AMGPlayerCharacter* Player =
         Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+    if (Player)
+    {
+        const FVector CurrentPosition = Player->GetActorLocation();
+        const APlayerController* PC = Cast<APlayerController>(Player->GetController());
+        const FRotator View = PC ? PC->GetControlRotation() : Player->GetActorRotation();
+        // Count purposeful movement or camera scanning as engagement. No hint
+        // is given just because a curious player spends 28 seconds exploring.
+        const bool bExploring = bHasObservedPlayer &&
+            (FVector::Dist2D(CurrentPosition, LastObservedPlayerLocation) > 2.5f ||
+             FMath::Abs(FMath::FindDeltaAngleDegrees(View.Yaw, LastObservedViewRotation.Yaw)) > 0.35f ||
+             FMath::Abs(View.Pitch - LastObservedViewRotation.Pitch) > 0.35f);
+        SecondsSinceExploration = bExploring ? 0.f :
+            SecondsSinceExploration + FMath::Max(0.f, Dt);
+        LastObservedPlayerLocation = CurrentPosition;
+        LastObservedViewRotation = View;
+        bHasObservedPlayer = true;
+    }
     if (Player && (Flags & MG_FOX_EXIT_WALL_BREACHED) &&
         !(Flags & MG_FOX_LEFT_PRISON) &&
         FVector::Dist2D(Player->GetActorLocation(), ExitPoint) < 190.f)
