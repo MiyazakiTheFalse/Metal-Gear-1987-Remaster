@@ -28,7 +28,8 @@ Pacing functions in Rust are *guidance*, never a hidden timer, enemy spawn manda
 - Player's E / gamepad face-left triggers \`TryInteract\`; interactions require an actual nearby, forward-facing target and a clear line of sight.
 - Rust ABI \`mg_gray_fox_transition\` provides ordered, once-only state changes. Unreal C++ has a matching fallback when \`MG_WITH_RUST=0\`; the Rust native lib is preferable.
 - The two walls remain solid until their respective events; actor collision is removed only when the state transaction commits.
-- Snake begins unarmed. Existing stun is disabled while equipment remains confiscated.
+- Snake begins unarmed. Existing stun is disabled while equipment remains confiscated. A separate concealed 1995-era transceiver remains manually available via C/Start; it does not imply a later implanted Codec.
+- Kyle Schneider's optional remake-authored architectural context is on 120.79, while Big Boss's optional original-role guidance is on 120.85; Q/right-stick press tunes while radio is open. The transceiver does not pause gameplay or gate wall breaching. The optional on-screen prompt follows the existing hint threshold rather than forcing a call.
 - Gray Fox dialogue is temporary, authored placeholder text; there is no voice, performance animation or complete scene localization yet. After rescue, J / gamepad D-pad Up toggles a replayable intel log so advancing quickly never loses essential information.
 - The escape lane has pre-existing guards, now with solid blocking capsules (they cannot phase through walls). Guard behaviour remains a basic prototype.
 - \`UMGGrayFoxSaveGame\` persists bitflags and a checkpoint position after each accepted action. Save/load does not replay one-shot actions.
@@ -52,6 +53,8 @@ Pacing functions in Rust are *guidance*, never a hidden timer, enemy spawn manda
 12. Compare each rebuilt room against exact J2ME data and source screenshots before declaring fidelity.
 
 ## Known limitations
+
+Schneider/Big Boss contact text and HUD are source-wired, but radio voice recordings, era-appropriate portraits, EQ/beeps, and synchronized listening animation do not exist. The first wall presently disappears on successful E interaction; visible progressive cracking, impact animation and timed debris/audio cues remain to be authored under Doctrine 004. The prison hints are progress-time-based rather than full observational behaviour tracking, so playtesting must evaluate whether they appear too soon.
 
 No Rust toolchain or Unreal editor is available in this authoring environment. The code and unit tests have been written and checked for structural consistency, **not run in the game engine**. Guard navigation is simple swept straight-line movement, and prototype characters are primitives; AI damage, cinematics, original level art and proper save migration are future work.
 
