@@ -47,25 +47,25 @@
     },
     {
       "provenance": "remake_adaptation_pending_j2me",
-      "implementation_status": "design_only",
+      "implementation_status": "source_prototype",
       "verification_status": "unverified",
       "id": "gray_fox.architecture_seed",
       "kind": "optional_radio",
       "intent": "Schneider provides credible architectural context without giving away the prison secret.",
       "trigger": "Player manually opens transceiver or accepts subtle incoming contact.",
-      "action": "May close or ignore Schneider and solve immediately.",
+      "action": "Press C/Start to open/close; Q/right stick press changes manual channel. Walking and wall breach continue. The optional hint appears at the existing 14-second progress threshold.",
       "visual": {
         "foreshadow": "Architectural seams can be seen before radio use",
-        "impact": "1995-era transceiver UI identifies Schneider",
+        "impact": "Provisional non-pausing HUD transcript with Schneider 120.79 and Big Boss 120.85; 3D listening animation and portrait are missing.",
         "aftermath": "Radio UI exits without camera teleport"
       },
       "audio": {
         "origin": "Dry receiver voice rather than 3D world broadcast",
-        "response": "Subdued world ambience during listening without hiding threat cues",
+        "response": "Placeholder UI confirmation only; no licensed voiced dialogue or authentic transceiver beep is supplied. Future spatially non-diegetic receiver EQ and sound mix must retain threat cues.",
         "non_audio_equivalent": "Subtitles and readable transcript"
       },
       "timing": {
-        "start_event": "Optional player request",
+        "start_event": "Player manually opens C/Start; optional visual radio prompt only when hints become eligible",
         "feedback_target_ms": 150,
         "max_forced_lock_seconds": 0,
         "optional_hint_seconds": [],
@@ -84,7 +84,9 @@
         "save_reload"
       ],
       "verification": [
-        "No call required to breach; transcript readable; channel identity correct"
+        "No call required to breach; transcript readable; channel identity correct",
+        "Confiscation does not block the transceiver; it does not pause or prevent movement",
+        "No automatic radio VO or clue is required to breach; live dialogue not voice-recorded"
       ]
     },
     {
