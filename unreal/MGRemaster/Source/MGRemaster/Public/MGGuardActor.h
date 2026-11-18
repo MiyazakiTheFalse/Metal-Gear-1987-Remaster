@@ -4,6 +4,7 @@
 #include "MGGuardActor.generated.h"
 
 class UStaticMeshComponent;
+class UCapsuleComponent;
 
 UCLASS()
 class MGREMASTER_API AMGGuardActor : public AActor
@@ -20,6 +21,9 @@ public:
     uint32 GetAwarenessState() const { return AwarenessState; }
 
 private:
+    UPROPERTY(VisibleAnywhere, Category="Prototype")
+    UCapsuleComponent* CollisionCapsule;
+
     UPROPERTY(VisibleAnywhere, Category="Prototype")
     UStaticMeshComponent* ProxyBody;
 

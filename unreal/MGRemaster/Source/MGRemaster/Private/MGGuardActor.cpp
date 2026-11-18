@@ -1,7 +1,7 @@
 #include "MGGuardActor.h"
 
 #include "MGPlayerCharacter.h"
-#include "Components/SceneComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
@@ -12,7 +12,11 @@
 AMGGuardActor::AMGGuardActor()
 {
     PrimaryActorTick.bCanEverTick = true;
-    RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+    CollisionCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CollisionCapsule"));
+    CollisionCapsule->InitCapsuleSize(35.f, 89.f);
+    CollisionCapsule->SetCollisionProfileName(TEXT("Pawn"));
+    CollisionCapsule->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+    RootComponent = CollisionCapsule;
     ProxyBody = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GuardBody"));
     ProxyBody->SetupAttachment(RootComponent);
     // Match the 176 cm player proxy; guard feet sit on the prototype floor.
@@ -41,6 +45,7 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
         Suspicion = 0.f;
         AwarenessState = 0;
         ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        CollisionCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         ProxyBody->SetRelativeRotation(FRotator(0.f, 0.f, 80.f));
         SetActorTickEnabled(false);
     }
@@ -118,7 +123,7 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     }
     else
     {
-        const FVector Point = PatrolOrigin + FVector(bPatrolForward ? 260.f : -260.f, 0.f, 0.f);
+        const FVector Point = PatrolOrigin + FVector(bPatrolForward ? 180.f : -180.f, 0.f, 0.f);
         const FVector Diff = Point - GetActorLocation();
         if (Diff.Size2D() < 20.f) bPatrolForward = !bPatrolForward;
         else
