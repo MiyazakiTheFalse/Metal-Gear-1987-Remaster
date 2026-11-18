@@ -54,6 +54,23 @@ The resulting `dist/Windows/` package must be smoke-tested before distribution. 
 | Swap shoulder | Q | Press right stick |
 | Graphics quality | F6 | Options menu pending |
 
+## Event architecture — Doctrine 002
+
+The [event doctrine](docs/DOCTRINE_002_EVENTS.md) governs how every rescue,
+radio call, security trigger, hazard, objective and cinematic is authored.
+The standalone [Rust event runtime](rust/src/mission_events.rs) now models
+stable trigger IDs, atomic mission flags, once-only activations, presentation
+cues and versioned mission snapshots. Five Rust unit tests are written,
+but neither Rust nor Unreal has been compiled in this authoring environment.
+
+The [event evidence ledger](data/event_ledger.json) records six event-family
+candidates with sources and interruption rules. All are still marked
+COMPARATIVE_PENDING_J2ME: original MSX2 documentation is not proof that
+the supplied Connect2Media J2ME game shares the same exact event triggers.
+Run `python tools/validate_event_ledger.py` and the associated unit tests
+before promoting a candidate to verified. Event simulation is not yet
+connected to Unreal Gameplay Tags, save games, AI StateTree or sequencers.
+
 ## Next checkpoints
 
 1. Complete a real UE5 Windows compile/package test and fix any engine errors.
