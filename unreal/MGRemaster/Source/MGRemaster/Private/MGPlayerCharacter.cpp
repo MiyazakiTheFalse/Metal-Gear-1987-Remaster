@@ -217,6 +217,19 @@ void AMGPlayerCharacter::MoveForward(float Value)
         const FRotator Yaw(0.f, Controller->GetControlRotation().Yaw, 0.f);
         const FVector Direction = FRotationMatrix(Yaw).GetUnitAxis(EAxis::X);
         if (bInCover) ApplyCoverMovement(Value, Direction);
+        else if (bIsProne)
+        {
+            // The upright controller capsule alone does not cover a 1.5m body.
+            // Require a forward-aligned prone clearance box at the next step.
+            FCollisionQueryParams Query(SCENE_QUERY_STAT(MGProneMovement), false, this);
+            FHitResult Hit;
+            const FVector Delta = Direction * Value * 95.f *
+                (GetWorld() ? GetWorld()->GetDeltaSeconds() : 0.f);
+            const bool bHit = GetWorld() && GetWorld()->SweepSingleByChannel(
+                Hit, GetActorLocation(), GetActorLocation()+Delta, GetActorQuat(),
+                ECC_Pawn, FCollisionShape::MakeBox(FVector(74.f, 29.f, 27.f)), Query);
+            if (!bHit) AddMovementInput(Direction, Value);
+        }
         else AddMovementInput(Direction, Value);
     }
 }
@@ -227,6 +240,17 @@ void AMGPlayerCharacter::MoveRight(float Value)
         const FRotator Yaw(0.f, Controller->GetControlRotation().Yaw, 0.f);
         const FVector Direction = FRotationMatrix(Yaw).GetUnitAxis(EAxis::Y);
         if (bInCover) ApplyCoverMovement(Value, Direction);
+        else if (bIsProne)
+        {
+            FCollisionQueryParams Query(SCENE_QUERY_STAT(MGProneMovement), false, this);
+            FHitResult Hit;
+            const FVector Delta = Direction * Value * 95.f *
+                (GetWorld() ? GetWorld()->GetDeltaSeconds() : 0.f);
+            const bool bHit = GetWorld() && GetWorld()->SweepSingleByChannel(
+                Hit, GetActorLocation(), GetActorLocation()+Delta, GetActorQuat(),
+                ECC_Pawn, FCollisionShape::MakeBox(FVector(74.f, 29.f, 27.f)), Query);
+            if (!bHit) AddMovementInput(Direction, Value);
+        }
         else AddMovementInput(Direction, Value);
     }
 }
@@ -313,7 +337,13 @@ void AMGPlayerCharacter::Interact()
             else if (Changed & 8u) NotifyFeedback(TEXT("GRAY FOX RESCUED — INTEL LOG UPDATED"), TEXT("rescue"));
             else if (Changed & 16u) NotifyFeedback(TEXT("ESCAPE ROUTE OPEN"), TEXT("breach"));
         }
-        else NotifyFeedback(TEXT("NO ACTION AVAILABLE — MOVE CLOSER AND FACE TARGET"), TEXT("denied"));
+        else if (bInCover)
+        {
+            LeaveCover();
+            NotifyFeedback(TEXT("LEFT COVER"), TEXT("select"));
+        }
+        else if (!TryEnterCover())
+            NotifyFeedback(TEXT("NO ACTION AVAILABLE — MOVE CLOSER AND FACE TARGET"), TEXT("denied"));
     }
 }
 
@@ -356,12 +386,23 @@ void AMGPlayerCharacter::EnterProneAfterCrouch()
     const float ProneHalf = 38.f;
     if (Before <= ProneHalf) return;
     const float Delta = Before - ProneHalf;
+    const FVector FutureCenter = GetActorLocation() - FVector(0.f, 0.f, Delta);
+    FCollisionQueryParams Clearance(SCENE_QUERY_STAT(MGProneBodyClearance), false, this);
+    if (GetWorld() && GetWorld()->OverlapBlockingTestByChannel(
+        FutureCenter, GetActorQuat(), ECC_Pawn,
+        FCollisionShape::MakeBox(FVector(74.f, 29.f, 27.f)), Clearance))
+    {
+        NotifyFeedback(TEXT("NOT ENOUGH ROOM TO LIE FLAT"), TEXT("denied"));
+        return;
+    }
     Capsule->SetCapsuleHalfHeight(ProneHalf, true);
     FHitResult Hit;
     const bool bMoved = SetActorLocation(
         GetActorLocation() - FVector(0.f, 0.f, Delta), true, &Hit);
-    if (!bMoved)
+    if (!bMoved || FVector::Dist(GetActorLocation(), FutureCenter) > 2.f)
     {
+        // Preserve capsule height if the floor move was obstructed; no
+        // teleporting into geometry just to complete a stance.
         Capsule->SetCapsuleHalfHeight(Before, true);
         NotifyFeedback(TEXT("CANNOT GO PRONE HERE"), TEXT("denied"));
         return;
@@ -378,6 +419,12 @@ bool AMGPlayerCharacter::ExitProneSafely()
     UCapsuleComponent* Capsule = GetCapsuleComponent();
     const float CurrentHalf = Capsule->GetUnscaledCapsuleHalfHeight();
     const float CrouchedHalf = 55.f;
+    if (CurrentHalf >= CrouchedHalf - 0.5f)
+    {
+        bIsProne = false;
+        UpdateMovementState();
+        return true;
+    }
     const float Delta = CrouchedHalf - CurrentHalf;
     const FVector NewCenter = GetActorLocation() + FVector(0.f, 0.f, Delta);
     FCollisionQueryParams Query(SCENE_QUERY_STAT(MGProneRiseClearance), false, this);
