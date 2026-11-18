@@ -83,7 +83,7 @@ void AMGPlayerCharacter::BeginPlay()
     }
     if (APlayerController* PC = Cast<APlayerController>(GetController()))
     {
-        // A paused Codec must still accept its close button.
+        // Retain pause-compatible input for future UI; the transceiver itself never pauses play.
         PC->PrimaryActorTick.bTickEvenWhenPaused = true;
     }
     ApplyMenuTimeState();
@@ -304,7 +304,20 @@ void AMGPlayerCharacter::CrouchToggle()
     else Crouch();
     UpdateMovementState();
 }
-void AMGPlayerCharacter::ShoulderSwap() { ShoulderSign = -ShoulderSign; }
+void AMGPlayerCharacter::ShoulderSwap()
+{
+    // While manually receiving a transceiver contact, Q / right-stick press
+    // changes the station. Snake keeps movement/camera control.
+    if (bCodecOpen)
+    {
+        TransceiverChannel = (TransceiverChannel + 1) % 2;
+        NotifyFeedback(TransceiverChannel == 0 ?
+            TEXT("RADIO TUNED — SCHNEIDER / 120.79") :
+            TEXT("RADIO TUNED — BIG BOSS / 120.85"), TEXT("select"));
+        return;
+    }
+    ShoulderSign = -ShoulderSign;
+}
 
 void AMGPlayerCharacter::UpdateMovementState()
 {
@@ -827,41 +840,20 @@ void AMGPlayerCharacter::ToggleCodec()
     {
         bCodecOpen = false;
         CodecStatus.Empty();
-        UGameplayStatics::SetGamePaused(this, false);
         ApplyMenuTimeState();
-        NotifyFeedback(TEXT("CODEC CLOSED — INFILTRATION RESUMED"), TEXT("select"));
+        NotifyFeedback(TEXT("TRANSCEIVER CLOSED"), TEXT("select"));
         return;
     }
 
-    // The initial prison slice is an equipment-loss checkpoint. It has no
-    // verified working 1995 transceiver until a later source-confirmed event.
-    const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
-        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
-    if (Mission && (Mission->GetMissionFlags() & 8u) == 0)
-    {
-        NotifyFeedback(TEXT("CODEC OFFLINE — TRANSMITTER CONFISCATED"), TEXT("denied"));
-        return;
-    }
-    if (IsCombatAlertActive())
-    {
-        NotifyFeedback(TEXT("TRANSMISSION DELAYED — UNDER FIRE"), TEXT("denied"));
-        return;
-    }
-    // For the provisional slice this is a read-only after-rescue intelligence
-    // playback, NOT a fabricated new Gray Fox radio contact.
+    // 1995 transceiver: separate from seized inventory and weapons, and never
+    // treated as an implanted 2005-era Codec. Manual, optional, replayable,
+    // non-pausing: players remain free to move and solve the wall immediately.
     CloseEquipmentWindows();
     ApplyMenuTimeState();
-    CodecStatus = Mission ? TEXT("FOXHOUND INTELLIGENCE FILE — PLAYBACK")
-                          : TEXT("RADIO CONTACTS — NONE VERIFIED");
     bCodecOpen = true;
-    const bool bPaused = UGameplayStatics::SetGamePaused(this, true);
-    if (!bPaused)
-    {
-        bCodecOpen = false;
-        CodecStatus.Empty();
-        NotifyFeedback(TEXT("CODEC PAUSE FAILED — TRY AGAIN"), TEXT("denied"));
-    }
-    else NotifyFeedback(TEXT("CODEC OPEN — WORLD PAUSED"), TEXT("menu"));
+    TransceiverChannel = 0; // Kyle Schneider; Q changes to Big Boss.
+    CodecStatus = TEXT("TRANSCEIVER ACTIVE — CHANGE CHANNEL Q / RS; CLOSE C / START");
+    NotifyFeedback(TEXT("TRANSCEIVER OPEN — SCHNEIDER / 120.79"), TEXT("select"));
 }
 
 void AMGPlayerCharacter::CycleGraphicsQuality()
