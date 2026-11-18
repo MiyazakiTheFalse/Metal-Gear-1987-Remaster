@@ -13,6 +13,10 @@ Research basis:
 - Epic StateTree: https://dev.epicgames.com/documentation/unreal-engine/overview-of-state-tree-in-unreal-engine
 - MSX2 comparative script: https://metalgear.dr-sunny.info/?lang=en&page=script
 
+## Integrated player experience is mandatory
+
+All event records are also subject to the binding game-wide [Doctrine 004](DOCTRINE_004_INTEGRATED_EXPERIENCE.md). Every event must have one integrated sight/sound/action/timing/AI/state/interrupt contract in data/beat_contracts.json, even when production assets are placeholders. Story flags cannot be owned by cinematic timing, and cues must express actual world state.
+
 ## Every event requires six records
 
 1. **Source/provenance**: exact version, room/scene identifier, screenshot/record/bytecode evidence; mark any MSX2-only claim as unverified for J2ME.
