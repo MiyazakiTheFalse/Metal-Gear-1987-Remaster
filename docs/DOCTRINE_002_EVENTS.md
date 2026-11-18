@@ -1,6 +1,6 @@
 # DOCTRINE 002 — In-Game Events and Player Agency (binding)
 
-Status: ACTIVE. Companion to 2D-to-3D map doctrine. The J2ME a1 archive remains the authoritative **target edition**, while MSX2 scripts are **comparative** until reproduced in J2ME gameplay or decoded event data.
+Status: ACTIVE. Governed by supreme [Doctrine 000](DOCTRINE_000_HOW_WE_BUILD.md) and spatial [Doctrine 005](DOCTRINE_005_SPATIAL_STRUCTURE.md). Companion to 2D-to-3D map doctrine. The J2ME a1 archive remains the authoritative **target edition**, while MSX2 scripts are **comparative** until reproduced in J2ME gameplay or decoded event data.
 
 ## Decision rule
 
