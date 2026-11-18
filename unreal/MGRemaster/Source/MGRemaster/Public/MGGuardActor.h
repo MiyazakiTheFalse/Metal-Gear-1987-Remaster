@@ -21,7 +21,7 @@ public:
     uint32 GetAwarenessState() const { return AwarenessState; }
     float GetSuspicion() const { return Suspicion; }
     // Sound stimulus carries a world location, never Snake's position.
-    void HearWallKnock(const FVector& SoundLocation, float HearingRadius, AActor* SoundInstigator);
+    void HearWallKnock(const FVector& SoundLocation, const FVector& WallNormal, float HearingRadius, AActor* SoundInstigator);
     bool IsInvestigatingNoise() const { return DistractionPhase != EDistractionPhase::None; }
 
 private:
