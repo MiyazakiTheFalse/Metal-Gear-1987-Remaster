@@ -23,10 +23,15 @@ These features are unverified source implementation, not finished gameplay or pr
 - `scripts/build_windows.ps1` — packaging entrypoint on a Windows UE5.7 build host.
 - `docs/` — source audit, gameplay scope, graphics policy and build notes.
 
+## Global production doctrine — binding
+
+Every player-facing beat must be designed as **one synchronized audiovisual, interactive and temporal experience**, not mechanics first and cosmetic polish later. See [Doctrine 004](docs/DOCTRINE_004_INTEGRATED_EXPERIENCE.md) and the [beat registry](data/beat_contracts.json). Visual foreshadowing, spatial sound, inputs, timing, AI knowledge, durable state, interruptions and accessibility must agree; a polished asset is not proof of a finished beat. The registry begins with nine source/design-stage contracts and is not exhaustive. Local regression checks are required before packaging; Unreal playtesting is still outstanding.
+
 ## Local checks
 
 ```sh
 python -m unittest discover -s tools -p 'test_*.py'
+python tools/validate_beat_contracts.py
 python tools/inspect_and_extract.py /path/to/Metal-Gear_J2ME_EN_v330.zip --output content
 cd rust && cargo test && cargo build --release
 ```
