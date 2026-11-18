@@ -4,6 +4,8 @@
 
 ## The rule
 
+Game-wide [Doctrine 004](DOCTRINE_004_INTEGRATED_EXPERIENCE.md) requires audiovisual cues, control affordances, event state and their exact relative timing to be designed and validated together for every beat; the pacing doctrine cannot be satisfied by a timing-only checklist.
+
 **Pace the experience through space, information and consequence, not artificial waiting.** Design the intended tension curve but let the player vary speed and tactics. Preserve original story/event dependencies. If the game forces a stop, it must be needed for a meaningful interaction, not for a timer or animation budget.
 
 ### Gray Fox prison vertical slice
