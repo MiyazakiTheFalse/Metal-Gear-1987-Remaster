@@ -7,7 +7,7 @@ Status: Unreal Engine 5.7 source-only prototype. Not compiled or playtested.
 - Press F / gamepad face-bottom while in cover to knock at the wall impact point instead of punching. Otherwise normal melee remains available.
 - Aim while sliding toward a wall end for a small camera corner offset. The existing camera probe still enforces collision.
 - E / gamepad face-left always prioritizes mission interaction. Gray Fox prison WeakWall_A and WeakWall_B receive MG_Breachable; cover detection ignores these while intact.
-- Breaching either mission wall immediately clears any prior cover state. The rescue flags, immediate interaction availability and optional 14/35-second hints remain unchanged.
+- Breaching either mission wall immediately clears any prior cover state. The rescue flags, immediate interaction availability and optional 28/75-second candidate hints remain non-blocking and are now exploration-aware.
 
 ## Guard response
 - Knock event contains a wall impact, outward surface normal and distance-limited sound radius, never Snake's coordinates.
