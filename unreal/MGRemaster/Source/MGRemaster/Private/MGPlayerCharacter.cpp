@@ -343,6 +343,8 @@ void AMGPlayerCharacter::Interact()
         if (Mission->TryInteract(this))
         {
             const uint32 Changed = PreviousFlags ^ Mission->GetMissionFlags();
+            // A destroyed wall must never leave Snake attached to nonexistent cover.
+            if (bInCover && (Changed & (4u | 16u))) LeaveCover();
             if (Changed & 4u) NotifyFeedback(TEXT("WALL BREACHED — NEW ROUTE"), TEXT("breach"));
             else if (Changed & 8u) NotifyFeedback(TEXT("GRAY FOX RESCUED — INTEL LOG UPDATED"), TEXT("rescue"));
             else if (Changed & 16u) NotifyFeedback(TEXT("ESCAPE ROUTE OPEN"), TEXT("breach"));
@@ -488,7 +490,9 @@ bool AMGPlayerCharacter::FindContactWall(const FVector& Direction, float Reach, 
     const FVector Waist = GetActorLocation() + FVector(0.f, 0.f, 40.f);
     if (!GetWorld()->LineTraceSingleByChannel(OutHit, Waist, Waist + Dir * Reach,
                                               ECC_Visibility, Query) ||
-        !OutHit.bBlockingHit || FMath::Abs(OutHit.ImpactNormal.Z) > 0.22f ||
+        !OutHit.bBlockingHit ||
+        (IsValid(OutHit.GetActor()) && OutHit.GetActor()->ActorHasTag(TEXT("MG_Breachable"))) ||
+        FMath::Abs(OutHit.ImpactNormal.Z) > 0.22f ||
         FVector::DotProduct(Dir, OutHit.ImpactNormal.GetSafeNormal2D()) > -0.72f)
         return false;
     // A low obstacle is not a full-height wall and must not attach Snake's back.
@@ -505,7 +509,8 @@ bool AMGPlayerCharacter::TryAutoEnterCover(const FVector& WorldDirection)
         CoverReattachCooldown > 0.f || !GetCharacterMovement()->IsMovingOnGround())
         return false;
     FHitResult Hit;
-    if (!FindContactWall(WorldDirection, 62.f, Hit)) return false;
+    // Attach only when the capsule is close enough to plausibly touch the wall.
+    if (!FindContactWall(WorldDirection, 46.f, Hit)) return false;
     CoverNormal = Hit.ImpactNormal.GetSafeNormal2D();
     if (CoverNormal.IsNearlyZero()) return false;
     bInCover = true;
