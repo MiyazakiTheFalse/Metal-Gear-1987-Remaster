@@ -16,12 +16,16 @@ class MGREMASTER_API AMGPlayerCharacter : public ACharacter
 public:
     AMGPlayerCharacter();
     virtual void BeginPlay() override;
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     virtual void Tick(float DeltaSeconds) override;
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
     bool IsAiming() const { return bAiming; }
     bool IsSprinting() const { return bSprinting && !bIsCrouched && !bAiming; }
     bool IsMissionLogVisible() const { return bShowMissionLog; }
+    bool IsCodecOpen() const { return bCodecOpen; }
+    FString GetCodecStatus() const { return CodecStatus; }
+    float GetEquipmentTimeScale() const { return EquipmentTimeScale; }
     float GetNoiseFactor() const;
     float GetHealth() const { return Health; }
     UMGEquipmentComponent* GetEquipment() const { return Equipment; }
@@ -41,6 +45,10 @@ private:
     UPROPERTY(VisibleAnywhere, Category="Equipment")
     UMGEquipmentComponent* Equipment;
 
+    UPROPERTY(EditAnywhere, Category="Controls|Time")
+    float EquipmentTimeScale = 0.20f; // Engineering default, not a canonical franchise speed.
+    bool bCodecOpen = false;
+    FString CodecStatus;
     bool bShowMissionLog = false;
     bool bAiming = false;
     bool bSprinting = false;
@@ -78,6 +86,10 @@ private:
     void SelectionNext();
     void UseItem();
     void MeleeAttack();
+    void ToggleCodec();
+    void ApplyMenuTimeState();
+    bool IsCombatAlertActive() const;
+    void CloseEquipmentWindows();
 
     void UpdateMovementState();
 };

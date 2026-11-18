@@ -16,6 +16,7 @@
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/GameUserSettings.h"
+#include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -77,7 +78,24 @@ void AMGPlayerCharacter::BeginPlay()
             CameraManager->ViewPitchMax = 55.f;
         }
     }
+    if (APlayerController* PC = Cast<APlayerController>(GetController()))
+    {
+        // A paused Codec must still accept its close button.
+        PC->PrimaryActorTick.bTickEvenWhenPaused = true;
+    }
+    ApplyMenuTimeState();
     UpdateMovementState();
+}
+
+void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+    // Ensure a checkpoint restart cannot inherit a slowed or paused world.
+    if (GetWorld())
+    {
+        UGameplayStatics::SetGamePaused(this, false);
+        UGameplayStatics::SetGlobalTimeDilation(this, 1.f);
+    }
+    Super::EndPlay(EndPlayReason);
 }
 
 void AMGPlayerCharacter::Tick(float DeltaSeconds)
@@ -131,6 +149,9 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
     Input->BindAction("SelectNext", IE_Pressed, this, &AMGPlayerCharacter::SelectionNext);
     Input->BindAction("UseItem", IE_Pressed, this, &AMGPlayerCharacter::UseItem);
     Input->BindAction("Melee", IE_Pressed, this, &AMGPlayerCharacter::MeleeAttack);
+    FInputActionBinding& CodecBinding =
+        Input->BindAction("Codec", IE_Pressed, this, &AMGPlayerCharacter::ToggleCodec);
+    CodecBinding.bExecuteWhenPaused = true;
 }
 void AMGPlayerCharacter::MoveForward(float Value)
 {
@@ -221,7 +242,7 @@ void AMGPlayerCharacter::Interact()
 
 void AMGPlayerCharacter::ToggleMissionLog()
 {
-    bShowMissionLog = !bShowMissionLog;
+    if (!bCodecOpen) bShowMissionLog = !bShowMissionLog;
 }
 
 void AMGPlayerCharacter::RestartRescue()
@@ -285,7 +306,13 @@ void AMGPlayerCharacter::NotifyFeedback(const FString& Message, FName CueName)
 }
 void AMGPlayerCharacter::WeaponWindowStart()
 {
-    if (Equipment) { Equipment->OpenWeaponWindow(); NotifyFeedback(TEXT("WEAPON SELECTION"), TEXT("menu")); }
+    if (bCodecOpen) return;
+    if (Equipment)
+    {
+        Equipment->OpenWeaponWindow();
+        ApplyMenuTimeState();
+        NotifyFeedback(TEXT("WEAPON SELECTION — TIME SLOWED"), TEXT("menu"));
+    }
 }
 void AMGPlayerCharacter::WeaponWindowStop()
 {
@@ -293,6 +320,7 @@ void AMGPlayerCharacter::WeaponWindowStop()
     {
         const int32 Selected = Equipment->GetWeaponSelection();
         Equipment->CloseWeaponWindow();
+        ApplyMenuTimeState();
         NotifyFeedback(Equipment->GetEquippedWeaponIndex() == Selected ?
             TEXT("WEAPON CONFIRMED") : TEXT("WEAPON UNAVAILABLE"), 
             Equipment->GetEquippedWeaponIndex() == Selected ? TEXT("select") : TEXT("denied"));
@@ -300,7 +328,13 @@ void AMGPlayerCharacter::WeaponWindowStop()
 }
 void AMGPlayerCharacter::ItemWindowStart()
 {
-    if (Equipment) { Equipment->OpenItemWindow(); NotifyFeedback(TEXT("ITEM SELECTION"), TEXT("menu")); }
+    if (bCodecOpen) return;
+    if (Equipment)
+    {
+        Equipment->OpenItemWindow();
+        ApplyMenuTimeState();
+        NotifyFeedback(TEXT("ITEM SELECTION — TIME SLOWED"), TEXT("menu"));
+    }
 }
 void AMGPlayerCharacter::ItemWindowStop()
 {
@@ -308,6 +342,7 @@ void AMGPlayerCharacter::ItemWindowStop()
     {
         const int32 Selected = Equipment->GetItemSelection();
         Equipment->CloseItemWindow();
+        ApplyMenuTimeState();
         NotifyFeedback(Equipment->GetEquippedItemIndex() == Selected ?
             TEXT("ITEM CONFIRMED") : TEXT("ITEM UNAVAILABLE"),
             Equipment->GetEquippedItemIndex() == Selected ? TEXT("select") : TEXT("denied"));
@@ -394,6 +429,79 @@ float AMGPlayerCharacter::TakeDamage(float Amount, const FDamageEvent& Event,
         UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
     }
     return Accepted;
+}
+
+
+bool AMGPlayerCharacter::IsCombatAlertActive() const
+{
+    if (!GetWorld()) return false;
+    for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
+        if (!It->IsIncapacitated() && It->GetAwarenessState() >= 3)
+            return true;
+    return false;
+}
+
+void AMGPlayerCharacter::CloseEquipmentWindows()
+{
+    if (!Equipment) return;
+    if (Equipment->IsItemWindowOpen()) Equipment->CloseItemWindow();
+    if (Equipment->IsWeaponWindowOpen()) Equipment->CloseWeaponWindow();
+}
+
+void AMGPlayerCharacter::ApplyMenuTimeState()
+{
+    if (!GetWorld()) return;
+    const bool bSelecting = Equipment &&
+        (Equipment->IsWeaponWindowOpen() || Equipment->IsItemWindowOpen());
+    const float Desired = (!bCodecOpen && bSelecting) ?
+        FMath::Clamp(EquipmentTimeScale, 0.10f, 1.0f) : 1.0f;
+    // Global time dilation affects AI, movement and physics together.
+    // Equipment menu rendering/input remains live. A real pause is separate.
+    UGameplayStatics::SetGlobalTimeDilation(this, Desired);
+}
+
+void AMGPlayerCharacter::ToggleCodec()
+{
+    if (!GetWorld()) return;
+    if (bCodecOpen)
+    {
+        bCodecOpen = false;
+        CodecStatus.Empty();
+        UGameplayStatics::SetGamePaused(this, false);
+        ApplyMenuTimeState();
+        NotifyFeedback(TEXT("CODEC CLOSED — INFILTRATION RESUMED"), TEXT("select"));
+        return;
+    }
+
+    // The initial prison slice is an equipment-loss checkpoint. It has no
+    // verified working 1995 transceiver until a later source-confirmed event.
+    const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
+    if (Mission && (Mission->GetMissionFlags() & 8u) == 0)
+    {
+        NotifyFeedback(TEXT("CODEC OFFLINE — TRANSMITTER CONFISCATED"), TEXT("denied"));
+        return;
+    }
+    if (IsCombatAlertActive())
+    {
+        NotifyFeedback(TEXT("TRANSMISSION DELAYED — UNDER FIRE"), TEXT("denied"));
+        return;
+    }
+    // For the provisional slice this is a read-only after-rescue intelligence
+    // playback, NOT a fabricated new Gray Fox radio contact.
+    CloseEquipmentWindows();
+    ApplyMenuTimeState();
+    CodecStatus = Mission ? TEXT("FOXHOUND INTELLIGENCE FILE — PLAYBACK")
+                          : TEXT("RADIO CONTACTS — NONE VERIFIED");
+    bCodecOpen = true;
+    const bool bPaused = UGameplayStatics::SetGamePaused(this, true);
+    if (!bPaused)
+    {
+        bCodecOpen = false;
+        CodecStatus.Empty();
+        NotifyFeedback(TEXT("CODEC PAUSE FAILED — TRY AGAIN"), TEXT("denied"));
+    }
+    else NotifyFeedback(TEXT("CODEC OPEN — WORLD PAUSED"), TEXT("menu"));
 }
 
 void AMGPlayerCharacter::CycleGraphicsQuality()
