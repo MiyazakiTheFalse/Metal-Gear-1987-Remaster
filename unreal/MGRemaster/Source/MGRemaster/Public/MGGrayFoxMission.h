@@ -50,6 +50,11 @@ private:
     bool bHasLoadedSave = false;
     bool bUnderAlert = false;
     float ElapsedSinceBeat = 0.f;
+    // Hints are offered when exploration stalls, not simply after entering a room.
+    float SecondsSinceExploration = 0.f;
+    FVector LastObservedPlayerLocation = FVector::ZeroVector;
+    FRotator LastObservedViewRotation = FRotator::ZeroRotator;
+    bool bHasObservedPlayer = false;
     float DialogueTimeRemaining = 0.f;
     FVector SavedPosition = FVector::ZeroVector;
     FString Dialogue;
