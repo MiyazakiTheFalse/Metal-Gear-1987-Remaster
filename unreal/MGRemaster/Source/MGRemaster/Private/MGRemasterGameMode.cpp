@@ -42,7 +42,7 @@ void AMGRemasterGameMode::StartPlay()
     PlaceBlock(FVector(-350.f, -200.f, 0.f), FVector(2.2f, 2.f, 2.f));
 
     GetWorld()->SpawnActor<AMGGuardActor>(AMGGuardActor::StaticClass(),
-        FVector(550.f, 350.f, -15.f), FRotator(0.f, 180.f, 0.f));
+        FVector(550.f, 350.f, -12.f), FRotator(0.f, 180.f, 0.f));
     GetWorld()->SpawnActor<AMGGuardActor>(AMGGuardActor::StaticClass(),
-        FVector(-650.f, 300.f, -15.f), FRotator::ZeroRotator);
+        FVector(-650.f, 300.f, -12.f), FRotator::ZeroRotator);
 }

@@ -1,6 +1,7 @@
 #include "MGPlayerCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "Camera/PlayerCameraManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -19,6 +20,9 @@ AMGPlayerCharacter::AMGPlayerCharacter()
     GetCapsuleComponent()->InitCapsuleSize(35.f, 88.f);
     GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
     GetCharacterMovement()->MaxWalkSpeed = 350.f;
+    GetCharacterMovement()->MaxAcceleration = 1800.f;
+    GetCharacterMovement()->BrakingDecelerationWalking = 2200.f;
+    GetCharacterMovement()->GroundFriction = 7.f;
     GetCharacterMovement()->bOrientRotationToMovement = true;
     GetCharacterMovement()->RotationRate = FRotator(0.f, 650.f, 0.f);
     bUseControllerRotationYaw = false;
@@ -26,7 +30,8 @@ AMGPlayerCharacter::AMGPlayerCharacter()
     PrototypeBody = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PrototypeBody"));
     PrototypeBody->SetupAttachment(GetCapsuleComponent());
     PrototypeBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    PrototypeBody->SetRelativeScale3D(FVector(0.7f, 0.7f, 1.5f));
+    // UE BasicShapes Cylinder: 100 cm high at scale 1; standing proxy = 176 cm.
+    PrototypeBody->SetRelativeScale3D(FVector(0.7f, 0.7f, 1.76f));
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
     if (Cylinder.Succeeded()) PrototypeBody->SetStaticMesh(Cylinder.Object);
 
@@ -56,6 +61,14 @@ void AMGPlayerCharacter::BeginPlay()
     {
         QualityPreset = FMath::Clamp(GEngine->GetGameUserSettings()->GetOverallScalabilityLevel(), 0, 3);
     }
+    if (APlayerController* PC = Cast<APlayerController>(GetController()))
+    {
+        if (APlayerCameraManager* CameraManager = PC->PlayerCameraManager)
+        {
+            CameraManager->ViewPitchMin = -65.f;
+            CameraManager->ViewPitchMax = 55.f;
+        }
+    }
     UpdateMovementState();
 }
 
@@ -65,6 +78,10 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     const float TargetLength = bAiming ? 190.f : 420.f;
     const float TargetFOV = bAiming ? 65.f : 85.f;
     const FVector TargetSocket = FVector(0.f, ShoulderSign * (bAiming ? 58.f : 65.f), bAiming ? 18.f : 10.f);
+    const FVector TargetPivot(0.f, 0.f, bIsCrouched ? 40.f : 65.f);
+    CameraBoom->SetRelativeLocation(FMath::VInterpTo(CameraBoom->GetRelativeLocation(), TargetPivot, DeltaSeconds, 12.f));
+    const FVector TargetProxyScale(0.7f, 0.7f, bIsCrouched ? 1.10f : 1.76f);
+    PrototypeBody->SetRelativeScale3D(FMath::VInterpTo(PrototypeBody->GetRelativeScale3D(), TargetProxyScale, DeltaSeconds, 12.f));
     CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, TargetLength, DeltaSeconds, 10.f);
     CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetSocket, DeltaSeconds, 10.f);
     FollowCamera->SetFieldOfView(FMath::FInterpTo(FollowCamera->FieldOfView, TargetFOV, DeltaSeconds, 11.f));
@@ -77,6 +94,8 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
     Input->BindAxis("MoveRight", this, &AMGPlayerCharacter::MoveRight);
     Input->BindAxis("Turn", this, &AMGPlayerCharacter::Turn);
     Input->BindAxis("LookUp", this, &AMGPlayerCharacter::LookUp);
+    Input->BindAxis("TurnRate", this, &AMGPlayerCharacter::TurnRate);
+    Input->BindAxis("LookUpRate", this, &AMGPlayerCharacter::LookUpRate);
     Input->BindAction("Aim", IE_Pressed, this, &AMGPlayerCharacter::AimStart);
     Input->BindAction("Aim", IE_Released, this, &AMGPlayerCharacter::AimStop);
     Input->BindAction("Sprint", IE_Pressed, this, &AMGPlayerCharacter::SprintStart);
@@ -104,6 +123,15 @@ void AMGPlayerCharacter::MoveRight(float Value)
 }
 void AMGPlayerCharacter::Turn(float Value) { AddControllerYawInput(Value); }
 void AMGPlayerCharacter::LookUp(float Value) { AddControllerPitchInput(Value); }
+// Unlike raw mouse deltas, gamepad sticks represent velocity and require delta time.
+void AMGPlayerCharacter::TurnRate(float Value)
+{
+    if (GetWorld()) AddControllerYawInput(Value * 100.f * GetWorld()->GetDeltaSeconds());
+}
+void AMGPlayerCharacter::LookUpRate(float Value)
+{
+    if (GetWorld()) AddControllerPitchInput(Value * 80.f * GetWorld()->GetDeltaSeconds());
+}
 
 void AMGPlayerCharacter::AimStart()
 {

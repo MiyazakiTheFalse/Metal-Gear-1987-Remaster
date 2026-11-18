@@ -15,7 +15,8 @@ AMGGuardActor::AMGGuardActor()
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
     ProxyBody = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("GuardBody"));
     ProxyBody->SetupAttachment(RootComponent);
-    ProxyBody->SetRelativeScale3D(FVector(0.6f, 0.6f, 1.6f));
+    // Match the 176 cm player proxy; guard feet sit on the prototype floor.
+    ProxyBody->SetRelativeScale3D(FVector(0.7f, 0.7f, 1.76f));
     ProxyBody->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
     ProxyBody->SetCollisionResponseToAllChannels(ECR_Ignore);
     ProxyBody->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);

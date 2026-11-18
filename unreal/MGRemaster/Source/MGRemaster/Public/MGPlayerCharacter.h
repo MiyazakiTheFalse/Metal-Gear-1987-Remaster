@@ -40,6 +40,8 @@ private:
     void MoveRight(float Value);
     void Turn(float Value);
     void LookUp(float Value);
+    void TurnRate(float Value);
+    void LookUpRate(float Value);
     void AimStart();
     void AimStop();
     void SprintStart();
