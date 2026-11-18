@@ -586,7 +586,7 @@ void AMGPlayerCharacter::KnockOnWall()
     NotifyFeedback(TEXT("KNOCK — LISTEN FOR THE GUARD'S RESPONSE"));
     // A sound stimulus reports the wall's impact point, not Snake's location.
     for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
-        if (IsValid(*It)) It->HearWallKnock(Hit.ImpactPoint, HearingRadius, this);
+        if (IsValid(*It)) It->HearWallKnock(Hit.ImpactPoint, CoverNormal, HearingRadius, this);
 }
 
 void AMGPlayerCharacter::ToggleCover()
