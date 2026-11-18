@@ -20,7 +20,7 @@
 | Escape | 5 | Guarded corridor | Reach far side of lane; bypass patrols | Legible stealth challenge |
 | Recovery | State after 5 | Corridor end | Player retains control | Mission completion and checkpoint |
 
-Pacing functions in Rust are *guidance*, never a hidden timer, enemy spawn mandate or mandatory pause. At >=14 seconds of no progress, a subtle hint can appear; at >=35 seconds, a stronger hint. If guards are actively alert, hints are suppressed to reduce HUD clutter. No new guard wave is spawned at the moment Gray Fox is rescued.
+Pacing functions in Rust are *guidance*, never a hidden timer, enemy spawn mandate or mandatory pause. After >=28 seconds since mission progress, a subtle hint may appear if Snake has stopped meaningful movement/scanning for 6s; after >=75s, a stronger hint can appear after 10s quiet. Anti-stall caps at 100s/150s eventually permit assistance even during ongoing exploration. These are hypotheses for actual player testing, not research-established thresholds. If guards are actively alert, hints are suppressed to reduce HUD clutter. No new guard wave is spawned at the moment Gray Fox is rescued.
 
 ## How the prototype implements this
 
@@ -44,7 +44,7 @@ Pacing functions in Rust are *guidance*, never a hidden timer, enemy spawn manda
 3. Try to rescue Gray Fox from outside the cell: denied. Try to breach exit before rescue: denied.
 4. Breach first wall, walk into Gray Fox cell, interact; verify the rescue flag and one-time cue.
 5. Interact repeatedly; no duplicate rescue, duplicated cutscene or corrupted inventory.
-6. Stand still for >=14s and >=35s per step; verify hints and that E works at 0s too.
+6. Explore actively past 28s/75s: early automatic hints should defer while moving/scanning. Stop for 6s/10s and verify soft/strong guidance; confirm E works at t=0. Verify 100s/150s anti-stall behaviour.
 7. Try to use stun while equipment confiscated: blocked. Restart and reload save after each beat.
 8. Walk into guarded route: guards patrol without moving through walls; use crouch/cover and test detection.
 9. Trigger guard alert: hint overlay disappears; no fabricated enemies spawn on rescue.
