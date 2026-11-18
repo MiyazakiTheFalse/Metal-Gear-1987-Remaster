@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "status": "REFERENCE_TARGETS_ONLY_NOT_YET_MODELLED",
+  "production_rule": "No later-game reference may override a verified J2ME room, object, temporal detail or mission gate. All geometry target sizes remain null until measured and approved.",
+  "targets": [
+    {
+      "id": "outer_perimeter",
+      "type": "exterior",
+      "source_design": "Original MG/J2ME + MSX2 original maps",
+      "later_reference": "MGSV exterior outpost readability",
+      "why": "clear approach routes, guard sightlines, climbable vs nonclimbable boundaries",
+      "original_confirmation": "requires_room_trace",
+      "size_m": null
+    },
+    {
+      "id": "secure_door",
+      "type": "architecture",
+      "source_design": "Original numbered access doors",
+      "later_reference": "MGSV industrial metal doors",
+      "why": "preserve keycard gating; give third-person camera enough clearance",
+      "original_confirmation": "confirm_source_tile_and_flag",
+      "size_m": null
+    },
+    {
+      "id": "corridors",
+      "type": "architecture",
+      "source_design": "Original J2ME tile layout",
+      "later_reference": "MGS4 third-person camera and close-quarters traversal",
+      "why": "preserve paths; deliberate local widening where needed",
+      "original_confirmation": "confirm_room_dimensions",
+      "size_m": null
+    },
+    {
+      "id": "industrial_wall",
+      "type": "architecture",
+      "source_design": "Original J2ME wall tile identity",
+      "later_reference": "MGSV utilitarian steel and concrete finish",
+      "why": "structural atmosphere without changing route geometry",
+      "original_confirmation": "confirm_tile_type",
+      "size_m": null
+    },
+    {
+      "id": "freight_elevator",
+      "type": "traversal",
+      "source_design": "Original game elevator networks",
+      "later_reference": "MGSV military industrial movement",
+      "why": "retain exact floors and mission progression",
+      "original_confirmation": "confirm_floor_links",
+      "size_m": null
+    },
+    {
+      "id": "stairwell",
+      "type": "traversal",
+      "source_design": "Original source room adjacency",
+      "later_reference": "MGSV believable service access",
+      "why": "physical vertical movement; cannot bypass locked floor",
+      "original_confirmation": "confirm_original_presence",
+      "size_m": null
+    },
+    {
+      "id": "ventilation",
+      "type": "traversal",
+      "source_design": "J2ME room and inventory event trace",
+      "later_reference": "MGS4 crawl/cover camera behavior",
+      "why": "only where the original or approved extension permits it",
+      "original_confirmation": "verify_presence_and_route",
+      "size_m": null
+    },
+    {
+      "id": "research_console",
+      "type": "prop",
+      "source_design": "Original room artwork",
+      "later_reference": "MGSV 1980s analog military control equipment",
+      "why": "period-plausible interactive scenery",
+      "original_confirmation": "confirm_or_mark_added",
+      "size_m": null
+    },
+    {
+      "id": "generator_machinery",
+      "type": "prop",
+      "source_design": "J2ME machinery tile artwork",
+      "later_reference": "MGSV industrial mechanical detail",
+      "why": "turn equipment shapes into believable 3D machines",
+      "original_confirmation": "confirm_visual_tile",
+      "size_m": null
+    },
+    {
+      "id": "warehouse_crates",
+      "type": "prop",
+      "source_design": "Original cover and obstruction tiles",
+      "later_reference": "MGSV supply logistics style",
+      "why": "maintain original stealth sightlines and crate identity",
+      "original_confirmation": "confirm_tile_and_collision",
+      "size_m": null
+    },
+    {
+      "id": "medical_bay",
+      "type": "room_type",
+      "source_design": "Original J2ME gameplay events",
+      "later_reference": "Peace Walker / MGSV medical technology",
+      "why": "possible environment enrichment only if original function warrants it",
+      "original_confirmation": "not_confirmed",
+      "size_m": null
+    },
+    {
+      "id": "barracks",
+      "type": "room_type",
+      "source_design": "Original J2ME rooms",
+      "later_reference": "MGSV Diamond Dogs personnel facilities",
+      "why": "believable occupation, guard schedule and environmental storytelling",
+      "original_confirmation": "not_confirmed",
+      "size_m": null
+    },
+    {
+      "id": "security_cameras",
+      "type": "security",
+      "source_design": "Original tile and patrol logic",
+      "later_reference": "MGS1/MGS4 stealth affordances",
+      "why": "optional gameplay upgrade only if encounter preserved",
+      "original_confirmation": "verify_original_presence_or_mark_new",
+      "size_m": null
+    },
+    {
+      "id": "floodlight_tower",
+      "type": "security",
+      "source_design": "Original map exterior",
+      "later_reference": "MGSV guard-post readability",
+      "why": "stealth lighting and patrol cover without adding unfair detection",
+      "original_confirmation": "not_confirmed",
+      "size_m": null
+    },
+    {
+      "id": "snake_uniform",
+      "type": "character",
+      "source_design": "Original Metal Gear Snake sprite/official art",
+      "later_reference": "MG2 178cm/75kg bio; MGSV movement and cloth response",
+      "why": "1995-appropriate outfit silhouette, matching collision size",
+      "original_confirmation": "art_and_period_check",
+      "size_m": {
+        "height": 1.78
+      }
+    },
+    {
+      "id": "guards",
+      "type": "character",
+      "source_design": "Original guard sprites",
+      "later_reference": "MGSV communication/cover/search behaviour",
+      "why": "consistent silhouette; modern behavior without omniscience",
+      "original_confirmation": "visual_reference_and_behaviour_trace",
+      "size_m": null
+    },
+    {
+      "id": "tx55_chamber",
+      "type": "story_space",
+      "source_design": "Original game endgame map and TX-55",
+      "later_reference": "MG2/MGS industrial mechanised weapon design principles",
+      "why": "retain source objective and machine identity, update staging",
+      "original_confirmation": "endgame_room_and_asset_trace",
+      "size_m": null
+    }
+  ],
+  "reference_sources": [
+    {
+      "title": "Original J2ME archive",
+      "type": "primary_local",
+      "url": null
+    },
+    {
+      "title": "Konami Metal Gear MSX manual",
+      "type": "official_original",
+      "url": "https://metalgear.konami.net/manual/mc1/mg1_msx/pc/en/page02.html"
+    },
+    {
+      "title": "MGSV Mother Base official manual",
+      "type": "official_later",
+      "url": "https://mgstpp-app.konamionline.com/manual/xb1/eu/en/xb1_07.html"
+    },
+    {
+      "title": "Konami MG2 Solid Snake bio",
+      "type": "official_later",
+      "url": "https://www.konami.com/mg/archive/mg2/chara.html"
+    },
+    {
+      "title": "MSX2 map comparison (community)",
+      "type": "secondary",
+      "url": "https://www.vgmaps.com/Atlas/MSX/index.htm"
+    }
+  ]
+}
