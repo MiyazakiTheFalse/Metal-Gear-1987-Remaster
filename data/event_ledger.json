@@ -1,0 +1,153 @@
+{
+  "version": 1,
+  "target_edition": "Connect2Media Metal Gear J2ME 3.3.0 (a1)",
+  "last_reviewed": "2026-11-18",
+  "policy": "MSX2-derived story events are COMPARATIVE, not verified event triggers in the supplied J2ME. Absence of native room, bytecode offset and witnessed playback blocks promotion to J2ME-verified.",
+  "event_types": [
+    "story",
+    "communication",
+    "hazard",
+    "security",
+    "interaction",
+    "mission"
+  ],
+  "entries": [
+    {
+      "id": "ev.story.gray_fox_rescue",
+      "type": "story",
+      "source_game": "Metal Gear (1987) MSX2",
+      "source_url": "https://metalgear.dr-sunny.info/?lang=en&page=script",
+      "evidence_status": "comparative_pending_j2me",
+      "original_room": null,
+      "source_bytecode": null,
+      "story_purpose": "Rescue missing FOXHOUND agent and learn critical mission information.",
+      "proposed_trigger": "interaction.prisoner.gray_fox",
+      "requirements_status": "source_not_yet_decoded",
+      "requirements": [],
+      "persistent_effects": [
+        "mission.gray_fox.rescued"
+      ],
+      "presentation": "interactive_dialogue",
+      "control_policy": "retain_where_safe",
+      "interruption_policy": "resumable",
+      "spoiler_gate": "original_story_progression",
+      "developer_notes": "No assumed location, item gating or forced single route. Source-specific placement TBD."
+    },
+    {
+      "id": "ev.story.madnar_ellen",
+      "type": "story",
+      "source_game": "Metal Gear (1987) MSX2",
+      "source_url": "https://metalgear.dr-sunny.info/?lang=en&page=script",
+      "evidence_status": "comparative_pending_j2me",
+      "original_room": null,
+      "source_bytecode": null,
+      "story_purpose": "Establish the scientist's cooperation and daughter-related leverage without erasing the dependency.",
+      "proposed_trigger": "interaction.prisoner.madnar",
+      "requirements_status": "source_not_yet_decoded",
+      "requirements": [],
+      "persistent_effects": [
+        "mission.madnar.dialogue_seen"
+      ],
+      "presentation": "interactive_dialogue",
+      "control_policy": "retain_where_safe",
+      "interruption_policy": "resumable",
+      "spoiler_gate": "original_story_progression",
+      "developer_notes": "Verify Ellen/Madnar rescue order in J2ME before authoring a gating rule."
+    },
+    {
+      "id": "ev.communication.big_boss_misdirection",
+      "type": "communication",
+      "source_game": "Metal Gear (1987) MSX2",
+      "source_url": "https://metalgear.dr-sunny.info/?lang=en&page=script",
+      "evidence_status": "comparative_pending_j2me",
+      "original_room": null,
+      "source_bytecode": null,
+      "story_purpose": "Misleading radio guidance builds uncertainty before the betrayal.",
+      "proposed_trigger": "zone.story.building3_radio",
+      "requirements_status": "source_not_yet_decoded",
+      "requirements": [],
+      "persistent_effects": [
+        "narrative.big_boss.warning_heard"
+      ],
+      "presentation": "radio_in_motion",
+      "control_policy": "retain",
+      "interruption_policy": "queue_or_transcript",
+      "spoiler_gate": "late_game",
+      "developer_notes": "Specific MSX2 misdirection around truck and trapped door; confirm precise scene exists in J2ME."
+    },
+    {
+      "id": "ev.hazard.gas_room",
+      "type": "hazard",
+      "source_game": "Metal Gear (1987) MSX2",
+      "source_url": "https://metalgear.dr-sunny.info/?lang=en&page=script",
+      "evidence_status": "comparative_pending_j2me",
+      "original_room": null,
+      "source_bytecode": null,
+      "story_purpose": "Equipment preparedness makes a hazardous room navigable.",
+      "proposed_trigger": "zone.hazard.gas.enter",
+      "requirements_status": "source_not_yet_decoded",
+      "requirements": [],
+      "persistent_effects": [],
+      "presentation": "environmental_feedback",
+      "control_policy": "retain",
+      "interruption_policy": "continuous_until_exit",
+      "spoiler_gate": "room_entry",
+      "developer_notes": "Gas mask response, exposure accumulation and escape options are simulation systems; do not put continuous damage in a one-time event."
+    },
+    {
+      "id": "ev.interaction.keycard_door",
+      "type": "interaction",
+      "source_game": "Metal Gear (1987) MSX2",
+      "source_url": "https://frameadvance.net/games/metal-gear/",
+      "evidence_status": "comparative_pending_j2me",
+      "original_room": null,
+      "source_bytecode": null,
+      "story_purpose": "Preserve numbered door access and progression dependencies.",
+      "proposed_trigger": "interaction.security_door.use",
+      "requirements_status": "source_not_yet_decoded",
+      "requirements": [],
+      "persistent_effects": [],
+      "presentation": "environmental_feedback",
+      "control_policy": "retain",
+      "interruption_policy": "not_applicable",
+      "spoiler_gate": "door_access",
+      "developer_notes": "Generic door template; actual key number and room transitions come from per-room source data. A locked denial must not mutate progress."
+    },
+    {
+      "id": "ev.mission.tx55_sabotage",
+      "type": "mission",
+      "source_game": "Metal Gear (1987) MSX2",
+      "source_url": "https://metalgear.dr-sunny.info/?lang=en&page=script",
+      "evidence_status": "comparative_pending_j2me",
+      "original_room": null,
+      "source_bytecode": null,
+      "story_purpose": "Complete the original TX-55 sabotage objective using its correct required sequence.",
+      "proposed_trigger": "interaction.tx55.sabotage",
+      "requirements_status": "source_not_yet_decoded",
+      "requirements": [],
+      "persistent_effects": [
+        "mission.tx55.sabotaged"
+      ],
+      "presentation": "short_cinematic_plus_playable_action",
+      "control_policy": "brief_lock_with_safe_restore",
+      "interruption_policy": "resume_from_committed_checkpoint",
+      "spoiler_gate": "endgame",
+      "developer_notes": "Do not invent an incompatible full TX-55 boss battle; verify actual sabotage mechanics in J2ME first."
+    }
+  ],
+  "production_gate": {
+    "j2me_verified_requires": [
+      "source archive version",
+      "source room or state",
+      "bytecode/event flag evidence",
+      "recorded playback comparison",
+      "repeat/save/skip test"
+    ],
+    "blocked_until_verified": [
+      "actual original-event trigger positions",
+      "story progression gates",
+      "mandatory room placement",
+      "specific item requirements"
+    ]
+  }
+}
