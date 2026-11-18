@@ -26,6 +26,9 @@ public:
     FString GetObjectiveText() const;
     FString GetPacingHint() const;
     FString GetRecentDialogue() const;
+    // Optional 1995-era transceiver: dialogue is remake-authored, not original transcription.
+    FString GetTransceiverDialogue(int32 Channel) const;
+    bool HasIncomingTransceiverPrompt() const;
     FString GetMissionLogText() const;
     FString GetPhaseText() const;
     void RestartMission();
