@@ -30,6 +30,15 @@ public:
     float GetHealth() const { return Health; }
     bool IsProne() const { return bIsProne; }
     bool IsInCover() const { return bInCover; }
+    // Read by animation blueprints once the finished character rig is imported.
+    UFUNCTION(BlueprintPure, Category="Stealth|Wall")
+    bool IsCornerPeeking() const { return CoverPeekAlpha > 0.35f; }
+    UFUNCTION(BlueprintPure, Category="Stealth|Wall")
+    float GetCoverPeekAlpha() const { return CoverPeekAlpha; }
+    UFUNCTION(BlueprintPure, Category="Stealth|Wall")
+    bool IsWallKnocking() const { return WallKnockVisualTimer > 0.f; }
+    UFUNCTION(BlueprintPure, Category="Stealth|Wall")
+    float GetCoverShuffleDirection() const { return CoverShuffleDirection; }
     FString GetPostureText() const;
     bool TryEnterCover();
     void LeaveCover();
@@ -57,6 +66,12 @@ private:
     bool bPendingProne = false;
     bool bInCover = false;
     FVector CoverNormal = FVector::ZeroVector;
+    float CoverReattachCooldown = 0.f;
+    float NextWallKnockTime = 0.f;
+    float WallKnockVisualTimer = 0.f;
+    float CoverPeekAlpha = 0.f;
+    float CoverShuffleDirection = 0.f;
+    float CoverIntent = 0.f;
     float PreferredShoulderSign = 1.f;
     FString CodecStatus;
     bool bShowMissionLog = false;
@@ -101,6 +116,10 @@ private:
     void EnterProneAfterCrouch();
     bool ExitProneSafely();
     void ApplyCoverMovement(float Value, const FVector& WorldDirection);
+    bool TryAutoEnterCover(const FVector& WorldDirection);
+    bool FindContactWall(const FVector& Direction, float Reach, FHitResult& OutHit) const;
+    void KnockOnWall();
+    void UpdateCornerPeek(float DeltaSeconds);
     void ToggleCodec();
     void ApplyMenuTimeState();
     bool IsCombatAlertActive() const;
