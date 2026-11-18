@@ -340,11 +340,11 @@ FString AMGGrayFoxMission::GetPhaseText() const
 FString AMGGrayFoxMission::GetObjectiveText() const
 {
     if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
-        return TEXT("Find a weakness in the cell wall. Face it and press E.");
+        return TEXT("Search your cell for a way out.");
     if (!(Flags & MG_FOX_RESCUED))
         return TEXT("Find Gray Fox in the adjacent cell. Face him and press E.");
     if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
-        return TEXT("Look for another weak wall and press E to breach it.");
+        return TEXT("Find a route into the outer passage.");
     if (!(Flags & MG_FOX_LEFT_PRISON))
         return TEXT("Get past the guards and reach the far side of the corridor.");
     return TEXT("Gray Fox rescued. You have escaped the prison.");
@@ -355,14 +355,14 @@ FString AMGGrayFoxMission::GetPacingHint() const
     const uint32 Level = GetHintLevel();
     if (!Level) return FString();
     if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
-        return Level == 1 ? TEXT("Look for a damaged section in the east wall.")
-                          : TEXT("Approach the centre of the wall ahead, face it and press E.");
+        return Level == 1 ? TEXT("The concrete has not all aged the same way.")
+                          : TEXT("Look for an altered join in the wall. Examine it up close.");
     if (!(Flags & MG_FOX_RESCUED))
         return Level == 1 ? TEXT("Someone is waiting further inside this room.")
                           : TEXT("The prisoner near the middle of the room is Gray Fox.");
     if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
-        return Level == 1 ? TEXT("The next barrier may have another weak section.")
-                          : TEXT("Approach the centre of the east wall, face it and press E.");
+        return Level == 1 ? TEXT("Old work and new repairs might meet again.")
+                          : TEXT("Investigate the unusual section of the next barrier.");
     return Level == 1 ? TEXT("Keep low and use the obstacles to break line of sight.")
                       : TEXT("Move east to the end of the passage, beyond the guards.");
 }
@@ -379,6 +379,52 @@ FString AMGGrayFoxMission::GetRecentDialogue() const
 {
     return DialogueTimeRemaining > 0.f ? Dialogue : FString();
 }
+
+
+FString AMGGrayFoxMission::GetTransceiverDialogue(int32 Channel) const
+{
+    // Remake-authored dialogue; Schneider knows architecture, not this prison layout.
+    if (Channel == 0)
+    {
+        if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
+            return TEXT("SCHNEIDER: I helped design parts of Outer Heaven.\n"
+                        "SCHNEIDER: Before they altered the plans.\n"
+                        "SNAKE: Altered how?\n"
+                        "SCHNEIDER: They sealed old passages with new work.\n"
+                        "SCHNEIDER: Some of it was rushed. I never saw\n"
+                        "SCHNEIDER: the prison plans, Snake.\n"
+                        "SNAKE: Understood.");
+        if (!(Flags & MG_FOX_RESCUED))
+            return TEXT("SCHNEIDER: You found a way through?\n"
+                        "SCHNEIDER: Keep your bearings. I never saw the\n"
+                        "SCHNEIDER: prison plans. I can't map your route.");
+        if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
+            return TEXT("SCHNEIDER: If they've modified this area,\n"
+                        "SCHNEIDER: the original structure might show it.\n"
+                        "SCHNEIDER: I can't tell you where.");
+        return TEXT("SCHNEIDER: Stay alert. I don't know this area.\n"
+                    "SCHNEIDER: Use what the building tells you.");
+    }
+
+    if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
+        return TEXT("BIG BOSS: Snake, you're in a tight spot.\n"
+                    "BIG BOSS: Check the wall. There may be a way through.\n"
+                    "SNAKE: How do you know?\n"
+                    "BIG BOSS: You're on site. See what you can find.");
+    if (!(Flags & MG_FOX_RESCUED))
+        return TEXT("BIG BOSS: Find Gray Fox. Don't lose sight of\n"
+                    "BIG BOSS: the objective.");
+    return TEXT("BIG BOSS: Continue the mission, Snake.\n"
+                "BIG BOSS: Stay alert.");
+}
+
+bool AMGGrayFoxMission::HasIncomingTransceiverPrompt() const
+{
+    // Optional prompt, never an automatic/interruption-triggered radio call.
+    return bPlayerInitialised && !bUnderAlert && (Flags & MG_FOX_CAPTURED) &&
+           !(Flags & MG_FOX_FIRST_WALL_BREACHED) && GetHintLevel() >= 1;
+}
+
 
 void AMGGrayFoxMission::Tick(float Dt)
 {
