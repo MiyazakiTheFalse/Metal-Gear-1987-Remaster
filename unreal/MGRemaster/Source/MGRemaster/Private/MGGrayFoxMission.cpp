@@ -4,6 +4,7 @@
 #include "MGGrayFoxSaveGame.h"
 #include "MGPlayerCharacter.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SceneComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/World.h"

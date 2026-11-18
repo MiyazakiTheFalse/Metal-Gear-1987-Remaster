@@ -1,8 +1,10 @@
 #include "MGPrototypeHUD.h"
 
+#include "MGGrayFoxMission.h"
 #include "MGPlayerCharacter.h"
 #include "Engine/Canvas.h"
 #include "GameFramework/PlayerController.h"
+#include "Kismet/GameplayStatics.h"
 
 void AMGPrototypeHUD::DrawHUD()
 {
@@ -10,11 +12,29 @@ void AMGPrototypeHUD::DrawHUD()
     if (!Canvas) return;
     const AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(GetOwningPawn());
     if (!Player) return;
-    DrawText(TEXT("PROTOTYPE  |  WASD: Move   Mouse: Look   RMB: Aim   LMB: Stun   Ctrl: Crouch   Shift: Sprint   Q: Shoulder   F6: Graphics"),
-        FLinearColor::White, 18.f, 20.f, nullptr, 0.9f, false);
-    DrawText(Player->IsAiming() ? TEXT("AIMING  -  NONLETHAL STUN") :
-             (Player->IsSprinting() ? TEXT("SPRINTING") : TEXT("INFILTRATION")),
-        FLinearColor::White, 18.f, 48.f, nullptr, 1.0f, false);
+    DrawText(TEXT("GRAY FOX RESCUE — PROVISIONAL GREYBOX  |  WASD: Move   Mouse: Camera   E: Interact   Ctrl: Crouch   Shift: Sprint   F9: Restart"),
+        FLinearColor::White, 18.f, 18.f, nullptr, 0.78f, false);
+    DrawText(TEXT("RMB: Aim   Q: Swap shoulder   F6: Opt-in graphics   |  Captivity: weapons confiscated"),
+        FLinearColor::White, 18.f, 38.f, nullptr, 0.80f, false);
+
+    const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
+    if (Mission)
+    {
+        DrawText(FString::Printf(TEXT("PHASE: %s"), *Mission->GetPhaseText()),
+                 FLinearColor(0.7f, 0.9f, 1.f, 1.f), 20.f, 74.f, nullptr, 1.f, false);
+        DrawText(Mission->GetObjectiveText(), FLinearColor::White,
+                 20.f, 103.f, nullptr, 1.0f, false);
+        const FString Hint = Mission->GetPacingHint();
+        if (!Hint.IsEmpty())
+            DrawText(Hint, FLinearColor(0.88f, 0.85f, 0.6f, 1.f),
+                     20.f, 131.f, nullptr, 0.93f, false);
+        const FString Cue = Mission->GetRecentDialogue();
+        if (!Cue.IsEmpty())
+            DrawText(Cue, FLinearColor::White, 24.f,
+                     Canvas->ClipY - 90.f, nullptr, 1.15f, false);
+    }
+
     if (Player->IsAiming())
     {
         const float X = Canvas->ClipX * 0.5f;

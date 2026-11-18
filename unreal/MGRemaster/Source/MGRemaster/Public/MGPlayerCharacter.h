@@ -49,6 +49,8 @@ private:
     void CrouchToggle();
     void ShoulderSwap();
     void FireStun();
+    void Interact();
+    void RestartRescue();
     void CycleGraphicsQuality();
     void UpdateMovementState();
 };

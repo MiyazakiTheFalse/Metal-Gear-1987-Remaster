@@ -1,11 +1,13 @@
 #include "MGRemasterGameMode.h"
 
-#include "MGGuardActor.h"
+#include "MGGrayFoxMission.h"
 #include "MGPlayerCharacter.h"
 #include "MGPrototypeHUD.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerController.h"
 #include "UObject/ConstructorHelpers.h"
 
 AMGRemasterGameMode::AMGRemasterGameMode()
@@ -31,18 +33,18 @@ void AMGRemasterGameMode::StartPlay()
 {
     Super::StartPlay();
     if (!GetWorld()) return;
-    // Deliberately an original test chamber, NOT reconstructed MSX/J2ME geometry.
-    // Cube meshes are 100cm; floor top at z=-100, pawn capsule bottom at -88.
-    PlaceBlock(FVector(0.f, 0.f, -150.f), FVector(24.f, 18.f, 1.f));
-    PlaceBlock(FVector(-1200.f, 0.f, 125.f), FVector(1.f, 18.f, 4.5f));
-    PlaceBlock(FVector(1200.f, 0.f, 125.f), FVector(1.f, 18.f, 4.5f));
-    PlaceBlock(FVector(0.f, -900.f, 125.f), FVector(24.f, 1.f, 4.5f));
-    PlaceBlock(FVector(0.f, 900.f, 125.f), FVector(24.f, 1.f, 4.5f));
-    PlaceBlock(FVector(200.f, 120.f, -20.f), FVector(1.8f, 3.f, 1.6f));
-    PlaceBlock(FVector(-350.f, -200.f, 0.f), FVector(2.2f, 2.f, 2.f));
 
-    GetWorld()->SpawnActor<AMGGuardActor>(AMGGuardActor::StaticClass(),
-        FVector(550.f, 350.f, -12.f), FRotator(0.f, 180.f, 0.f));
-    GetWorld()->SpawnActor<AMGGuardActor>(AMGGuardActor::StaticClass(),
-        FVector(-650.f, 300.f, -12.f), FRotator::ZeroRotator);
+    // The rescue is the current runnable mission slice; other greybox
+    // environments are added only after original J2ME map verification.
+    if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
+    {
+        if (!PC->GetPawn())
+        {
+            AMGPlayerCharacter* Pawn = GetWorld()->SpawnActor<AMGPlayerCharacter>(
+                FVector(-950.f, 0.f, -11.f), FRotator::ZeroRotator);
+            if (Pawn) PC->Possess(Pawn);
+        }
+    }
+    GetWorld()->SpawnActor<AMGGrayFoxMission>(AMGGrayFoxMission::StaticClass(),
+                                            FVector::ZeroVector, FRotator::ZeroRotator);
 }

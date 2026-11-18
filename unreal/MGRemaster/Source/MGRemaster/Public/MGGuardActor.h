@@ -17,6 +17,7 @@ public:
                              AController* EventInstigator, AActor* DamageCauser) override;
 
     bool IsIncapacitated() const { return bIncapacitated; }
+    uint32 GetAwarenessState() const { return AwarenessState; }
 
 private:
     UPROPERTY(VisibleAnywhere, Category="Prototype")

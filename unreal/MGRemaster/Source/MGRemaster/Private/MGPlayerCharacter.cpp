@@ -1,4 +1,5 @@
 #include "MGPlayerCharacter.h"
+#include "MGGrayFoxMission.h"
 
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
@@ -106,6 +107,8 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
     Input->BindAction("ShoulderSwap", IE_Pressed, this, &AMGPlayerCharacter::ShoulderSwap);
     Input->BindAction("Fire", IE_Pressed, this, &AMGPlayerCharacter::FireStun);
     Input->BindAction("GraphicsPreset", IE_Pressed, this, &AMGPlayerCharacter::CycleGraphicsQuality);
+    Input->BindAction("Interact", IE_Pressed, this, &AMGPlayerCharacter::Interact);
+    Input->BindAction("RestartRescue", IE_Pressed, this, &AMGPlayerCharacter::RestartRescue);
 }
 void AMGPlayerCharacter::MoveForward(float Value)
 {
@@ -176,9 +179,33 @@ float AMGPlayerCharacter::GetVisibilityFactor() const
     return bIsCrouched ? 0.36f : 1.f;
 }
 
+void AMGPlayerCharacter::Interact()
+{
+    if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+    {
+        Mission->TryInteract(this);
+    }
+}
+
+void AMGPlayerCharacter::RestartRescue()
+{
+    if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+    {
+        Mission->RestartMission();
+    }
+}
+
 void AMGPlayerCharacter::FireStun()
 {
     if (!bAiming || !GetWorld() || !Controller) return;
+    if (const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+    {
+        // The captured Snake loses equipment; don't silently restore a gun.
+        if (Mission->HasEquipmentConfiscated()) return;
+    }
     // Camera ray determines crosshair target; a second ray enforces obstruction
     // between the character and target. Prototype nonlethal incapacitation only.
     const FVector CameraStart = FollowCamera->GetComponentLocation();
