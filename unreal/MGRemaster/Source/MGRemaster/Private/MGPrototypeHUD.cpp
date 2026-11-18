@@ -226,6 +226,9 @@ void AMGPrototypeHUD::DrawHUD()
         DrawLine(X, Y + 3.f, X, Y + 11.f, FLinearColor::White, 1.f);
     }
 
-    DrawText(TEXT("E / X: INTERACT   Z / DPAD-DOWN: PRONE   V: COVER   F / A: MELEE"),
+    const FString CoverHelp = Player->IsInCover() ?
+        TEXT("WALL: F / A KNOCK   AIM + SLIDE: CORNER PEEK   MOVE AWAY: RELEASE") :
+        TEXT("E / X: BREACH / INTERACT   MOVE INTO WALL: COVER   F / A: MELEE");
+    DrawText(CoverHelp,
              HudMuted, Margin, Height - 27.f * UiScale, nullptr, 0.69f * UiScale, false);
 }
