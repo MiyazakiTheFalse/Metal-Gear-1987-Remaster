@@ -41,6 +41,8 @@ On a Windows machine with UE5.7, Rust MSVC, Visual Studio C++:
 
 The resulting `dist/Windows/` package must be smoke-tested before distribution. No UE-capable runner is currently connected; **no executable has been generated**.
 
+The prison's destructible mission walls intentionally **do not** trigger automatic cover: E/X breach interaction retains priority. Knocking is a sound-location distraction, not a direct player-position reveal. See [wall/knock implementation contract](docs/WALL_KNOCK_AND_BREACH_CONTRACT.md). No UE5.7 build validation or finished skeletal animations are claimed.
+
 ## Prototype controls
 
 | Action | Keyboard/mouse | Gamepad |
@@ -51,6 +53,10 @@ The resulting `dist/Windows/` package must be smoke-tested before distribution. 
 | Stun | LMB while aiming | RT while aiming |
 | Sprint | Shift | Press left stick |
 | Crouch | Ctrl | B/Circle |
+| Wall cover | Move into full-height wall; V manual | Move into full-height wall |
+| Knock (in cover) | F | A / face-bottom |
+| Corner peek | Hold aim + slide towards wall end | Hold LT + move towards wall end |
+| Breach mission wall | E (in reach, face wall) | X / face-left |
 | Swap shoulder | Q | Press right stick |
 | Graphics quality | F6 | Options menu pending |
 
