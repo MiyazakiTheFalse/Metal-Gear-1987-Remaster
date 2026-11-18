@@ -42,6 +42,16 @@ typedef struct MgGuardResult {
 #define MG_FOX_ESCAPE 5u
 uint32_t mg_gray_fox_transition(uint32_t flags, uint32_t action, uint32_t* next_flags);
 
+/* Return optional pacing guidance; NO progression is gated on a timer. */
+typedef struct MgGrayFoxPacing {
+    uint32_t phase;
+    float target_intensity;
+    uint32_t hint_level;
+    uint32_t should_suppress_new_pressure;
+} MgGrayFoxPacing;
+uint32_t mg_gray_fox_pacing(uint32_t flags, float seconds_without_progress,
+                            uint32_t under_alert, MgGrayFoxPacing* output);
+
 uint32_t mg_core_abi_version(void);
 uint32_t mg_step_guard(const MgGuardFrame* frame, MgGuardResult* output);
 #ifdef __cplusplus
