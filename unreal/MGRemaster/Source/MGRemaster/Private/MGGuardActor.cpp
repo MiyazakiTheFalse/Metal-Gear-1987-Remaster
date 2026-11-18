@@ -34,11 +34,12 @@ void AMGGuardActor::BeginPlay()
     PatrolOrigin = GetActorLocation();
 }
 
-void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, float HearingRadius, AActor* SoundInstigator)
+void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, const FVector& WallNormal, float HearingRadius, AActor* SoundInstigator)
 {
     if (bIncapacitated || !GetWorld() || AwarenessState >= 3) return;
     const float Distance = FVector::Dist2D(GetActorLocation(), SoundLocation);
     if (Distance > HearingRadius) return;
+    const FVector GuardSide = (GetActorLocation() - SoundLocation).GetSafeNormal2D();
 
     // Concrete obstacles attenuate a knock. A guard hears a location, not a
     // magically transmitted player transform. The player isn't acoustic cover.
@@ -48,12 +49,14 @@ void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, float HearingRad
     const bool bBlocked = GetWorld()->LineTraceSingleByChannel(
         Obstacle, GetActorLocation() + FVector(0.f, 0.f, 55.f),
         SoundLocation + FVector(0.f, 0.f, 18.f), ECC_Visibility, Query);
-    if (Distance > HearingRadius * (bBlocked ? 0.55f : 1.f)) return;
+    const bool bSourceWallOccludes = FVector::DotProduct(GuardSide, WallNormal) < -0.10f;
+    const bool bOtherObstacle = bBlocked &&
+        FVector::Dist(Obstacle.ImpactPoint, SoundLocation + FVector(0.f, 0.f, 18.f)) > 28.f;
+    if (Distance > HearingRadius * ((bSourceWallOccludes || bOtherObstacle) ? 0.55f : 1.f)) return;
 
     // Repeated knocks renew attention, not instant omniscient combat alert.
     ConsecutiveKnocks = DistractionPhase == EDistractionPhase::None ?
         0 : FMath::Min(ConsecutiveKnocks + 1, 3);
-    const FVector GuardSide = (GetActorLocation() - SoundLocation).GetSafeNormal2D();
     DistractionLocation = SoundLocation + GuardSide * 90.f;
     DistractionLocation.Z = GetActorLocation().Z;
     ReturnToPatrol = PatrolOrigin +
