@@ -25,9 +25,11 @@ public:
     bool IsMissionLogVisible() const { return bShowMissionLog; }
     bool IsCodecOpen() const { return bCodecOpen; }
     FString GetCodecStatus() const { return CodecStatus; }
+    void TuneCellReceiver() { TransceiverChannel = 1; }
     int32 GetTransceiverChannel() const { return TransceiverChannel; }
     float GetEquipmentTimeScale() const { return EquipmentTimeScale; }
     float GetNoiseFactor() const;
+    void PlayBreachStrike() { MeleeVisualTimer = .22f; CombatNoiseTimer = .45f; }
     float GetHealth() const { return Health; }
     bool IsProne() const { return bIsProne; }
     bool IsInCover() const { return bInCover; }

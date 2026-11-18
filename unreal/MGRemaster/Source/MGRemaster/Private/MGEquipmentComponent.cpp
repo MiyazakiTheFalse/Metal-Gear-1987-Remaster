@@ -1,4 +1,5 @@
 #include "MGEquipmentComponent.h"
+#include "MGGrayFoxSaveGame.h"
 
 UMGEquipmentComponent::UMGEquipmentComponent()
 {
@@ -19,7 +20,7 @@ void UMGEquipmentComponent::BeginPlay()
     };
     // A captured Snake cannot use pre-capture weapons or items. Test entries are
     // deliberately marked provisional rather than claims about J2ME inventory.
-    SetConfiscated(true);
+    SetConfiscated(false);
 }
 
 void UMGEquipmentComponent::TickComponent(
@@ -40,14 +41,24 @@ void UMGEquipmentComponent::SetConfiscated(bool bSeized)
     bConfiscated = bSeized;
     if (bConfiscated)
     {
-        EquippedWeapon = 0;
-        EquippedItem = 0;
+        // Keep the player's selections with the sealed loadout.
         WeaponSelection = 0;
         ItemSelection = 0;
         bWeaponWindowOpen = false;
         bItemWindowOpen = false;
     }
 }
+void UMGEquipmentComponent::RestoreLoadout(const UMGGrayFoxSaveGame& Save)
+{
+    if (Save.Weapons.Num() == Weapons.Num() && Save.Items.Num() == Items.Num())
+    {
+        Weapons = Save.Weapons;
+        Items = Save.Items;
+        EquippedWeapon = Weapons.IsValidIndex(Save.EquippedWeapon) ? Save.EquippedWeapon : 0;
+        EquippedItem = Items.IsValidIndex(Save.EquippedItem) ? Save.EquippedItem : 0;
+    }
+}
+
 bool UMGEquipmentComponent::IsAvailable(const FMGEquipmentEntry& Entry) const
 {
     return Entry.bOwned && (Entry.Id == FName(TEXT("NONE")) || !bConfiscated)

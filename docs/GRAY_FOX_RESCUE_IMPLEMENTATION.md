@@ -1,66 +1,33 @@
-# Gray Fox Prison Rescue — First Integrated Vertical Slice
+# Gray Fox prison sequence
 
-**Status: authored source, Unreal not compiled, no packaged executable.**
+The default entry is the last prisoner contact before capture. Completion is the player's exit after Shoot Gunner. The corridor is an intermediate checkpoint. The browser playtest and Unreal source share those story gates. Controller bindings, room dimensions and presentation still differ.
 
-## Source truth and boundaries
+| Beat | Playable action and consequence |
+|---|---|
+| Intelligence | Speak to the prisoner at the lit desk to learn why entering custody could reach Fox. |
+| Approach | Carry the prototype loadout past a patrol. Cover, retreat and confrontation remain available. |
+| Arrest | Lower the weapon and volunteer at the post. Snake loses access to his existing inventory. The radio remains available. |
+| Solitary | Investigate immediately. Schneider supplies pre-capture context. Big Boss can offer wall guidance inside. |
+| Discovery | Strike the repaired panel. Its first two impacts expose damage, with audible and captioned responses. |
+| Breakthrough | The third impact opens a traversable hole. Progress persists across reloads. |
+| Gray Fox | Approach Fox without a camera cut. Read successive lines about the walking nuclear weapon and Dr. Pettrovich. The intel log preserves the exchange. |
+| Second breach | Apply the discovered interaction to a perpendicular wall. The turn leads into the patrol route. |
+| Personal effects | Retrieve the inventory and remaining ammunition. The property shutter opens. |
+| Shoot Gunner | Use the raised-weapon warning, cover and existing combat inputs. Close combat remains viable with depleted ammunition. Defeat opens the exit. |
+| Resolution | Keep control after the fight. Cross the final shutter to checkpoint the objective of finding Pettrovich. |
 
-- Original story reference: *Metal Gear* (1987) MSX2; Gray Fox is held within the Outer Heaven complex and the comparative capture sequence involves cell-wall escape.
-- Supplied production target: Connect2Media J2ME v3.3.0 a1. Original J2ME prison event triggers and geometry remain **unverified**. Nothing about the provisional greybox room dimensions is represented as an authentic 1987/2012 specification.
-- This mission intentionally **starts at the capture checkpoint** to test the scene in isolation. It is not a claim the original story starts with Snake captured.
-- Later games are quality references for free camera, stealth and responsive actions, not a reason to alter core 1995 plot continuity.
+## Fidelity and presentation
 
-## Pacing and mandatory sequence
+The original MSX2 script and gameplay are comparative evidence for the prison, Fox's revelation, the equipment and the warden. The booth, cover, lighting, radio paraphrases, stun pistol, damage counts, boss tuning and threshold treatment are remake decisions. The J2ME v3.3.0 a1 room graph, loadout, exact triggers and dialogue still require direct source verification. The original equipment transmitter trap is outside this prototype. Records and comparisons are in [the source audit](SOURCE_AUDIT.md), [the MSX script](https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/30618) and [the walkthrough](https://www.neoseeker.com/metal-gear/faqs/105549-script.html).
 
-| Stage | Rust action | Space | Player control | Pressure |
-|---|---|---|---|---|
-| Capture checkpoint | 1 | Initial cell | Regained immediately | Orientation, vulnerability |
-| Breach first wall | 2 | First divider | Press E/gamepad face-left; no wait | A short action peak |
-| Meet Gray Fox | 3 | Adjacent cell | Interact within range | Eleven seconds of optional on-screen dialogue, no input lock |
-| Breach exit wall | 4 | Second divider | Immediate breach after rescue | Rising tension |
-| Escape | 5 | Guarded corridor | Reach far side of lane; bypass patrols | Legible stealth challenge |
-| Recovery | State after 5 | Corridor end | Player retains control | Mission completion and checkpoint |
+The browser retains the existing procedural humanoids and optional network-loaded rig. The normal route leaves Fox in the cells; the earlier companion behaviour is available with the browser's escort option. Original synthesized foley covers cell bolts, masonry, gear and gunfire. Browser captions can be accompanied by an installed English system voice. These are temporary performances. Facial acting, final character art and a recorded voice mix remain production work.
 
-Pacing functions in Rust are *guidance*, never a hidden timer, enemy spawn mandate or mandatory pause. After >=28 seconds since mission progress, a subtle hint may appear if Snake has stopped meaningful movement/scanning for 6s; after >=75s, a stronger hint can appear after 10s quiet. Anti-stall caps at 100s/150s eventually permit assistance even during ongoing exploration. These are hypotheses for actual player testing, not research-established thresholds. If guards are actively alert, hints are suppressed to reduce HUD clutter. No new guard wave is spawned at the moment Gray Fox is rescued.
+## Checkpoints and developer entry
 
-## How the prototype implements this
+The Unreal slot retains its original name. Schema 2 adds inventory, equipped selections and partial masonry damage. Valid older captured states gain the contact flag and move to a safe landmark in the revised geography. New sessions start in the yard. The development option `-GrayFoxCellStart` starts a fresh mission in the cell. F9 clears the slot.
 
-- GameMode spawns \`AMGGrayFoxMission\` in the default runtime scene.
-- Player's E / gamepad face-left triggers \`TryInteract\`; interactions require an actual nearby, forward-facing target and a clear line of sight.
-- Rust ABI \`mg_gray_fox_transition\` provides ordered, once-only state changes. Unreal C++ has a matching fallback when \`MG_WITH_RUST=0\`; the Rust native lib is preferable.
-- The two walls remain solid until their respective events; actor collision is removed only when the state transaction commits.
-- Snake begins unarmed. Existing stun is disabled while equipment remains confiscated. A separate concealed 1995-era transceiver remains manually available via C/Start; it does not imply a later implanted Codec.
-- Kyle Schneider's optional remake-authored architectural context is on 120.79, while Big Boss's optional original-role guidance is on 120.85; Q/right-stick press tunes while radio is open. The transceiver does not pause gameplay or gate wall breaching. The optional on-screen prompt follows the existing hint threshold rather than forcing a call.
-- Gray Fox dialogue is temporary, authored placeholder text; there is no voice, performance animation or complete scene localization yet. After rescue, J / gamepad D-pad Up toggles a replayable intel log so advancing quickly never loses essential information.
-- The escape lane has pre-existing guards, now with solid blocking capsules (they cannot phase through walls). Guard behaviour remains a basic prototype.
-- \`UMGGrayFoxSaveGame\` persists bitflags and a checkpoint position after each accepted action. Save/load does not replay one-shot actions.
-- F9 deletes the slice checkpoint and reopens the map for replay. This is a developer/test shortcut, not final gameplay UI.
-- During early pacing the environment is quiet because it is physically separated from the perimeter, not because we erase a legitimate enemy alert.
-- The authored room is a **straight-line functional test**, not a verified exact reconstruction. Original missions/doors/topology still govern the final replacement.
+The browser supports `?cell` for a fresh cell entry, `?escort` for the optional companion prototype, and Continue Checkpoint for saved progress. Old browser saves migrate through a safe landmark. The arena checkpoint permits retries even with an empty pistol.
 
-## Intended test cases before calling this playable
+## Verification
 
-1. Compile UE5.7 C++ and Rust. Fix compile/link errors; verify native ABI version in packaged output.
-2. Enter cell, free-look and crouch without wall penetration; verify camera probe retracts.
-3. Try to rescue Gray Fox from outside the cell: denied. Try to breach exit before rescue: denied.
-4. Breach first wall, walk into Gray Fox cell, interact; verify the rescue flag and one-time cue.
-5. Interact repeatedly; no duplicate rescue, duplicated cutscene or corrupted inventory.
-6. Explore actively past 28s/75s: early automatic hints should defer while moving/scanning. Stop for 6s/10s and verify soft/strong guidance; confirm E works at t=0. Verify 100s/150s anti-stall behaviour.
-7. Try to use stun while equipment confiscated: blocked. Restart and reload save after each beat.
-8. Walk into guarded route: guards patrol without moving through walls; use crouch/cover and test detection.
-9. Trigger guard alert: hint overlay disappears; no fabricated enemies spawn on rescue.
-10. Escape and verify final checkpoint; reset via F9 and repeat with controller.
-11. Verify first-contact run timing, camera collision, failure recovery and low-end PC frame pacing.
-12. Compare each rebuilt room against exact J2ME data and source screenshots before declaring fidelity.
-
-## Known limitations
-
-Schneider/Big Boss contact text and HUD are source-wired, but radio voice recordings, era-appropriate portraits, EQ/beeps, and synchronized listening animation do not exist. The first wall presently disappears on successful E interaction; visible progressive cracking, impact animation and timed debris/audio cues remain to be authored under Doctrine 004. The prison hints are progress-time-based rather than full observational behaviour tracking, so playtesting must evaluate whether they appear too soon.
-
-No Rust toolchain or Unreal editor is available in this authoring environment. The code and unit tests have been written and checked for structural consistency, **not run in the game engine**. Guard navigation is simple swept straight-line movement, and prototype characters are primitives; AI damage, cinematics, original level art and proper save migration are future work.
-
-## Reference design research
-
-- [Level Design Book — Pacing](https://book.leveldesignbook.com/process/preproduction/pacing)
-- [GameDeveloper — Anatomy of a Stealth Encounter](https://www.gamedeveloper.com/design/the-anatomy-of-a-stealth-encounter)
-- [TIME — Kojima on stress/tension relief in Metal Gear](https://time.com/2862423/interview-hideo-kojima/)
-- [Konami Metal Gear MSX manual](https://metalgear.konami.net/manual/mc1/mg1_msx/pc/en/page02.html)
+Run `node browser/tests/test_campaign.cjs` and the repository's Python tests and registry validators. The campaign test exercises the real browser movement, navigation, interaction and combat routines in a simulated host. It does not establish frame rate, controller feel or player comprehension. Unreal requires a UE5.7 build host. Human checks should include a muted first run, declining surrender, returning after a fight at the post, a wall reload, a missed Fox line, empty-ammo combat, waiting after the warden falls, and both camera shoulders.

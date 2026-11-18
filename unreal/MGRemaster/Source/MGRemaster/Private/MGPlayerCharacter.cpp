@@ -7,6 +7,7 @@
 #include "Camera/PlayerCameraManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -652,7 +653,7 @@ void AMGPlayerCharacter::FireStun()
     const FVector Target = bCameraHit ? CameraHit.ImpactPoint : CameraEnd;
     const FVector Muzzle = GetActorLocation() + FVector(0.f, 0.f, 45.f);
     FHitResult MuzzleHit;
-    if (GetWorld()->LineTraceSingleByChannel(MuzzleHit, Muzzle, Target, ECC_Visibility, Params) && MuzzleHit.GetActor())
+    if (GetWorld()->LineTraceSingleByChannel(MuzzleHit, Muzzle, Target + (Target - Muzzle).GetSafeNormal() * 3.f, ECC_Visibility, Params) && MuzzleHit.GetActor())
     {
         UGameplayStatics::ApplyDamage(MuzzleHit.GetActor(), 100.f, Controller, this, UDamageType::StaticClass());
     }
@@ -851,9 +852,9 @@ void AMGPlayerCharacter::ToggleCodec()
     CloseEquipmentWindows();
     ApplyMenuTimeState();
     bCodecOpen = true;
-    TransceiverChannel = 0; // Kyle Schneider; Q changes to Big Boss.
+    // The capture transaction tunes the receiver; reopening preserves manual tuning.
     CodecStatus = TEXT("TRANSCEIVER ACTIVE — CHANGE CHANNEL Q / RS; CLOSE C / START");
-    NotifyFeedback(TEXT("TRANSCEIVER OPEN — SCHNEIDER / 120.79"), TEXT("select"));
+    NotifyFeedback(TransceiverChannel ? TEXT("BIG BOSS / 120.85") : TEXT("SCHNEIDER / 120.79"), TEXT("select"));
 }
 
 void AMGPlayerCharacter::CycleGraphicsQuality()

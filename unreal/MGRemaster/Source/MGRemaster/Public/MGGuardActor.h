@@ -17,6 +17,7 @@ public:
     virtual float TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent,
                              AController* EventInstigator, AActor* DamageCauser) override;
 
+    void ConfigureShotmaker();
     bool IsIncapacitated() const { return bIncapacitated; }
     uint32 GetAwarenessState() const { return AwarenessState; }
     float GetSuspicion() const { return Suspicion; }
@@ -48,6 +49,10 @@ private:
     float Suspicion = 0.f;
     float Health = 100.f;
     float StaggerSeconds = 0.f;
+    bool bShotmaker = false;
+    float AimRemaining = -1.f;
+    FVector ShotDirection = FVector::ZeroVector;
+    UPROPERTY() UStaticMeshComponent* Barrel = nullptr;
     float AttackCooldown = 0.f;
     uint32 AwarenessState = 0;
 };

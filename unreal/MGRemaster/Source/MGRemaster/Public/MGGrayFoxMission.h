@@ -45,6 +45,22 @@ private:
     UPROPERTY(Transient)
     AStaticMeshActor* ExitMarker = nullptr;
 
+    UPROPERTY() AStaticMeshActor* Informant = nullptr;
+    UPROPERTY() AStaticMeshActor* Sentry = nullptr;
+    UPROPERTY() AStaticMeshActor* Locker = nullptr;
+    UPROPERTY() AStaticMeshActor* Gate = nullptr;
+    UPROPERTY() AStaticMeshActor* ArmouryGate = nullptr;
+    UPROPERTY() AStaticMeshActor* FinalGate = nullptr;
+    UPROPERTY() class AMGGuardActor* Shotmaker = nullptr;
+    UPROPERTY() TArray<AStaticMeshActor*> WallScars;
+    UPROPERTY() class UMGGrayFoxSaveGame* Loaded = nullptr;
+    uint8 FirstHits = 0;
+    uint8 ExitHits = 0;
+    float NextStrike = 0.f;
+    float FoxSpeech = -1.f;
+    bool StrikeWall(AMGPlayerCharacter* Player, AStaticMeshActor* Wall, uint8& Hits, uint32 Action);
+    void ShowScar(AStaticMeshActor* Wall, uint8 Hit);
+    void AddLight(const FVector& Position, FLinearColor Colour, float Radius);
     uint32 Flags = 0;
     bool bPlayerInitialised = false;
     bool bHasLoadedSave = false;

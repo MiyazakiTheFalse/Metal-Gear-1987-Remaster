@@ -189,8 +189,8 @@
       },
       "topology": {
         "adjacency": [
-          "prison.gray_fox_cell",
-          "escape marker destination"
+          "prison.gray_fox_cell via the service turn",
+          "prison.property_office"
         ],
         "gates": [
           "Escape action requires second breach"
@@ -251,6 +251,245 @@
         "Camera and collision sweeps",
         "Guard acoustic/route tests",
         "Escape checkpoint replay"
+      ]
+    },
+    {
+      "provenance": "comparative_msx2_pending_target_j2me",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Do not alter source story gates or claim actual J2ME map is verified.",
+      "test_evidence": [],
+      "id": "prison.yard",
+      "stage": "infiltration",
+      "beat_ids": [
+        "gray_fox.prisoner_intel",
+        "gray_fox.approach",
+        "gray_fox.capture_and_control"
+      ],
+      "arrival": {
+        "entry": "Western entry before capture",
+        "safe_observation": "Use the central partition",
+        "first_goal": "Speak with the prisoner and choose whether to approach the post.",
+        "landmark": "Lit contact desk and processing post"
+      },
+      "topology": {
+        "adjacency": [
+          "prison.snake_cell on surrender"
+        ],
+        "gates": [
+          "Speak with the prisoner and choose whether to approach the post."
+        ],
+        "choices": [
+          "Use the central partition",
+          "Retreat",
+          "Approach the lit post"
+        ],
+        "camera_clearance": "Measure both shoulder clearances in the packaged build."
+      },
+      "visual": {
+        "forewarning": "Lit contact desk and processing post",
+        "reveal": "Speak with the prisoner and choose whether to approach the post.",
+        "spatial_readability": "Read silhouettes, threshold shapes and captions."
+      },
+      "audio": {
+        "sources": [
+          "Movement and interaction foley"
+        ],
+        "occlusion": "Physical obstruction gates the encounter sightline; final room mix awaits playtesting.",
+        "non_audio_equivalent": "Lit contact desk and processing post and persistent objective."
+      },
+      "risk": {
+        "safe_points": [
+          "Use the central partition"
+        ],
+        "exposure_windows": [
+          "Yard patrol can detect Snake."
+        ],
+        "pressure": "Yard patrol can detect Snake."
+      },
+      "timing": {
+        "trigger": "Western entry before capture",
+        "hint_policy": "Optional information never gates progress.",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "color_independent": true,
+        "caption_plan": "Hearing clues need subtitles or visible guard gestures",
+        "control_plan": "Free movement and cover throughout"
+      },
+      "failure": {
+        "interrupts": [
+          "Alert",
+          "Repeated knock",
+          "Failed navigation",
+          "Death/checkpoint",
+          "Low fps"
+        ],
+        "recovery": "The post remains available after evasion."
+      },
+      "tests": [
+        "First visit: Speak with the prisoner and choose whether to approach the post.",
+        "Fast route: Approach the lit post",
+        "Reload: The post remains available after evasion."
+      ]
+    },
+    {
+      "provenance": "comparative_msx2_pending_target_j2me",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Do not alter source story gates or claim actual J2ME map is verified.",
+      "test_evidence": [],
+      "id": "prison.property_office",
+      "stage": "recovery",
+      "beat_ids": [
+        "gray_fox.escape_and_recovery",
+        "gray_fox.reclaim"
+      ],
+      "arrival": {
+        "entry": "Guard passage after the second breach",
+        "safe_observation": "Study the patrol",
+        "first_goal": "Reclaim the original loadout.",
+        "landmark": "Personal-effects locker"
+      },
+      "topology": {
+        "adjacency": [
+          "prison.escape_corridor",
+          "prison.warden_room on recovery"
+        ],
+        "gates": [
+          "Reclaim the original loadout."
+        ],
+        "choices": [
+          "Study the patrol",
+          "Use the cabinet to break sight"
+        ],
+        "camera_clearance": "Measure both shoulder clearances in the packaged build."
+      },
+      "visual": {
+        "forewarning": "Personal-effects locker",
+        "reveal": "Reclaim the original loadout.",
+        "spatial_readability": "Read silhouettes, threshold shapes and captions."
+      },
+      "audio": {
+        "sources": [
+          "Movement and interaction foley"
+        ],
+        "occlusion": "Physical obstruction gates the encounter sightline; final room mix awaits playtesting.",
+        "non_audio_equivalent": "Personal-effects locker and persistent objective."
+      },
+      "risk": {
+        "safe_points": [
+          "Study the patrol"
+        ],
+        "exposure_windows": [
+          "Snake remains vulnerable until the kit is recovered."
+        ],
+        "pressure": "Snake remains vulnerable until the kit is recovered."
+      },
+      "timing": {
+        "trigger": "Guard passage after the second breach",
+        "hint_policy": "Optional information never gates progress.",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "color_independent": true,
+        "caption_plan": "Hearing clues need subtitles or visible guard gestures",
+        "control_plan": "Free movement and cover throughout"
+      },
+      "failure": {
+        "interrupts": [
+          "Alert",
+          "Repeated knock",
+          "Failed navigation",
+          "Death/checkpoint",
+          "Low fps"
+        ],
+        "recovery": "Retry from the escape checkpoint."
+      },
+      "tests": [
+        "First visit: Reclaim the original loadout.",
+        "Fast route: Use the cabinet to break sight",
+        "Reload: Retry from the escape checkpoint."
+      ]
+    },
+    {
+      "provenance": "comparative_msx2_pending_target_j2me",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Do not alter source story gates or claim actual J2ME map is verified.",
+      "test_evidence": [],
+      "id": "prison.warden_room",
+      "stage": "combat",
+      "beat_ids": [
+        "gray_fox.shoot_gunner",
+        "gray_fox.depart"
+      ],
+      "arrival": {
+        "entry": "Shutter beyond stored property",
+        "safe_observation": "Use tall cover",
+        "first_goal": "Read the weapon cue and reach the exit.",
+        "landmark": "Warden silhouette and far shutter"
+      },
+      "topology": {
+        "adjacency": [
+          "prison.property_office",
+          "Eastern exit after boss defeat"
+        ],
+        "gates": [
+          "Read the weapon cue and reach the exit."
+        ],
+        "choices": [
+          "Use tall cover",
+          "Close distance between attacks",
+          "Choose when to leave"
+        ],
+        "camera_clearance": "Measure both shoulder clearances in the packaged build."
+      },
+      "visual": {
+        "forewarning": "Warden silhouette and far shutter",
+        "reveal": "Read the weapon cue and reach the exit.",
+        "spatial_readability": "Read silhouettes, threshold shapes and captions."
+      },
+      "audio": {
+        "sources": [
+          "Movement and interaction foley"
+        ],
+        "occlusion": "Physical obstruction gates the encounter sightline; final room mix awaits playtesting.",
+        "non_audio_equivalent": "Warden silhouette and far shutter and persistent objective."
+      },
+      "risk": {
+        "safe_points": [
+          "Use tall cover"
+        ],
+        "exposure_windows": [
+          "The firing lane has interrupted sightlines and exposed crossings."
+        ],
+        "pressure": "The firing lane has interrupted sightlines and exposed crossings."
+      },
+      "timing": {
+        "trigger": "Shutter beyond stored property",
+        "hint_policy": "Optional information never gates progress.",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "color_independent": true,
+        "caption_plan": "Hearing clues need subtitles or visible guard gestures",
+        "control_plan": "Free movement and cover throughout"
+      },
+      "failure": {
+        "interrupts": [
+          "Alert",
+          "Repeated knock",
+          "Failed navigation",
+          "Death/checkpoint",
+          "Low fps"
+        ],
+        "recovery": "Retry with the stored kit; after defeat the shutter remains open."
+      },
+      "tests": [
+        "First visit: Read the weapon cue and reach the exit.",
+        "Fast route: Choose when to leave",
+        "Reload: Retry with the stored kit; after defeat the shutter remains open."
       ]
     }
   ]

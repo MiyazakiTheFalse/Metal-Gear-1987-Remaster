@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "policy": "No proprietary fan-made Metal Gear replicas or game rips are bundled. Every external model, texture, animation or sound requires asset-by-asset licence proof; author a coherent 1995 character style.",
+  "built_in_original_assets": [
+    {
+      "name": "procedural_humanoid_v3_prone_pose",
+      "type": "browser mesh and joint animation",
+      "status": "integrated",
+      "format": "JavaScript-generated sphere/cylinder/cube meshes with interpolated prone torso rotation"
+    },
+    {
+      "name": "prison_industrial_set_dressing_v2",
+      "type": "procedural 3D geometry and shader materials",
+      "status": "integrated",
+      "format": "WebGL1 procedural"
+    },
+    {
+      "name": "adaptive_alert_soundbed_v1",
+      "type": "generated electronic ambience and feedback",
+      "status": "integrated",
+      "format": "WebAudio-generated, original"
+    },
+    {
+      "name": "player_stance_colliders_v2",
+      "type": "gameplay physics",
+      "status": "integrated",
+      "format": "vertical circular footprint for standing/crouch; five-disc horizontal capsule for prone; stance clearance tests"
+    }
+  ],
+  "external_candidates": [
+    {
+      "name": "Quaternius Universal Base Characters",
+      "purpose": "base humanoid rigs, not final Snake likeness",
+      "url": "https://quaternius.com/packs/universalbasecharacters.html",
+      "license_reported": "CC0; verify exact downloaded release",
+      "format": "GLB/glTF or FBX depending pack",
+      "status": "research_only_not_imported"
+    },
+    {
+      "name": "Quaternius Universal Animation Library",
+      "purpose": "re-target gait and transitions",
+      "url": "https://quaternius.com/packs/universalanimationlibrary.html",
+      "license_reported": "CC0; verify exact downloaded release",
+      "status": "research_only_not_imported"
+    },
+    {
+      "name": "KayKit Character Animations",
+      "purpose": "fallback compatible animation collection",
+      "url": "https://kaylousberg.itch.io/kaykit-character-animations",
+      "license_reported": "CC0 1.0 on official pack page",
+      "status": "research_only_not_imported"
+    },
+    {
+      "name": "Poly Haven materials",
+      "purpose": "concrete/metal/industrial HDRI texture reference and production maps",
+      "url": "https://polyhaven.com/license",
+      "license_reported": "CC0",
+      "status": "research_only_not_imported"
+    },
+    {
+      "name": "ambientCG materials",
+      "purpose": "PBR tiling concrete/steel/floor",
+      "url": "https://docs.ambientcg.com/license/",
+      "license_reported": "CC0",
+      "status": "research_only_not_imported"
+    },
+    {
+      "name": "Epic Game Animation Sample",
+      "purpose": "Unreal-only motion matching baseline; check Fab/UE-specific licence",
+      "url": "https://dev.epicgames.com/documentation/unreal-engine/game-animation-sample-project-in-unreal-engine",
+      "license_reported": "Check Fab listing terms and engine limitations",
+      "status": "research_only_not_imported"
+    },
+    {
+      "name": "Adobe Mixamo",
+      "purpose": "temporary retargeted locomotion and reactions",
+      "url": "https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html",
+      "license_reported": "Royalty free in game, restrictions on raw asset redistribution",
+      "status": "research_only_not_imported"
+    }
+  ],
+  "integration_gates": [
+    "Verify source licence and terms",
+    "Check rig skeleton and coordinate orientation",
+    "Retarget on 1.78m Snake-like silhouette with character ownership clearance",
+    "In-engine 8-way locomotion / starts / stops / aim / crouch / prone / melee",
+    "Animation contact timing drives damage and footsteps",
+    "PBR LOD/performance tests on low-end GPU",
+    "No canonical original-room fidelity claim until J2ME evidence exists"
+  ]
+}

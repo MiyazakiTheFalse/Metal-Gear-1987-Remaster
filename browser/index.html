@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="theme-color" content="#091215">
+<title>Metal Gear — Gray Fox Rescue | Browser Vertical Slice</title>
+<style>
+:root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Arial,sans-serif;color:#e9eee9;background:#071113}*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050b0d}canvas#gl{display:block;width:100%;height:100%;touch-action:none}
+#grain{pointer-events:none;position:fixed;inset:0;background:radial-gradient(ellipse at 50% 40%,transparent 40%,#01050799 100%);z-index:2}
+#hud{position:fixed;inset:0;pointer-events:none;z-index:3;text-shadow:0 2px 8px #000b}
+#top{position:absolute;top:22px;left:28px;right:28px;display:flex;align-items:start;justify-content:space-between;gap:16px}
+#brand small{font-size:10px;letter-spacing:.28em;color:#aac7b7}#brand strong{display:block;font-size:17px;letter-spacing:.11em;font-weight:800;color:#e7e8db}
+#meta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;font:12px ui-monospace,Consolas,monospace;color:#9fc1b0}
+#objective{position:absolute;top:102px;left:28px;max-width:500px;background:#07191cb5;border-left:3px solid #85d7aa;padding:12px 16px;border-radius:0 8px 8px 0}
+#objective .kicker{color:#70bd9c;font:10px ui-monospace,monospace;letter-spacing:.2em}#objective .detail{font-size:14px;font-weight:650;line-height:1.5;margin-top:4px}
+#hint{font-size:12px;color:#dfd3a7;margin-top:6px}#hint:empty{display:none}
+#reticle{position:absolute;left:50%;top:50%;width:24px;height:24px;transform:translate(-50%,-50%);opacity:0;transition:opacity .1s}
+#reticle:before,#reticle:after{content:"";position:absolute;background:#e5ece0;box-shadow:0 0 5px #000}#reticle:before{width:2px;height:24px;left:11px}#reticle:after{height:2px;width:24px;top:11px}
+#subtitle{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);width:min(90%,710px);text-align:center;font-size:16px;line-height:1.5;white-space:pre-line;font-weight:600;color:#f4f2dc;background:#061115cc;border:1px solid #405d57;padding:12px 18px;border-radius:6px;opacity:0;transition:opacity .2s}
+#prompt{position:absolute;bottom:164px;left:50%;transform:translateX(-50%);color:#e5edcf;background:#09211adb;border:1px solid #85bf9b99;padding:8px 14px;border-radius:4px;font-size:12px;letter-spacing:.06em;opacity:0}
+#bottom{position:absolute;left:28px;right:28px;bottom:18px;display:flex;justify-content:space-between;align-items:end;gap:16px}
+#status{font:12px ui-monospace,Consolas,monospace;color:#adbfac;line-height:1.7}#controls{font:11px ui-monospace,Consolas,monospace;color:#b1b9ae;text-align:right;line-height:1.6}
+#alert{position:absolute;top:18px;left:50%;transform:translateX(-50%);font:700 13px ui-monospace,monospace;letter-spacing:.26em;color:#ff6d67;background:#3f1118cf;border:1px solid #af3632;padding:8px 20px;opacity:0}
+#meters{margin-top:7px;display:flex;gap:3px}#meters b{height:5px;width:25px;background:#385448}#meters b.on{background:#9bddb0}#meters b.alert.on{background:#ef7c6a}
+#tutorial{position:absolute;left:28px;bottom:123px;width:min(410px,43vw);background:#071b1bdb;border-left:3px solid #9cc7a2;border-radius:0 6px 6px 0;padding:10px 14px;opacity:0;transition:opacity .22s}
+#tutorial strong{display:block;letter-spacing:.14em;color:#a6dfb9;font:700 11px ui-monospace,monospace}
+#tutorial span{font-size:12px;line-height:1.5;display:block;margin-top:4px}
+#equip{position:absolute;right:25px;bottom:145px;width:260px;display:none;background:#07191ced;border:1px solid #607d65;padding:13px;border-radius:4px;font:12px ui-monospace,monospace}
+#equip .kicker{font-size:10px;letter-spacing:.10em;color:#aee7bd;margin-bottom:10px}
+#equip .slot{padding:8px 5px;margin-bottom:3px;border-bottom:1px solid #364e49}
+#equip .slot.picked{color:#f3dea7;background:#264234}
+#equip .slot.locked{color:#dd8a78}
+#equip small{color:#a7c0b0;font-size:10px;line-height:1.5;display:block;margin-top:8px}
+#radarBox{position:absolute;top:93px;right:28px;border:1px solid #547a68;background:#061719dc;padding:7px;width:198px}
+#radarTitle{font:10px ui-monospace,monospace;letter-spacing:.1em;color:#98dbb1;margin-bottom:5px}
+#radar{display:block;width:182px;height:140px}
+#radarLegend{border-top:1px solid #37574d;padding-top:5px;color:#9bcdb1;font:8px ui-monospace,monospace;letter-spacing:.035em;white-space:nowrap;text-shadow:none}
+.checklabel{display:flex;gap:9px;align-items:center;color:#d3e2d3;font-size:12px;margin:10px 0 14px}
+.checklabel input{accent-color:#9acfaa}
+#intro,#pause,#intel,#complete,#missionFail{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:7;background:linear-gradient(130deg,#030d10ef,#07191ddf);padding:24px}
+#pause,#intel,#complete,#missionFail{display:none}
+.panel{width:min(94vw,620px);border:1px solid #3e5b58;background:#08181bfa;box-shadow:0 28px 100px #000c;padding:33px 35px;border-radius:6px}
+.eyebrow{font:11px ui-monospace,Consolas,monospace;letter-spacing:.28em;color:#7dc29e}
+h1{font-size:clamp(26px,4.8vw,42px);line-height:1.08;letter-spacing:-.03em;margin:12px 0}h2{font-size:25px;margin:9px 0 18px}p{line-height:1.58;color:#c5cec7;font-size:14px}p em{color:#e9e3c1;font-style:normal}strong{color:#f0f3e8}
+.rule{border-top:1px solid #31514b;margin:19px 0}button{pointer-events:auto;cursor:pointer;background:#a8d9b8;color:#081611;border:0;border-radius:3px;padding:12px 20px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:12px}button:hover{background:#d0ecd3}button.secondary{background:transparent;color:#d0e5d3;border:1px solid #536e62;margin-left:7px}button.secondary:hover{background:#19342e}
+.tag{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:#d5b788;border:1px solid #977e55;padding:5px 7px;display:inline-block;margin-bottom:6px}
+#fail{position:absolute;top:48%;width:100%;text-align:center;color:#f7bcae;background:#470f18a8;padding:18px;z-index:5;display:none;font-size:22px;font-weight:bold}
+@media(max-width:700px){#top{top:13px;left:13px;right:13px}#brand strong{font-size:12px}#meta{font-size:10px}#objective{top:75px;left:12px;right:12px;max-width:none;padding:9px}#objective .detail{font-size:12px}#bottom{left:12px;right:12px;bottom:12px}#controls{max-width:180px;font-size:9px}#subtitle{bottom:105px;font-size:13px}#tutorial{left:12px;bottom:118px;width:min(390px,75vw)}#equip{right:12px;bottom:184px;width:220px}#radarBox{top:176px;right:12px;width:132px;padding:5px}#radar{width:120px;height:96px}#radarLegend{font-size:7px;white-space:normal}.panel{padding:24px}}
+
+/* Tactical HUD v0.5: legible MGS-inspired instrumentation, original typography. */
+#brand strong{color:#e6f1e6;text-shadow:0 2px 11px #081c19;letter-spacing:.145em}
+#brand small{color:#8fcbb7}
+#objective{background:linear-gradient(100deg,#092123ed,#0b2427c4);border-left:3px solid #80e2ae;border-top:1px solid #365b52;border-bottom:1px solid #365b52;box-shadow:0 12px 20px #0006}
+#objective:before{content:'OPERATION // INTRUDE N313';position:absolute;right:12px;top:8px;font:8px ui-monospace,monospace;letter-spacing:.12em;color:#749888}
+#radarBox{background:linear-gradient(145deg,#091f21fa,#030d10ee);border:1px solid #568578;box-shadow:0 4px 28px #000a,inset 0 0 0 2px #081415}
+#radarTitle{border-bottom:1px solid #416b62;padding-bottom:6px;font-size:10px}
+#radar{filter:drop-shadow(0 0 5px #53bc9040)}
+#alert{font-weight:900;letter-spacing:.2em;padding:10px 20px;border:2px solid #ec735a;box-shadow:0 0 18px #d4383c55}
+#subtitle{background:linear-gradient(95deg,#061417f5,#0e282bdc,#061417f5);border-top:2px solid #7dbda6;border-bottom:2px solid #7dbda6;box-shadow:0 8px 30px #0009}
+#status{font-size:11px;background:#081d1dc9;border-left:2px solid #7aaf9c;padding:7px 10px}
+#equip{background:linear-gradient(115deg,#091c1bf8,#071115f5);border:1px solid #80b4a3;border-top:3px solid #9bd3ae;box-shadow:0 0 22px #000b}
+#equip .slot{padding:10px 7px;font-size:12px;transition:background .13s}
+#equip .slot.picked{background:#34594b;color:#f7e5ab;border-left:2px solid #e4c786}
+#equip .slot.locked{color:#cf827b}
+#lifeBox{position:absolute;left:28px;bottom:85px;width:256px;background:#071a1ada;border:1px solid #4e786b;padding:9px 11px;box-shadow:0 2px 22px #0008}
+#lifeTop{display:flex;justify-content:space-between;letter-spacing:.13em;color:#a4d9b8;font:700 10px ui-monospace,monospace}
+#lifeTrack{height:10px;background:#1c302e;border:1px solid #3e5b53;margin-top:7px}
+#lifeFill{height:100%;width:100%;background:linear-gradient(90deg,#447a6a,#8bd2ad);transition:width .16s}
+#coverFeedback{position:absolute;right:27px;top:292px;max-width:240px;text-align:right;font:700 10px ui-monospace,monospace;letter-spacing:.05em;line-height:1.5;color:#e3a77e;text-shadow:0 1px 7px black}
+#coverFeedback[data-safe=yes]{color:#93dfb3}
+#hud:after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent 0px,transparent 4px,#050f1110 5px);opacity:.22;mix-blend-mode:multiply}
+@media(max-width:700px){#lifeBox{left:12px;bottom:89px;width:190px;padding:7px}#coverFeedback{right:10px;top:286px;max-width:130px;font-size:8px}#objective:before{display:none}}
+
+#foxBox{position:absolute;left:28px;bottom:160px;width:256px;background:#071c20e6;border:1px solid #438b99;padding:9px 11px;box-shadow:0 3px 22px #000b}
+#foxBox .foxTop{display:flex;justify-content:space-between;color:#afe2f0;font:700 10px ui-monospace,monospace;letter-spacing:.06em}
+#foxTrack{height:9px;background:#1b2e34;border:1px solid #426b72;margin-top:7px}
+#foxFill{height:100%;width:100%;background:linear-gradient(90deg,#367889,#a2dfea);transition:width .16s}
+#foxTactics{font:10px ui-monospace,monospace;color:#8cbaca;margin-top:5px}
+#foxBox[data-danger=yes] #foxFill{background:linear-gradient(90deg,#a22c37,#ee8870)}
+@media(max-width:700px){#foxBox{left:12px;bottom:161px;width:190px;padding:7px}}
+
+/* Earned end-state: a visible security shutter, not just a congratulatory line. */
+#endPanel{width:min(94vw,720px);border-top:3px solid #95d3b0;background:linear-gradient(125deg,#0a1b1d,#061014);}
+#endPanel h1{font-size:clamp(32px,5vw,50px);color:#c9f1d7;letter-spacing:.04em;margin-bottom:10px}
+#endPanel p{margin:11px 0;font-size:13px}
+#endPanel #stats{color:#edcf8f;font:700 13px ui-monospace,monospace;padding:13px;background:#132c29;border-left:2px solid #9fe8b2}
+#secureSequence{height:150px;background:radial-gradient(ellipse at 50% 15%,#325049,#061011);border:1px solid #467c66;position:relative;overflow:hidden;margin:15px 0 8px}
+.blastGate{position:absolute;inset:9px 12px 30px;border:8px ridge #4e6663;background:#152b2c;overflow:hidden}
+.gateLeft,.gateRight{position:absolute;top:0;bottom:0;width:50%;background:repeating-linear-gradient(0deg,#425653 0 17px,#253a3b 18px 22px);border:3px solid #74908a;transition:transform 1.2s ease}
+.gateLeft{left:0;transform:translateX(-100%)}.gateRight{right:0;transform:translateX(100%)}
+#secureSequence.played .gateLeft,#secureSequence.played .gateRight{transform:translateX(0)}
+.gateSeam{position:absolute;left:calc(50% - 4px);top:0;height:100%;width:8px;background:#acbb8d;opacity:.7}
+.sealReadout{position:absolute;left:0;right:0;bottom:0;padding:6px;background:#071f1c;color:#c3ead0;text-align:center;font:700 11px ui-monospace,monospace;letter-spacing:.13em}
+.signalLamp{color:#65f6a4;text-shadow:0 0 9px #6fda96}
+@media(max-height:650px){#endPanel{padding:15px 22px}#secureSequence{height:88px}#endPanel p{margin:6px 0}}
+</style>
+</head><body>
+<canvas id="gl" aria-label="Real-time third person 3D prison infiltration game"></canvas><div id="grain"></div>
+<div id="hud"><div id="top"><div id="brand"><small>OUTER HEAVEN • 1995</small><strong>METAL GEAR <span style="color:#84cfaa">//</span> GRAY FOX</strong></div><div id="meta"><span id="controller">KEYBOARD + MOUSE</span><span id="quality">PERFORMANCE</span><span id="fps">60 FPS TARGET</span></div></div>
+<div id="objective"><div class="kicker" id="phase">INFILTRATION</div><div class="detail" id="obj">Contact the prisoner.</div><div id="hint"></div><div id="meters"></div></div><div id="alert">ENEMY ALERT</div><div id="radarBox"><div id="radarTitle">FIELD MAP</div><canvas id="radar" width="182" height="140" aria-label="Guard facing directions, obstacle-clipped visual ranges, Snake and Gray Fox positions; radar becomes unavailable during enemy alert"></canvas><div id="radarLegend" aria-hidden="true">◢ GUARD FOV &nbsp; △ FACING &nbsp; · NEAR DETECTION</div></div><div id="reticle"></div><div id="coverFeedback" aria-live="off"></div><div id="subtitle"></div><div id="prompt"></div><div id="tutorial" role="status" aria-live="polite"><strong id="tutorialTitle"></strong><span id="tutorialBody"></span></div><div id="equip"></div><div id="foxBox" style="display:none" aria-label="Gray Fox escort health"><div class="foxTop"><span>GRAY FOX // LIFE</span><span id="foxHP">100 / 100</span></div><div id="foxTrack"><div id="foxFill"></div></div><div id="foxTactics">FOLLOWING</div></div><div id="lifeBox"><div id="lifeTop"><span>FOXHOUND // LIFE</span><span id="lifeHP">100 / 100</span></div><div id="lifeTrack"><div id="lifeFill"></div></div></div><div id="bottom"><div id="status">EQUIPMENT: CONFISCATED<br>STANCE: STANDING<br>CHECKPOINT: AUTO</div><div id="controls">WASD MOVE · MOUSE LOOK · E CONTEXT COVER · V COVER · F/N KNOCK · CTRL CROUCH<br>RMB AIM · F TAKEDOWN · J INTEL · ESC PAUSE · R RESET<br>XBOX: LS MOVE · RS CAMERA · A CONTEXT COVER · B CROUCH · X KNOCK/CQC</div></div></div>
+<div id="fail"></div>
+<div id="intro"><div class="panel"><div class="tag">Browser proof-of-play • not a final remaster</div><div class="eyebrow">OPERATION INTRUDE N313 // PRISON RESCUE</div><h1>Some walls<br>weren't built to last.</h1><p>A prisoner knows where Gray Fox is being held. Reach him before the patrol doubles back.</p><p><strong>Free third-person camera.</strong> Authentic 1995-inspired military atmosphere, player-led pacing, dynamic guards, procedural animation, generated original sounds, and checkpoints. Xbox controller support is included.</p><p style="font-size:12px"><em>Prototype reconstruction:</em> the original J2ME cell dimensions, final textures, character likeness and dialogue have not been verified. This browser playtest uses independently authored provisional art.</p><div class="rule"></div><label class="checklabel"><input id="rigToggle" type="checkbox" checked> Use rigged, animated soldier models (requires internet; fallback works offline)</label><div id="rigStatus" style="font:10px ui-monospace,monospace;color:#9cc7a2;margin:5px 0 11px">CHARACTER RIGS · INITIALISING</div><label class="checklabel"><input id="tipsToggle" type="checkbox" checked> Show contextual training prompts (toggle with T)</label><label class="checklabel"><input id="voiceToggle" type="checkbox"> Read dialogue aloud with a local device voice</label><button class="secondary" id="brief">MISSION BRIEFING</button><button id="start">START INFILTRATION</button><button class="secondary" id="resume">CONTINUE CHECKPOINT</button><p id="support" style="font-size:11px;opacity:.75">Desktop Chrome / Edge / Firefox. Controller: connect before or after starting, then press a button.</p></div></div>
+<div id="briefing" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;z-index:9;background:#030e10f5;padding:24px"><div class="panel"><div class="eyebrow">FOXHOUND // OPERATION INTRUDE N313</div><h2>Infiltrate Outer Heaven</h2><p>Gray Fox has vanished during reconnaissance. Snake, a new FOXHOUND operative, must locate him and investigate a suspected new weapon.</p><p>This slice begins at the final intelligence contact before Snake enters solitary. The mission briefing does not change the original game’s progression, and the prison geometry is provisional.</p><p>Use this space to learn free-look, stealth, wall interaction, the inventory controls and the radio archive through play. All instructions are optional.</p><button id="backBrief">BACK</button></div></div><div id="pause"><div class="panel"><div class="eyebrow">PAUSED</div><h2>Infiltration suspended</h2><p>Use the mouse or Xbox right stick to control the camera. Continue from your latest position, review intel, or restart the sequence.</p><button id="unpause">RESUME</button><button class="secondary" id="pauseIntel">INTEL</button><button class="secondary" id="restart">RESTART</button></div></div>
+<div id="intel"><div class="panel"><div class="eyebrow">MISSION ARCHIVE</div><h2>Rescue intelligence</h2><p id="intelText">No intelligence recovered yet. Find Gray Fox first.</p><p style="font-size:12px">This is a paraphrased gameplay placeholder, not final source-authentic dialogue.</p><button id="closeIntel">CLOSE</button></div></div>
+<div id="missionFail"><div class="panel"><div class="eyebrow">OPERATION INTRUDE N313 // FAILED</div><h2>GRAY FOX DOWN</h2><p>The prisoner did not survive the extraction. Protect him, use cover, and make sure he reaches the exit with Snake.</p><p id="failStats">GRAY FOX KIA — ESCORT FAILED</p><button id="retryEscort">Retry from last checkpoint</button></div></div><div id="complete"><div class="panel" id="endPanel"><div class="eyebrow">OPERATION INTRUDE N313 // SECTOR OBJECTIVE CLEARED</div>
+<div id="secureSequence" role="img" aria-label="Security hatch closes and locks, placing Snake and Gray Fox out of the guard corridor">
+<div class="blastGate"><div class="gateLeft"></div><div class="gateRight"></div><div class="gateSeam"></div></div><div class="sealReadout"><span class="signalLamp">●</span> BULKHEAD SEALED <span>●</span> FOXHOUND // SECURE</div></div>
+<h1>GRAY FOX<br>SECURED.</h1>
+<p><strong>Immediate threat contained.</strong> Both operatives have entered the maintenance lift; the armoured shutter seals the prison corridor behind them. Gray Fox is alive and receives emergency attention. The enemy no longer has a direct firing line.</p>
+<p><strong>Intelligence recovered:</strong> Metal Gear is a nuclear-capable walking weapon. Dr. Pettrovich holds the information needed to destroy it. Snake's wider mission is still active.</p>
+<p class="tag">REMASTER ESCORT ENDING — NOT A VERIFIED 1987/J2ME SCENE</p>
+<p id="stats"></p>
+<button id="retry">REPLAY SLICE</button><button class="secondary" id="finishIntel">REVIEW GRAY FOX INTEL</button></div></div>
+<script src="dialogue.js"></script><script src="tutorial.js"></script><script src="game.js"></script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.173.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.173.0/examples/jsm/"}}</script>
+<script type="module" src="rigged_characters.js"></script>
+</body></html>
