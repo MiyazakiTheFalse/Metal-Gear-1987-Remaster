@@ -34,6 +34,104 @@ void AMGGuardActor::BeginPlay()
     PatrolOrigin = GetActorLocation();
 }
 
+void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, float HearingRadius, AActor* SoundInstigator)
+{
+    if (bIncapacitated || !GetWorld() || AwarenessState >= 3) return;
+    const float Distance = FVector::Dist2D(GetActorLocation(), SoundLocation);
+    if (Distance > HearingRadius) return;
+
+    // Concrete obstacles attenuate a knock. A guard hears a location, not a
+    // magically transmitted player transform. The player isn't acoustic cover.
+    FCollisionQueryParams Query(SCENE_QUERY_STAT(MGKnockOcclusion), false, this);
+    if (IsValid(SoundInstigator)) Query.AddIgnoredActor(SoundInstigator);
+    FHitResult Obstacle;
+    const bool bBlocked = GetWorld()->LineTraceSingleByChannel(
+        Obstacle, GetActorLocation() + FVector(0.f, 0.f, 55.f),
+        SoundLocation + FVector(0.f, 0.f, 18.f), ECC_Visibility, Query);
+    if (Distance > HearingRadius * (bBlocked ? 0.55f : 1.f)) return;
+
+    // Repeated knocks renew attention, not instant omniscient combat alert.
+    ConsecutiveKnocks = DistractionPhase == EDistractionPhase::None ?
+        0 : FMath::Min(ConsecutiveKnocks + 1, 3);
+    const FVector GuardSide = (GetActorLocation() - SoundLocation).GetSafeNormal2D();
+    DistractionLocation = SoundLocation + GuardSide * 90.f;
+    DistractionLocation.Z = GetActorLocation().Z;
+    ReturnToPatrol = PatrolOrigin +
+        FVector(FMath::Clamp(GetActorLocation().X - PatrolOrigin.X, -180.f, 180.f), 0.f, 0.f);
+    DistractionPhase = EDistractionPhase::React;
+    DistractionTimer = FMath::Max(0.22f, 0.45f - ConsecutiveKnocks * 0.06f);
+    InvestigationStuckTimer = 0.f;
+    Suspicion = FMath::Max(Suspicion, 0.24f);
+    AwarenessState = FMath::Max(AwarenessState, 1u);
+}
+
+void AMGGuardActor::MoveToward(const FVector& Destination, float Speed, float DeltaSeconds)
+{
+    const FVector Diff = (Destination - GetActorLocation()).GetSafeNormal2D();
+    if (Diff.IsNearlyZero()) return;
+    const FVector Step = Diff * FMath::Min(Speed * DeltaSeconds, FVector::Dist2D(Destination, GetActorLocation()));
+    SetActorLocation(GetActorLocation() + Step, true);
+    SetActorRotation(FMath::RInterpTo(GetActorRotation(), Diff.Rotation(), DeltaSeconds, 6.f));
+}
+
+bool AMGGuardActor::AdvanceNoiseInvestigation(float DeltaSeconds)
+{
+    if (DistractionPhase == EDistractionPhase::None) return false;
+    // Real visual detection and combat stimuli supersede a mere sound cue.
+    if (AwarenessState >= 2)
+    {
+        DistractionPhase = EDistractionPhase::None;
+        ConsecutiveKnocks = 0;
+        return false;
+    }
+    Suspicion = FMath::Max(Suspicion, 0.24f);
+    AwarenessState = FMath::Max(AwarenessState, 1u);
+    if (DistractionPhase == EDistractionPhase::React)
+    {
+        const FVector Direction = (DistractionLocation - GetActorLocation()).GetSafeNormal2D();
+        if (!Direction.IsNearlyZero())
+            SetActorRotation(FMath::RInterpTo(GetActorRotation(), Direction.Rotation(), DeltaSeconds, 2.8f));
+        DistractionTimer -= DeltaSeconds;
+        if (DistractionTimer <= 0.f)
+        {
+            DistractionPhase = EDistractionPhase::Approach;
+            InvestigationStuckTimer = 0.f;
+        }
+    }
+    else if (DistractionPhase == EDistractionPhase::Approach)
+    {
+        const float Before = FVector::Dist2D(DistractionLocation, GetActorLocation());
+        MoveToward(DistractionLocation, 115.f, DeltaSeconds);
+        const float After = FVector::Dist2D(DistractionLocation, GetActorLocation());
+        InvestigationStuckTimer = After >= Before - 0.5f ?
+            InvestigationStuckTimer + DeltaSeconds : 0.f;
+        if (After < 82.f || InvestigationStuckTimer > 1.5f)
+        {
+            DistractionPhase = EDistractionPhase::Search;
+            DistractionTimer = 2.5f + 0.85f * ConsecutiveKnocks;
+        }
+    }
+    else if (DistractionPhase == EDistractionPhase::Search)
+    {
+        const FVector Direction = (DistractionLocation - GetActorLocation()).GetSafeNormal2D();
+        const float BaseYaw = Direction.IsNearlyZero() ? GetActorRotation().Yaw : Direction.Rotation().Yaw;
+        const float Sweep = 32.f * FMath::Sin(GetWorld()->GetTimeSeconds() * 2.2f);
+        SetActorRotation(FRotator(0.f, BaseYaw + Sweep, 0.f));
+        DistractionTimer -= DeltaSeconds;
+        if (DistractionTimer <= 0.f) DistractionPhase = EDistractionPhase::Return;
+    }
+    else if (DistractionPhase == EDistractionPhase::Return)
+    {
+        MoveToward(ReturnToPatrol, 90.f, DeltaSeconds);
+        if (FVector::Dist2D(ReturnToPatrol, GetActorLocation()) < 28.f)
+        {
+            DistractionPhase = EDistractionPhase::None;
+            ConsecutiveKnocks = 0;
+        }
+    }
+    return true;
+}
+
 float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent,
                                 AController* EventInstigator, AActor* DamageCauser)
 {
@@ -129,7 +227,12 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     }
 
     if (StaggerSeconds > 0.f) return;
-    if (AwarenessState == 3)
+    // Noise investigations are interruptible by real detection/alert.
+    if (AdvanceNoiseInvestigation(DeltaSeconds))
+    {
+        // Noise behaviour already selected movement/turning for this frame.
+    }
+    else if (AwarenessState == 3)
     {
         const FVector Direction = (LastKnownPlayerPosition - GetActorLocation()).GetSafeNormal2D();
         if (!Direction.IsNearlyZero())
