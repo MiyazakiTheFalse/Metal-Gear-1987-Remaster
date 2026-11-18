@@ -38,6 +38,17 @@ Updated 2026-11-18. This is a source-verified *candidate* pipeline, NOT a claim 
 - **Never depict:** 2005 Cyborg Ninja exoskeleton/helmet, later Zanzibar Land combat gear or a generic fully armed guard body as his detention outfit.
 - **Animation requirements:** separate fatigue, guarded walk, listening and recovery sets; his distinct silhouette must remain readable beside Snake under dark prison lighting.
 
+### Solid Snake recognisability — binding acceptance gate
+
+The player must be able to identify the controlled character as **Solid Snake** without relying on a generic military body with an olive tint. **Gameplay identity, distinctive character art, and framing are all required.**
+
+- Commission/author a **distinct 1995 Solid Snake head, hair, facial proportions and outfit silhouette** from verified early-series reference art; no generic soldier body or only palette-swapped guard is acceptable as the final hero asset. His exact 1995 likeness is a source-led reconstruction, not a transplanted MGS4 Old Snake face/suit.
+- **Show the face and silhouette** in a brief authored capture opening, close conversational framing and an inventory/Codec portrait. Regular third-person camera should preserve recognisable posture, uniform and hairstyle without compromising control.
+- **Explicit identification:** the opening mission briefing, subtitle speaker labels and Codec UI should clearly identify him as **SOLID SNAKE**. His prison outfit is the same operative visibly stripped of equipment, not an unrelated playable character swap.
+- **Animation identity:** an experienced younger Snake's guarded, economical movement and combat should read differently from a generic sentry. Keep CQC interpretations consistent with 1995 continuity.
+- **Acceptance:** a first-time player must correctly identify Snake in a neutral 3/4 character view, in normal third-person motion, and in the opening capture cutscene; not just from reading a nameplate. Verify at 720p and under intended prison lighting.
+- **Production status:** character identification is a hard quality gate, **not yet delivered**. The existing generic soldier skeleton/colour variants are placeholders pending a unique rigged head and costume mesh.
+
 ### Cross-game visual guidance
 
 Use MGS4 as **presentation/animation quality benchmark**, never as an excuse to transpose 2014 equipment into 1995. Maintain explicit variant IDs `snake_mg1_1995_infiltration`, `snake_mg1_1995_disarmed` and `gray_fox_mg1_1995_prisoner`. A generic soldier model is a *rigging/animation scaffold*, not a finished character likeness. Treat the MSX2 prisoner blue as comparative evidence, not verification of the target J2ME sprite.
