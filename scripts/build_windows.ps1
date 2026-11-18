@@ -19,7 +19,7 @@ Write-Host 'Building Rust gameplay core...'
 & cargo build --release --manifest-path $Manifest
 if ($LASTEXITCODE -ne 0) { throw "Rust build failed: $LASTEXITCODE" }
 Write-Host 'Cooking, staging and packaging Unreal...'
-$Args = @('BuildCookRun', "-project=$Project", '-noP4', '-platform=Win64', '-clientconfig=Development', '-build', '-cook', '-stage', '-pak', '-archive', '-prereqs', "-archivedirectory=$ArchiveDirectory")
-& $UAT @Args
+$UatArgs = @('BuildCookRun', "-project=$Project", '-noP4', '-platform=Win64', '-clientconfig=Development', '-build', '-cook', '-stage', '-pak', '-archive', '-prereqs', "-archivedirectory=$ArchiveDirectory")
+& $UAT @UatArgs
 if ($LASTEXITCODE -ne 0) { throw "Unreal packaging failed: $LASTEXITCODE" }
 Write-Host "Build archive: $ArchiveDirectory. Smoke-test before sharing."
