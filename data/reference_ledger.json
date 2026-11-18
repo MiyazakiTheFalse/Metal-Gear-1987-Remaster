@@ -1,0 +1,119 @@
+{
+  "schema_version": 1,
+  "updated_on": "2026-11-18",
+  "policy": "This is an evidence ledger. Original J2ME level claims require verification against actual playable source. Do not fill missing metres with guesses.",
+  "sources": [
+    {
+      "id": "j2me_a1",
+      "tier": "original_game",
+      "title": "Connect2Media J2ME Metal Gear 3.3.0 (a1)",
+      "uri": "local:Metal-Gear_J2ME_EN_v330.zip"
+    },
+    {
+      "id": "konami_mg1",
+      "tier": "official_original",
+      "title": "Metal Gear (MSX) manual/story",
+      "uri": "https://metalgear.konami.net/manual/mc1/mg1_msx/pc/en/page02.html"
+    },
+    {
+      "id": "konami_mg2",
+      "tier": "official_later",
+      "title": "Metal Gear 2 Solid Snake character profile",
+      "uri": "https://www.konami.com/mg/archive/mg2/chara.html"
+    },
+    {
+      "id": "konami_mgsv",
+      "tier": "official_later",
+      "title": "MGSV Mother Base manual",
+      "uri": "https://mgstpp-app.konamionline.com/manual/xb1/eu/en/xb1_07.html"
+    },
+    {
+      "id": "konami_mgsv_summary",
+      "tier": "official_later",
+      "title": "MGSV 1984 storyline",
+      "uri": "https://eu-support.konami.com/hc/en-gb/articles/9666546497047-Metal-Gear-Solid-V-The-Phantom-Pain"
+    },
+    {
+      "id": "msx_maps",
+      "tier": "community_secondary",
+      "title": "MSX game map atlas",
+      "uri": "https://www.vgmaps.com/Atlas/MSX/index.htm"
+    }
+  ],
+  "facts": [
+    {
+      "id": "CHAR-001",
+      "category": "character",
+      "subject": "Solid Snake",
+      "claim": "178 cm, 75 kg",
+      "source_ids": [
+        "konami_mg2"
+      ],
+      "confidence": "verified_in_later_game",
+      "scope": "1999 character profile; remaster 1995 physical reference remains provisional",
+      "action": "Use 178cm player model reference without treating as a source J2ME sprite dimension"
+    },
+    {
+      "id": "LOC-001",
+      "category": "location",
+      "subject": "Outer Heaven",
+      "claim": "1995 South African fortress in the original Metal Gear storyline",
+      "source_ids": [
+        "konami_mg1",
+        "j2me_a1"
+      ],
+      "confidence": "established_canon",
+      "scope": "Original game setting",
+      "action": "Preserve source fortress, critical routes, elevators and progression"
+    },
+    {
+      "id": "LOC-002",
+      "category": "location",
+      "subject": "Diamond Dogs Mother Base",
+      "claim": "1984 offshore base of Diamond Dogs; not a spatial blueprint for Outer Heaven",
+      "source_ids": [
+        "konami_mgsv",
+        "konami_mgsv_summary"
+      ],
+      "confidence": "established_later_setting",
+      "scope": "Different location and decade",
+      "action": "Reference utilitarian design language and logistics only"
+    },
+    {
+      "id": "MAP-001",
+      "category": "measurements",
+      "subject": "J2ME candidate room",
+      "claim": "Observed candidate 30 x 24 tile arrays and 8px tile artwork; exact room scope unverified",
+      "source_ids": [
+        "j2me_a1"
+      ],
+      "confidence": "inferred_needs_engine_trace",
+      "scope": "Do not assign metres per source tile; verify each room separately",
+      "action": "Record native grid, tile IDs, adjacency and source pixel measurements before 3D authoring"
+    },
+    {
+      "id": "MAP-002",
+      "category": "measurements",
+      "subject": "3D floor tile",
+      "claim": "0.90m modelling module, not a measured original tile",
+      "source_ids": [
+        "j2me_a1"
+      ],
+      "confidence": "remaster_design",
+      "scope": "Modular prototype only",
+      "action": "Never infer original 1995 building physical size from this geometry"
+    },
+    {
+      "id": "SET-001",
+      "category": "materials",
+      "subject": "Outer Heaven industrial asset style",
+      "claim": "Period-plausible 1995 military-industrial interiors can draw design language from MGSV",
+      "source_ids": [
+        "konami_mgsv"
+      ],
+      "confidence": "design_interpretation",
+      "scope": "Not a statement that individual props occur in original",
+      "action": "Rebuild or author models to source room measurements and camera clearance; mark additions"
+    }
+  ]
+}
