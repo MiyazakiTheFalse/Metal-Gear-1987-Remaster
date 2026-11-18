@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "last_updated": "2026-11-18",
+  "browser_prototype": {
+    "version": "0.3",
+    "status": "conversation_zip_only",
+    "webgl_visual_playtest_verified": false,
+    "controller_hardware_test_verified": false,
+    "tests": [
+      "rescue mission logic mock WebGL",
+      "Xbox button B edge detection regression",
+      "120 camera sphere sweep samples"
+    ],
+    "integrated": [
+      "procedural rounded character mesh generation",
+      "joint animation with gait/crouch easing",
+      "procedural steel/concrete materials and set dressing",
+      "persistent wall debris",
+      "original layered WebAudio alert-aware ambience"
+    ],
+    "not_integrated": [
+      "external CC0 models",
+      "skeletal animation retargeting",
+      "high quality facial rigs",
+      "TTS performances",
+      "true PBR texture imports",
+      "native Unreal compiled build"
+    ]
+  },
+  "asset_policy": "Never redistribute unlicensed Konami rips, unofficial fan game likenesses, or audio. Check source asset license per package."
+}
