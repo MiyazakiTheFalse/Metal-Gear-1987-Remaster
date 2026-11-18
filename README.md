@@ -25,6 +25,8 @@ These features are unverified source implementation, not finished gameplay or pr
 
 ## Global production doctrine — binding
 
+**Doctrine 000 — [How We Build](docs/DOCTRINE_000_HOW_WE_BUILD.md)** governs every other doctrine. Product quality is defined by the *method*: research and provenance, player-first intent, integrated execution, actual evidence, accessibility, source fidelity, performance and maintainability. Its [Doctrine 005 — Spatial Structure](docs/DOCTRINE_005_SPATIAL_STRUCTURE.md) companion binds topology and room rhythm to the same standards, with [area contracts](data/area_contracts.json). When requirements conflict, record an explicit decision and test the player's experience instead of allowing undocumented shortcuts.
+
 Every player-facing beat must be designed as **one synchronized audiovisual, interactive and temporal experience**, not mechanics first and cosmetic polish later. See [Doctrine 004](docs/DOCTRINE_004_INTEGRATED_EXPERIENCE.md) and the [beat registry](data/beat_contracts.json). Visual foreshadowing, spatial sound, inputs, timing, AI knowledge, durable state, interruptions and accessibility must agree; a polished asset is not proof of a finished beat. The registry begins with nine source/design-stage contracts and is not exhaustive. Local regression checks are required before packaging; Unreal playtesting is still outstanding.
 
 ## Local checks
@@ -32,6 +34,7 @@ Every player-facing beat must be designed as **one synchronized audiovisual, int
 ```sh
 python -m unittest discover -s tools -p 'test_*.py'
 python tools/validate_beat_contracts.py
+python tools/validate_area_contracts.py
 python tools/inspect_and_extract.py /path/to/Metal-Gear_J2ME_EN_v330.zip --output content
 cd rust && cargo test && cargo build --release
 ```
