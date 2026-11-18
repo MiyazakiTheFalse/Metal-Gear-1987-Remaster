@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "scope": "Gray Fox prison vertical slice",
+  "status": "NOT_PRODUCTION_READY",
+  "categories": [
+    {
+      "id": "character",
+      "priority": "P0",
+      "status": "prototype",
+      "evidence": "Unreal cylinder; browser procedural block humanoids",
+      "gate": "Rigged source-accurate characters, retargeted motion, facial posing"
+    },
+    {
+      "id": "locomotion",
+      "priority": "P0",
+      "status": "source_uncompiled",
+      "evidence": "UE camera-relative 350/600cm/s and shoulder camera",
+      "gate": "Test starts stops turns aim, foot contacts and Xbox camera"
+    },
+    {
+      "id": "prone",
+      "priority": "P0",
+      "status": "source_uncompiled",
+      "evidence": "UE 38cm prone capsule and box clearance checks",
+      "gate": "Real prone 3D collision, reversible transitions, authored animation"
+    },
+    {
+      "id": "cover",
+      "priority": "P0",
+      "status": "source_uncompiled",
+      "evidence": "UE contextual wall sweep and wall-relative movement",
+      "gate": "Test shoulder peeking, discontinuities and safe exits"
+    },
+    {
+      "id": "melee",
+      "priority": "P0",
+      "status": "prototype",
+      "evidence": "3-hit instant-damage loop; no authored animation",
+      "gate": "Animation-notify damage frames and guard reaction"
+    },
+    {
+      "id": "room_fidelity",
+      "priority": "P0",
+      "status": "unverified",
+      "evidence": "Original J2ME data 30x24 hypothesis not proven for Gray Fox cell",
+      "gate": "Decode true Gray Fox room, doors, events and proportions"
+    },
+    {
+      "id": "materials",
+      "priority": "P1",
+      "status": "prototype",
+      "evidence": "6 generic greybox OBJ; browser procedural textures",
+      "gate": "Sourced period-correct prison, scalable PBR and real set dressing"
+    },
+    {
+      "id": "world_reactivity",
+      "priority": "P1",
+      "status": "missing",
+      "evidence": "Weak walls currently disappear on event",
+      "gate": "Staged fracture, rubble, dust, sound and guard investigation"
+    },
+    {
+      "id": "audio",
+      "priority": "P0",
+      "status": "missing",
+      "evidence": "UE cue hooks only; browser procedural beeps",
+      "gate": "Footsteps, contact, alert, breach, search, adaptive music and subtitle ducking"
+    },
+    {
+      "id": "narrative",
+      "priority": "P0",
+      "status": "prototype",
+      "evidence": "Provisional Gray Fox written dialogue and mission flags",
+      "gate": "Verified 1995/J2ME narrative, expressive directed dialogue, pacing playtests"
+    },
+    {
+      "id": "packaging",
+      "priority": "P0",
+      "status": "unverified",
+      "evidence": "No compiled Unreal build in available environment",
+      "gate": "Windows smoke playtest, Xbox controls, performance and save reload"
+    }
+  ],
+  "approval": "All P0/P1 gates require evidence and in-engine playtest; changes without evidence cannot be marked done"
+}
