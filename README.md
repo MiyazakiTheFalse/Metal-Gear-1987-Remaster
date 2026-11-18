@@ -46,7 +46,7 @@ On a Windows machine with UE5.7, Rust MSVC, Visual Studio C++:
 
 The resulting `dist/Windows/` package must be smoke-tested before distribution. No UE-capable runner is currently connected; **no executable has been generated**.
 
-The prison's destructible mission walls intentionally **do not** trigger automatic cover: E/X breach interaction retains priority. Knocking is a sound-location distraction, not a direct player-position reveal. See [wall/knock implementation contract](docs/WALL_KNOCK_AND_BREACH_CONTRACT.md). No UE5.7 build validation or finished skeletal animations are claimed.
+The prison source prototype now includes a non-pausing, optional 1995-style transceiver with architectural dialogue from Kyle Schneider (120.79) and separate Big Boss guidance (120.85); C/Start opens it even when weapons are confiscated. The dialogue is remake-authored and currently displayed as text, not recorded VO. The early mission objective no longer gives away the wall. The prison's destructible mission walls intentionally **do not** trigger automatic cover: E/X breach interaction retains priority. Knocking is a sound-location distraction, not a direct player-position reveal. See [wall/knock implementation contract](docs/WALL_KNOCK_AND_BREACH_CONTRACT.md). No UE5.7 build validation or finished skeletal animations are claimed.
 
 ## Prototype controls
 
@@ -62,7 +62,8 @@ The prison's destructible mission walls intentionally **do not** trigger automat
 | Knock (in cover) | F | A / face-bottom |
 | Corner peek | Hold aim + slide towards wall end | Hold LT + move towards wall end |
 | Breach mission wall | E (in reach, face wall) | X / face-left |
-| Swap shoulder | Q | Press right stick |
+| Swap shoulder | Q (outside radio) | Press right stick (outside radio) |
+| Optional transceiver | C to open/close; Q to tune | Start/left special to open/close; press right stick to tune |
 | Graphics quality | F6 | Options menu pending |
 
 ## Event architecture — Doctrine 002
