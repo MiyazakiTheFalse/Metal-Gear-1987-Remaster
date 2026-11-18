@@ -25,6 +25,7 @@ public:
     bool IsMissionLogVisible() const { return bShowMissionLog; }
     bool IsCodecOpen() const { return bCodecOpen; }
     FString GetCodecStatus() const { return CodecStatus; }
+    int32 GetTransceiverChannel() const { return TransceiverChannel; }
     float GetEquipmentTimeScale() const { return EquipmentTimeScale; }
     float GetNoiseFactor() const;
     float GetHealth() const { return Health; }
@@ -74,6 +75,7 @@ private:
     float CoverIntent = 0.f;
     float PreferredShoulderSign = 1.f;
     FString CodecStatus;
+    int32 TransceiverChannel = 0; // 0: Kyle Schneider 120.79, 1: Big Boss 120.85
     bool bShowMissionLog = false;
     bool bAiming = false;
     bool bSprinting = false;
