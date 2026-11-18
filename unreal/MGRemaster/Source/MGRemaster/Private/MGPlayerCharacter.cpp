@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/PrimitiveComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "CollisionShape.h"
 #include "Engine/Engine.h"
@@ -105,6 +106,8 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     CombatNoiseTimer = FMath::Max(0.f, CombatNoiseTimer - DeltaSeconds);
     MeleeVisualTimer = FMath::Max(0.f, MeleeVisualTimer - DeltaSeconds);
+    WallKnockVisualTimer = FMath::Max(0.f, WallKnockVisualTimer - DeltaSeconds);
+    CoverReattachCooldown = FMath::Max(0.f, CoverReattachCooldown - DeltaSeconds);
     // Start prone only once CharacterMovement has established a valid crouch
     // base position. Never fake a prone pose with a standing collision capsule.
     if (bPendingProne && bIsCrouched && !bIsProne)
@@ -119,8 +122,10 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
         (bAiming ? 190.f : (bInCover ? 320.f : 420.f));
     const float TargetFOV = bAiming ? 65.f : 85.f;
     const float ShoulderWidth = bIsProne ? 24.f : (bInCover ? 46.f : (bAiming ? 58.f : 65.f));
+    const float CornerCameraReach = (bInCover && bAiming) ? 18.f * CoverPeekAlpha : 0.f;
     const FVector PivotLocal(0.f, 0.f, bIsProne ? 18.f : (bIsCrouched ? 40.f : 65.f));
-    FVector TargetSocket(0.f, ShoulderSign * ShoulderWidth, bIsProne ? 8.f : (bAiming ? 18.f : 10.f));
+    FVector TargetSocket(0.f, ShoulderSign * (ShoulderWidth + CornerCameraReach),
+                         bIsProne ? 8.f : (bAiming ? 18.f : 10.f));
 
     // Shoulder offset must also respect nearby cover. Spring-arm probe alone
     // handles camera distance, but the sideways socket needs its own sweep.
@@ -150,8 +155,10 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     // Clear visual windup/recovery cue until a source-accurate animation rig exists.
     const float AttackOffset = MeleeVisualTimer > 0.f ?
         17.f * FMath::Sin(FMath::Clamp(MeleeVisualTimer / 0.22f, 0.f, 1.f) * PI) : 0.f;
+    const float KnockOffset = WallKnockVisualTimer > 0.f ?
+        4.f * FMath::Sin(FMath::Clamp(WallKnockVisualTimer / 0.30f, 0.f, 1.f) * PI) : 0.f;
     PrototypeBody->SetRelativeLocation(FMath::VInterpTo(
-        PrototypeBody->GetRelativeLocation(), FVector(AttackOffset, 0.f, 0.f),
+        PrototypeBody->GetRelativeLocation(), FVector(AttackOffset, 0.f, 0.f) + CoverNormal * KnockOffset,
         DeltaSeconds, 19.f));
     CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, TargetLength, DeltaSeconds, 10.f);
     CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetSocket, DeltaSeconds, 10.f);
@@ -172,8 +179,9 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
             LeaveCover();
         else
             SetActorRotation(FMath::RInterpTo(GetActorRotation(),
-                (-CoverNormal).Rotation(), DeltaSeconds, 14.f));
+                CoverNormal.Rotation(), DeltaSeconds, 14.f)); // Back against wall.
     }
+    UpdateCornerPeek(DeltaSeconds);
 }
 
 void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
@@ -230,7 +238,8 @@ void AMGPlayerCharacter::MoveForward(float Value)
                 ECC_Pawn, FCollisionShape::MakeBox(FVector(74.f, 29.f, 27.f)), Query);
             if (!bHit) AddMovementInput(Direction, Value);
         }
-        else AddMovementInput(Direction, Value);
+        else if (!TryAutoEnterCover(Direction * FMath::Sign(Value)))
+            AddMovementInput(Direction, Value);
     }
 }
 void AMGPlayerCharacter::MoveRight(float Value)
@@ -251,7 +260,8 @@ void AMGPlayerCharacter::MoveRight(float Value)
                 ECC_Pawn, FCollisionShape::MakeBox(FVector(74.f, 29.f, 27.f)), Query);
             if (!bHit) AddMovementInput(Direction, Value);
         }
-        else AddMovementInput(Direction, Value);
+        else if (!TryAutoEnterCover(Direction * FMath::Sign(Value)))
+            AddMovementInput(Direction, Value);
     }
 }
 void AMGPlayerCharacter::Turn(float Value) { AddControllerYawInput(Value); }
@@ -372,9 +382,18 @@ FString AMGPlayerCharacter::GetPostureText() const
 void AMGPlayerCharacter::ApplyCoverMovement(float Value, const FVector& Direction)
 {
     if (FMath::IsNearlyZero(Value)) return;
+    const FVector Desired = Direction.GetSafeNormal2D() * Value;
+    if (FVector::DotProduct(Desired, CoverNormal) > 0.76f)
+    {
+        LeaveCover();
+        AddMovementInput(Direction, Value);
+        return;
+    }
     const FVector Tangent = FVector::CrossProduct(FVector::UpVector, CoverNormal).GetSafeNormal2D();
-    const float AlongWall = FVector::DotProduct(Direction.GetSafeNormal2D(), Tangent);
-    AddMovementInput(Tangent, AlongWall * Value);
+    const float AlongWall = FVector::DotProduct(Desired, Tangent);
+    CoverIntent = AlongWall;
+    CoverShuffleDirection = AlongWall;
+    AddMovementInput(Tangent, AlongWall);
 }
 void AMGPlayerCharacter::EnterProneAfterCrouch()
 {
@@ -616,6 +635,7 @@ void AMGPlayerCharacter::UseItem()
 void AMGPlayerCharacter::MeleeAttack()
 {
     if (!GetWorld() || !Controller) return;
+    if (bInCover) { KnockOnWall(); return; }
     if (bIsProne)
     {
         NotifyFeedback(TEXT("UNABLE TO STRIKE WHILE PRONE"), TEXT("denied"));
