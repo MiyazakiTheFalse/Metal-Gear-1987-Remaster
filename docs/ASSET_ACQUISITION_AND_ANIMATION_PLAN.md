@@ -22,6 +22,26 @@ Updated 2026-11-18. This is a source-verified *candidate* pipeline, NOT a claim 
 | [Mixamo](https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html) | Optional retargetable placeholder animations | Royalty free for games; no resale/distribution of raw library as standalone files | Candidate only |
 | [Epic Game Animation Sample](https://dev.epicgames.com/documentation/unreal-engine/game-animation-sample-project-in-unreal-engine) | Unreal motion-matching and responsive locomotion reference | Review Fab license and Unreal-specific terms | Candidate only |
 
+## Binding 1995 wardrobe guide — separate character identities
+
+### Solid Snake: Operation Intrude N313 (1995)
+- **Established:** novice FOXHOUND operative infiltrating Outer Heaven in 1995. Original MSX2 character sprite uses a limited green/blue military palette; contemporary promotional artwork depicts practical green fatigues and field webbing. See Konami original-game history: https://www.konami.com/mg/history/jp/ja/mg and original MG MSX2 cover art.
+- **Permitted 3D interpretation:** olive/green field uniform, functional boots/gloves, modest period-plausible pouches and belt, appropriate 1995 hair/face. Recognisable young Snake silhouette. Wear and damage evolve through infiltration and capture.
+- **Not source-verified:** precise jacket cut, helmet/headband, armour plate count, 1995-specific weapon harness and backpack layout. These must be labelled design interpretations pending comparison with original MSX2 and supplied J2ME sprites.
+- **Do not import as 1995 canon:** 2005 Shadow Moses thermal sneaking suit, 2007 Tanker suit, 2009 Pliskin disguise, 2014 OctoCamo/Solid Eye or Venom Snake's Diamond Dogs hardware.
+- **Capture:** retain clothing silhouette but remove equipment visibly. Confiscation should not magically swap Snake to a later sneaking suit.
+
+### Gray Fox: imprisoned agent (1995)
+- **Established in the MSX2 release:** a blue recolour of the ordinary prisoner sprite, whose clothing is brown. Comparative evidence: https://comicvine.gamespot.com/grey-fox/4005-47947/ and https://metalgear.fandom.com/wiki/Prisoner_of_war
+- **Permitted 3D interpretation:** distinct blue detention uniform (simple institutional garments), tired posture and restrained equipment; expressive rescue reactions. He is experienced and competent but physically compromised.
+- **Not source-verified:** exact buttons, fabric weave, collar, footwear, prison identification marks, hair colour in the selected Connect2Media J2ME edition. Verify target sprite and do not silently copy conjectural details.
+- **Never depict:** 2005 Cyborg Ninja exoskeleton/helmet, later Zanzibar Land combat gear or a generic fully armed guard body as his detention outfit.
+- **Animation requirements:** separate fatigue, guarded walk, listening and recovery sets; his distinct silhouette must remain readable beside Snake under dark prison lighting.
+
+### Cross-game visual guidance
+
+Use MGS4 as **presentation/animation quality benchmark**, never as an excuse to transpose 2014 equipment into 1995. Maintain explicit variant IDs `snake_mg1_1995_infiltration`, `snake_mg1_1995_disarmed` and `gray_fox_mg1_1995_prisoner`. A generic soldier model is a *rigging/animation scaffold*, not a finished character likeness. Treat the MSX2 prisoner blue as comparative evidence, not verification of the target J2ME sprite.
+
 ## Technical integration order
 
 1. Acquire properly licensed skeleton/base mesh and record file hashes, name, release, URL, licence and limits.
