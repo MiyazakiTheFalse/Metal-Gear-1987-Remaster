@@ -314,7 +314,8 @@ void AMGPlayerCharacter::UpdateMovementState()
     Movement->MaxWalkSpeed = bIsProne ? 95.f :
         (bInCover ? 120.f : (bIsCrouched ? 170.f :
             (bAiming ? 210.f : (bSprinting ? 600.f : 350.f))));
-    Movement->MaxWalkSpeedCrouched = 170.f;
+    // Crouched/prone cover must not bypass the current slow movement cap.
+    Movement->MaxWalkSpeedCrouched = bIsProne ? 95.f : (bInCover ? 120.f : 170.f);
 }
 float AMGPlayerCharacter::GetNoiseFactor() const
 {
