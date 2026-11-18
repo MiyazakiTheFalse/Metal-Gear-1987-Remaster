@@ -1,0 +1,381 @@
+{
+  "schema_version": 1,
+  "doctrine": "DOCTRINE_004",
+  "scope": "game_wide",
+  "coverage_status": "seed_only_not_exhaustive",
+  "note": "Seed registry for key prison and stealth beats; all future player-facing features must add a contract and pass production gates.",
+  "beats": [
+    {
+      "provenance": "remake_adaptation_pending_j2me",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "id": "gray_fox.capture_and_control",
+      "kind": "story_transition",
+      "intent": "Connect Snake's deliberate capture to loss of equipment and regain player control.",
+      "trigger": "Begin mission in cell checkpoint.",
+      "action": "Player can move, aim camera and inspect immediately.",
+      "visual": {
+        "foreshadow": "Equipment removed in earlier capture scene; prison cell reads as confined",
+        "impact": "Confiscation notification appears when mission capture commits",
+        "aftermath": "Snake resumes control in unchanged uniform, without weapons"
+      },
+      "audio": {
+        "origin": "Close cell hum and restrained ambience",
+        "response": "Equipment removal cue is audible, not a sustained alarm",
+        "non_audio_equivalent": "Onscreen confiscated-equipment status"
+      },
+      "timing": {
+        "start_event": "Capture flag commit",
+        "feedback_target_ms": 120,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "hypothesis_until_playtested"
+      },
+      "state": {
+        "transaction": "Capture + confiscation flags once",
+        "persistence": "Checkpoint resumes with no repeated capture cue",
+        "ai_knowledge": "Guard awareness not fabricated"
+      },
+      "interruptions": [
+        "reload",
+        "skip_future_capture_cutscene",
+        "rapid_input"
+      ],
+      "verification": [
+        "Capture once; immediate control; save/reload without duplicate"
+      ]
+    },
+    {
+      "provenance": "remake_adaptation_pending_j2me",
+      "implementation_status": "design_only",
+      "verification_status": "unverified",
+      "id": "gray_fox.architecture_seed",
+      "kind": "optional_radio",
+      "intent": "Schneider provides credible architectural context without giving away the prison secret.",
+      "trigger": "Player manually opens transceiver or accepts subtle incoming contact.",
+      "action": "May close or ignore Schneider and solve immediately.",
+      "visual": {
+        "foreshadow": "Architectural seams can be seen before radio use",
+        "impact": "1995-era transceiver UI identifies Schneider",
+        "aftermath": "Radio UI exits without camera teleport"
+      },
+      "audio": {
+        "origin": "Dry receiver voice rather than 3D world broadcast",
+        "response": "Subdued world ambience during listening without hiding threat cues",
+        "non_audio_equivalent": "Subtitles and readable transcript"
+      },
+      "timing": {
+        "start_event": "Optional player request",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "hypothesis_until_playtested"
+      },
+      "state": {
+        "transaction": "No mission progress flag committed by dialogue",
+        "persistence": "Optional call is replayable and does not gate a wall",
+        "ai_knowledge": "No guards triangulate an internal radio voice"
+      },
+      "interruptions": [
+        "skip",
+        "close",
+        "alert",
+        "pause",
+        "save_reload"
+      ],
+      "verification": [
+        "No call required to breach; transcript readable; channel identity correct"
+      ]
+    },
+    {
+      "provenance": "remake_adaptation_pending_j2me",
+      "implementation_status": "design_only",
+      "verification_status": "unverified",
+      "id": "gray_fox.wall_discovery",
+      "kind": "environmental_puzzle",
+      "intent": "Player notices that a repaired section may not be sound.",
+      "trigger": "Inspection or approach near WeakWall_A.",
+      "action": "Observe textures, compare contact sounds, or act on prior knowledge.",
+      "visual": {
+        "foreshadow": "Masonry seam and conduit join distinguish patch without glowing arrows",
+        "impact": "Contact feedback identifies hollow candidate",
+        "aftermath": "Surface remains recognizably damaged until breached"
+      },
+      "audio": {
+        "origin": "Localized hollow sound compared with solid material",
+        "response": "Acoustic response only where surface is struck",
+        "non_audio_equivalent": "Visible wear and descriptive caption or inspect affordance"
+      },
+      "timing": {
+        "start_event": "First inspection or contact",
+        "feedback_target_ms": 120,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [
+          14,
+          35
+        ],
+        "timing_status": "hypothesis_until_playtested"
+      },
+      "state": {
+        "transaction": "No hidden timer unlock; wall is eligible immediately",
+        "persistence": "Wall condition persists until breach",
+        "ai_knowledge": "Only meaningful audible impacts create guards' sound cues"
+      },
+      "interruptions": [
+        "no_audio",
+        "no_visual_colour",
+        "repeated_contact",
+        "alerts"
+      ],
+      "verification": [
+        "Early solver can breach at t=0; hints only after inactivity; compare acoustic/visual comprehension"
+      ]
+    },
+    {
+      "provenance": "remake_adaptation_pending_j2me",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "id": "gray_fox.first_breach",
+      "kind": "destruction_event",
+      "intent": "Earned breakthrough shows a passage and confirms the player's inference.",
+      "trigger": "Player E/X near WeakWall_A after capture.",
+      "action": "Immediate breach if eligibility is met; no presentation lock.",
+      "visual": {
+        "foreshadow": "Weak seam visible at approach",
+        "impact": "Impact/crack, debris and opening align with actual collision change",
+        "aftermath": "Opening remains and can be traversed"
+      },
+      "audio": {
+        "origin": "Distinct masonry fracture at the wall",
+        "response": "Debris settles with no fake distant gunfire",
+        "non_audio_equivalent": "Captions/visible dust and collision-open confirmation"
+      },
+      "timing": {
+        "start_event": "First successful interaction",
+        "feedback_target_ms": 120,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "hypothesis_until_playtested"
+      },
+      "state": {
+        "transaction": "Commit first-breach flag once",
+        "persistence": "Destroy blocker only on committed event, restore after load",
+        "ai_knowledge": "Noise only informs guards within plausible acoustic reach"
+      },
+      "interruptions": [
+        "spam_input",
+        "interrupted_audio",
+        "save_reload",
+        "frame_drop"
+      ],
+      "verification": [
+        "Same checkpoint state after skip/reload; no cover attach to breachable actor"
+      ]
+    },
+    {
+      "provenance": "remake_adaptation_pending_j2me",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "id": "gray_fox.fox_revelation",
+      "kind": "rescue_event",
+      "intent": "Gray Fox's condition and intelligence create a restrained dramatic release.",
+      "trigger": "Player E/X near Gray Fox after first breach.",
+      "action": "Retain input; no forced eleven-second stall.",
+      "visual": {
+        "foreshadow": "Distinct prisoner silhouette and exhausted posture",
+        "impact": "Readable performance/shot and subtitle identify Gray Fox",
+        "aftermath": "Player can act while dialogue cue progresses"
+      },
+      "audio": {
+        "origin": "Voice prioritized over hum without muting real guard cues",
+        "response": "Small purposeful pause in score rather than mandatory silence",
+        "non_audio_equivalent": "Persist key information to mission log"
+      },
+      "timing": {
+        "start_event": "Rescue transaction commits",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "hypothesis_until_playtested"
+      },
+      "state": {
+        "transaction": "One rescue flag",
+        "persistence": "Intel survives cue interruption and save/load",
+        "ai_knowledge": "No unrelated scripted guard wave"
+      },
+      "interruptions": [
+        "move_away",
+        "skip",
+        "guard_alert",
+        "save_reload"
+      ],
+      "verification": [
+        "Immediate next move available; read log after interrupt"
+      ]
+    },
+    {
+      "provenance": "remake_adaptation_pending_j2me",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "id": "gray_fox.second_breach",
+      "kind": "destruction_event",
+      "intent": "Release into dangerous escape lane with coherent spatial cause.",
+      "trigger": "Player E/X near WeakWall_B after rescue.",
+      "action": "Immediate breach; player chooses stealth or haste.",
+      "visual": {
+        "foreshadow": "Surface deterioration and clear exit route",
+        "impact": "Breach debris and opening reveal legible corridor",
+        "aftermath": "Collision and sight lines agree with visible opening"
+      },
+      "audio": {
+        "origin": "Wall fracture and falling debris from exact location",
+        "response": "Acoustics transition from enclosed room to corridor",
+        "non_audio_equivalent": "Visual wall-open signal plus captions"
+      },
+      "timing": {
+        "start_event": "Second breach flag commits",
+        "feedback_target_ms": 120,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "hypothesis_until_playtested"
+      },
+      "state": {
+        "transaction": "Exit-breach flag once",
+        "persistence": "Persistent opening on resume",
+        "ai_knowledge": "Any resulting guard response obeys real audibility"
+      },
+      "interruptions": [
+        "spam_input",
+        "cover",
+        "guard_alert",
+        "save_reload"
+      ],
+      "verification": [
+        "No forced wait; sound stimulus never points to Snake directly"
+      ]
+    },
+    {
+      "provenance": "remake_adaptation_pending_j2me",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "id": "stealth.wall_contact_and_knock",
+      "kind": "player_interaction",
+      "intent": "Reward tactical approach with tactile contact and controllable deception.",
+      "trigger": "Move into a suitable full-height wall, then F/A while attached.",
+      "action": "Slide, peek, release, knock or leave. Breakable walls cannot auto-attach.",
+      "visual": {
+        "foreshadow": "Surface contact and body turn telegraph attachment",
+        "impact": "Hand strike at exact impact position; small body response",
+        "aftermath": "Return to quiet wall posture without camera snap"
+      },
+      "audio": {
+        "origin": "Distinct knock by material at hit point",
+        "response": "Occlusion and material influence audibility",
+        "non_audio_equivalent": "Visible contact and optional sound-event captions"
+      },
+      "timing": {
+        "start_event": "Contact/knock action",
+        "feedback_target_ms": 120,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "hypothesis_until_playtested"
+      },
+      "state": {
+        "transaction": "No rescue/breach flag on knock",
+        "persistence": "Knock cooldown ephemeral",
+        "ai_knowledge": "Guards get wall point, not player's position"
+      },
+      "interruptions": [
+        "camera_collision",
+        "repeated_knock",
+        "destroy_wall",
+        "sprint"
+      ],
+      "verification": [
+        "No automatic attach to WeakWall_A/B; input returns without trapping Snake"
+      ]
+    },
+    {
+      "provenance": "remake_adaptation_pending_j2me",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "id": "stealth.guard_sound_investigation",
+      "kind": "ai_response",
+      "intent": "Guards seem observant, not omniscient.",
+      "trigger": "Audible impact reaches guard within range/obstruction rules.",
+      "action": "Guard reacts, turns, approaches, searches, then returns unless actually detects Snake.",
+      "visual": {
+        "foreshadow": "Look/turn begins reaction before locomotion",
+        "impact": "Patrol diverts toward sound, scans corners",
+        "aftermath": "Returns to route after failed investigation"
+      },
+      "audio": {
+        "origin": "Guard reaction/chatter optional and positioned at guard",
+        "response": "Boots/search audio and music reflect actual knowledge",
+        "non_audio_equivalent": "Subtitles/visible body facing and radar caution state"
+      },
+      "timing": {
+        "start_event": "Hearing event accepted",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "hypothesis_until_playtested"
+      },
+      "state": {
+        "transaction": "No mission objective commit",
+        "persistence": "Patrol origin/last position persists for this encounter",
+        "ai_knowledge": "No reveal of Snake's location without sight/hearing evidence"
+      },
+      "interruptions": [
+        "repeat_knock",
+        "physical_obstacle",
+        "sighting",
+        "combat_alert"
+      ],
+      "verification": [
+        "Investigate sound not player transform; alert overrides; no collision phasing"
+      ]
+    },
+    {
+      "provenance": "remake_adaptation_pending_j2me",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "id": "gray_fox.escape_and_recovery",
+      "kind": "mission_transition",
+      "intent": "Resolve the threat with relief, not artificial speed manipulation.",
+      "trigger": "Reach physical escape marker after second breach.",
+      "action": "Player retains locomotion and may finish without confrontation.",
+      "visual": {
+        "foreshadow": "Exit landmark established before escape",
+        "impact": "Completion notification follows actual checkpoint transaction",
+        "aftermath": "Environment remains readable after success"
+      },
+      "audio": {
+        "origin": "Threat audio only if guards actually engaged",
+        "response": "Quiet release/ambient resolve rather than mandatory victory sting",
+        "non_audio_equivalent": "Mission summary is readable without audio"
+      },
+      "timing": {
+        "start_event": "Escape flag commits",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "hypothesis_until_playtested"
+      },
+      "state": {
+        "transaction": "Escape flag once",
+        "persistence": "Checkpoint persists",
+        "ai_knowledge": "AI memory not forcibly erased just to make calm"
+      },
+      "interruptions": [
+        "death",
+        "save_reload",
+        "late_alert",
+        "rapid_completion"
+      ],
+      "verification": [
+        "No replay of completed rescue/escape; player control returns"
+      ]
+    }
+  ]
+}
