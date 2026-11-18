@@ -1,0 +1,257 @@
+{
+  "schema_version": 1,
+  "doctrine": "DOCTRINE_005",
+  "supreme_doctrine": "DOCTRINE_000",
+  "scope": "game_wide",
+  "coverage_status": "seed_only_not_exhaustive",
+  "areas": [
+    {
+      "provenance": "comparative_msx2_pending_target_j2me",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Do not alter source story gates or claim actual J2ME map is verified.",
+      "test_evidence": [],
+      "id": "prison.snake_cell",
+      "stage": "discovery",
+      "beat_ids": [
+        "gray_fox.capture_and_control",
+        "gray_fox.architecture_seed",
+        "gray_fox.wall_discovery",
+        "gray_fox.first_breach"
+      ],
+      "arrival": {
+        "entry": "Capture checkpoint inside western holding cell",
+        "safe_observation": "Initial cell is shielded from pre-existing outer corridor patrols",
+        "first_goal": "Find a credible way out without a mandatory radio",
+        "landmark": "Uneven patched wall material adjacent to service structure is proposed"
+      },
+      "topology": {
+        "adjacency": [
+          "prison.gray_fox_cell after first breach"
+        ],
+        "gates": [
+          "First breach requires capture flag; first wall blocks until successful E/X"
+        ],
+        "choices": [
+          "Direct first-wall approach",
+          "Inspect contrasting solid walls",
+          "Optional manual radio contacts"
+        ],
+        "camera_clearance": "Test both camera shoulders and low angles against cell limits; not yet measured"
+      },
+      "visual": {
+        "forewarning": "Mismatch between patch and older concrete; proposed art not present",
+        "reveal": "Actual break must create visible, traversable opening",
+        "spatial_readability": "Use contrast in geometry, seams, lighting and captions without bright arrows"
+      },
+      "audio": {
+        "sources": [
+          "Prison ambience",
+          "Potential hollow test sound",
+          "Optional non-spatial transceiver"
+        ],
+        "occlusion": "Intact wall isolates patrol sound; after breach soundscape changes",
+        "non_audio_equivalent": "Material border/seam and inspection cue must be legible with audio muted"
+      },
+      "risk": {
+        "safe_points": [
+          "Cell entry position"
+        ],
+        "exposure_windows": [],
+        "pressure": "Low until player genuinely exposes route; never spawn a wave for pacing"
+      },
+      "timing": {
+        "trigger": "Player action / first successful wall interaction",
+        "hint_policy": "Candidate 28/75s since beat, deferred during active exploration; never blocks a breach",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "color_independent": true,
+        "caption_plan": "Describe relevant hollow resonance when introduced",
+        "control_plan": "E/X first breach works without radio; C optional"
+      },
+      "failure": {
+        "interrupts": [
+          "Save/reload",
+          "Knock on wrong wall",
+          "Immediate correct solve",
+          "Camera clipping",
+          "Muted audio"
+        ],
+        "recovery": "No dead end; first-wall breach always remains accessible after capture"
+      },
+      "tests": [
+        "Direct solve",
+        "Curious exploration",
+        "Player inactivity and renewed exploration",
+        "Muted-audio clue legibility",
+        "Immediate breach no cover attach"
+      ]
+    },
+    {
+      "provenance": "comparative_msx2_pending_target_j2me",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Do not alter source story gates or claim actual J2ME map is verified.",
+      "test_evidence": [],
+      "id": "prison.gray_fox_cell",
+      "stage": "revelation",
+      "beat_ids": [
+        "gray_fox.fox_revelation",
+        "gray_fox.second_breach"
+      ],
+      "arrival": {
+        "entry": "Through first breach",
+        "safe_observation": "Quiet passage for contextual rescue, no fabricated alert reset",
+        "first_goal": "Identify Gray Fox then understand escape route",
+        "landmark": "Distinct captive silhouette; currently proxy geometry only"
+      },
+      "topology": {
+        "adjacency": [
+          "prison.snake_cell",
+          "prison.escape_corridor after second breach"
+        ],
+        "gates": [
+          "Rescue requires first-wall breach",
+          "Second breach requires rescue"
+        ],
+        "choices": [
+          "Hear or skip through temporary intel subtitle",
+          "Explore cell and inspect exit"
+        ],
+        "camera_clearance": "Two shoulder setups at breach thresholds; currently untested"
+      },
+      "visual": {
+        "forewarning": "Vulnerable captive occupies readable central sightline",
+        "reveal": "Gray Fox identity and intelligence have dramatic emphasis",
+        "spatial_readability": "Enough space for Snake to turn and interact; no cinematic clipping"
+      },
+      "audio": {
+        "sources": [
+          "In-room subdued ambience",
+          "Gray Fox dialogue to be recorded",
+          "Second breach fracture to be authored"
+        ],
+        "occlusion": "Two separating barriers create expected isolation until destroyed",
+        "non_audio_equivalent": "Speaker labels and persistent intel log"
+      },
+      "risk": {
+        "safe_points": [
+          "Immediate area around rescue interaction"
+        ],
+        "exposure_windows": [],
+        "pressure": "Revelation quiet is earned by walls, not AI suspension"
+      },
+      "timing": {
+        "trigger": "Player rescue/exit-breach actions",
+        "hint_policy": "Only after inactivity and with player exploration suppression; not required",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "color_independent": true,
+        "caption_plan": "Subtitles distinguish speaker and speaker intent",
+        "control_plan": "E/X rescue and exit breach available when flags permit"
+      },
+      "failure": {
+        "interrupts": [
+          "Player leaves during dialogue",
+          "Save/reload",
+          "Premature exit attempt",
+          "Enemy noise from actual outside world"
+        ],
+        "recovery": "Intel persists in log and exit remains available when rescued"
+      },
+      "tests": [
+        "No premature rescue",
+        "No second-wall breach before Fox",
+        "Dialogue interrupt",
+        "Checkpoint and corridor access"
+      ]
+    },
+    {
+      "provenance": "comparative_msx2_pending_target_j2me",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Do not alter source story gates or claim actual J2ME map is verified.",
+      "test_evidence": [],
+      "id": "prison.escape_corridor",
+      "stage": "risk_and_recovery",
+      "beat_ids": [
+        "stealth.wall_contact_and_knock",
+        "stealth.guard_sound_investigation",
+        "gray_fox.escape_and_recovery"
+      ],
+      "arrival": {
+        "entry": "After second breach",
+        "safe_observation": "Opening grants a vantage over a dangerous route before stepping out",
+        "first_goal": "Read guard patrols, choose a route to physical exit marker",
+        "landmark": "Exit marker at far end of corridor, currently geometric proxy"
+      },
+      "topology": {
+        "adjacency": [
+          "prison.gray_fox_cell",
+          "escape marker destination"
+        ],
+        "gates": [
+          "Escape action requires second breach"
+        ],
+        "choices": [
+          "Wait for patrol",
+          "Use cover and knocks",
+          "Take a risk through exposed corridor"
+        ],
+        "camera_clearance": "Shoulder switching and peek from normal walls without clipping or bypassing wall"
+      },
+      "visual": {
+        "forewarning": "Visible guard silhouettes and cover before exposure",
+        "reveal": "Player creates distraction and watches guard investigate impact, not Snake transform",
+        "spatial_readability": "Patrol and exit identifiable without relying on radar"
+      },
+      "audio": {
+        "sources": [
+          "Guard steps and acknowledgement",
+          "Material knocks at impact location",
+          "Corridor exterior room tone"
+        ],
+        "occlusion": "Wall destruction changes audio path; simple trace attenuation currently implemented for knocks",
+        "non_audio_equivalent": "Guard body language, awareness radar and captions"
+      },
+      "risk": {
+        "safe_points": [
+          "Cell-side approach and suitable cover"
+        ],
+        "exposure_windows": [
+          "Guard sight cones in active corridor"
+        ],
+        "pressure": "Result of actual guard detection and navigable topology"
+      },
+      "timing": {
+        "trigger": "Player exit-breach + guard perception event",
+        "hint_policy": "No hint should override a real guard alert",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "color_independent": true,
+        "caption_plan": "Hearing clues need subtitles or visible guard gestures",
+        "control_plan": "Free movement and cover throughout"
+      },
+      "failure": {
+        "interrupts": [
+          "Alert",
+          "Repeated knock",
+          "Failed navigation",
+          "Death/checkpoint",
+          "Low fps"
+        ],
+        "recovery": "Guard may investigate, search, then return; actual pathfinding and recovery behavior still need playtesting"
+      },
+      "tests": [
+        "Stealth traversal",
+        "Detected traversal",
+        "Camera and collision sweeps",
+        "Guard acoustic/route tests",
+        "Escape checkpoint replay"
+      ]
+    }
+  ]
+}
