@@ -3,6 +3,7 @@
 #include "MGGuardActor.h"
 #include "MGGrayFoxSaveGame.h"
 #include "MGPlayerCharacter.h"
+#include "MGEquipmentComponent.h"
 #include "MGPrisonerCharacter.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SceneComponent.h"
@@ -25,7 +26,9 @@ namespace
     uint32 FallbackStep(uint32 Flags, uint32 Action)
     {
         // Mirror the Rust transaction, fail closed on skipped or repeated steps.
-        const uint32 Known = 63u;
+        // 1987 prisoner intelligence, boss, transmitter and Card 3 additions.
+        // Old six-bit checkpoints remain valid. Unknown bits fail closed.
+        const uint32 Known = 16383u;
         if (Flags & ~Known) return Flags;
         if (Action == MG_FOX_CAPTURE && !(Flags & MG_FOX_CAPTURED))
             return Flags | MG_FOX_CAPTURED | MG_FOX_CONFISCATED;
@@ -41,6 +44,28 @@ namespace
         if (Action == MG_FOX_ESCAPE
             && (Flags & MG_FOX_EXIT_WALL_BREACHED) && !(Flags & MG_FOX_LEFT_PRISON))
             return Flags | MG_FOX_LEFT_PRISON;
+        if (Action == MG_FOX_ENTER_SHOTMAKER
+            && (Flags & MG_FOX_LEFT_PRISON) && !(Flags & MG_FOX_SHOTMAKER_ENCOUNTERED))
+            return Flags | MG_FOX_SHOTMAKER_ENCOUNTERED;
+        if (Action == MG_FOX_RECOVER_GEAR
+            && (Flags & MG_FOX_SHOTMAKER_ENCOUNTERED) && !(Flags & MG_FOX_GEAR_RECOVERED))
+            return Flags | MG_FOX_GEAR_RECOVERED | MG_FOX_TRANSMITTER_PLANTED;
+        if (Action == MG_FOX_DEFEAT_SHOTMAKER
+            && (Flags & MG_FOX_GEAR_RECOVERED) && !(Flags & MG_FOX_SHOTMAKER_DEFEATED))
+            return Flags | MG_FOX_SHOTMAKER_DEFEATED;
+        if (Action == MG_FOX_COLLECT_CARD3
+            && (Flags & MG_FOX_SHOTMAKER_DEFEATED) && !(Flags & MG_FOX_CARD3_RECOVERED))
+            return Flags | MG_FOX_CARD3_RECOVERED;
+        if (Action == MG_FOX_REMOVE_TRANSMITTER
+            && (Flags & MG_FOX_TRANSMITTER_PLANTED) && !(Flags & MG_FOX_TRANSMITTER_REMOVED))
+            return Flags | MG_FOX_TRANSMITTER_REMOVED;
+        if (Action == MG_FOX_COMPLETE_SLICE
+            && (Flags & MG_FOX_CARD3_RECOVERED) && !(Flags & MG_FOX_SLICE_COMPLETED))
+            return Flags | MG_FOX_SLICE_COMPLETED;
+        // Distinct from capture, for the expanded playable pre-prison route.
+        if (Action == MG_FOX_LEARN_DETENTION_ROUTE
+            && !(Flags & MG_FOX_CAPTURED) && !(Flags & MG_FOX_DETENTION_INTELLIGENCE))
+            return Flags | MG_FOX_DETENTION_INTELLIGENCE;
         return Flags;
     }
 }
@@ -130,21 +155,34 @@ void AMGGrayFoxMission::BeginPlay()
     {
         // Reject unknown bits and structurally impossible checkpoints.
         const uint32 F = Save->MissionFlags;
-        const bool bValid = (F & ~63u) == 0
+        const bool bLegacy = Save->SchemaVersion == 1;
+        const bool bRecognizedSchema = bLegacy || Save->SchemaVersion == 2;
+        const bool bValid = bRecognizedSchema
+            && (F & ~(bLegacy ? 63u : 16383u)) == 0
             && (!(F & MG_FOX_CAPTURED) || (F & MG_FOX_CONFISCATED))
             && (!(F & MG_FOX_FIRST_WALL_BREACHED) || (F & MG_FOX_CAPTURED))
             && (!(F & MG_FOX_RESCUED) || (F & MG_FOX_FIRST_WALL_BREACHED))
             && (!(F & MG_FOX_EXIT_WALL_BREACHED) || (F & MG_FOX_RESCUED))
-            && (!(F & MG_FOX_LEFT_PRISON) || (F & MG_FOX_EXIT_WALL_BREACHED));
+            && (!(F & MG_FOX_LEFT_PRISON) || (F & MG_FOX_EXIT_WALL_BREACHED))
+            && (!(F & MG_FOX_SHOTMAKER_ENCOUNTERED) || (F & MG_FOX_LEFT_PRISON))
+            && (!(F & MG_FOX_GEAR_RECOVERED) || (F & MG_FOX_SHOTMAKER_ENCOUNTERED))
+            && (!(F & MG_FOX_TRANSMITTER_PLANTED) || (F & MG_FOX_GEAR_RECOVERED))
+            && (!(F & MG_FOX_TRANSMITTER_REMOVED) || (F & MG_FOX_TRANSMITTER_PLANTED))
+            && (!(F & MG_FOX_SHOTMAKER_DEFEATED) || (F & MG_FOX_GEAR_RECOVERED))
+            && (!(F & MG_FOX_CARD3_RECOVERED) || (F & MG_FOX_SHOTMAKER_DEFEATED))
+            && (!(F & MG_FOX_SLICE_COMPLETED) || (F & MG_FOX_CARD3_RECOVERED));
         const FVector P = Save->CheckpointLocation;
         const bool bPositionSafe = !P.ContainsNaN()
-            && P.X >= -1160.f && P.X <= 1310.f
+            && P.X >= -1160.f
+            && P.X <= ((F & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 2950.f : 1310.f)
             && FMath::Abs(P.Y) < 410.f
             && P.Z >= -95.f && P.Z <= 180.f
             // A stale save must not place the player beyond a solid, unopened wall.
             && ((F & MG_FOX_FIRST_WALL_BREACHED) || P.X < -350.f)
-            && ((F & MG_FOX_EXIT_WALL_BREACHED) || P.X < 420.f);
-        if (bValid && bPositionSafe && Save->SchemaVersion == 1
+            && ((F & MG_FOX_EXIT_WALL_BREACHED) || P.X < 420.f)
+            // Later boss checkpoints cannot appear before the prison exit.
+            && ((F & MG_FOX_LEFT_PRISON) || P.X < 1300.f);
+        if (bValid && bPositionSafe
             && (F & MG_FOX_CAPTURED))
         {
             Flags = F;
@@ -177,6 +215,10 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
     if (APlayerController* PC = Cast<APlayerController>(Player->GetController()))
         PC->SetControlRotation(FRotator(-8.f, 0.f, 0.f));
     bPlayerInitialised = true;
+    // The historic confiscation flag is retained for canon and save fidelity.
+    // Gear usability depends on the distinct actual recovery transaction.
+    if (UMGEquipmentComponent* Inventory = Player->GetEquipment())
+        Inventory->SetConfiscated((Flags & MG_FOX_GEAR_RECOVERED) == 0);
 
     if (!bHasLoadedSave)
     {
@@ -196,7 +238,7 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
         UGameplayStatics::CreateSaveGameObject(UMGGrayFoxSaveGame::StaticClass()));
     if (!Save) return;
-    Save->SchemaVersion = 1;
+    Save->SchemaVersion = 2;
     Save->MissionFlags = Flags;
     Save->CheckpointLocation = Player ? Player->GetActorLocation() : CellStart;
     if (!UGameplayStatics::SaveGameToSlot(Save, SaveSlot, 0))
@@ -239,7 +281,29 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         Dialogue = TEXT("The outer passage is open. Stay low. Guards are nearby.");
         break;
     case MG_FOX_ESCAPE:
-        Dialogue = TEXT("PRISON ESCAPED — Gray Fox rescued. Checkpoint secured.");
+        Dialogue = TEXT("PRISON EXIT REACHED — THE INFILTRATION CONTINUES.");
+        break;
+    case MG_FOX_ENTER_SHOTMAKER:
+        Dialogue = TEXT("SHOOT GUNNER — AVOID THE SHOTGUN WHILE DISARMED.");
+        break;
+    case MG_FOX_RECOVER_GEAR:
+        if (Player && Player->GetEquipment())
+            Player->GetEquipment()->SetConfiscated(false);
+        Dialogue = TEXT("GEAR RECOVERED — INSPECT FOR AN ENEMY TRANSMITTER.");
+        break;
+    case MG_FOX_REMOVE_TRANSMITTER:
+        Dialogue = TEXT("ENEMY TRANSMITTER REMOVED.");
+        break;
+    case MG_FOX_DEFEAT_SHOTMAKER:
+        Dialogue = TEXT("SHOOT GUNNER DOWN — SEARCH FOR THE ACCESS CARD.");
+        break;
+    case MG_FOX_COLLECT_CARD3:
+        if (Player && Player->GetEquipment())
+            Player->GetEquipment()->AwardItem(TEXT("CARD3"), 1);
+        Dialogue = TEXT("CARD 3 RECOVERED — ROUTE FORWARD OPEN.");
+        break;
+    case MG_FOX_COMPLETE_SLICE:
+        Dialogue = TEXT("VERTICAL SLICE CHAPTER COMPLETE.");
         break;
     default: break;
     }
@@ -289,7 +353,8 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
 
 bool AMGGrayFoxMission::HasEquipmentConfiscated() const
 {
-    return (Flags & MG_FOX_CONFISCATED) != 0;
+    return (Flags & MG_FOX_CONFISCATED) != 0
+        && (Flags & MG_FOX_GEAR_RECOVERED) == 0;
 }
 
 void AMGGrayFoxMission::UpdateGuardAlert()
@@ -317,7 +382,10 @@ uint32 AMGGrayFoxMission::GetPacingPhase() const
     if (!(Flags & MG_FOX_RESCUED)) return 2;
     if (!(Flags & MG_FOX_EXIT_WALL_BREACHED)) return 3;
     if (!(Flags & MG_FOX_LEFT_PRISON)) return 4;
-    return 5;
+    if ((Flags & MG_FOX_SLICE_COMPLETED) || (Flags & MG_FOX_SHOTMAKER_DEFEATED)) return 5;
+    if (Flags & MG_FOX_GEAR_RECOVERED) return 8;
+    if (Flags & MG_FOX_SHOTMAKER_ENCOUNTERED) return 7;
+    return 6;
 }
 
 uint32 AMGGrayFoxMission::GetHintLevel() const
@@ -350,6 +418,9 @@ FString AMGGrayFoxMission::GetPhaseText() const
     case 2: return TEXT("BREAKTHROUGH");
     case 3: return TEXT("REVELATION");
     case 4: return TEXT("ESCAPE");
+    case 6: return TEXT("APPROACH");
+    case 7: return TEXT("SHOOT GUNNER — UNARMED");
+    case 8: return TEXT("SHOOT GUNNER — ARMED");
     default: return TEXT("RECOVERY");
     }
 }
