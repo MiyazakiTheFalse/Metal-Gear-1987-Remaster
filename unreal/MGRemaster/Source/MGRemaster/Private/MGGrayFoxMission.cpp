@@ -1,6 +1,7 @@
 #include "MGGrayFoxMission.h"
 
 #include "MGGuardActor.h"
+#include "MGShootGunnerActor.h"
 #include "MGGrayFoxSaveGame.h"
 #include "MGPlayerCharacter.h"
 #include "MGEquipmentComponent.h"
@@ -21,6 +22,7 @@ namespace
     // Wall and floor positions are illustrative 3D blockout, not original 2D coordinates.
     const FVector CellStart(-950.f, 0.f, -11.f);
     const FVector ExitPoint(1150.f, 0.f, -11.f);
+    const FVector BossThreshold(1570.f, 0.f, -11.f);
     const FString SaveSlot = TEXT("GrayFoxSliceV1");
 
     uint32 FallbackStep(uint32 Flags, uint32 Action)
@@ -86,7 +88,7 @@ AStaticMeshActor* AMGGrayFoxMission::SpawnBlock(
     if (!Actor) return nullptr;
     Actor->Tags.Add(Tag);
     // Breakable mission geometry must remain an interaction, never automatic cover.
-    if (Tag.ToString().StartsWith(TEXT("WeakWall_")))
+    if (Tag.ToString().StartsWith(TEXT("WeakWall_")) || Tag == TEXT("GearDoor"))
         Actor->Tags.Add(TEXT("MG_Breachable"));
     UStaticMeshComponent* Mesh = Actor->GetStaticMeshComponent();
     Mesh->SetMobility(EComponentMobility::Movable);
@@ -109,7 +111,9 @@ void AMGGrayFoxMission::CreateGreybox()
     SpawnBlock(TEXT("NorthBoundary"), FVector(75.f, 500.f, 90.f), FVector(26.5f, 0.4f, 3.8f), true);
     SpawnBlock(TEXT("SouthBoundary"), FVector(75.f, -500.f, 90.f), FVector(26.5f, 0.4f, 3.8f), true);
     SpawnBlock(TEXT("WestBoundary"), FVector(-1250.f, 0.f, 90.f), FVector(0.4f, 10.f, 3.8f), true);
-    SpawnBlock(TEXT("EastBoundary"), FVector(1400.f, 0.f, 90.f), FVector(0.4f, 10.f, 3.8f), true);
+    // Connected opening: 400cm wide. Never teleport to the boss.
+    SpawnBlock(TEXT("EastBoundaryNorth"), FVector(1400.f, 350.f, 90.f), FVector(.4f, 3.f, 3.8f), true);
+    SpawnBlock(TEXT("EastBoundarySouth"), FVector(1400.f, -350.f, 90.f), FVector(.4f, 3.f, 3.8f), true);
 
     for (const float X : {-300.f, 470.f})
     {
@@ -135,6 +139,41 @@ void AMGGrayFoxMission::CreateGreybox()
     ExitMarker = SpawnBlock(TEXT("EscapeMarker"), ExitPoint, FVector(0.5f,0.5f,1.2f), false);
 }
 
+void AMGGrayFoxMission::CreateBossWing()
+{
+    // Provisional geometry, NOT J2ME original room dimensions. A connected
+    // boss arena plus a physical recovery side room and Card-2 storeroom.
+    SpawnBlock(TEXT("BossFloor"), FVector(2550.f, 0.f, -150.f), FVector(24.f, 10.f, 1.f), true);
+    SpawnBlock(TEXT("BossEastBoundary"), FVector(3750.f, 0.f, 90.f), FVector(.4f, 10.f, 3.8f), true);
+    SpawnBlock(TEXT("BossNorthWallWest"), FVector(1650.f, 500.f, 90.f), FVector(5.f, .4f, 3.8f), true);
+    SpawnBlock(TEXT("BossNorthWallEast"), FVector(2950.f, 500.f, 90.f), FVector(16.f, .4f, 3.8f), true);
+    Card2Door = SpawnBlock(TEXT("Card2Door"), FVector(2100.f, 500.f, 90.f), FVector(4.f, .4f, 3.8f), true);
+    SpawnBlock(TEXT("CardRoomFloor"), FVector(2100.f, 780.f, -150.f), FVector(9.f, 5.6f, 1.f), true);
+    SpawnBlock(TEXT("CardRoomWest"), FVector(1640.f, 780.f, 90.f), FVector(.4f, 5.6f, 3.8f), true);
+    SpawnBlock(TEXT("CardRoomEast"), FVector(2560.f, 780.f, 90.f), FVector(.4f, 5.6f, 3.8f), true);
+    SpawnBlock(TEXT("CardRoomNorth"), FVector(2100.f, 1080.f, 90.f), FVector(9.2f, .4f, 3.8f), true);
+    Card3Pickup = SpawnBlock(TEXT("Card3Pickup"), FVector(2100.f, 845.f, -45.f), FVector(.35f, .14f, .9f), false);
+
+    SpawnBlock(TEXT("BossSouthWallWest"), FVector(2025.f, -500.f, 90.f), FVector(12.5f, .4f, 3.8f), true);
+    SpawnBlock(TEXT("BossSouthWallEast"), FVector(3415.f, -500.f, 90.f), FVector(6.7f, .4f, 3.8f), true);
+    GearDoor = SpawnBlock(TEXT("GearDoor"), FVector(2775.f, -500.f, 90.f), FVector(2.9f, .4f, 3.8f), true);
+    SpawnBlock(TEXT("GearRoomFloor"), FVector(2775.f, -785.f, -150.f), FVector(10.2f, 5.8f, 1.f), true);
+    SpawnBlock(TEXT("GearRoomWest"), FVector(2265.f, -785.f, 90.f), FVector(.4f, 5.8f, 3.8f), true);
+    SpawnBlock(TEXT("GearRoomEast"), FVector(3285.f, -785.f, 90.f), FVector(.4f, 5.8f, 3.8f), true);
+    SpawnBlock(TEXT("GearRoomSouth"), FVector(2775.f, -1085.f, 90.f), FVector(10.2f, .4f, 3.8f), true);
+    GearBag = SpawnBlock(TEXT("GearBag"), FVector(2700.f, -830.f, -68.f), FVector(.65f, .7f, .55f), false);
+    PlantedTransmitter = SpawnBlock(TEXT("PlantedTransmitter"), FVector(2790.f, -833.f, -30.f), FVector(.2f, .2f, .16f), false);
+    if (IsValid(PlantedTransmitter)) PlantedTransmitter->SetActorHiddenInGame(true);
+
+    SpawnBlock(TEXT("BossLowCoverA"), FVector(1960.f, 170.f, -55.f), FVector(2.1f, 1.f, .9f), true);
+    SpawnBlock(TEXT("BossLowCoverB"), FVector(2610.f, -50.f, -55.f), FVector(1.1f, 1.6f, .9f), true);
+    SpawnBlock(TEXT("BossLowCoverC"), FVector(3330.f, 230.f, -55.f), FVector(1.4f, .8f, .9f), true);
+    ChapterExit = SpawnBlock(TEXT("ChapterExit"), FVector(3610.f, 0.f, 90.f), FVector(.45f, 2.2f, 3.8f), true);
+    if (GetWorld())
+        Shotmaker = GetWorld()->SpawnActor<AMGShootGunnerActor>(
+            FVector(3100.f, 55.f, -11.f), FRotator(0.f, 180.f, 0.f));
+}
+
 void AMGGrayFoxMission::SpawnPerimeterGuards()
 {
     // Existing hostile patrols outside confinement. No surprise wave on rescue.
@@ -149,6 +188,7 @@ void AMGGrayFoxMission::BeginPlay()
 {
     Super::BeginPlay();
     CreateGreybox();
+    CreateBossWing();
     SpawnPerimeterGuards();
     if (const UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
         UGameplayStatics::LoadGameFromSlot(SaveSlot, 0)))

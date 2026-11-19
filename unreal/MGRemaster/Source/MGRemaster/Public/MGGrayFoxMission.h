@@ -5,6 +5,7 @@
 
 class AStaticMeshActor;
 class AMGPlayerCharacter;
+class AMGShootGunnerActor;
 class UStaticMesh;
 
 /**
@@ -21,6 +22,8 @@ public:
     virtual void Tick(float DeltaSeconds) override;
 
     bool TryInteract(AMGPlayerCharacter* Player);
+    bool TryPunchRecoveryDoor(AMGPlayerCharacter* Player);
+    bool IsBossTelegraphing() const;
     bool HasEquipmentConfiscated() const;
     uint32 GetMissionFlags() const { return Flags; }
     FString GetObjectiveText() const;
@@ -44,6 +47,16 @@ private:
     AActor* FoxProxy = nullptr;
     UPROPERTY(Transient)
     AStaticMeshActor* ExitMarker = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* GearDoor = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* GearBag = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* PlantedTransmitter = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* Card2Door = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* Card3Pickup = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* ChapterExit = nullptr;
+    UPROPERTY(Transient) AMGShootGunnerActor* Shotmaker = nullptr;
+    int32 RecoveryDoorPunches = 0;
+    bool bGearDoorOpen = false;
+    bool bCardDoorOpen = false;
 
     uint32 Flags = 0;
     bool bPlayerInitialised = false;
@@ -62,6 +75,7 @@ private:
     AStaticMeshActor* SpawnBlock(FName Tag, const FVector& Centre,
                                   const FVector& Scale, bool bBlockMovement);
     void CreateGreybox();
+    void CreateBossWing();
     void SpawnPerimeterGuards();
     void InitializePlayerIfReady();
     bool ApplyAction(uint32 Action, AMGPlayerCharacter* Player);
