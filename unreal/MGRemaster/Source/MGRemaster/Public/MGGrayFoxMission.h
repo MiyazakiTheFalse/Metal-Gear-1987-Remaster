@@ -8,6 +8,7 @@ class AMGPlayerCharacter;
 class AMGShootGunnerActor;
 class AMGGuardActor;
 class UStaticMesh;
+class APointLight;
 
 /**
  * Self-contained, provisional Gray Fox prison greybox.
@@ -76,6 +77,7 @@ private:
     UPROPERTY(Transient) AStaticMeshActor* Card3Pickup = nullptr;
     UPROPERTY(Transient) AStaticMeshActor* ChapterExit = nullptr;
     UPROPERTY(Transient) AMGShootGunnerActor* Shotmaker = nullptr;
+    UPROPERTY(Transient) APointLight* BossThreatLight = nullptr;
     int32 RecoveryDoorPunches = 0;
     bool bGearDoorOpen = false;
     bool bCardDoorOpen = false;
@@ -104,6 +106,8 @@ private:
     void CreateGreybox();
     void CreatePrelude();
     void CreateBossWing();
+    void CreateZoneLighting();
+    void UpdateZoneLighting(float DeltaSeconds);
     void SpawnPerimeterGuards();
     void BroadcastStructuralImpact(const FVector& Location,
                                    float AudibleRadius, AActor* Source);

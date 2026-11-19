@@ -1,6 +1,8 @@
 #include "MGGrayFoxMission.h"
 
 #include "MGGuardActor.h"
+#include "Engine/PointLight.h"
+#include "Components/PointLightComponent.h"
 #include "MGShootGunnerActor.h"
 #include "MGGrayFoxSaveGame.h"
 #include "MGPlayerCharacter.h"
@@ -249,6 +251,62 @@ void AMGGrayFoxMission::CreateBossWing()
             FVector(3100.f, 55.f, -11.f), FRotator(0.f, 180.f, 0.f));
 }
 
+void AMGGrayFoxMission::CreateZoneLighting()
+{
+    if (!GetWorld()) return;
+    // Source-authored 1995 lighting composition, not a finished art pass.
+    // Each light cues a spatial landmark without being treated as a stealth
+    // visibility multiplier; AI perception currently uses collision/posture.
+    struct FZoneLightingCue
+    {
+        FVector Position;
+        FLinearColor Tint;
+        float Lumens;
+        float Radius;
+        bool bBossReactive;
+    };
+    const FZoneLightingCue Lights[] = {
+        {FVector(-3200.f, -35.f, 240.f), FLinearColor(.41f,.54f,.72f), 950.f, 820.f, false}, // exterior service
+        {FVector(-1710.f, 190.f, 220.f), FLinearColor(.95f,.72f,.43f), 1250.f, 610.f, false}, // active custody point
+        {FVector(-930.f, 55.f, 230.f), FLinearColor(.77f,.79f,.72f), 520.f, 570.f, false}, // weak cell bulb
+        {FVector(120.f, -55.f, 225.f), FLinearColor(.59f,.73f,.91f), 680.f, 600.f, false}, // Fox's cell, cold
+        {FVector(1060.f, -20.f, 255.f), FLinearColor(.60f,.72f,.81f), 840.f, 840.f, false}, // guard corridor
+        {FVector(2575.f, -810.f, 240.f), FLinearColor(.95f,.72f,.49f), 750.f, 700.f, false}, // confiscated gear
+        {FVector(2080.f, 795.f, 235.f), FLinearColor(.61f,.75f,.85f), 670.f, 640.f, false}, // aftermath card room
+        {FVector(2990.f, 45.f, 280.f), FLinearColor(.99f,.50f,.31f), 650.f, 940.f, true} // boss threat
+    };
+    for (const FZoneLightingCue& Cue : Lights)
+    {
+        APointLight* Actor = GetWorld()->SpawnActor<APointLight>(
+            Cue.Position, FRotator::ZeroRotator);
+        if (!Actor) continue;
+        UPointLightComponent* Light = Actor->GetPointLightComponent();
+        if (!Light) continue;
+        Light->SetMobility(EComponentMobility::Movable);
+        Light->SetIntensity(Cue.Lumens);
+        Light->SetAttenuationRadius(Cue.Radius);
+        Light->SetLightColor(Cue.Tint);
+        // Avoid eight dynamic shadow-casting lights until actual performance
+        // profiling gives budget; geometry can still receive surface shading.
+        Light->SetCastShadows(false);
+        if (Cue.bBossReactive) BossThreatLight = Actor;
+    }
+}
+
+void AMGGrayFoxMission::UpdateZoneLighting(float DeltaSeconds)
+{
+    if (!IsValid(BossThreatLight)) return;
+    UPointLightComponent* Light = BossThreatLight->GetPointLightComponent();
+    if (!Light) return;
+    // Visual storytelling tied to *committed* event: the large firing-space
+    // warning light intensifies while the gunner controls the wing, then
+    // recedes after defeat. No invented damage or lock from a lighting cue.
+    const float Target = (Flags & MG_FOX_SHOTMAKER_DEFEATED) ? 240.f :
+        ((Flags & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 1550.f : 650.f);
+    Light->SetIntensity(FMath::FInterpTo(Light->Intensity, Target,
+        FMath::Max(0.f, DeltaSeconds), 1.2f));
+}
+
 void AMGGrayFoxMission::SpawnPerimeterGuards()
 {
     // Existing hostile patrols outside confinement. No surprise wave on rescue.
@@ -273,6 +331,7 @@ void AMGGrayFoxMission::BeginPlay()
     CreatePrelude();
     CreateGreybox();
     CreateBossWing();
+    CreateZoneLighting();
     SpawnPerimeterGuards();
     if (const UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
         UGameplayStatics::LoadGameFromSlot(SaveSlot, 0)))
@@ -1049,6 +1108,7 @@ void AMGGrayFoxMission::Tick(float Dt)
     if (!bPlayerInitialised) return;
     ElapsedSinceBeat += FMath::Max(0.f, Dt);
     DialogueTimeRemaining = FMath::Max(0.f, DialogueTimeRemaining - Dt);
+    UpdateZoneLighting(Dt);
     UpdateGuardAlert();
     AMGPlayerCharacter* Player =
         Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
