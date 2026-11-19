@@ -7,7 +7,7 @@ window.createFieldRenderer = function(gl, compile) {
  uniform vec4 palette[${count}];
  uniform mat4 vp;
  uniform vec4 actor;
- varying vec3 shade;
+ varying vec3 shade;varying vec3 rest;varying float sheen;
  varying float distanceW;
  vec2 spin(vec2 p, vec2 cs){return vec2(cs.x*p.x-cs.y*p.y,cs.y*p.x+cs.x*p.y);}
  void main(){
@@ -18,11 +18,21 @@ window.createFieldRenderer = function(gl, compile) {
   vec3 n=vec3(spin(normal.xy,j.xy),normal.z);
   n.xz=spin(n.xz,actor.zw); n=normalize(n);
   float lit=.54+.51*max(0.,dot(n,normalize(vec3(-.4,.9,.5))));
-  shade=color*lit; gl_Position=vp*vec4(xz.x,local.y,xz.y,1.);distanceW=gl_Position.w;
+  vec3 warm=vec3(22.,3.05,.3)-vec3(xz.x,local.y,xz.y);
+  float pool=max(0.,dot(n,normalize(warm)))/(1.+dot(warm,warm)*.08);
+  shade=color*(lit+vec3(.61,.43,.25)*pool);
+  shade+=vec3(.043,.075,.086)*max(0.,dot(n,normalize(vec3(.52,.46,-.7))));
+  sheen=pow(max(dot(n,normalize(vec3(-.46,.72,.39))),0.),13.);
+  rest=position;gl_Position=vp*vec4(xz.x,local.y,xz.y,1.);distanceW=gl_Position.w;
  }`;
  const frag=`precision mediump float;
- varying vec3 shade;varying float distanceW;
- void main(){gl_FragColor=vec4(mix(shade,vec3(.04,.09,.09),clamp((distanceW-9.)/48.,0.,.68)),1.);}`;
+ varying vec3 shade;varying vec3 rest;varying float sheen;varying float distanceW;
+ void main(){
+  float cloth=step(shade.r*.94,shade.g);
+  float weave=sin(rest.y*530.)*sin((rest.x+rest.z)*420.);
+  float fade=1.-smoothstep(1.6,4.2,distanceW);
+  vec3 material=shade*(1.+cloth*.075*weave*fade)+vec3(.069,.068,.059)*sheen;
+  gl_FragColor=vec4(mix(material,vec3(.04,.09,.09),clamp((distanceW-9.)/48.,0.,.68)),1.);}`;
  const prog=gl.createProgram();
  gl.attachShader(prog,compile(vertex,gl.VERTEX_SHADER));gl.attachShader(prog,compile(frag,gl.FRAGMENT_SHADER));
  gl.linkProgram(prog);

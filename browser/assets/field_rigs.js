@@ -61,6 +61,18 @@ function model(role) {
    .map(point=>[...point,1,0,0,...colors[shade],joint,0]);
   for(const ix of [0,1,2,0,2,3])parts[layer].push(vertices[ix]);
  }
+ function box(j,col,x,y,z,dx,dy,dz){
+  for(let axis=0;axis<3;axis++)for(const sign of [-1,1]){
+   const u=(axis+1)%3,v=(axis+2)%3,dim=[dx,dy,dz],normal=[0,0,0];
+   normal[axis]=sign;
+   const corners=[[-1,-1],[1,-1],[1,1],[-1,1]].map(([a,b])=>{
+    const point=[x,y,z];point[axis]+=sign*dim[axis]/2;
+    point[u]+=a*dim[u]/2;point[v]+=b*dim[v]/2;
+    return [...point,...normal,...colors[col],j,0];
+   });
+   for(const index of sign>0?[0,1,2,0,2,3]:[2,1,0,3,2,0])parts[layer].push(corners[index]);
+  }
+ }
  const shirt=fox?'sand':snake?'sage':boss?'ochre':'jacket',pants=fox?'stitch':snake?'pine':'steel';
  surface(0,pants,0,0,[[.76,.09,.14],[.80,.14,.19],[.90,.145,.18],[1,.13,.16]]);
  surface(1,shirt,0,0,[[.91,.15,.18],[.97,.135,.17],[1.06,.14,.167],[1.22,.155,.196],[1.38,.16,.222],[1.44,.13,.211],[1.49,.08,.10]],18,true);
@@ -105,7 +117,11 @@ function model(role) {
    for(const s of [-1,1]) surface(3,'hair',-.093,s*.055,
     [[1.577,.008,.005,-.029],[1.638,.043,.036,-.016],[1.714,.050,.041]],10);
    surface(3,'pine',-.009,0,[[1.693,.135,.121],[1.722,.139,.122]],20);
-   for(const s of [-1,1])surface(3,'pine',-.14,s*.03,[[1.53,.013,.008,-.05],[1.62,.024,.013,-.036],[1.711,.026,.017]],8);
+   for(const side of [-1,1]){
+    const z=side*.043, end=side>0?1.565:1.525;
+    surface(3,'pine',-.130,z,[[end,.015,.004,-.087],[end+.035,.026,.007,-.075],
+     [1.642,.031,.009,-.033],[1.701,.021,.009]],6);
+   }
   }
  }
  for(let side=0;side<2;side++){
@@ -124,6 +140,21 @@ function model(role) {
   surface(j+4,pants,-.004,.12*s,[[.145,.073,.069],[.20,.083,.078],[.35,.091,.084,-.015],[.445,.081,.078],[.516,.09,.083,.014]],14,true);
   surface(j+5,'boot',0,.12*s,[[.01,.132,.078,.045],[.037,.141,.081,.045],[.082,.137,.08,.039],[.126,.097,.074,.014],[.19,.076,.073],[.21,.078,.073]],14);
  }
+ if(snake){
+  // Tread blocks sit below the welt so the soles read from the prone camera.
+  for(let side=0;side<2;side++){
+   const sign=side?1:-1,j=4+side*6,z=sign*.12;
+   surface(j+5,'ink',0,z,[[.008,.133,.077,.041],[.025,.142,.083,.041],[.041,.139,.082,.041]],16);
+   for(let row=0;row<6;row++)for(const lane of [-1,1]){
+    box(j+5,'boot',-.063+row*.041,.006,z+lane*(row%2?.032:.039),.026,.016,.043);
+   }
+   for(let row=0;row<3;row++)box(j+5,'belt',.083-row*.012,.095+row*.026,z,.017,.016,.095);
+   // Cloth gathers at the elbow and knee; vary the cut rather than painting rings.
+   for(const [yy,rx,rz] of [[.54,.096,.091],[.57,.103,.095],[.705,.115,.102]]){
+    surface(j+3,'pine',.003,z,[[yy-.012,rx*.98,rz],[yy,rx*1.04,rz*1.03],[yy+.015,rx,rz]],14);
+   }
+  }
+ }
  if(!fox){
   layer=snake?1:0;
   surface(0,'belt',0,0,[[.924,.149,.185],[.982,.148,.182]],18);
@@ -132,6 +163,16 @@ function model(role) {
    surface(1,'belt',.003,s*.125,[[1.02,.143,.027],[1.28,.154,.029],[1.426,.117,.034],[1.464,.069,.029]],10);
    oval(0,'pine',-.02,.92,s*.188,.067,.074,.04);
    oval(1,'belt',.125,1.15,s*.082,.048,.079,.060);
+  }
+  if(snake){
+   // Radio pouch and folded storm flap on the back of the recovered webbing.
+   surface(1,'pine',-.138,0,[[1.035,.050,.121],[1.06,.091,.139],[1.22,.096,.143],[1.29,.077,.138],[1.31,.043,.122]],16);
+   box(1,'sage',-.219,1.231,0,.025,.098,.257);
+   for(const side of [-1,1]){
+    box(1,'belt',-.236,1.176,side*.085,.016,.145,.032);
+    box(1,'buckle',-.245,1.163,side*.085,.012,.025,.038);
+    box(1,'pine',-.128,1.321,side*.128,.053,.215,.044);
+   }
   }
   if(boss){
    // A single articulated silhouette remains attached to his right hand.
@@ -165,8 +206,13 @@ function pose(state) {
   rot[j+4]=-.10-.63*Math.max(0,w)-1.83*crouch-.26*prone;
   rot[j+5]=-(rot[0]+rot[j+3]+rot[j+4])*(1-prone)*(1-down);
   if(prone){
-   // Forearms reach towards the face and clear the floor as the torso rolls forward.
-   rot[j]+=prone*.65;rot[j+1]+=prone*.48;
+   // Elbows take the weight. The reaching hand stays nearly level with
+   // the floor through its stroke, including the stationary prone pose.
+   const upper=.72+.26*w+(side?.08:-.08);
+   const lower=1.48-.15*w;
+   rot[j]+=prone*(upper-rot[0]-rot[1]-rot[j]);
+   rot[j+1]+=prone*(lower-upper-rot[j+1]);
+   rot[j+3]+=prone*.15*w;rot[j+4]-=prone*.30*Math.max(0,w);
   }
   if(aim||cover||strike){const amount=Math.max(aim,side?cover:0,side?strike:0);
    rot[j]+=amount*(1.06-rot[j]);rot[j+1]+=amount*(.50-rot[j+1]);}

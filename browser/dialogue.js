@@ -1,6 +1,10 @@
 /* Independently written temporary scene dialogue; not transcribed J2ME text. */
 window.MGDialogue = Object.freeze({
   bossEntry:{speaker:'SHOOT GUNNER',text:'Property stays on this side of the line. That includes you.',duration:3.5},
+  tagQuestion:{speaker:'SNAKE',text:'Two tones. Coming from my gear.',duration:2},
+  tagReply:{speaker:'BIG BOSS · 120.85',text:'Your kit was quiet when I issued it.',duration:2.6},
+  bossTag:{speaker:'SHOOT GUNNER',text:'There’s my missing property.',duration:2.1},
+  bossEmpty:{speaker:'SHOOT GUNNER',text:'Just the tag.',duration:1.4},
   bossSearch:{speaker:'SHOOT GUNNER',text:'I have the key. Take your time.',duration:2.6},
   bossWounded:{speaker:'SHOOT GUNNER',text:'I said behind the line.',duration:1.8},
   informant:{speaker:'PRISONER',text:'Fox is in solitary. The guards at processing take prisoners straight through. It is the only way inside.',duration:6},
@@ -14,7 +18,7 @@ window.MGDialogue = Object.freeze({
   rescue3: {speaker:'GRAY FOX',text:'Metal Gear. It can launch a nuclear missile. Find Dr. Pettrovich. He designed it.',duration:7.3,direction:'A whispered confession, with a meaningful pause after Metal Gear.'},
   escortIntro: {speaker:'GRAY FOX',text:'I can move, Snake. Stay low. I will follow you, but I have no weapon.',duration:5.2,direction:'Tired but determined; not a robotic instruction.'},
   escortFail: {speaker:'MISSION SYSTEM',text:'Gray Fox is down. Extraction has failed.',duration:4.0,direction:'Clear, subdued failure announcement.'},
-  equipment: {speaker:'SNAKE',text:'My equipment. Just as I left it.',duration:3.8,direction:'Controlled relief, no boasting.'},
+  equipment: {speaker:'SNAKE',text:'Same kit. Different seal.',duration:3.8,direction:'Controlled relief, no boasting.'},
   secure: {speaker:'GRAY FOX',text:'The shutter is locked. They cannot follow us here. You have to find Pettrovich.',duration:5.4,direction:'Out of breath, urgent clarity; not triumphant.'},
   exit: {speaker:'SNAKE',text:'Another weak seam. The guard corridor is open.',duration:4.0,direction:'Practical assessment, new alertness.'},
   detected: {speaker:'GUARD',text:'Contact! Intruder in the cell block!',duration:3.4,direction:'Sudden shout, genuinely surprised.'},

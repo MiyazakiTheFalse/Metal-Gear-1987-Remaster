@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-function boot(storage = new Map(),search = '') {
+function boot(storage = new Map(),search = '',getGamepads=()=>[]) {
   const elements = new Map();
   const noop = () => {};
   const gl = new Proxy({}, { get(_, name) {
@@ -20,14 +20,14 @@ function boot(storage = new Map(),search = '') {
   }
   const runtime = { console, performance, URLSearchParams, location:{search, hash:''},
     document:{getElementById:element, addEventListener:noop}, addEventListener:noop,
-    navigator:{getGamepads:() => []}, requestAnimationFrame:noop, setTimeout:noop,
+    navigator:{getGamepads}, requestAnimationFrame:noop, setTimeout:noop,
     localStorage:{getItem:key=>storage.get(key),setItem:(key,value)=>storage.set(key,value)},
     __MG_TEST__:true };
   runtime.window=runtime;
   vm.createContext(runtime);
   for (const file of ['dialogue.js','tutorial.js','game.js'])
     vm.runInContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),runtime,{filename:file});
-  return {game:runtime.__mgGameDebug,button:id=>element(id).onclick(),storage};
+  return {game:runtime.__mgGameDebug,button:id=>element(id).onclick(),element,storage};
 }
 
 let run=boot();
@@ -160,3 +160,46 @@ const tallEye={x:21.1,z:.9},behindCart={x:21.1,z:3.35};
 assert.equal(rehearsal.game.sightBlocked(tallEye,behindCart,1.58,1.52),false);
 assert.equal(rehearsal.game.sightBlocked(tallEye,behindCart,1.58,.48),true);
 console.log('PASS: rehearsal isolation and low freight cart sightlines.');
+
+const tagRun=loadFixture({version:5,stage:4,x:24.0,z:1.4,health:100});
+const tg=tagRun.game;
+for(let i=0;i<4;i++)tg.testSetGuard(i,{knocked:true});
+assert.equal(tg.state.tagState,'carried');
+tg.act('equipitem');for(let i=0;i<3;i++)tg.act('next');
+tg.act('equipclose');assert.equal(tg.state.tagState,'carried','browsing preserves the item');
+tg.act('equipitem');for(let i=0;i<3;i++)tg.act('next');
+tg.act('interact');assert.equal(tg.state.tagState,'placed');
+const stored=boot(tagRun.storage);stored.button('resume');
+assert.deepEqual({...stored.game.state.tagPoint},{x:24.0,z:1.4});
+tg.teleport(13,0);
+for(let i=0;i<14;i++)tg.step(1/30);
+assert.equal(tg.state.bossBeat,'trace');
+assert.deepEqual({...tg.state.signal},{x:24.0,z:1.4});
+for(let i=0;i<70;i++)tg.step(1/30);
+assert.equal(tg.state.tagState,'spent','the boss can silence the unattended transmitter');
+assert.equal(tg.state.health,100);
+const ended=boot(tagRun.storage);ended.button('resume');
+assert.equal(ended.game.state.tagState,'spent');
+console.log('PASS: item inspection, deliberate placement, signal-location investigation, decoy retirement and save restoration.');
+
+const makePad=index=>({index,id:'Xbox '+index,mapping:'standard',connected:true,
+ axes:[0,0,0,0],buttons:Array.from({length:17},()=>({pressed:false,value:0}))});
+const idlePad=makePad(0),activeXbox=makePad(2);
+let listed=[idlePad,null,activeXbox];
+const pads=boot(new Map(),'',()=>listed),pg=pads.game;
+pg.readPad();activeXbox.buttons[0].pressed=true;pg.readPad();
+assert.equal(pg.state.started,true);assert.equal(pg.state.activePadIndex,2);
+const before=pg.state.player.x;
+activeXbox.axes[1]=-1;activeXbox.buttons[0].pressed=false;pg.readPad();pg.step(.12);
+assert.ok(pg.state.player.x>before);activeXbox.axes[1]=0;
+activeXbox.buttons[1].pressed=true;pg.readPad();assert.equal(pg.state.player.stance,1);
+activeXbox.buttons[1].pressed=false;activeXbox.buttons[6].value=.85;pg.readPad();pg.step(.01);
+assert.equal(pg.state.player.aim,true);
+activeXbox.buttons[7].value=.85;pg.readPad();assert.equal(pg.state.stunAmmo,5);
+listed=[];pg.readPad();pg.step(.01);assert.equal(pg.state.player.aim,false);
+assert.equal(pg.state.activePadIndex,-1);
+listed=[null,null,activeXbox];pg.readPad();assert.equal(pg.state.activePadIndex,2);
+const blocked=boot(new Map(),'',()=>{throw Error('SecurityError')});
+blocked.game.readPad();assert.match(blocked.element('padReadout').textContent,/blocked/i);
+blocked.button('start');assert.equal(blocked.game.state.started,true);
+console.log('PASS: Xbox input selection, A start, left stick, B, analog LT/RT, disconnect/reconnect and denied-API keyboard fallback.');
