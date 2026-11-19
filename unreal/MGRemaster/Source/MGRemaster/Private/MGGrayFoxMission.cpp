@@ -218,7 +218,13 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
     // The historic confiscation flag is retained for canon and save fidelity.
     // Gear usability depends on the distinct actual recovery transaction.
     if (UMGEquipmentComponent* Inventory = Player->GetEquipment())
+    {
         Inventory->SetConfiscated((Flags & MG_FOX_GEAR_RECOVERED) == 0);
+        // Rebuild a non-consumable from a completed mission transaction after
+        // a checkpoint load. Never award it merely from a boss defeat.
+        if (Flags & MG_FOX_CARD3_RECOVERED)
+            Inventory->AwardItem(TEXT("CARD3"), 1);
+    }
 
     if (!bHasLoadedSave)
     {
@@ -289,7 +295,7 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
     case MG_FOX_RECOVER_GEAR:
         if (Player && Player->GetEquipment())
             Player->GetEquipment()->SetConfiscated(false);
-        Dialogue = TEXT("GEAR RECOVERED — INSPECT FOR AN ENEMY TRANSMITTER.");
+        Dialogue = TEXT("GEAR RECOVERED — CHECK THE INVENTORY FOR COMPROMISE.");
         break;
     case MG_FOX_REMOVE_TRANSMITTER:
         Dialogue = TEXT("ENEMY TRANSMITTER REMOVED.");
@@ -458,6 +464,16 @@ FString AMGGrayFoxMission::GetPacingHint() const
 FString AMGGrayFoxMission::GetMissionLogText() const
 {
     if (!(Flags & MG_FOX_RESCUED)) return FString();
+    if (Flags & MG_FOX_CARD3_RECOVERED)
+        return TEXT("GRAY FOX: METAL GEAR / MADNAR. CARD 3 ACQUIRED. CONTINUE INFILTRATION.");
+    if (Flags & MG_FOX_SHOTMAKER_DEFEATED)
+        return TEXT("GRAY FOX: METAL GEAR / MADNAR. SEARCH THE BOSSED AREA FOR CARD 3.");
+    if (Flags & MG_FOX_GEAR_RECOVERED)
+    {
+        if (!(Flags & MG_FOX_TRANSMITTER_REMOVED))
+            return TEXT("GRAY FOX: METAL GEAR / MADNAR. RECOVERED GEAR MAY BE COMPROMISED.");
+        return TEXT("GRAY FOX: METAL GEAR / MADNAR. ENEMY TRANSMITTER REMOVED.");
+    }
     // Temporary paraphrase; not a verbatim line from the licensed J2ME script.
     return TEXT("GRAY FOX INTEL: Metal Gear is real. Seek the scientist who designed it. "
                 "Your equipment is still missing. Continue the infiltration.");

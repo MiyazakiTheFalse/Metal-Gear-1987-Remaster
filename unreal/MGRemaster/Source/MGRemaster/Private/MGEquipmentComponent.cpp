@@ -15,7 +15,8 @@ void UMGEquipmentComponent::BeginPlay()
     Items = {
         {FName(TEXT("NONE")), TEXT("NO ITEM"), 0, true, false},
         {FName(TEXT("RATION")), TEXT("RATION [TEST]"), 1, true, true},
-        {FName(TEXT("CARD1")), TEXT("KEYCARD 1 [TEST]"), 0, false, false}
+        {FName(TEXT("CARD1")), TEXT("KEYCARD 1 [TEST]"), 0, false, false},
+        {FName(TEXT("CARD3")), TEXT("KEYCARD 3 [SLICE]"), 0, false, false}
     };
     // A captured Snake cannot use pre-capture weapons or items. Test entries are
     // deliberately marked provisional rather than claims about J2ME inventory.
