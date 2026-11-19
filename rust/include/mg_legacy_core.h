@@ -35,11 +35,20 @@ typedef struct MgGuardResult {
 #define MG_FOX_RESCUED 8u
 #define MG_FOX_EXIT_WALL_BREACHED 16u
 #define MG_FOX_LEFT_PRISON 32u
+/* Shoot Gunner/Shotmaker encounter. Historical confiscation remains immutable. */
+#define MG_FOX_SHOTMAKER_ENCOUNTERED 64u
+#define MG_FOX_GEAR_RECOVERED 128u
+#define MG_FOX_SHOTMAKER_DEFEATED 256u
+#define MG_FOX_SLICE_COMPLETED 512u
 #define MG_FOX_CAPTURE 1u
 #define MG_FOX_BREACH_FIRST_WALL 2u
 #define MG_FOX_RESCUE 3u
 #define MG_FOX_BREACH_EXIT_WALL 4u
 #define MG_FOX_ESCAPE 5u
+#define MG_FOX_ENTER_SHOTMAKER 6u
+#define MG_FOX_RECOVER_GEAR 7u
+#define MG_FOX_DEFEAT_SHOTMAKER 8u
+#define MG_FOX_COMPLETE_SLICE 9u
 uint32_t mg_gray_fox_transition(uint32_t flags, uint32_t action, uint32_t* next_flags);
 
 /* Return optional pacing guidance; NO progression is gated on a timer. */

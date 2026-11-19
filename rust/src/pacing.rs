@@ -3,7 +3,8 @@
 //! This is an adaptation of the MSX2 rescue, not J2ME-verified original timing.
 use crate::gray_fox::{
     CAPTURED, FIRST_WALL_BREACHED, GRAY_FOX_RESCUED,
-    EXIT_WALL_BREACHED, LEFT_PRISON, ALL_FLAGS,
+    EXIT_WALL_BREACHED, LEFT_PRISON, SHOTMAKER_ENCOUNTERED,
+    GEAR_RECOVERED, SHOTMAKER_DEFEATED, SLICE_COMPLETED, ALL_FLAGS,
 };
 
 #[repr(C)]
@@ -21,6 +22,9 @@ pub const BREAKTHROUGH: u32 = 2;
 pub const REVELATION: u32 = 3;
 pub const ESCAPE_PRESSURE: u32 = 4;
 pub const RECOVERY: u32 = 5;
+pub const SHOTMAKER_THREAT: u32 = 6;
+pub const SHOTMAKER_RECOVERY_PUZZLE: u32 = 7;
+pub const SHOTMAKER_FIGHT: u32 = 8;
 
 // Provisional tuning candidates, NOT empirically optimal delays. The engine
 // further suppresses hints while the player is meaningfully investigating.
@@ -43,13 +47,20 @@ pub fn evaluate(flags: u32, seconds_without_progress: f32, under_alert: bool)
         (REVELATION, 0.20, true)
     } else if flags & LEFT_PRISON == 0 {
         (ESCAPE_PRESSURE, 0.82, false)
-    } else {
+    } else if flags & SLICE_COMPLETED != 0 || flags & SHOTMAKER_DEFEATED != 0 {
         (RECOVERY, 0.05, true)
+    } else if flags & GEAR_RECOVERED != 0 {
+        (SHOTMAKER_FIGHT, 0.92, false)
+    } else if flags & SHOTMAKER_ENCOUNTERED != 0 {
+        (SHOTMAKER_RECOVERY_PUZZLE, 0.86, false)
+    } else {
+        (SHOTMAKER_THREAT, 0.73, false)
     };
     let since = if seconds_without_progress.is_finite() {
         seconds_without_progress.max(0.0)
     } else { 0.0 };
-    let hint = if under_alert || phase == CAPTURE_BEAT || phase == RECOVERY {
+    let hint = if under_alert || phase == CAPTURE_BEAT || phase == RECOVERY
+        || phase >= SHOTMAKER_THREAT {
         0
     } else if since >= STRONG_HINT_AFTER_SECONDS {
         2

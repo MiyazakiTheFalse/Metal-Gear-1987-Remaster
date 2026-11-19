@@ -7,16 +7,25 @@ pub const FIRST_WALL_BREACHED: u32 = 1 << 2;
 pub const GRAY_FOX_RESCUED: u32 = 1 << 3;
 pub const EXIT_WALL_BREACHED: u32 = 1 << 4;
 pub const LEFT_PRISON: u32 = 1 << 5;
+pub const SHOTMAKER_ENCOUNTERED: u32 = 1 << 6;
+pub const GEAR_RECOVERED: u32 = 1 << 7;
+pub const SHOTMAKER_DEFEATED: u32 = 1 << 8;
+pub const SLICE_COMPLETED: u32 = 1 << 9;
 
 pub const ACTION_CAPTURE: u32 = 1;
 pub const ACTION_BREACH_FIRST_WALL: u32 = 2;
 pub const ACTION_RESCUE_GRAY_FOX: u32 = 3;
 pub const ACTION_BREACH_EXIT_WALL: u32 = 4;
 pub const ACTION_ESCAPE: u32 = 5;
+pub const ACTION_ENTER_SHOTMAKER: u32 = 6;
+pub const ACTION_RECOVER_GEAR: u32 = 7;
+pub const ACTION_DEFEAT_SHOTMAKER: u32 = 8;
+pub const ACTION_COMPLETE_SLICE: u32 = 9;
 
 pub const ALL_FLAGS: u32 = CAPTURED | EQUIPMENT_CONFISCATED
     | FIRST_WALL_BREACHED | GRAY_FOX_RESCUED
-    | EXIT_WALL_BREACHED | LEFT_PRISON;
+    | EXIT_WALL_BREACHED | LEFT_PRISON | SHOTMAKER_ENCOUNTERED
+    | GEAR_RECOVERED | SHOTMAKER_DEFEATED | SLICE_COMPLETED;
 
 /// Returns None on repeated actions or skipped mission prerequisites.
 /// Other game systems can listen to the accepted state transition for presentation.
@@ -37,6 +46,18 @@ pub fn transition(flags: u32, action: u32) -> Option<u32> {
         ACTION_ESCAPE if flags & EXIT_WALL_BREACHED != 0
             && flags & LEFT_PRISON == 0 =>
             flags | LEFT_PRISON,
+        ACTION_ENTER_SHOTMAKER if flags & LEFT_PRISON != 0
+            && flags & SHOTMAKER_ENCOUNTERED == 0 =>
+            flags | SHOTMAKER_ENCOUNTERED,
+        ACTION_RECOVER_GEAR if flags & SHOTMAKER_ENCOUNTERED != 0
+            && flags & GEAR_RECOVERED == 0 =>
+            flags | GEAR_RECOVERED,
+        ACTION_DEFEAT_SHOTMAKER if flags & GEAR_RECOVERED != 0
+            && flags & SHOTMAKER_DEFEATED == 0 =>
+            flags | SHOTMAKER_DEFEATED,
+        ACTION_COMPLETE_SLICE if flags & SHOTMAKER_DEFEATED != 0
+            && flags & SLICE_COMPLETED == 0 =>
+            flags | SLICE_COMPLETED,
         _ => return None,
     };
     Some(next)
@@ -65,13 +86,31 @@ mod tests {
     #[test]
     fn only_correct_sequence_completes_rescue() {
         let mut state = 0;
-        for action in 1..=5 {
+        for action in 1..=9 {
             let next = transition(state, action).expect("step must be valid");
             assert_ne!(state, next);
             assert!(transition(next, action).is_none(), "replay must be rejected");
             state = next;
         }
         assert_eq!(state, ALL_FLAGS);
+    }
+    #[test]
+    fn cannot_skip_shotmaker_puzzle() {
+        let rescued = CAPTURED | EQUIPMENT_CONFISCATED | FIRST_WALL_BREACHED |
+            GRAY_FOX_RESCUED | EXIT_WALL_BREACHED | LEFT_PRISON;
+        assert!(transition(rescued, ACTION_RECOVER_GEAR).is_none());
+        assert!(transition(rescued, ACTION_DEFEAT_SHOTMAKER).is_none());
+        let encountered = transition(rescued, ACTION_ENTER_SHOTMAKER).unwrap();
+        assert!(transition(encountered, ACTION_DEFEAT_SHOTMAKER).is_none());
+        let gear = transition(encountered, ACTION_RECOVER_GEAR).unwrap();
+        assert!(transition(gear, ACTION_COMPLETE_SLICE).is_none());
+    }
+    #[test]
+    fn former_5_step_checkpoint_is_still_accepted() {
+        let mut state = 0;
+        for a in 1..=5 { state = transition(state, a).unwrap(); }
+        assert_eq!(state, 63);
+        assert!(transition(state, ACTION_ENTER_SHOTMAKER).is_some());
     }
     #[test]
     fn cannot_rescue_without_breach() {
