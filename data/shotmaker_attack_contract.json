@@ -10,7 +10,12 @@
     "player_begins_disarmed": true,
     "recover_confiscated_inventory_before_defeat": true,
     "hidden_transmitter_in_inventory": true,
-    "card2_to_card3_progression": true
+    "card2_to_card3_progression": true,
+    "normal_handgun_hits_to_defeat": 10,
+    "remote_controlled_missile_hits_to_defeat": 4,
+    "single_rocket_hit_reported_in_guides": 1,
+    "opening_line_premise": "Nobody escapes this prison; the gunner names himself proudly",
+    "personality_scope": "One boast plus former Spetsnaz career; inner motive is NOT specified by canon"
   },
   "interpretation_tuning": {
     "windup_seconds": 0.78,
@@ -20,7 +25,15 @@
     "pellet_count": 5,
     "pellet_damage": 8,
     "damage_cap_per_shot": 32,
-    "patrol_speed_cm_per_sec": 65
+    "patrol_speed_cm_per_sec": 65,
+    "boss_health": 100,
+    "effective_handgun_damage_per_accepted_hit": 10,
+    "future_remote_missile_damage_per_direct_hit": 25,
+    "reaction_stage_thresholds_percent": [
+      70,
+      35
+    ],
+    "proposed_character_direction": "proud detention specialist: theatrical initial boast, controlled movement, confidence cracks only as the intruder survives"
   },
   "limits": {
     "windup_seconds": [
@@ -50,6 +63,10 @@
     "damage_cap_per_shot": [
       12,
       50
+    ],
+    "effective_handgun_damage_per_accepted_hit": [
+      5,
+      25
     ]
   },
   "artifacts": {
@@ -73,10 +90,15 @@
     "Inventory bug can be discarded with item selection",
     "Card2 and Card3 survive reload without state duplication",
     "Exact original edition map and dialogue crosschecked",
-    "Hand grip/pump/stock physically accurate in final rig"
+    "Hand grip/pump/stock physically accurate in final rig",
+    "Source-faithful standard handgun 10 hits; four remote missiles not playable until separate weapon system exists",
+    "NPC pistol damage remains unchanged; no hidden global health or ammo nerf",
+    "Defeat optionality in original MSX2 is reported by TAS community: verify before hard-gating Card 3"
   ],
   "references": [
     "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/17103",
-    "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/35361"
+    "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/35361",
+    "https://thesnakesoup.org/metal-gear-msx-walkthrough/",
+    "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/7524"
   ]
 }

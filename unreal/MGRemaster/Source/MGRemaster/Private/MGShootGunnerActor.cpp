@@ -269,6 +269,7 @@ float AMGShootGunnerActor::TakeDamage(float Amount, const FDamageEvent& DamageEv
             return 0.f;
     const float Accepted = Super::TakeDamage(Amount, DamageEvent, EventInstigator, Causer);
     Health = FMath::Max(0.f, Health - Amount);
+    OnBossWounded(GetHealthFraction());
     if (Health <= 0.f) EnterDefeatedState();
     return FMath::Max(Amount, Accepted);
 }

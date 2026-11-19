@@ -30,6 +30,13 @@ public:
     void SetEncounterActive(bool bEnabled);
     void RestoreDefeated();
     void ReceiveTrackerPing(const FVector& ApproximateLocation);
+    // The original MSX2 balance is approximately TEN regular handgun hits.
+    // Keep 100 normalized boss HP, while other NPCs retain their own damage.
+    UFUNCTION(BlueprintPure, Category="Shotmaker|Combat")
+    float GetHandgunDamagePerHit() const
+    {
+        return FMath::Clamp(HandgunDamagePerHit, 5.f, 25.f);
+    }
     UFUNCTION(BlueprintPure, Category="Shotmaker|Gameplay")
     bool IsDefeated() const { return bDefeated; }
     UFUNCTION(BlueprintPure, Category="Shotmaker|Gameplay")
@@ -53,6 +60,10 @@ public:
     void OnPumpAction(int32 CompletedShotIndex);
     UFUNCTION(BlueprintImplementableEvent, Category="Shotmaker|Presentation")
     void OnBossDefeated();
+    // Performance cue only: stage reaction/anger through actual damage, never
+    // let a camera/actor animation change survival or mission flags.
+    UFUNCTION(BlueprintImplementableEvent, Category="Shotmaker|Presentation")
+    void OnBossWounded(float RemainingHealthFraction);
 private:
     enum class EAttackState : uint8 { Dormant, Searching, Warning, Volley, Recovery, Defeated };
 
@@ -96,6 +107,12 @@ private:
     float MaxShotDamage = 32.f;
     UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="30", ClampMax="110"))
     float PatrolSpeedCmPerSec = 65.f;
+
+    // 100 normalised health: ten accepted standard handgun hits (10 each).
+    // 25-damage remote-controlled missiles are a source-matched FUTURE item,
+    // not yet an imported or playable player weapon.
+    UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="5", ClampMax="25"))
+    float HandgunDamagePerHit = 10.f;
 
     EAttackState State = EAttackState::Dormant;
     bool bActive = false;

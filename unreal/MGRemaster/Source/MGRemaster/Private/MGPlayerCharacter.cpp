@@ -1,6 +1,7 @@
 #include "MGPlayerCharacter.h"
 #include "MGGrayFoxMission.h"
 #include "MGGuardActor.h"
+#include "MGShootGunnerActor.h"
 #include "MGEquipmentComponent.h"
 
 #include "Camera/CameraComponent.h"
@@ -763,8 +764,17 @@ void AMGPlayerCharacter::FireStun()
     FHitResult MuzzleHit;
     if (GetWorld()->LineTraceSingleByChannel(MuzzleHit, Muzzle, Target, ECC_Visibility, Params) && MuzzleHit.GetActor())
     {
-        UGameplayStatics::ApplyDamage(MuzzleHit.GetActor(),
-            bStun ? 100.f : 26.f, Controller, this, UDamageType::StaticClass());
+        // Standard handgun keeps 26-damage prototype tuning against guards,
+        // but the first MSX2 boss withstands ten accepted handgun hits.
+        // Shotmaker-specific HP is in his encounter contract, not a hidden
+        // global nerf to Snake's handgun against ordinary sentries.
+        float Damage = bStun ? 100.f : 26.f;
+        if (bHandgun)
+            if (const AMGShootGunnerActor* Gunner =
+                Cast<AMGShootGunnerActor>(MuzzleHit.GetActor()))
+                Damage = Gunner->GetHandgunDamagePerHit();
+        UGameplayStatics::ApplyDamage(MuzzleHit.GetActor(), Damage, Controller,
+            this, UDamageType::StaticClass());
     }
 }
 

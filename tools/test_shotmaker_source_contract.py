@@ -33,6 +33,17 @@ class ShotmakerSourceChecks(unittest.TestCase):
         self.assertIn("EAttackState::Warning", BOSS)
         self.assertIn("EAttackState::Recovery", BOSS)
 
+    def test_original_hit_count_and_boss_only_handgun_balance(self):
+        facts = CONTRACT["canon_facts"]
+        self.assertEqual(facts["normal_handgun_hits_to_defeat"], 10)
+        self.assertEqual(facts["remote_controlled_missile_hits_to_defeat"], 4)
+        self.assertEqual(CONTRACT["interpretation_tuning"]["boss_health"], 100)
+        self.assertEqual(CONTRACT["interpretation_tuning"]["effective_handgun_damage_per_accepted_hit"], 10)
+        self.assertIn("float HandgunDamagePerHit = 10.f;", HEADER)
+        self.assertIn("Gunner->GetHandgunDamagePerHit()", PLAYER)
+        self.assertIn("bStun ? 100.f : 26.f", PLAYER)
+        self.assertIn("OnBossWounded(GetHealthFraction())", BOSS)
+
     def test_cover_and_muzzle_are_physical(self):
         for label in ("BossLowCoverA", "BossLowCoverB", "BossLowCoverC"):
             line = next(l for l in MISSION.splitlines() if f'TEXT("{label}")' in l)
