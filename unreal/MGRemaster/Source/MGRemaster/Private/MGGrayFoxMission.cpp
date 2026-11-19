@@ -380,6 +380,7 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
             Inventory->AwardItem(TEXT("CARD3"), 1);
     }
 
+    NotifyPacingPhaseIfChanged();
     if (!bHasLoadedSave)
     {
         // Open with the authentic transceiver paradigm, without stealing
@@ -501,6 +502,7 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
     // Save AFTER item and weapon transactions. A reload must match the
     // currently visible inventory, not the previous frame's values.
     SaveProgress(Player);
+    NotifyPacingPhaseIfChanged();
     // Short subtitle holds are placeholder reading windows; dialogue never locks control.
     DialogueTimeRemaining = Action == MG_FOX_RESCUE ? 7.f : 4.5f;
     return true;
@@ -748,6 +750,44 @@ uint32 AMGGrayFoxMission::GetPacingPhase() const
     if (Flags & MG_FOX_GEAR_RECOVERED) return 8;
     if (Flags & MG_FOX_SHOTMAKER_ENCOUNTERED) return 7;
     return 6;
+}
+
+float AMGGrayFoxMission::GetSuggestedBeatIntensity() const
+{
+#if MG_WITH_RUST
+    MgGrayFoxPacing Report = {};
+    if (mg_core_abi_version() == 1 &&
+        mg_gray_fox_pacing(Flags, ElapsedSinceBeat,
+            bUnderAlert ? 1u : 0u, &Report))
+        return FMath::Clamp(Report.target_intensity, 0.f, 1.f);
+#endif
+    switch (GetPacingPhase())
+    {
+    case 0: return .22f;
+    case 9: return .52f;
+    case 1: return .12f;
+    case 2: return .42f;
+    case 3: return .18f;
+    case 4: return .76f;
+    case 6: return .49f;
+    case 7: return .86f;
+    case 8: return .93f;
+    case 10: return .10f;
+    case 11: return .28f;
+    case 5: return .03f;
+    default: return .25f;
+    }
+}
+
+void AMGGrayFoxMission::NotifyPacingPhaseIfChanged()
+{
+    const int32 NewPhase = static_cast<int32>(GetPacingPhase());
+    if (LastPresentedPacingPhase == NewPhase) return;
+    const int32 Previous = LastPresentedPacingPhase;
+    LastPresentedPacingPhase = NewPhase;
+    // The Sequencer/lighting/audio can subscribe and blend in the new mood.
+    // Presentation never owns a game-state transaction.
+    OnPacingBeatChanged(Previous, NewPhase, GetSuggestedBeatIntensity());
 }
 
 uint32 AMGGrayFoxMission::GetHintLevel() const
@@ -1020,6 +1060,9 @@ void AMGGrayFoxMission::Tick(float Dt)
         && !(Flags & MG_FOX_SHOTMAKER_DEFEATED)
         && IsValid(Shotmaker) && Shotmaker->IsDefeated())
         ApplyAction(MG_FOX_DEFEAT_SHOTMAKER, Player);
+    // A reliable once-per-beat signal for score, lighting and camera design;
+    // no timeline lock or fabricated pressure if a player moves quickly.
+    NotifyPacingPhaseIfChanged();
 }
 
 void AMGGrayFoxMission::RestartMission()

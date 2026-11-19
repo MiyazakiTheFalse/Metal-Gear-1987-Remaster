@@ -203,6 +203,7 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
             CodecStatus = TEXT("CONNECTED — BIG BOSS / 120.85");
         }
     }
+    if (bCodecOpen) RadioTranscriptSeconds += FMath::Max(0.f, DeltaSeconds);
     CombatNoiseTimer = FMath::Max(0.f, CombatNoiseTimer - DeltaSeconds);
     WeaponRecoilTimer = FMath::Max(0.f, WeaponRecoilTimer - DeltaSeconds);
     MeleeVisualTimer = FMath::Max(0.f, MeleeVisualTimer - DeltaSeconds);
@@ -425,6 +426,8 @@ void AMGPlayerCharacter::ShoulderSwap()
     if (bCodecOpen)
     {
         TransceiverChannel = (TransceiverChannel + 1) % 2;
+        bStagedOpeningCall = false; // Explicit tuning reveals the full contact.
+        RadioTranscriptSeconds = 0.f;
         StopIncomingRing();
         EnsureRadioSfxLoaded();
         IncomingConnectionDelay = -1.f;
@@ -1028,6 +1031,18 @@ void AMGPlayerCharacter::StopIncomingRing()
     ActiveIncomingRing = nullptr;
 }
 
+int32 AMGPlayerCharacter::GetVisibleRadioLineCount(int32 AvailableLines) const
+{
+    if (AvailableLines <= 0) return 0;
+    if (!bStagedOpeningCall || !bCodecOpen) return AvailableLines;
+    // A first-time call is staged as dialogue beats, not dumped all at once.
+    // This is visual pacing, NOT a 9-second gameplay lock. Closing, tuning or
+    // re-opening never loses the full transcript or objective intelligence.
+    const float SinceConnect = FMath::Max(0.f, RadioTranscriptSeconds - .94f);
+    return FMath::Clamp(1 + FMath::FloorToInt(SinceConnect / 1.65f),
+        1, AvailableLines);
+}
+
 void AMGPlayerCharacter::PlayRadioCue(USoundBase* Cue, float Level) const
 {
     if (Cue && GetWorld())
@@ -1045,6 +1060,8 @@ void AMGPlayerCharacter::OpenIncomingMissionBriefing()
     bCodecOpen = true;
     TransceiverChannel = 1; // Real Big Boss, FOXHOUND 120.85
     CodecStatus = TEXT("INCOMING — BIG BOSS / 120.85");
+    RadioTranscriptSeconds = 0.f;
+    bStagedOpeningCall = true;
     // The sound motif plays as gameplay begins; there is no unskippable
     // call animation and no missing intelligence on immediate close.
     IncomingConnectionDelay = .94f;
@@ -1061,6 +1078,8 @@ void AMGPlayerCharacter::ToggleCodec()
     if (bCodecOpen)
     {
         bCodecOpen = false;
+        bStagedOpeningCall = false;
+        RadioTranscriptSeconds = 0.f;
         StopIncomingRing();
         IncomingConnectionDelay = -1.f;
         CodecStatus.Empty();
@@ -1077,6 +1096,8 @@ void AMGPlayerCharacter::ToggleCodec()
     CloseEquipmentWindows();
     ApplyMenuTimeState();
     bCodecOpen = true;
+    bStagedOpeningCall = false;
+    RadioTranscriptSeconds = 0.f;
     TransceiverChannel = 0; // Kyle Schneider; Q changes to Big Boss.
     IncomingConnectionDelay = -1.f;
     CodecStatus = TEXT("TRANSCEIVER ACTIVE — CHANGE CHANNEL Q / RS; CLOSE C / START");

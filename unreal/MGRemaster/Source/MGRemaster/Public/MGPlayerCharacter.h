@@ -33,6 +33,7 @@ public:
     bool IsMissionLogVisible() const { return bShowMissionLog; }
     bool IsCodecOpen() const { return bCodecOpen; }
     FString GetCodecStatus() const { return CodecStatus; }
+    int32 GetVisibleRadioLineCount(int32 AvailableLines) const;
     int32 GetTransceiverChannel() const { return TransceiverChannel; }
     float GetEquipmentTimeScale() const { return EquipmentTimeScale; }
     float GetNoiseFactor() const;
@@ -107,6 +108,8 @@ private:
     UPROPERTY(Transient) USoundBase* SignalRadioSfx = nullptr;
     UPROPERTY(Transient) UAudioComponent* ActiveIncomingRing = nullptr;
     float IncomingConnectionDelay = -1.f;
+    float RadioTranscriptSeconds = 0.f;
+    bool bStagedOpeningCall = false;
     void EnsureRadioSfxLoaded();
     void StopIncomingRing();
     void PlayRadioCue(USoundBase* Cue, float Level = .55f) const;

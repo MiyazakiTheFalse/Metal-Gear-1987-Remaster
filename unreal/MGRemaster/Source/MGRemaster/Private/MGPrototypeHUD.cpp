@@ -254,7 +254,8 @@ void AMGPrototypeHUD::DrawHUD()
         const float PanelWidth = FMath::Min(580.f * UiScale, Width - 2.f * Margin);
         const float PanelX = Width - Margin - PanelWidth;
         const float PanelY = Height * 0.31f;
-        const int32 VisibleLines = FMath::Min(Lines.Num(), 8);
+        const int32 VisibleLines = FMath::Min(
+            Player->GetVisibleRadioLineCount(Lines.Num()), 8);
         const float PanelHeight = (71.f + 23.f * VisibleLines) * UiScale;
         DrawRect(HudPanel, PanelX, PanelY, PanelWidth, PanelHeight);
         DrawText(Channel == 0 ? TEXT("TRANSCEIVER / 120.79 / KYLE SCHNEIDER")

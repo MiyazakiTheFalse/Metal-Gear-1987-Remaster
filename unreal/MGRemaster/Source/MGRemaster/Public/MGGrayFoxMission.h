@@ -40,6 +40,12 @@ public:
     bool HasIncomingTransceiverPrompt() const;
     FString GetMissionLogText() const;
     FString GetPhaseText() const;
+    UFUNCTION(BlueprintPure, Category="Mission|Pacing")
+    float GetSuggestedBeatIntensity() const;
+    // Presentation-only callbacks for sound design, lighting and Sequencer;
+    // the visual/audio timeline must NEVER write gameplay flags.
+    UFUNCTION(BlueprintImplementableEvent, Category="Mission|Pacing")
+    void OnPacingBeatChanged(int32 PreviousPhase, int32 NewPhase, float SuggestedIntensity);
     void RestartMission();
 
 private:
@@ -88,6 +94,7 @@ private:
     int32 LoadedHandgunRounds = 24;
     int32 LoadedStunRounds = 8;
     float BeaconPulseTimer = 0.f;
+    int32 LastPresentedPacingPhase = INDEX_NONE;
     FString Dialogue;
 
     AStaticMeshActor* SpawnBlock(FName Tag, const FVector& Centre,
@@ -105,4 +112,5 @@ private:
     uint32 GetPacingPhase() const;
     uint32 GetHintLevel() const;
     void UpdateGuardAlert();
+    void NotifyPacingPhaseIfChanged();
 };
