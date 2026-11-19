@@ -82,6 +82,10 @@ public:
                                  EMGGuardEvidenceKind CurrentEvidence);
     UFUNCTION(BlueprintPure, Category="Security|Acting")
     FVector GetEvidenceLocation() const { return LastKnownPlayerPosition; }
+    FString GetActiveGuardCallout() const { return CalloutRemaining > 0.f
+        ? ActiveGuardCallout : FString(); }
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
+    void OnGuardCallout(FName EventId);
     UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
     void OnPostureChanged(EMGGuardPosture Previous, EMGGuardPosture Current);
     UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
@@ -137,6 +141,9 @@ private:
     float BodyScanCountdown = 0.f;
     float BodyReportDelay = -1.f;
     FVector BodyReportLocation = FVector::ZeroVector;
+    FString ActiveGuardCallout;
+    float CalloutRemaining = 0.f;
+    void EmitGuardCallout(FName EventId, const FString& Caption);
     EMGGuardAwarenessPhase SecurityPhase = EMGGuardAwarenessPhase::Routine;
     EMGGuardEvidenceKind EvidenceKind = EMGGuardEvidenceKind::None;
     float TimeInSecurityState = 0.f;

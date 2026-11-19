@@ -158,6 +158,26 @@ void AMGPrototypeHUD::DrawHUD()
                     MarkPoint(Gunner->GetActorLocation(), HudRed, 8.f);
     }
 
+    // A visual/caption fallback for real security speech. Only a nearby
+    // guard's actual transition can produce it; no omniscient global subtitles.
+    const AMGGuardActor* AudibleGuard = nullptr;
+    float NearestCalloutCm = 950.f;
+    for (TActorIterator<AMGGuardActor> Guard(GetWorld()); Guard; ++Guard)
+    {
+        if (Guard->IsIncapacitated() || Guard->GetActiveGuardCallout().IsEmpty())
+            continue;
+        const float Distance = FVector::Dist2D(
+            Guard->GetActorLocation(), Player->GetActorLocation());
+        if (Distance < NearestCalloutCm)
+        {
+            AudibleGuard = *Guard;
+            NearestCalloutCm = Distance;
+        }
+    }
+    if (AudibleGuard)
+        DrawText(AudibleGuard->GetActiveGuardCallout(), HudAmber,
+            Width * .28f, Height * .70f, nullptr, .83f * UiScale, false);
+
     if (Mission)
     {
         if (Mission->IsTransmitterActive())

@@ -97,6 +97,16 @@ bool AMGGuardActor::CanAcceptDetention(const AMGPlayerCharacter* Suspect) const
     return !bHit || Hit.GetActor() == Suspect;
 }
 
+void AMGGuardActor::EmitGuardCallout(FName EventId, const FString& Caption)
+{
+    ActiveGuardCallout = Caption;
+    CalloutRemaining = 2.6f;
+    // Hook to replace provisional subtitles with authored 1995 tactical
+    // performance, subtitled VO and sound occlusion. Caption remains optional
+    // for the player but is never a hidden mission-state trigger.
+    OnGuardCallout(EventId);
+}
+
 void AMGGuardActor::SetSecurityPhase(EMGGuardAwarenessPhase NewPhase)
 {
     if (SecurityPhase == NewPhase) return;
@@ -104,6 +114,19 @@ void AMGGuardActor::SetSecurityPhase(EMGGuardAwarenessPhase NewPhase)
     SecurityPhase = NewPhase;
     TimeInSecurityState = 0.f;
     OnAwarenessPhaseChanged(Old, NewPhase, EvidenceKind);
+    if (NewPhase == EMGGuardAwarenessPhase::Suspicious &&
+        (EvidenceKind == EMGGuardEvidenceKind::HeardMovement ||
+         EvidenceKind == EMGGuardEvidenceKind::StructuralImpact))
+        EmitGuardCallout(TEXT("Question"), TEXT("GUARD: WHAT WAS THAT?"));
+    else if (NewPhase == EMGGuardAwarenessPhase::Investigating)
+        EmitGuardCallout(TEXT("Investigate"), TEXT("GUARD: CHECK THAT NOISE."));
+    else if (NewPhase == EMGGuardAwarenessPhase::Engaged)
+        EmitGuardCallout(TEXT("Contact"), TEXT("GUARD: INTRUDER!"));
+    else if (NewPhase == EMGGuardAwarenessPhase::Searching &&
+             Old == EMGGuardAwarenessPhase::Engaged)
+        EmitGuardCallout(TEXT("LostSight"), TEXT("GUARD: LOST VISUAL. SEARCH THE AREA."));
+    else if (NewPhase == EMGGuardAwarenessPhase::Returning)
+        EmitGuardCallout(TEXT("Return"), TEXT("GUARD: BACK TO POST."));
 }
 
 void AMGGuardActor::ObserveEvidence(EMGGuardEvidenceKind Kind, const FVector& Location)
@@ -168,6 +191,7 @@ void AMGGuardActor::CheckVisibleIncapacitatedColleagues()
         BodyReportLocation = Colleague->GetActorLocation();
         BodyReportDelay = 1.2f;
         OnBodyDiscovered(BodyReportLocation);
+        EmitGuardCallout(TEXT("BodyDiscovered"), TEXT("GUARD: MAN DOWN!"));
         SetGuardPosture(EMGGuardPosture::Investigate);
         break; // One discovery / report action per brief scan.
     }
@@ -372,6 +396,7 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     if (bIncapacitated || !GetWorld()) return;
     TimeInSecurityState += FMath::Max(0.f, DeltaSeconds);
+    CalloutRemaining = FMath::Max(0.f, CalloutRemaining - FMath::Max(0.f, DeltaSeconds));
     EvidenceAge = FMath::Min(120.f, EvidenceAge + FMath::Max(0.f, DeltaSeconds));
     bConfirmedVisualThisFrame = false;
     StaggerSeconds = FMath::Max(0.f, StaggerSeconds - DeltaSeconds);
@@ -454,7 +479,12 @@ void AMGGuardActor::Tick(float DeltaSeconds)
             SetGuardPosture(EMGGuardPosture::Challenge);
             AttackWindupSeconds = 0.f;
             ChallengeAge += DeltaSeconds;
-            if (bFirstChallengeFrame) OnCustodyChallenge();
+            if (bFirstChallengeFrame)
+            {
+                OnCustodyChallenge();
+                EmitGuardCallout(TEXT("CustodyChallenge"),
+                    TEXT("SECURITY: HALT. KEEP YOUR HANDS VISIBLE."));
+            }
             const FVector Direction = ToPlayer.GetSafeNormal2D();
             if (!Direction.IsNearlyZero())
                 SetActorRotation(FMath::RInterpTo(GetActorRotation(),
@@ -571,6 +601,8 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         {
             bPendingRadioReport = false;
             OnContactReported(PendingConfirmedRadioSighting);
+            EmitGuardCallout(TEXT("RadioContact"),
+                TEXT("GUARD RADIO: HOSTILE CONTACT. REQUEST SUPPORT."));
             if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
                     UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
                 Mission->NotifyGuardContactReported(PendingConfirmedRadioSighting);
