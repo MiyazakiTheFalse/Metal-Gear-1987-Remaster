@@ -81,6 +81,15 @@ void AMGShootGunnerActor::SetEncounterActive(bool bEnabled)
     ShotsFired = 0;
 }
 
+void AMGShootGunnerActor::ReceiveTrackerPing(const FVector& ApproximateLocation)
+{
+    if (!bActive || bDefeated) return;
+    // A compromised inventory provides a **radio beacon**, not wall-penetrating
+    // bullets or a perfect real-time crosshair. Last known position decays.
+    LastTrackerLocation = ApproximateLocation;
+    TrackerPingAge = 0.f;
+}
+
 bool AMGShootGunnerActor::CanSeePlayer(AMGPlayerCharacter* Player) const
 {
     if (!IsValid(Player) || !GetWorld()) return false;
@@ -99,6 +108,7 @@ void AMGShootGunnerActor::Tick(float Dt)
     if (!bActive || bDefeated || !GetWorld()) return;
     AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     StateClock += FMath::Max(0.f, Dt);
+    TrackerPingAge += FMath::Max(0.f, Dt);
 
     if (State == EAttackState::Searching)
     {
@@ -107,8 +117,13 @@ void AMGShootGunnerActor::Tick(float Dt)
         if (StateClock > .45f)
         {
             const FVector Here = GetActorLocation();
-            if (Here.Y > 235.f) PatrolDirection = -1.f;
-            if (Here.Y < -205.f) PatrolDirection = 1.f;
+            if (TrackerPingAge < 3.f && FMath::Abs(Here.Y - LastTrackerLocation.Y) > 55.f)
+                PatrolDirection = FMath::Sign(LastTrackerLocation.Y - Here.Y);
+            else
+            {
+                if (Here.Y > 235.f) PatrolDirection = -1.f;
+                if (Here.Y < -205.f) PatrolDirection = 1.f;
+            }
             SetActorLocation(Here + FVector(0.f, PatrolDirection * 65.f * Dt, 0.f), true);
         }
         if (CanSeePlayer(Player))

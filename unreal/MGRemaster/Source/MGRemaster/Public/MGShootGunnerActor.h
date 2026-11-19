@@ -27,6 +27,7 @@ public:
 
     void SetEncounterActive(bool bEnabled);
     void RestoreDefeated();
+    void ReceiveTrackerPing(const FVector& ApproximateLocation);
     UFUNCTION(BlueprintPure, Category="Shotmaker|Gameplay")
     bool IsDefeated() const { return bDefeated; }
     UFUNCTION(BlueprintPure, Category="Shotmaker|Gameplay")
@@ -71,6 +72,8 @@ private:
     int32 VolleysCompleted = 0;
     float PatrolDirection = 1.f;
     FVector LockedAimPoint = FVector::ZeroVector;
+    FVector LastTrackerLocation = FVector::ZeroVector;
+    float TrackerPingAge = 99.f;
 
     bool CanSeePlayer(AMGPlayerCharacter* Player) const;
     void FireShot(AMGPlayerCharacter* Player);

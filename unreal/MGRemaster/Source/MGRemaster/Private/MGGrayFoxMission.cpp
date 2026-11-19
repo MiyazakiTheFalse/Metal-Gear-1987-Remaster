@@ -752,6 +752,10 @@ void AMGGrayFoxMission::Tick(float Dt)
         && !(Flags & MG_FOX_SHOTMAKER_ENCOUNTERED)
         && Player->GetActorLocation().X > BossThreshold.X)
         ApplyAction(MG_FOX_ENTER_SHOTMAKER, Player);
+    if (Player && IsTransmitterActive() && IsValid(Shotmaker)
+        && (Flags & MG_FOX_SHOTMAKER_ENCOUNTERED)
+        && (Flags & MG_FOX_GEAR_RECOVERED))
+        Shotmaker->ReceiveTrackerPing(Player->GetActorLocation());
     if (Player && (Flags & MG_FOX_SHOTMAKER_ENCOUNTERED)
         && !(Flags & MG_FOX_SHOTMAKER_DEFEATED)
         && IsValid(Shotmaker) && Shotmaker->IsDefeated())

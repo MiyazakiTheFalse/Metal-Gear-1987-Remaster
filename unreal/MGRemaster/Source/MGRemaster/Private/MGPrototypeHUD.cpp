@@ -127,6 +127,10 @@ void AMGPrototypeHUD::DrawHUD()
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
     if (Mission)
     {
+        if (Mission->IsTransmitterActive())
+            DrawText(TEXT("TRACKING SIGNAL ACTIVE — DISCARD UNKNOWN ITEM"), HudRed,
+                Width * .30f, Margin + 150.f * UiScale,
+                nullptr, .9f * UiScale, false);
         DrawRect(HudPanel, Margin, Margin + 113.f * UiScale,
                  FMath::Min(540.f * UiScale, Width - 2.f * Margin), 112.f * UiScale);
         DrawText(FString::Printf(TEXT("MISSION / %s"), *Mission->GetPhaseText()),
