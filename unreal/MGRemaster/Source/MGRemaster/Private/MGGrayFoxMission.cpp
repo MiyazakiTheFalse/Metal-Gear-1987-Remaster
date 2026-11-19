@@ -121,11 +121,11 @@ void AMGGrayFoxMission::CreatePrelude()
 
     // Alternate northern/southern paths reward scouting rather than a single
     // linear sprint to the objective. The centre route is quicker but exposed.
-    SpawnBlock(TEXT("PreludeUtility"), FVector(-3100.f, 60.f, -50.f),
-        FVector(2.9f, 1.3f, 1.4f), true);
-    SpawnBlock(TEXT("PreludeCargoA"), FVector(-2880.f, -250.f, -55.f),
-        FVector(1.8f, 1.5f, 1.3f), true);
-    SpawnBlock(TEXT("PreludeCargoB"), FVector(-2340.f, 30.f, -35.f),
+    SpawnBlock(TEXT("PreludeUtility"), FVector(-3100.f, 60.f, -5.f),
+        FVector(2.9f, 1.3f, 2.1f), true);
+    SpawnBlock(TEXT("PreludeCargoA"), FVector(-2880.f, -250.f, -20.f),
+        FVector(1.8f, 1.5f, 1.5f), true);
+    SpawnBlock(TEXT("PreludeCargoB"), FVector(-2340.f, 30.f, -15.f),
         FVector(2.4f, .85f, 1.7f), true);
     SpawnBlock(TEXT("PreludeSecurityBooth"), FVector(-1920.f, 225.f, -15.f),
         FVector(2.6f, 1.8f, 2.1f), true);
@@ -136,12 +136,12 @@ void AMGGrayFoxMission::CreatePrelude()
 
     // Detention transport: its silhouette, not a quest teleport button, is the
     // landmark. Two separated components for body/cab; artist substitutes later.
-    SpawnBlock(TEXT("CustodyTruckChassis"), FVector(-1590.f, -235.f, -28.f),
+    SpawnBlock(TEXT("CustodyTruckChassis"), FVector(-1590.f, -310.f, -28.f),
         FVector(3.9f, 1.7f, 1.25f), true);
-    SpawnBlock(TEXT("CustodyTruckCab"), FVector(-1360.f, -235.f, 35.f),
+    SpawnBlock(TEXT("CustodyTruckCab"), FVector(-1360.f, -310.f, 35.f),
         FVector(1.65f, 1.7f, 2.15f), true);
     CustodyMarker = SpawnBlock(TEXT("CustodyPoint"),
-        FVector(-1600.f, 75.f, -25.f), FVector(.25f, .3f, .55f), false);
+        FVector(-1590.f, -15.f, -25.f), FVector(.25f, .3f, .55f), false);
 
     // A quiet outer perimeter is not the prison's guarded corridor. Patrols
     // are hand-positioned; hostile sight and hearing obey guard perception.
@@ -154,9 +154,9 @@ void AMGGrayFoxMission::CreatePrelude()
             FVector(-2100.f, -285.f, -11.f), FRotator(0.f, 135.f, 0.f)))
             PatrolB->SetRole(EMGGuardRole::Patrol);
         CustodyOfficerA = GetWorld()->SpawnActor<AMGGuardActor>(
-            FVector(-1720.f, 205.f, -11.f), FRotator(0.f, 180.f, 0.f));
+            FVector(-1570.f, 315.f, -11.f), FRotator(0.f, -90.f, 0.f));
         CustodyOfficerB = GetWorld()->SpawnActor<AMGGuardActor>(
-            FVector(-1510.f, 265.f, -11.f), FRotator(0.f, 180.f, 0.f));
+            FVector(-1470.f, 170.f, -11.f), FRotator(0.f, -90.f, 0.f));
         if (IsValid(CustodyOfficerA))
             CustodyOfficerA->SetRole(EMGGuardRole::Custody);
         if (IsValid(CustodyOfficerB))
@@ -193,10 +193,10 @@ void AMGGrayFoxMission::CreateGreybox()
                FVector(1.8f, 0.9f, 0.75f), true);
     SpawnBlock(TEXT("Bed"), FVector(110.f, 240.f, -62.f),
                FVector(1.8f, 0.9f, 0.75f), true);
-    SpawnBlock(TEXT("GuardCover"), FVector(950.f, 215.f, -40.f),
-               FVector(1.8f, 0.7f, 1.2f), true);
-    SpawnBlock(TEXT("GuardCover"), FVector(1200.f, -200.f, -40.f),
-               FVector(1.8f, 0.7f, 1.2f), true);
+    SpawnBlock(TEXT("GuardCover"), FVector(950.f, 215.f, -25.f),
+               FVector(1.8f, 0.7f, 1.5f), true);
+    SpawnBlock(TEXT("GuardCover"), FVector(1200.f, -200.f, -25.f),
+               FVector(1.8f, 0.7f, 1.5f), true);
     ExitMarker = SpawnBlock(TEXT("EscapeMarker"), ExitPoint, FVector(.5f,.5f,1.2f), false);
     // Cracks are simple light-catching surface slivers. They are pre-authored
     // at the weak seams but reveal more damage on each actual punch.
@@ -554,7 +554,15 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
                         && CustodyOfficerB->CanAcceptDetention(Player));
                 if (!bChallenged)
                 {
-                    Dialogue = TEXT("FIND A POSITION WHERE SECURITY CAN SEE YOU.");
+                    // The player has to be physically observed and allowed to
+                    // comply. This brief challenge is an actual guard state,
+                    // not an arbitrary cinematic wait-to-unlock timer.
+                    const bool bBeingChallenged =
+                        (IsValid(CustodyOfficerA) && CustodyOfficerA->IsIssuingChallenge())
+                        || (IsValid(CustodyOfficerB) && CustodyOfficerB->IsIssuingChallenge());
+                    Dialogue = bBeingChallenged
+                        ? TEXT("SECURITY: STOP. HANDS WHERE I CAN SEE THEM.")
+                        : TEXT("STAY VISIBLE. LET SECURITY IDENTIFY YOU.");
                     DialogueTimeRemaining = 2.8f;
                     return true;
                 }

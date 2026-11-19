@@ -30,6 +30,12 @@ public:
     void SetRole(EMGGuardRole NewRole) { Role = NewRole; }
     bool CanAcceptDetention(const class AMGPlayerCharacter* Suspect) const;
     bool IsIssuingChallenge() const { return bCustodyChallenge; }
+    UFUNCTION(BlueprintPure, Category="Security|Custody")
+    bool IsCustodyChallengeReady() const { return bCustodyChallenge && ChallengeAge >= .75f; }
+    // Final guard pose/VO/animation may bind this state. No cinematic controls
+    // confiscation or grants arrest merely by playing its animation.
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Custody")
+    void OnCustodyChallenge();
     void ReceiveLocalSquadReport(const FVector& SeenAt, const AActor* Sender);
     uint32 GetAwarenessState() const { return AwarenessState; }
     float GetSuspicion() const { return Suspicion; }
@@ -65,12 +71,15 @@ private:
     bool bCustodyChallenge = false;
     bool bPendingRadioReport = false;
     float ChallengeAge = 0.f;
+    float CustodyThreatMemorySeconds = 0.f;
     float ContactEvidenceAge = 99.f;
     float PendingRadioDelay = 0.f;
     float SquadBroadcastCooldown = 0.f;
     float SearchForLastKnownSeconds = 0.f;
     float PursuitBlockedSeconds = 0.f;
     int32 FlankSide = 1;
+    UPROPERTY(EditAnywhere, Category="Security|Debug")
+    bool bShowPerceptionDebug = false;
     FVector LastKnownPlayerPosition = FVector::ZeroVector;
     bool bPatrolForward = true;
     bool bIncapacitated = false;

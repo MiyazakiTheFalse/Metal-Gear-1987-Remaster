@@ -67,7 +67,9 @@ bool AMGGuardActor::HasAuthoredCharacterArt() const
 bool AMGGuardActor::CanAcceptDetention(const AMGPlayerCharacter* Suspect) const
 {
     if (Role != EMGGuardRole::Custody || bIncapacitated || !bCustodyChallenge ||
-        !IsValid(Suspect) || Suspect->IsAiming() || Suspect->IsSprinting())
+        !IsValid(Suspect) || Suspect->IsAiming() || Suspect->IsSprinting()
+        || Suspect->IsProne() || ChallengeAge < .75f
+        || CustodyThreatMemorySeconds > 0.f || AwarenessState >= 3)
         return false;
     if (FVector::Dist2D(GetActorLocation(), Suspect->GetActorLocation()) > 620.f)
         return false;
@@ -238,6 +240,8 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     StaggerSeconds = FMath::Max(0.f, StaggerSeconds - DeltaSeconds);
     AttackCooldown = FMath::Max(0.f, AttackCooldown - DeltaSeconds);
     SquadBroadcastCooldown = FMath::Max(0.f, SquadBroadcastCooldown - DeltaSeconds);
+    CustodyThreatMemorySeconds = FMath::Max(0.f,
+        CustodyThreatMemorySeconds - DeltaSeconds);
     SearchForLastKnownSeconds = FMath::Max(0.f,
         SearchForLastKnownSeconds - DeltaSeconds);
     // Do not counter-rotate an authored skeletal rig: its AnimBP owns hit reactions.
@@ -264,11 +268,18 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     if (Role == EMGGuardRole::Custody && !bIncapacitated)
     {
         const bool bNear = Distance < 690.f;
-        const bool bThreatening = Player->IsAiming();
-        bCustodyChallenge = bNear && bHasLineOfSight && !bThreatening;
+        const bool bThreatening = Player->IsAiming() || Player->IsSprinting();
+        if (bNear && bHasLineOfSight && bThreatening)
+            CustodyThreatMemorySeconds = 3.5f;
+        const bool bCanChallenge = bNear && bHasLineOfSight
+            && !bThreatening && !Player->IsProne()
+            && CustodyThreatMemorySeconds <= 0.f && AwarenessState < 3;
+        const bool bFirstChallengeFrame = bCanChallenge && !bCustodyChallenge;
+        bCustodyChallenge = bCanChallenge;
         if (bCustodyChallenge)
         {
             ChallengeAge += DeltaSeconds;
+            if (bFirstChallengeFrame) OnCustodyChallenge();
             const FVector Direction = ToPlayer.GetSafeNormal2D();
             if (!Direction.IsNearlyZero())
                 SetActorRotation(FMath::RInterpTo(GetActorRotation(),
@@ -418,11 +429,17 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     }
 
 #if !UE_BUILD_SHIPPING
-    const FColor DebugColor = AwarenessState == 3 ? FColor::Red :
-        (AwarenessState == 2 ? FColor::Orange : (AwarenessState == 1 ? FColor::Yellow : FColor::Green));
-    DrawDebugSphere(GetWorld(), GetActorLocation() + FVector(0.f, 0.f, 180.f),
-        22.f, 12, DebugColor, false, 0.f, 0, 2.f);
-    DrawDebugLine(GetWorld(), Eye, Eye + GetActorForwardVector() * 300.f,
-        DebugColor, false, 0.f, 0, 2.f);
+    // Visible perception orbs and forward vectors spoil lighting and
+    // narrative staging in Play-In-Editor; turn on explicitly for diagnosis.
+    if (bShowPerceptionDebug)
+    {
+        const FColor DebugColor = AwarenessState == 3 ? FColor::Red :
+            (AwarenessState == 2 ? FColor::Orange :
+             (AwarenessState == 1 ? FColor::Yellow : FColor::Green));
+        DrawDebugSphere(GetWorld(), GetActorLocation() + FVector(0.f, 0.f, 180.f),
+            22.f, 12, DebugColor, false, 0.f, 0, 2.f);
+        DrawDebugLine(GetWorld(), Eye, Eye + GetActorForwardVector() * 300.f,
+            DebugColor, false, 0.f, 0, 2.f);
+    }
 #endif
 }
