@@ -29,6 +29,9 @@ AMGPlayerCharacter::AMGPlayerCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
     GetCapsuleComponent()->InitCapsuleSize(35.f, 89.f);
+    // The source-only cylindrical stand-in has no visibility collision; the
+    // real gameplay capsule must remain hittable by muzzle-origin line traces.
+    GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
     Equipment = CreateDefaultSubobject<UMGEquipmentComponent>(TEXT("Equipment"));
     WeaponBodyVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponBodyVisual"));
     WeaponBodyVisual->SetupAttachment(GetMesh(), TEXT("weapon_r"));
@@ -892,7 +895,16 @@ void AMGPlayerCharacter::MeleeAttack()
         NotifyFeedback(Target->IsIncapacitated() ?
             TEXT("GUARD INCAPACITATED") : TEXT("MELEE IMPACT"), TEXT("impact"));
     }
-    else NotifyFeedback(TEXT("UNARMED STRIKE — NO TARGET"), TEXT("whoosh"));
+    else
+    {
+        // The original recovery-room puzzle is a **punchable door**, not a
+        // magically disappearing 'E' prop or a forced cinematic prompt.
+        AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+            UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
+        if (Mission && Mission->TryPunchRecoveryDoor(this))
+            NotifyFeedback(TEXT("DOOR IMPACT — HINGES STRAINING"), TEXT("impact"));
+        else NotifyFeedback(TEXT("UNARMED STRIKE — NO TARGET"), TEXT("whoosh"));
+    }
 }
 float AMGPlayerCharacter::TakeDamage(float Amount, const FDamageEvent& Event,
                                      AController* Instigator, AActor* Causer)

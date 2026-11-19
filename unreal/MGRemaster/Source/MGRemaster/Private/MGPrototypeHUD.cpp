@@ -132,6 +132,11 @@ void AMGPrototypeHUD::DrawHUD()
         DrawText(FString::Printf(TEXT("MISSION / %s"), *Mission->GetPhaseText()),
                  HudGreen, Margin + 12.f * UiScale,
                  Margin + 120.f * UiScale, nullptr, 0.75f * UiScale, false);
+        // A subtitle-only telegraph proxy until real audio/animation/VFX exist.
+        // Indicates an actually observed hostile wind-up, not unseen enemy AI.
+        if (Mission->IsBossTelegraphing())
+            DrawText(TEXT("SHOTGUN AIMING — BREAK LINE OF SIGHT"), HudAmber,
+                Width * .37f, Height * .78f, nullptr, 1.03f * UiScale, false);
         DrawText(Mission->GetObjectiveText(), FLinearColor::White,
                  Margin + 12.f * UiScale, Margin + 149.f * UiScale,
                  nullptr, 0.88f * UiScale, false);

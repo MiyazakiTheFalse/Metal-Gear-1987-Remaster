@@ -672,6 +672,13 @@ FString AMGGrayFoxMission::GetTransceiverDialogue(int32 Channel) const
     if (!(Flags & MG_FOX_RESCUED))
         return TEXT("BIG BOSS: Find Gray Fox. Don't lose sight of\n"
                     "BIG BOSS: the objective.");
+    if ((Flags & MG_FOX_LEFT_PRISON) && !(Flags & MG_FOX_GEAR_RECOVERED))
+        return TEXT("BIG BOSS: Recover the equipment they took.\n"
+                    "BIG BOSS: Search the nearby storage doors.");
+    if ((Flags & MG_FOX_GEAR_RECOVERED) && !(Flags & MG_FOX_TRANSMITTER_REMOVED))
+        return TEXT("BIG BOSS: Inspect the gear you recovered.\n"
+                    "BIG BOSS: They may have planted a transmitter.\n"
+                    "SNAKE: A transmitter?");
     return TEXT("BIG BOSS: Continue the mission, Snake.\n"
                 "BIG BOSS: Stay alert.");
 }

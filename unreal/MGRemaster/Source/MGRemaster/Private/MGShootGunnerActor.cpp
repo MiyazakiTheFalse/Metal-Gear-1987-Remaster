@@ -1,6 +1,7 @@
 #include "MGShootGunnerActor.h"
 
 #include "MGPlayerCharacter.h"
+#include "MGEquipmentComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -17,6 +18,7 @@ AMGShootGunnerActor::AMGShootGunnerActor()
     CollisionCapsule->InitCapsuleSize(39.f, 89.f);
     CollisionCapsule->SetCollisionProfileName(TEXT("Pawn"));
     CollisionCapsule->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+    CollisionCapsule->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
     RootComponent = CollisionCapsule;
 
     CharacterMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("ShotmakerSkeletalBody"));
@@ -201,6 +203,11 @@ float AMGShootGunnerActor::TakeDamage(float Amount, const FDamageEvent& DamageEv
                                    AController* EventInstigator, AActor* Causer)
 {
     if (!bActive || bDefeated || Amount <= 0.f) return 0.f;
+    // A stun-only TEST prop cannot erase the original puzzle by defeating
+    // Shotmaker with one non-lethal hit. Reclaimed conventional weapons work.
+    if (const AMGPlayerCharacter* Snake = Cast<AMGPlayerCharacter>(Causer))
+        if (Snake->GetEquipment() && Snake->GetEquipment()->IsStunEquipped())
+            return 0.f;
     const float Accepted = Super::TakeDamage(Amount, DamageEvent, EventInstigator, Causer);
     Health = FMath::Max(0.f, Health - Amount);
     if (Health <= 0.f) EnterDefeatedState();
