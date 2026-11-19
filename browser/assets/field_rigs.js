@@ -15,9 +15,9 @@ for (const side of [-1,1]) {
 const colors={skin:[.72,.53,.40],lip:[.44,.27,.22],eye:[.78,.74,.62],ink:[.07,.076,.068],
  hair:[.14,.105,.084],ash:[.30,.28,.245],sage:[.25,.34,.27],pine:[.14,.22,.19],
  steel:[.25,.30,.27],sand:[.58,.54,.43],stitch:[.44,.42,.34],boot:[.14,.13,.115],
- belt:[.19,.21,.175],buckle:[.47,.48,.40],wrap:[.69,.65,.53],jacket:[.32,.35,.25]};
+ belt:[.19,.21,.175],buckle:[.47,.48,.40],wrap:[.69,.65,.53],ochre:[.52,.32,.18],oxblood:[.27,.12,.10],jacket:[.32,.35,.25]};
 function model(role) {
- const snake=role==='snake', guard=role==='guard', fox=role==='fox';
+ const snake=role==='snake', guard=role==='guard', fox=role==='fox',boss=role==='shoot_gunner';
  const parts=[[],[]]; let layer=0;
  // Each ring is [height, forward radius, width radius, optional forward offset].
  function surface(joint,shade,cx,cz,rings,sides=14,blend=false){
@@ -59,7 +59,7 @@ function model(role) {
    .map(point=>[...point,1,0,0,...colors[shade],joint,0]);
   for(const ix of [0,1,2,0,2,3])parts[layer].push(vertices[ix]);
  }
- const shirt=fox?'sand':snake?'sage':'jacket',pants=fox?'stitch':snake?'pine':'steel';
+ const shirt=fox?'sand':snake?'sage':boss?'ochre':'jacket',pants=fox?'stitch':snake?'pine':'steel';
  surface(0,pants,0,0,[[.76,.09,.14],[.80,.14,.19],[.90,.145,.18],[1,.13,.16]]);
  surface(1,shirt,0,0,[[.91,.15,.18],[.97,.135,.17],[1.06,.14,.167],[1.22,.155,.196],[1.38,.16,.222],[1.44,.13,.211],[1.49,.08,.10]],18,true);
  surface(2,'skin',0,0,[[1.435,.087,.08],[1.52,.079,.076],[1.59,.083,.08]]);
@@ -82,7 +82,13 @@ function model(role) {
    panel(1,'pine',[.155,1.296,s*.101],[.167,1.27,s*.101],.050);
   }
  }
- if(guard){
+ if(boss){
+  surface(3,'boot',-.007,0,[[1.692,.129,.119],[1.724,.136,.124]],18);
+  surface(3,'oxblood',-.018,-.016,[[1.719,.144,.138],[1.75,.159,.155,-.012],
+   [1.776,.14,.147,-.026],[1.797,.065,.070,-.043]],20);
+  oval(3,'buckle',.118,1.744,.047,.011,.016,.013);
+  for(const s of [-1,1])oval(1,'boot',-.012,1.432,s*.202,.115,.061,.078);
+ }else if(guard){
   surface(3,'steel',-.008,0,[[1.674,.14,.129],[1.695,.153,.142],[1.724,.146,.14],[1.77,.12,.12],[1.811,.082,.08],[1.826,.003,.003]],20);
  }else{
   surface(3,fox?'ash':'hair',-.012,0,[[1.695,.131,.116],[1.745,.136,.12],[1.795,.108,.105],[1.824,.039,.038,-.02],[1.83,.002,.002,-.035]],18);
@@ -136,15 +142,15 @@ function model(role) {
 // FK uses rotations about the model's lateral axis. Animation is in place.
 function pose(state) {
  const {phase=0,stride=0,crouch=0,prone=0,down=0,aim=0,cover=0,hit=0,
-        strike=0,time=0,captive=false}=state;
+        strike=0,time=0,captive=0}=state;
  const rot=new Array(bones.length).fill(0);
- const lean=.055+.07*stride+.19*crouch+(captive?.12:0);
+ const lean=.055+.07*stride+.19*crouch+.12*captive;
  rot[0]=-lean-1.38*prone-1.48*down; rot[1]=-.013*Math.sin(time*2.4)-.08*hit;
- rot[2]=lean*.55+.55*prone+(captive?-.12:0); rot[3]=.24*prone;
+ rot[2]=lean*.55+.55*prone+(-.12*captive); rot[3]=.24*prone;
  for(let side=0;side<2;side++){
   const j=4+side*6,w=Math.sin(phase+side*Math.PI)*stride;
-  rot[j]=-.32*w+.06+.22*crouch+1.78*prone+(captive?.24:0);
-  rot[j+1]=.18+.26*stride+.62*prone+(captive?.90:0);
+  rot[j]=-.32*w+.06+.22*crouch+1.78*prone+.24*captive;
+  rot[j+1]=.18+.26*stride+.62*prone+.90*captive;
   rot[j+3]=lean+.68*w+.97*crouch-.15*prone;
   rot[j+4]=-.10-.63*Math.max(0,w)-1.83*crouch-.26*prone;
   rot[j+5]=-(rot[0]+rot[j+3]+rot[j+4])*(1-prone)*(1-down);

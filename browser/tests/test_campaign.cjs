@@ -74,8 +74,28 @@ run.game.setCamera(0);
 for(let i=0;i<9&&stage()===4;i++){act('melee');run.game.step(.31)}
 assert.equal(stage(),5);
 assert.equal(run.game.state.paused,false);
-walk(28.4,0);next();assert.equal(stage(),6);
-resume();assert.equal(stage(),6);
+assert.equal(run.game.state.hasCard3,false);
+assert.equal(run.game.canOccupy(27.3,0,0,0),false);
+const dropped=run.game.state.cardDrop;
+resume();assert.equal(stage(),5);
+assert.deepEqual({...run.game.state.cardDrop},{...dropped});
+walk(26.05,1.7);run.game.setCamera(0);act('interact');
+assert.equal(stage(),5,'reader denies access without the card');
+walk(dropped.x-.7,dropped.z);run.game.setCamera(Math.PI);
+assert.equal(run.game.state.accessPrompt,'','facing away hides the pickup prompt');
+run.game.setCamera(0);assert.equal(run.game.state.accessPrompt,'take');
+act('interact');assert.equal(stage(),6);assert.equal(run.game.state.hasCard3,true);
+resume();assert.equal(stage(),6);assert.equal(run.game.state.shutterOpen,false);
+walk(26.05,1.7);run.game.setCamera(0);
+assert.equal(run.game.state.accessPrompt,'scan');act('interact');
+assert.equal(stage(),7);assert.equal(run.game.state.shutterOpen,false);
+next();assert.equal(run.game.canOccupy(27.3,0,0,0),false);
+next();next();assert.equal(run.game.state.shutterOpen,true);
+resume();assert.equal(run.game.state.shutterOpen,true);
+walk(28.4,0);next();assert.equal(stage(),8);
+resume();assert.equal(stage(),8);
+act('interact');assert.equal(run.game.state.paused,true);
+run.button('returnToGame');assert.equal(run.game.state.paused,false);
 console.log('PASS: new game, navigable route, arrest, multi-hit/reload, Fox, rotated breach, actual kit, boss, player-led exit and completed reload.');
 
 const slot='mg1987.grayfox.browser.v1';
@@ -94,3 +114,12 @@ assert.equal(depleted.game.state.stage,4);
 assert.equal(depleted.game.state.stunAmmo,0);
 assert.equal(depleted.game.state.equippedWeapon,'BARE HANDS');
 console.log('PASS: legacy corridor checkpoint and empty-ammo recovery without refills.');
+
+
+for(const [oldStage,newStage] of [[5,7],[6,8]]){
+ const previous=loadFixture({version:4,stage:oldStage,x:28,z:0,health:71});
+ assert.equal(previous.game.state.stage,newStage);
+ assert.equal(previous.game.state.shutterOpen,true);
+ assert.equal(previous.game.state.hasCard3,true);
+}
+console.log('PASS: physical card pickup, denied reader, scan, shutter motion, checkpoint restoration and v4 exit migration.');

@@ -30,7 +30,7 @@ window.createFieldRenderer = function(gl, compile) {
  const attrs=['position','normal','color','binding'].map(k=>gl.getAttribLocation(prog,k));
  const uniforms=['vp','actor','palette[0]'].map(k=>gl.getUniformLocation(prog,k));
  const meshes={};
- for(const role of ['snake','fox','guard']){
+ for(const role of ['snake','fox','guard','shoot_gunner']){
   meshes[role]=assets.model(role).map(part=>{
    if(!part.length)return null;
    const data=new Float32Array(part.length*12);

@@ -3,7 +3,7 @@ const {FieldRigs:rig}=require('../assets/field_rigs.js');
 const fs=require('node:fs'), path=require('node:path');
 const out=process.argv[2]||path.join(__dirname,'../assets/models');
 fs.mkdirSync(out,{recursive:true});
-for(const role of ['snake','fox','guard']){
+for(const role of ['snake','fox','guard','shoot_gunner']){
  const chunks=[], views=[], accessors=[], nodes=[], primitives=[], animations=[];
  let size=0;
  function accessor(values,type,component=5126,bounds=false){

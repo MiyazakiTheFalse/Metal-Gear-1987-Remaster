@@ -1,6 +1,6 @@
 # Local character assets
 
-The default Snake, human Gray Fox and patrol guard models, vertex colours, skin weights and poses were authored for this playtest. Mesh profiles and motions are editable in field_rigs.js. The GLB exporter uses the same definitions. The comparison option below uses a separate donor model.
+The default Snake, human Gray Fox, patrol guard and Shoot Gunner models, vertex colours, skin weights and poses were authored for this playtest. Mesh profiles and motions are editable in field_rigs.js. The GLB exporter uses the same definitions. The comparison option below uses a separate donor model.
 
 # Rigged-character visual upgrade — source and licences
 

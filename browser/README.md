@@ -1,6 +1,6 @@
 # Gray Fox browser playtest
 
-Extract the entire package and open **index.html** in a desktop browser with WebGL. Choose **Start infiltration** for the expanded mission or **Continue checkpoint** to resume. Snake, Gray Fox and patrol guards use original skinned models rendered locally in WebGL. The game audio also works offline. The comparison checkbox loads the older generic soldier over the network. Attribution is in assets/ASSET_CREDITS.md.
+Extract the entire package and open **index.html** in a desktop browser with WebGL. Choose **Start infiltration** for the expanded mission or **Continue checkpoint** to resume. Snake, Gray Fox, patrol guards and Shoot Gunner use original skinned models rendered locally in WebGL. The game audio also works offline. The comparison checkbox loads the older generic soldier over the network. Attribution is in assets/ASSET_CREDITS.md.
 
 Move with WASD, look with the mouse, and interact with E. Ctrl crouches, Z goes prone, V enters cover, and F strikes or knocks from cover. Hold the right mouse button to aim and use the left to fire. G opens the weapon selector, brackets select, and releasing G confirms. C calls on the transceiver. J opens the intelligence log.
 
@@ -10,3 +10,5 @@ The source target is the Connect2Media J2ME edition. The prison sequence follows
 
 
 Editable GLBs are included in assets/models in the playtest ZIP. Rebuild them from the browser mesh and motion sources with `node tools/export_field_rigs.cjs`. Each includes 16 bones and idle, walk, run, crouch, prone and down clips. Fox also has a captive pose. These are stylised playtest models. Unreal import and production character art are pending.
+
+After Shoot Gunner falls, recover Card 3 from the floor. Face the reader beside the east shutter and press E or gamepad A, then cross when ready. At the far threshold you can review the debrief, reopen Fox’s intelligence or return to play. Older saves with an open exit retain access. The badge, reader and shutter choreography are original playtest assets.

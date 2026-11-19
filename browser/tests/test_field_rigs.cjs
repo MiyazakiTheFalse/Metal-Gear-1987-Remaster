@@ -2,7 +2,7 @@ const assert=require('node:assert/strict');
 const {FieldRigs:rig}=require('../assets/field_rigs.js');
 assert.equal(rig.bones.length,16);
 for(const [i,[name,parent]] of rig.bones.entries())assert.ok(parent<i,name);
-for(const role of ['snake','fox','guard']){
+for(const role of ['snake','fox','guard','shoot_gunner']){
  const [body,gear]=rig.model(role);
  assert.ok(body.length>3000 && body.length%3===0);
  assert.equal(gear.length>0,role==='snake');
