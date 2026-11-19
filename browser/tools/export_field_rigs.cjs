@@ -4,6 +4,7 @@ const fs=require('node:fs'), path=require('node:path');
 const out=process.argv[2]||path.join(__dirname,'../assets/models');
 fs.mkdirSync(out,{recursive:true});
 for(const role of ['snake','fox','guard','shoot_gunner']){
+ const bones=rig.skeleton(role);
  const chunks=[], views=[], accessors=[], nodes=[], primitives=[], animations=[];
  let size=0;
  function accessor(values,type,component=5126,bounds=false){
@@ -19,8 +20,8 @@ for(const role of ['snake','fox','guard','shoot_gunner']){
   return accessors.push(a)-1;
  }
  const inverses=[];
- rig.bones.forEach(([name,parent,x,y,z],i)=>{
-  const b=rig.bones[parent]||['',0,0,0,0];
+ bones.forEach(([name,parent,x,y,z],i)=>{
+  const b=bones[parent]||['',0,0,0,0];
   nodes.push({name,translation:[x-b[2],y-b[3],z-b[4]]});
   if(parent>=0)(nodes[parent].children??=[]).push(i);
   inverses.push(1,0,0,0,0,1,0,0,0,0,1,0,-x,-y,-z,1);
@@ -32,7 +33,7 @@ for(const role of ['snake','fox','guard','shoot_gunner']){
    const key=v.join(',');
    if(!keys.has(key)){
     keys.set(key,keys.size);pos.push(...v.slice(0,3));norm.push(...v.slice(3,6));
-    col.push(...v.slice(6,9));joints.push(v[9],Math.max(0,rig.bones[v[9]][1]),0,0);
+    col.push(...v.slice(6,9));joints.push(v[9],Math.max(0,bones[v[9]][1]),0,0);
     weights.push(1-v[10],v[10],0,0);
    }
    indices.push(keys.get(key));
@@ -43,23 +44,23 @@ for(const role of ['snake','fox','guard','shoot_gunner']){
  }
  const keys=Array.from({length:25},(_,i)=>i/24);
  const times=accessor(keys,'SCALAR',5126,true);
- for(const [name,state] of Object.entries({Idle:{},Walk:{stride:.72},Run:{stride:1},Crouch:{crouch:1},Prone:{prone:1},Down:{down:1},...(role==='fox'?{Captive:{captive:true}}:{})})){
-  const frames=keys.map(t=>rig.pose({...state,time:t*2*Math.PI/2.4,phase:t*2*Math.PI}));
+ for(const [name,state] of Object.entries({Idle:{},Walk:{stride:.72},Run:{stride:1},Crouch:{crouch:1},Prone:{prone:1},Down:{down:1},...(role==='shoot_gunner'?{Address:{order:1},Shoulder:{focus:1,aim:.8},Recoil:{focus:.5,recoil:1},Search:{order:.3}}:{}),...(role==='fox'?{Captive:{captive:true}}:{})})){
+  const frames=keys.map(t=>rig.pose({...state,boss:role==='shoot_gunner',mouth:name==='Address'?.5+.5*Math.sin(t*6*Math.PI):0,time:t*2*Math.PI/2.4,phase:t*2*Math.PI}));
   const channels=[],samplers=[];
   function track(bone,key,output){
    channels.push({sampler:samplers.length,target:{node:bone,path:key}});
    samplers.push({input:times,output,interpolation:'LINEAR'});
   }
-  rig.bones.forEach((_,i)=>track(i,'rotation',accessor(frames.flatMap(f=>
+  bones.forEach((_,i)=>track(i,'rotation',accessor(frames.flatMap(f=>
    [0,0,Math.sin(f.rot[i]/2),Math.cos(f.rot[i]/2)]),'VEC4')));
-  track(0,'translation',accessor(frames.flatMap(f=>f.offset.map((v,k)=>v+rig.bones[0][2+k])),'VEC3'));
+  track(0,'translation',accessor(frames.flatMap(f=>f.offset.map((v,k)=>v+bones[0][2+k])),'VEC3'));
   animations.push({name,channels,samplers});
  }
  const meshNode=nodes.push({name:role,mesh:0,skin:0})-1;
  const inverseBindMatrices=accessor(inverses,'MAT4');
  const doc={asset:{version:'2.0',generator:'Outer Heaven field rig exporter'},scene:0,scenes:[{nodes:[0,meshNode]}],
   nodes,meshes:[{name:role,primitives}],materials:[{name:'Uniform and skin',doubleSided:true,pbrMetallicRoughness:{metallicFactor:0,roughnessFactor:.86}}],
-  skins:[{skeleton:0,joints:rig.bones.map((_,i)=>i),inverseBindMatrices}],animations,
+  skins:[{skeleton:0,joints:bones.map((_,i)=>i),inverseBindMatrices}],animations,
   buffers:[{byteLength:size}],bufferViews:views,accessors};
  const json=Buffer.from(JSON.stringify(doc)),pad=Buffer.alloc((4-json.length%4)%4,32),binary=Buffer.concat(chunks);
  const header=Buffer.alloc(20),binHeader=Buffer.alloc(8);

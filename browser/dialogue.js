@@ -1,5 +1,8 @@
 /* Independently written temporary scene dialogue; not transcribed J2ME text. */
 window.MGDialogue = Object.freeze({
+  bossEntry:{speaker:'SHOOT GUNNER',text:'Property stays on this side of the line. That includes you.',duration:3.5},
+  bossSearch:{speaker:'SHOOT GUNNER',text:'I have the key. Take your time.',duration:2.6},
+  bossWounded:{speaker:'SHOOT GUNNER',text:'I said behind the line.',duration:1.8},
   informant:{speaker:'PRISONER',text:'Fox is in solitary. The guards at processing take prisoners straight through. It is the only way inside.',duration:6},
   schneider:{speaker:'SCHNEIDER · 120.79',text:'I worked on the buildings here. They have altered the original construction since then.',duration:4},
   bigBoss:{speaker:'BIG BOSS · 120.85',text:'Check the cell walls, Snake. Listen closely.',duration:3},

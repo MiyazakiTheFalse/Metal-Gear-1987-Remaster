@@ -9,7 +9,7 @@ for(const role of ['snake','fox','guard','shoot_gunner']){
  for(const v of [...body,...gear]){
   assert.ok(v.every(Number.isFinite));
   assert.ok(Math.abs(Math.hypot(...v.slice(3,6))-1)<1e-5);
-  assert.ok(Number.isInteger(v[9])&&v[9]>=0&&v[9]<rig.bones.length&&v[10]>=0&&v[10]<=1);
+  assert.ok(Number.isInteger(v[9])&&v[9]>=0&&v[9]<rig.skeleton(role).length&&v[10]>=0&&v[10]<=1);
  }
 }
 for(const state of [{},{stride:1,phase:1.4},{crouch:1},{prone:1},{down:1},{cover:1},{strike:1}]){

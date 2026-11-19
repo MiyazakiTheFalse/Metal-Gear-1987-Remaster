@@ -1,7 +1,7 @@
 // One interleaved static vertex buffer per costume layer. The same depth buffer
 // as the prison geometry handles characters behind walls, bars and doorways.
 window.createFieldRenderer = function(gl, compile) {
- const assets=window.FieldRigs, count=assets.bones.length;
+ const assets=window.FieldRigs, count=assets.skeleton('shoot_gunner').length;
  const vertex=`attribute vec3 position, normal, color;
  attribute vec3 binding;
  uniform vec4 palette[${count}];
@@ -31,12 +31,13 @@ window.createFieldRenderer = function(gl, compile) {
  const uniforms=['vp','actor','palette[0]'].map(k=>gl.getUniformLocation(prog,k));
  const meshes={};
  for(const role of ['snake','fox','guard','shoot_gunner']){
+  const bones=assets.skeleton(role);
   meshes[role]=assets.model(role).map(part=>{
    if(!part.length)return null;
    const data=new Float32Array(part.length*12);
    part.forEach((vertex,i)=>{
     data.set(vertex.slice(0,10),i*12);
-    data[i*12+10]=Math.max(0,assets.bones[vertex[9]][1]);data[i*12+11]=vertex[10];
+    data[i*12+10]=Math.max(0,bones[vertex[9]][1]);data[i*12+11]=vertex[10];
    });
    const buffer=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
    gl.bufferData(gl.ARRAY_BUFFER,data,gl.STATIC_DRAW);return {buffer,count:part.length};
@@ -47,8 +48,9 @@ window.createFieldRenderer = function(gl, compile) {
   attrs.forEach(k=>gl.enableVertexAttribArray(k));
   for(const {role,actor,state,gear} of actors){
    const {rot,offset}=assets.pose(state), p=new Float32Array(count*4);
-   for(let j=0;j<count;j++){
-    const [,parent,x,y]=assets.bones[j],pi=parent*4;
+   const bones=assets.skeleton(role);
+   for(let j=0;j<bones.length;j++){
+    const [,parent,x,y]=bones[j],pi=parent*4;
     const pc=parent<0?1:p[pi], ps=parent<0?0:p[pi+1];
     const c=Math.cos(rot[j]),s=Math.sin(rot[j]);
     const ac=pc*c-ps*s,as=ps*c+pc*s;

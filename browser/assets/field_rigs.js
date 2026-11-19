@@ -12,6 +12,8 @@ for (const side of [-1,1]) {
   ['thigh',0,0,.90,.115],['shin',base+3,.018,.50,.12],['foot',base+4,-.005,.115,.12]
  ]) bones.push([name+suffix,parent,x,y,z*side]);
 }
+const bossBones=[...bones,['jaw',3,.02,1.631,0],['brow',3,.035,1.70,0]];
+const skeleton=role=>role==='shoot_gunner'?bossBones:bones;
 const colors={skin:[.72,.53,.40],lip:[.44,.27,.22],eye:[.78,.74,.62],ink:[.07,.076,.068],
  hair:[.14,.105,.084],ash:[.30,.28,.245],sage:[.25,.34,.27],pine:[.14,.22,.19],
  steel:[.25,.30,.27],sand:[.58,.54,.43],stitch:[.44,.42,.34],boot:[.14,.13,.115],
@@ -21,7 +23,7 @@ function model(role) {
  const parts=[[],[]]; let layer=0;
  // Each ring is [height, forward radius, width radius, optional forward offset].
  function surface(joint,shade,cx,cz,rings,sides=14,blend=false){
-  const color=colors[shade],offset=bones[joint][3];
+  const color=colors[shade],offset=skeleton(role)[joint][3];
   const rows=rings.map(([y,rx,rz,dx=0],row)=>Array.from({length:sides},(_,i)=>{
    const a=i*2*Math.PI/sides, ca=Math.cos(a),sa=Math.sin(a);
    const lo=rings[Math.max(0,row-1)],hi=rings[Math.min(rings.length-1,row+1)];
@@ -65,12 +67,12 @@ function model(role) {
  surface(2,'skin',0,0,[[1.435,.087,.08],[1.52,.079,.076],[1.59,.083,.08]]);
  surface(3,'skin',0,0,[[1.52,.044,.049,.055],[1.55,.086,.079,.026],[1.595,.101,.100,.014],[1.65,.115,.109],[1.71,.12,.111],[1.77,.105,.095],[1.805,.046,.053]],20);
  oval(3,'skin',.118,1.646,0,.035,.046,.024);
- oval(3,'lip',.121,1.589,0,.008,.006,.034);
+ oval(boss?16:3,'lip',.121,1.589,0,.008,.006,.034);
  for(const s of [-1,1]){
   oval(3,'skin',-.016,1.645,s*.110,.027,.044,.017);
   oval(3,'eye',.103,1.677,s*.049,.011,.009,.025);
   oval(3,'ink',.114,1.677,s*.049,.004,.008,.008);
-  oval(3,fox?'ash':'hair',.103,1.694,s*.050,.012,.008,.033);
+  oval(boss?17:3,fox?'ash':'hair',.103,1.694,s*.050,.012,.008,.033);
  }
  if(fox){
   panel(1,'stitch',[.083,1.467,-.079],[.158,1.32,.018],.024);
@@ -131,6 +133,14 @@ function model(role) {
    oval(0,'pine',-.02,.92,s*.188,.067,.074,.04);
    oval(1,'belt',.125,1.15,s*.082,.048,.079,.060);
   }
+  if(boss){
+   // A single articulated silhouette remains attached to his right hand.
+   surface(12,'boot',.028,.259,[[.80,.030,.023],[.86,.041,.030],[1.08,.055,.034],[1.14,.048,.036]],10);
+   surface(12,'ink',.028,.259,[[.58,.039,.026],[.82,.046,.032],[.88,.041,.035]],10);
+   surface(12,'steel',.018,.259,[[.27,.024,.022],[.64,.030,.026]],12);
+   surface(12,'boot',.050,.259,[[.48,.030,.029],[.64,.031,.030]],10);
+   for(const s of [-1,1])panel(1,'buckle',[.134,1.374,.15*s],[.147,1.345,.145*s],.034);
+  }
   if(guard){
    // The carried prop follows the forward hand through the patrol cycle.
    surface(12,'ink',.20,.26,[[.79,.20,.024],[.82,.26,.026],[.86,.26,.026],[.88,.18,.022]],8);
@@ -173,9 +183,17 @@ function pose(state) {
   return y+Math.cos(angle)*(.01-bones[parent][3])
    +Math.min(Math.sin(angle)*(-.087-bones[parent][2]),Math.sin(angle)*(.177-bones[parent][2]));
  }
+ if(state.boss){
+  const focus=state.focus||0,kick=state.recoil||0,order=state.order||0;
+  rot[1]-=.11*focus-.18*kick;rot[3]+=.12*focus-.14*order;
+  rot[4]+=.46*order+.45*focus;rot[5]+=.84*order+.36*focus;
+  rot[10]+=.43*focus-.20*kick;rot[11]+=.12*focus;
+  rot[16]=-(state.mouth||0)*.30;
+  rot[17]=-.16*focus+.12*order-.11*kick;
+ }
  const grounded=.008-Math.min(soleHeight(7),soleHeight(13));
  const offset=[0,grounded*(1-prone)*(1-down)-.74*prone-.685*down,0];
  return {rot,offset};
 }
-root.FieldRigs={bones,model,pose};
+root.FieldRigs={bones,skeleton,model,pose};
 })(typeof module==='object'?module.exports:window);

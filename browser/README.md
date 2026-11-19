@@ -9,6 +9,8 @@ On a standard gamepad, the sticks control movement and view. A interacts, B crou
 The source target is the Connect2Media J2ME edition. The prison sequence follows comparative MSX2 evidence. Geometry, dialogue, stun equipment, lighting and timing are provisional. For isolated testing, append ?cell to the file URL before starting. Optional ?escort enables the earlier companion behaviour.
 
 
-Editable GLBs are included in assets/models in the playtest ZIP. Rebuild them from the browser mesh and motion sources with `node tools/export_field_rigs.cjs`. Each includes 16 bones and idle, walk, run, crouch, prone and down clips. Fox also has a captive pose. These are stylised playtest models. Unreal import and production character art are pending.
+Editable GLBs are included in assets/models in the playtest ZIP. Rebuild them from the browser mesh and motion sources with `node tools/export_field_rigs.cjs`. The body rigs have 16 joints and idle, walk, run, crouch, prone and down clips. Fox also has a captive pose. Shoot Gunner adds jaw and brow joints and four performance clips. These are stylised playtest models. Unreal import and production character art are pending.
+
+Choose **Rehearse Shoot Gunner** on the opening menu to enter the property hall with recovered gear and a separate checkpoint. Its low cart and tall freight trunks offer different sightlines.
 
 After Shoot Gunner falls, recover Card 3 from the floor. Face the reader beside the east shutter and press E or gamepad A, then cross when ready. At the far threshold you can review the debrief, reopen Fox’s intelligence or return to play. Older saves with an open exit retain access. The badge, reader and shutter choreography are original playtest assets.
