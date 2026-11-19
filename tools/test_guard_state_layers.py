@@ -48,6 +48,8 @@ class GuardStateLayerSourceTests(unittest.TestCase):
         self.assertIn("!bFacilityLockdown",GUARD)
         self.assertIn("bFacilityCaution",GUARD)
         self.assertIn("bUnderAlert = bLocalConfirmedContact",MISSION)
+        self.assertNotIn("bActiveInvestigation || FacilityCautionRemaining",MISSION)
+        self.assertIn("Only explicit radio/body notifications",MISSION)
 
     def test_patrol_axis_and_physical_world_evidence(self):
         self.assertIn("FVector::DotProduct(\n        GetActorLocation() - PatrolOrigin, PatrolAxis)",GUARD)

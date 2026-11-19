@@ -845,19 +845,16 @@ void AMGGrayFoxMission::UpdateGuardAlert(float Dt)
     FacilityAlertRemaining = FMath::Max(0.f, FacilityAlertRemaining - Step);
     FacilityCautionRemaining = FMath::Max(0.f, FacilityCautionRemaining - Step);
     bool bLocalConfirmedContact = false;
-    bool bActiveInvestigation = false;
     if (GetWorld())
         for (TActorIterator<AMGGuardActor> G(GetWorld()); G; ++G)
         {
             if (G->IsIncapacitated()) continue;
             bLocalConfirmedContact |= G->HasDirectVisualContact()
                 && G->GetAwarenessState() >= 3;
-            const EMGGuardAwarenessPhase Phase = G->GetAwarenessPhase();
-            bActiveInvestigation |= Phase == EMGGuardAwarenessPhase::Suspicious ||
-                Phase == EMGGuardAwarenessPhase::Investigating ||
-                Phase == EMGGuardAwarenessPhase::Searching ||
-                (Phase == EMGGuardAwarenessPhase::Confirming &&
-                 !G->IsIssuingChallenge());
+            // Crucial: the facility has NOT automatically heard what one
+            // uncommunicative sentry privately suspects or investigates.
+            // Only explicit radio/body notifications and the enemy beacon
+            // are allowed to raise installation-wide condition.
         }
 
     if (FacilityAlertRemaining > 0.f)
@@ -876,8 +873,7 @@ void AMGGrayFoxMission::UpdateGuardAlert(float Dt)
             SetFacilitySecurityState(EMGFacilitySecurityState::Caution);
         }
     }
-    else if (bActiveInvestigation || FacilityCautionRemaining > 0.f ||
-             IsTransmitterActive())
+    else if (FacilityCautionRemaining > 0.f || IsTransmitterActive())
         SetFacilitySecurityState(EMGFacilitySecurityState::Caution);
     else if (FacilitySecurityState == EMGFacilitySecurityState::Caution)
     {
