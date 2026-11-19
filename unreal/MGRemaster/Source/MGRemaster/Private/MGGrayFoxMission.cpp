@@ -290,6 +290,8 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
             Inventory->RestoreStunRounds(LoadedStunRounds);
         }
         Inventory->SetConfiscated((Flags & MG_FOX_GEAR_RECOVERED) == 0);
+        if (IsTransmitterActive())
+            Inventory->AwardItem(TEXT("TRANSMITTER"), 1);
         // Rebuild a non-consumable from a completed mission transaction after
         // a checkpoint load. Never award it merely from a boss defeat.
         if (Flags & MG_FOX_CARD3_RECOVERED)
@@ -368,11 +370,16 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         break;
     case MG_FOX_RECOVER_GEAR:
         if (Player && Player->GetEquipment())
+        {
             Player->GetEquipment()->SetConfiscated(false);
+            Player->GetEquipment()->AwardItem(TEXT("TRANSMITTER"), 1);
+        }
         if (IsValid(PlantedTransmitter)) PlantedTransmitter->SetActorHiddenInGame(false);
         Dialogue = TEXT("GEAR RECOVERED — EQUIP THE HANDGUN. WHAT IS THAT DEVICE?");
         break;
     case MG_FOX_REMOVE_TRANSMITTER:
+        if (Player && Player->GetEquipment())
+            Player->GetEquipment()->DiscardPlantedTransmitter();
         if (IsValid(PlantedTransmitter)) PlantedTransmitter->SetActorHiddenInGame(true);
         Dialogue = TEXT("ENEMY TRANSMITTER REMOVED.");
         break;
@@ -440,10 +447,11 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
     if (!(Flags & MG_FOX_GEAR_RECOVERED) && bGearDoorOpen
         && CanReach(Player, GearBag, 200.f))
         return ApplyAction(MG_FOX_RECOVER_GEAR, Player);
-    if ((Flags & MG_FOX_TRANSMITTER_PLANTED)
-        && !(Flags & MG_FOX_TRANSMITTER_REMOVED)
-        && CanReach(Player, PlantedTransmitter, 185.f))
-        return ApplyAction(MG_FOX_REMOVE_TRANSMITTER, Player);
+    // The original game places the enemy transmitter IN Snake's inventory.
+    // E on the visible evidence is an accessible physical alternative; the
+    // primary 1987 solution is equip the item and discard it with item Use.
+    if (IsTransmitterActive() && CanReach(Player, PlantedTransmitter, 185.f))
+        return DiscardTransmitter(Player);
 
     if ((Flags & MG_FOX_SHOTMAKER_DEFEATED)
         && !(Flags & MG_FOX_CARD3_RECOVERED))
@@ -501,6 +509,20 @@ bool AMGGrayFoxMission::IsBossTelegraphing() const
     return IsValid(Shotmaker) && Shotmaker->IsTelegraphing();
 }
 
+bool AMGGrayFoxMission::IsTransmitterActive() const
+{
+    return (Flags & MG_FOX_TRANSMITTER_PLANTED) != 0
+        && (Flags & MG_FOX_TRANSMITTER_REMOVED) == 0;
+}
+
+bool AMGGrayFoxMission::DiscardTransmitter(AMGPlayerCharacter* Player)
+{
+    return Player && Player->GetEquipment()
+        && Player->GetEquipment()->HasPlantedTransmitter()
+        && IsTransmitterActive()
+        && ApplyAction(MG_FOX_REMOVE_TRANSMITTER, Player);
+}
+
 bool AMGGrayFoxMission::HasEquipmentConfiscated() const
 {
     return (Flags & MG_FOX_CONFISCATED) != 0
@@ -509,7 +531,7 @@ bool AMGGrayFoxMission::HasEquipmentConfiscated() const
 
 void AMGGrayFoxMission::UpdateGuardAlert()
 {
-    bUnderAlert = false;
+    bUnderAlert = IsTransmitterActive();
     if (!GetWorld()) return;
     for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
         if (It->GetAwarenessState() >= 3 && !It->IsIncapacitated())
@@ -589,6 +611,8 @@ FString AMGGrayFoxMission::GetObjectiveText() const
         return TEXT("Continue east through the security checkpoint.");
     if (!(Flags & MG_FOX_GEAR_RECOVERED))
         return TEXT("Avoid the shotgun. Punch open the southern recovery room.");
+    if (IsTransmitterActive())
+        return TEXT("The enemy transmitter is exposing you. Discard it from the item menu.");
     if (!(Flags & MG_FOX_SHOTMAKER_DEFEATED))
         return TEXT("Fight with your recovered handgun. Use cover between volleys.");
     if (!(Flags & MG_FOX_CARD3_RECOVERED))

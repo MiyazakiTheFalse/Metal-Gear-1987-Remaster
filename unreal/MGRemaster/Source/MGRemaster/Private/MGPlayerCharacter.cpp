@@ -839,6 +839,20 @@ void AMGPlayerCharacter::UseItem()
 {
     if (!Equipment || Equipment->IsConfiscated())
     { NotifyFeedback(TEXT("ITEMS CONFISCATED"), TEXT("denied")); return; }
+    // Source-faithful: extra inventory item itself is an enemy tracking bug.
+    // Remove it through the inventory instead of clicking a distant objective.
+    if (Equipment->IsTransmitterEquipped())
+    {
+        if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+            UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+            if (Mission->DiscardTransmitter(this))
+            {
+                NotifyFeedback(TEXT("ENEMY TRANSMITTER DISCARDED"), TEXT("select"));
+                return;
+            }
+        NotifyFeedback(TEXT("TRANSMITTER CANNOT BE DISCARDED"), TEXT("denied"));
+        return;
+    }
     if (Health >= 100.f)
     { NotifyFeedback(TEXT("HEALTH FULL"), TEXT("denied")); return; }
     if (Equipment->ConsumeRation())

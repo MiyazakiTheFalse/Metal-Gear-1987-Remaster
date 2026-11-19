@@ -24,6 +24,8 @@ public:
     bool TryInteract(AMGPlayerCharacter* Player);
     bool TryPunchRecoveryDoor(AMGPlayerCharacter* Player);
     bool IsBossTelegraphing() const;
+    bool IsTransmitterActive() const;
+    bool DiscardTransmitter(AMGPlayerCharacter* Player);
     bool HasEquipmentConfiscated() const;
     uint32 GetMissionFlags() const { return Flags; }
     FString GetObjectiveText() const;
