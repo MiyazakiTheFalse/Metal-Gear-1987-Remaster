@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "updated": "2026-11-19",
+  "status": "committed_source_uncompiled",
+  "target": "Outer Heaven 1995 / MSX2 comparative",
+  "principle": "Duty determines normal tasks; awareness determines belief; tactics/presentation determine moment-to-moment action; facility condition spreads only actual reports, not exact player location.",
+  "layers": {
+    "duty": {
+      "enum": "EMGGuardRole",
+      "values": [
+        "Patrol",
+        "Prison",
+        "Custody"
+      ],
+      "description": "Assigned job and route. Custody holds posts, patrol/Prison have different axes and speeds."
+    },
+    "awareness": {
+      "enum": "EMGGuardAwarenessPhase",
+      "values": [
+        "Routine",
+        "Suspicious",
+        "Investigating",
+        "Confirming",
+        "Engaged",
+        "Searching",
+        "Returning",
+        "Incapacitated"
+      ],
+      "description": "Local, evidence-limited state. This is not interchangeable with numeric Rust suspicion thresholds."
+    },
+    "evidence": {
+      "enum": "EMGGuardEvidenceKind",
+      "values": [
+        "None",
+        "HeardMovement",
+        "StructuralImpact",
+        "ObservedIntruder",
+        "SquadSighting",
+        "DiscoveredBody",
+        "SquadBodyReport",
+        "Wounded"
+      ],
+      "description": "Source identity retained; one impact or secondhand body report is not proof of visual contact."
+    },
+    "action": {
+      "enum": "EMGGuardPosture",
+      "values": [
+        "Patrol",
+        "Notice",
+        "Investigate",
+        "Search",
+        "Challenge",
+        "Report",
+        "Engage",
+        "Strike",
+        "Incapacitated"
+      ],
+      "description": "Animation/voice/camera interpretation of actual game state. May change more often than facility security."
+    },
+    "facility": {
+      "enum": "EMGFacilitySecurityState",
+      "values": [
+        "Normal",
+        "Caution",
+        "Alert",
+        "Evasion",
+        "StandDown"
+      ],
+      "description": "Raised by evidence transmitted by guards, not a generic cinematic timer or a local unconfirmed suspicious glance."
+    }
+  },
+  "candidate_parameters": {
+    "custody_required_challenge_seconds": 0.75,
+    "custody_threat_cooldown_seconds": 3.5,
+    "melee_visual_confirm_seconds": 0.16,
+    "melee_telegraph_seconds": 0.38,
+    "melee_recovery_seconds": 1.25,
+    "local_squad_report_delay_seconds": 0.6,
+    "local_squad_report_range_cm": 950,
+    "body_scan_seconds": 0.7,
+    "body_report_delay_seconds": 1.2,
+    "body_discovery_range_cm": 720,
+    "facility_alert_seconds": 10,
+    "facility_evasion_seconds": 7,
+    "facility_body_caution_seconds": 9,
+    "facility_post_alert_caution_seconds": 5,
+    "facility_standdown_seconds": 3,
+    "patrol_acceleration_interpolation_speed": 6,
+    "muted_occluded_footstep_loudness_multiplier": 0.42
+  },
+  "examples": [
+    {
+      "input": "One wall impact",
+      "local": [
+        "Routine",
+        "Investigating",
+        "Searching",
+        "Returning",
+        "Routine"
+      ],
+      "facility": "Caution only if sustained evidence warrants it",
+      "attack": "none until direct visual confirmation"
+    },
+    {
+      "input": "Player briefly glimpsed",
+      "local": [
+        "Suspicious",
+        "Confirming",
+        "Searching",
+        "Returning"
+      ],
+      "facility": "Normal or Caution until actually reported",
+      "attack": "none without sustained direct sight and face alignment"
+    },
+    {
+      "input": "Confirmed target reported over radio",
+      "local": [
+        "Confirming",
+        "Engaged",
+        "Searching"
+      ],
+      "facility": "Alert → Evasion → Caution → StandDown → Normal",
+      "attack": "warned and cancellable close-range action only"
+    },
+    {
+      "input": "Unconscious guard discovered",
+      "local": [
+        "Routine",
+        "Investigating",
+        "Searching",
+        "Returning"
+      ],
+      "facility": "Caution on body report",
+      "attack": "none by body evidence alone"
+    },
+    {
+      "input": "Custody challenge with lowered weapon",
+      "local": [
+        "Routine",
+        "Confirming"
+      ],
+      "facility": "Normal until independent report",
+      "attack": "no automatic lethal attack"
+    },
+    {
+      "input": "Custody approach while aiming during global alert",
+      "local": [
+        "Suspicious",
+        "Searching"
+      ],
+      "facility": "Already Alert/Evasion",
+      "attack": "no compliant capture; evidence still required"
+    }
+  ],
+  "source_implementation": [
+    "unreal/MGRemaster/Source/MGRemaster/Public/MGGuardActor.h",
+    "unreal/MGRemaster/Source/MGRemaster/Private/MGGuardActor.cpp",
+    "unreal/MGRemaster/Source/MGRemaster/Public/MGGrayFoxMission.h",
+    "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp",
+    "unreal/MGRemaster/Source/MGRemaster/Private/MGPrototypeHUD.cpp"
+  ],
+  "presentation_bindings": [
+    "OnAwarenessPhaseChanged",
+    "OnPostureChanged",
+    "OnMeleeWarning",
+    "OnMeleeImpact",
+    "OnBodyDiscovered",
+    "OnContactReported",
+    "OnCustodyChallenge",
+    "OnFacilitySecurityStateChanged"
+  ],
+  "critical_invariants": [
+    "Duty remains independent of alert/awareness/tactical animation.",
+    "Direct observed sight, sound origin, squad sighting, body evidence and injury are explicitly distinct causes.",
+    "Only a direct confirmed sighting initiates a .6-second squad sighting radio call and facility Alert.",
+    "Radio call uses a saved snapshot of an actual sighting, not coordinates overwritten by later sound.",
+    "Body evidence raises Caution and sends location of discovered body, not current Snake position.",
+    "A guard needs face alignment and uninterrupted visual confirmation before melee damage.",
+    "Striking can be cancelled by breaking LOS, increasing distance or stunning guard.",
+    "Alerted custody officers do not offer a routine compliant arrest as a trap.",
+    "The previous guard behavior returns to the actual patrol axis, including north/south routes.",
+    "Facility conditions modify attention, not visibility through concrete or invulnerability to stealth.",
+    "Exploration pacing never fabricates a reported security incident.",
+    "Animation and audio callbacks cannot own combat hits, flags or checkpoint state."
+  ],
+  "known_gaps": [
+    "No animation-blueprint implementation of these states or authored guard voice barks.",
+    "No UE5.7 compile, automation tests, collision, visual-telegraph or novice-player evidence.",
+    "Facility security-state timers are presently session runtime values and are not restored as a full world snapshot after save/load.",
+    "Navigation remains bounded steering with swept collision, not full NavMesh/path tactical planning.",
+    "More nuanced morale, fatigue, chain of command and sector-local radio networks are design work, not committed systems.",
+    "Original J2ME encounter geography and patrol assignment have not been source verified."
+  ],
+  "approved_in_unreal": false
+}
