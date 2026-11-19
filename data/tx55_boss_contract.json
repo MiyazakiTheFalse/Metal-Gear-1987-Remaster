@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "owner": "gameplay_authoritative_not_cinematic",
+  "source_edition": "1987 MSX2; J2ME direct check pending",
+  "verification_status": "source_authoring_only",
+  "original_name": "TX-55 Metal Gear",
+  "fixed_order": [
+    "R",
+    "R",
+    "L",
+    "R",
+    "L",
+    "L",
+    "R",
+    "L",
+    "L",
+    "R",
+    "R",
+    "L",
+    "R",
+    "L",
+    "R",
+    "R"
+  ],
+  "known_to_player": 15,
+  "player_must_infer_last": true,
+  "placement_count": 16,
+  "wrong_leg_consumes_charge": false,
+  "stale_notify_commits": false,
+  "model_is_stationary_in_original": true,
+  "security_lasers_in_source": true,
+  "final_human_confrontation": "1995 Big Boss; MGSV continuity Venom Snake",
+  "source_urls": [
+    "https://thesnakesoup.org/metal-gear-msx-walkthrough/",
+    "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/65155"
+  ],
+  "review_gates": [
+    "Exact source version checked",
+    "Rigged TX-55 recognisable without HUD at 720p",
+    "Real leg socket and charge contact",
+    "Laser hazard fairness with camera/control transitions",
+    "At least 16 valid explosives available/recoverable; no softlock",
+    "No unwarranted progress for wrong leg/stale interaction",
+    "16 placements commit exactly once",
+    "Cutscene skip preserves identical game state",
+    "Real UE5.7 compiled and packaged test",
+    "Unfamiliar players can solve using replayable first 15"
+  ]
+}

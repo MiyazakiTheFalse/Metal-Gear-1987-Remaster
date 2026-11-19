@@ -43,8 +43,9 @@ python -m unittest discover -s tools -p 'test_*.py'
 python tools/validate_beat_contracts.py
 python tools/validate_area_contracts.py
 python tools/validate_solid_snake_contract.py
+python tools/validate_full_game_bibles.py
 python tools/inspect_and_extract.py /path/to/Metal-Gear_J2ME_EN_v330.zip --output content
-cd rust && cargo test && cargo build --release
+cd rust && cargo test && cargo build --release  # Includes engine-neutral TX-55 sabotage tests
 ```
 
 ## Windows packaging

@@ -61,6 +61,25 @@ typedef struct MgGrayFoxPacing {
 uint32_t mg_gray_fox_pacing(uint32_t flags, float seconds_without_progress,
                             uint32_t under_alert, MgGrayFoxPacing* output);
 
+/* Backward-compatible ABI-v1 addition. TX-55 logic is game-engine neutral.
+   On a valid placement the output is written exactly once; stale or
+   incorrect animation notifies leave input, output and ammo unchanged. */
+#define MG_TX55_LEFT 0u
+#define MG_TX55_RIGHT 1u
+#define MG_TX55_INVALID 0u
+#define MG_TX55_ACCEPTED 1u
+#define MG_TX55_WRONG_LEG 2u
+#define MG_TX55_NO_CHARGE 3u
+#define MG_TX55_STALE_EVENT 4u
+#define MG_TX55_ALREADY_DESTROYED 5u
+typedef struct MgTx55State {
+    uint32_t accepted_placements;
+    uint32_t charges_available;
+    uint32_t destroyed;
+} MgTx55State;
+uint32_t mg_tx55_place_charge(const MgTx55State* input, uint32_t leg,
+                             uint32_t expected_progress, MgTx55State* output);
+
 uint32_t mg_core_abi_version(void);
 uint32_t mg_step_guard(const MgGuardFrame* frame, MgGuardResult* output);
 #ifdef __cplusplus
