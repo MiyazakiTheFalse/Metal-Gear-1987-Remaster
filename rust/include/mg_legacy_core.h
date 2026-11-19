@@ -40,6 +40,10 @@ typedef struct MgGuardResult {
 #define MG_FOX_GEAR_RECOVERED 128u
 #define MG_FOX_SHOTMAKER_DEFEATED 256u
 #define MG_FOX_SLICE_COMPLETED 512u
+#define MG_FOX_TRANSMITTER_PLANTED 1024u
+#define MG_FOX_TRANSMITTER_REMOVED 2048u
+#define MG_FOX_CARD3_RECOVERED 4096u
+#define MG_FOX_DETENTION_INTELLIGENCE 8192u
 #define MG_FOX_CAPTURE 1u
 #define MG_FOX_BREACH_FIRST_WALL 2u
 #define MG_FOX_RESCUE 3u
@@ -49,6 +53,9 @@ typedef struct MgGuardResult {
 #define MG_FOX_RECOVER_GEAR 7u
 #define MG_FOX_DEFEAT_SHOTMAKER 8u
 #define MG_FOX_COMPLETE_SLICE 9u
+#define MG_FOX_COLLECT_CARD3 10u
+#define MG_FOX_REMOVE_TRANSMITTER 11u
+#define MG_FOX_LEARN_DETENTION_ROUTE 12u
 uint32_t mg_gray_fox_transition(uint32_t flags, uint32_t action, uint32_t* next_flags);
 
 /* Return optional pacing guidance; NO progression is gated on a timer. */

@@ -61,3 +61,8 @@ MSX2 encounter order: https://www.youtube.com/watch?v=ehlAMTh42Ko
 MSX2 original gameplay walkthrough: https://thesnakesoup.org/metal-gear-msx-walkthrough/
 MGSV Truth: primary 2015 game sequence, player-facing full reveal **not** permitted in 1995.
 Konami 1995 betrayal archive: https://img.konami.com/mg/mc2/s/img/top/book_sample_mgs4_en.pdf
+
+
+## Transaction amendment — prison-to-Shoot Gunner completeness (19 November 2026)
+
+The extended Rust transaction model now distinguishes (1) informant detention-route intelligence, (2) capture and confiscation, (3) Gray Fox and prison escape, (4) Shoot Gunner encounter, (5) gear actually recovered with a **planted transmitter still present**, (6) optional physical transmitter removal, (7) Shotmaker defeat, (8) **Card 3 collected**, and only then (9) slice completion. The existing five-step/capture checkpoint still loads as a compatible starting point; it is not dishonestly described as the new expanded playable opening. The old UE prison scene currently does **not** yet expose all of these new interactions. Source-state logic is distinct from an implemented boss or complete cutscenes.
