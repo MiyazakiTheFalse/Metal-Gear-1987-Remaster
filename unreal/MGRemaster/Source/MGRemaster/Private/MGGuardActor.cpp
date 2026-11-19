@@ -44,6 +44,7 @@ void AMGGuardActor::BeginPlay()
 {
     Super::BeginPlay();
     PatrolOrigin = GetActorLocation();
+    StationFacing = GetActorRotation();
     if (!CharacterMesh->GetSkeletalMeshAsset())
         if (USkeletalMesh* Asset = LoadObject<USkeletalMesh>(nullptr,
                 TEXT("/Game/Characters/Guard/SK_Guard_1995.SK_Guard_1995")))
@@ -60,6 +61,15 @@ void AMGGuardActor::BeginPlay()
         CharacterMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
         CharacterMesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
     }
+}
+
+void AMGGuardActor::ConfigurePatrol(const FVector& Axis,
+                                    float HalfLengthCm, float SpeedCmPerSec)
+{
+    PatrolAxis = Axis.GetSafeNormal2D();
+    if (PatrolAxis.IsNearlyZero()) PatrolAxis = FVector::ForwardVector;
+    PatrolHalfLength = FMath::Clamp(HalfLengthCm, 60.f, 320.f);
+    PatrolSpeed = FMath::Clamp(SpeedCmPerSec, 45.f, 130.f);
 }
 
 bool AMGGuardActor::HasAuthoredCharacterArt() const
@@ -108,7 +118,7 @@ void AMGGuardActor::ReceiveEnvironmentalReport(const FVector& EvidenceAt, const 
     SetGuardPosture(EMGGuardPosture::Search);
 }
 
-void AMGGuardActor::CheckVisibleIncapacitatedColleagues(const AMGPlayerCharacter* Player)
+void AMGGuardActor::CheckVisibleIncapacitatedColleagues()
 {
     if (bIncapacitated || !GetWorld()) return;
     // Small slice population; evaluate infrequently, and do not see a body
@@ -323,8 +333,7 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     if (BodyScanCountdown <= 0.f && Role != EMGGuardRole::Custody)
     {
         BodyScanCountdown = 0.70f;
-        CheckVisibleIncapacitatedColleagues(
-            Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0)));
+        CheckVisibleIncapacitatedColleagues();
     }
     // Do not counter-rotate an authored skeletal rig: its AnimBP owns hit reactions.
     if (!HasAuthoredCharacterArt())
@@ -547,17 +556,22 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         if (!ToSearch.IsNearlyZero())
             SetActorRotation(FMath::RInterpTo(GetActorRotation(), ToSearch.Rotation(), DeltaSeconds, 3.f));
     }
+    else if (Role == EMGGuardRole::Custody)
+    {
+        // The two transport officers hold actual security posts, rather than
+        // walking away from the arrest point because a generic patrol tick
+        // was reused. Their scan is subtle and visible to the player.
+        const float Scan = 23.f * FMath::Sin(GetWorld()->GetTimeSeconds() * .75f);
+        SetActorRotation(FMath::RInterpTo(GetActorRotation(),
+            FRotator(0.f, StationFacing.Yaw + Scan, 0.f), DeltaSeconds, 1.8f));
+    }
     else
     {
-        const FVector Point = PatrolOrigin + FVector(bPatrolForward ? 180.f : -180.f, 0.f, 0.f);
-        const FVector Diff = Point - GetActorLocation();
-        if (Diff.Size2D() < 20.f) bPatrolForward = !bPatrolForward;
-        else
-        {
-            const FVector Step = Diff.GetSafeNormal2D();
-            SetActorLocation(GetActorLocation() + Step * 90.f * DeltaSeconds, true);
-            SetActorRotation(Step.Rotation());
-        }
+        const FVector Point = PatrolOrigin
+            + PatrolAxis * (bPatrolForward ? PatrolHalfLength : -PatrolHalfLength);
+        if (FVector::Dist2D(Point, GetActorLocation()) < 30.f)
+            bPatrolForward = !bPatrolForward;
+        else MoveToward(Point, PatrolSpeed, DeltaSeconds);
     }
 
 #if !UE_BUILD_SHIPPING

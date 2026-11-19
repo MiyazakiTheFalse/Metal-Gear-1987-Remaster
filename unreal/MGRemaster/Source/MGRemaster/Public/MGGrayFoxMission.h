@@ -46,6 +46,8 @@ public:
     // the visual/audio timeline must NEVER write gameplay flags.
     UFUNCTION(BlueprintImplementableEvent, Category="Mission|Pacing")
     void OnPacingBeatChanged(int32 PreviousPhase, int32 NewPhase, float SuggestedIntensity);
+    UFUNCTION(BlueprintImplementableEvent, Category="Mission|Environment")
+    void OnSurfaceImpact(FName SurfaceTag, int32 ContactIndex, bool bOpened);
     void RestartMission();
 
 private:
@@ -103,6 +105,8 @@ private:
     void CreatePrelude();
     void CreateBossWing();
     void SpawnPerimeterGuards();
+    void BroadcastStructuralImpact(const FVector& Location,
+                                   float AudibleRadius, AActor* Source);
     void InitializePlayerIfReady();
     bool ApplyAction(uint32 Action, AMGPlayerCharacter* Player);
     void RestoreVisualState();

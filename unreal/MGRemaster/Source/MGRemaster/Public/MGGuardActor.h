@@ -36,6 +36,7 @@ public:
 
     bool IsIncapacitated() const { return bIncapacitated; }
     void SetRole(EMGGuardRole NewRole) { Role = NewRole; }
+    void ConfigurePatrol(const FVector& Axis, float HalfLengthCm, float SpeedCmPerSec);
     bool CanAcceptDetention(const class AMGPlayerCharacter* Suspect) const;
     bool IsIssuingChallenge() const { return bCustodyChallenge; }
     UFUNCTION(BlueprintPure, Category="Security|Custody")
@@ -106,9 +107,13 @@ private:
     float BodyReportDelay = -1.f;
     FVector BodyReportLocation = FVector::ZeroVector;
     EMGGuardPosture PresentedPosture = EMGGuardPosture::Patrol;
-    TSet<TWeakObjectPtr<AMGGuardActor>> SeenIncapacitatedColleagues;
+    TSet<AMGGuardActor*> SeenIncapacitatedColleagues;
+    FVector PatrolAxis = FVector::ForwardVector;
+    float PatrolHalfLength = 180.f;
+    float PatrolSpeed = 90.f;
+    FRotator StationFacing = FRotator::ZeroRotator;
     void SetGuardPosture(EMGGuardPosture Desired);
-    void CheckVisibleIncapacitatedColleagues(const class AMGPlayerCharacter* Player);
+    void CheckVisibleIncapacitatedColleagues();
     int32 FlankSide = 1;
     UPROPERTY(EditAnywhere, Category="Security|Debug")
     bool bShowPerceptionDebug = false;

@@ -149,10 +149,16 @@ void AMGGrayFoxMission::CreatePrelude()
     {
         if (AMGGuardActor* PatrolA = GetWorld()->SpawnActor<AMGGuardActor>(
             FVector(-3060.f, 280.f, -11.f), FRotator(0.f, -90.f, 0.f)))
+        {
             PatrolA->SetRole(EMGGuardRole::Patrol);
+            PatrolA->ConfigurePatrol(FVector(0.f, 1.f, 0.f), 130.f, 82.f);
+        }
         if (AMGGuardActor* PatrolB = GetWorld()->SpawnActor<AMGGuardActor>(
             FVector(-2100.f, -285.f, -11.f), FRotator(0.f, 135.f, 0.f)))
+        {
             PatrolB->SetRole(EMGGuardRole::Patrol);
+            PatrolB->ConfigurePatrol(FVector(1.f, 0.f, 0.f), 145.f, 92.f);
+        }
         CustodyOfficerA = GetWorld()->SpawnActor<AMGGuardActor>(
             FVector(-1570.f, 315.f, -11.f), FRotator(0.f, -90.f, 0.f));
         CustodyOfficerB = GetWorld()->SpawnActor<AMGGuardActor>(
@@ -247,10 +253,18 @@ void AMGGrayFoxMission::SpawnPerimeterGuards()
 {
     // Existing hostile patrols outside confinement. No surprise wave on rescue.
     if (!GetWorld()) return;
-    GetWorld()->SpawnActor<AMGGuardActor>(FVector(840.f, 360.f, -11.f),
-                                           FRotator(0.f, 180.f, 0.f));
-    GetWorld()->SpawnActor<AMGGuardActor>(FVector(1120.f, -340.f, -11.f),
-                                           FRotator(0.f, 180.f, 0.f));
+    if (AMGGuardActor* G = GetWorld()->SpawnActor<AMGGuardActor>(
+            FVector(840.f, 360.f, -11.f), FRotator(0.f, 180.f, 0.f)))
+    {
+        G->SetRole(EMGGuardRole::Prison);
+        G->ConfigurePatrol(FVector(0.f, -1.f, 0.f), 180.f, 76.f);
+    }
+    if (AMGGuardActor* G = GetWorld()->SpawnActor<AMGGuardActor>(
+            FVector(1120.f, -340.f, -11.f), FRotator(0.f, 180.f, 0.f)))
+    {
+        G->SetRole(EMGGuardRole::Prison);
+        G->ConfigurePatrol(FVector(0.f, 1.f, 0.f), 170.f, 70.f);
+    }
 }
 
 void AMGGrayFoxMission::BeginPlay()
@@ -639,6 +653,19 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
     return false;
 }
 
+void AMGGrayFoxMission::BroadcastStructuralImpact(const FVector& Location,
+                                                     float AudibleRadius, AActor* Source)
+{
+    if (!GetWorld()) return;
+    // The wall itself is the evidence source. Guards hear that impact through
+    // distance/occlusion modelling and never gain a direct visual lock or
+    // Snake's transform merely because an interaction was performed.
+    for (TActorIterator<AMGGuardActor> Guard(GetWorld()); Guard; ++Guard)
+        if (!Guard->IsIncapacitated())
+            Guard->HearWallKnock(Location, FVector(1,0,0),
+                                AudibleRadius, Source);
+}
+
 bool AMGGrayFoxMission::TryPunchWeakWall(AMGPlayerCharacter* Player)
 {
     if (!Player || !bPlayerInitialised || !(Flags & MG_FOX_CAPTURED))
@@ -651,6 +678,12 @@ bool AMGGrayFoxMission::TryPunchWeakWall(AMGPlayerCharacter* Player)
     if (!CanReach(Player, Surface, 190.f)) return false;
     int32& Impacts = bFirst ? FirstWallStrikes : SecondWallStrikes;
     ++Impacts;
+    const int32 Needed = bFirst ? 3 : 4; // tunable; never a timed waiting gate
+    BroadcastStructuralImpact(Surface->GetActorLocation(),
+        bFirst ? 790.f : 1100.f, Player);
+    OnSurfaceImpact(bFirst ? FName(TEXT("PrisonWallA"))
+                           : FName(TEXT("PrisonWallB")),
+                    Impacts, Impacts >= Needed);
     AStaticMeshActor* Crack = bFirst ? FirstWallCrack : SecondWallCrack;
     if (IsValid(Crack))
     {
@@ -659,7 +692,6 @@ bool AMGGrayFoxMission::TryPunchWeakWall(AMGPlayerCharacter* Player)
         // a timer-driven wall deletion or a ready-made explosion animation.
         Crack->SetActorScale3D(FVector(1.f, FMath::Min(Impacts * .60f, 2.2f), 1.f));
     }
-    const int32 Needed = bFirst ? 3 : 4; // playtest candidates, not 1987 numeric claims
     if (Impacts < Needed)
     {
         Dialogue = Impacts == 1 ? TEXT("THE WALL SHIFTS. KEEP STRIKING THE SEAM.")
@@ -679,6 +711,9 @@ bool AMGGrayFoxMission::TryPunchRecoveryDoor(AMGPlayerCharacter* Player)
         !CanReach(Player, GearDoor, 210.f))
         return false;
     ++RecoveryDoorPunches;
+    BroadcastStructuralImpact(GearDoor->GetActorLocation(), 950.f, Player);
+    OnSurfaceImpact(FName(TEXT("RecoveryDoor")), RecoveryDoorPunches,
+                    RecoveryDoorPunches >= 2);
     // Physical repeated impacts; count is a playtest hypothesis, not a
     // transcribed 1987 number. Never use a single 'E' door disappearance.
     if (RecoveryDoorPunches < 2)
