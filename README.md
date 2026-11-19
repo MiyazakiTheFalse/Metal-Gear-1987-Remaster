@@ -22,6 +22,7 @@ These features are unverified source implementation, not finished gameplay or pr
 - `tools/` — licensed source archive inspection + local extraction, tests.
 - `scripts/build_windows.ps1` — packaging entrypoint on a Windows UE5.7 build host.
 - `docs/` — source audit, gameplay scope, graphics policy and build notes.
+- **1995 Solid Snake protagonist bible:** [binding identity/rig/aim/animation design](docs/SOLID_SNAKE_1995_PROTAGONIST_BIBLE.md), with [machine-checkable contract](data/solid_snake_character_contract.json). This is an authored specification, not imported/verified final character art.
 
 ## Global production doctrine — binding
 
@@ -35,6 +36,7 @@ Every player-facing beat must be designed as **one synchronized audiovisual, int
 python -m unittest discover -s tools -p 'test_*.py'
 python tools/validate_beat_contracts.py
 python tools/validate_area_contracts.py
+python tools/validate_solid_snake_contract.py
 python tools/inspect_and_extract.py /path/to/Metal-Gear_J2ME_EN_v330.zip --output content
 cd rust && cargo test && cargo build --release
 ```
