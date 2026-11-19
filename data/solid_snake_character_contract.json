@@ -1,0 +1,231 @@
+{
+  "schema_version": 1,
+  "bible": "docs/SOLID_SNAKE_1995_PROTAGONIST_BIBLE.md",
+  "status": "source_contract_only",
+  "doctrine": "DOCTRINE_000",
+  "source_classes": [
+    "C",
+    "R",
+    "I",
+    "P",
+    "U"
+  ],
+  "identity": {
+    "character": "Solid Snake",
+    "era": 1995,
+    "variant_ids": [
+      "snake_mg1_1995_infiltration",
+      "snake_mg1_1995_disarmed"
+    ],
+    "provisional_height_cm": 178,
+    "canon_source": "https://www.konami.com/mg/history/jp/ja/mg"
+  },
+  "animation_architecture": {
+    "unreal_actor": "AMGPlayerCharacter",
+    "state_bridge": "UMGCharacterAnimInstance",
+    "skeletal_asset": "/Game/Characters/Snake/SK_Snake_1995_Infiltration",
+    "disarmed_asset": "/Game/Characters/Snake/SK_Snake_1995_Disarmed",
+    "anim_blueprint": "/Game/Characters/Snake/ABP_Snake_1995",
+    "weapon_socket": "weapon_r",
+    "required_layers": [
+      "base_locomotion",
+      "stance",
+      "upper_body_aim_offset",
+      "two_hand_ik",
+      "foot_ik",
+      "impact_additive",
+      "facial_look_at"
+    ],
+    "current_status": "data_bridge_only"
+  },
+  "animation_sets": {
+    "idle": [
+      "idle_alert",
+      "idle_breathe",
+      "idle_listen",
+      "idle_injured",
+      "idle_head_scan",
+      "idle_adjust_stance"
+    ],
+    "locomotion": [
+      "start_forward",
+      "start_backward",
+      "start_left",
+      "start_right",
+      "stop_forward",
+      "stop_backward",
+      "pivot_45",
+      "pivot_90",
+      "pivot_180",
+      "walk_8way",
+      "run_8way",
+      "sprint",
+      "aim_strafe_8way"
+    ],
+    "crouch": [
+      "crouch_enter",
+      "crouch_idle",
+      "crouch_exit",
+      "crouch_walk_8way",
+      "crouch_aim"
+    ],
+    "prone": [
+      "prone_enter",
+      "prone_idle",
+      "prone_exit",
+      "prone_crawl_forward",
+      "prone_crawl_backward",
+      "prone_turn"
+    ],
+    "cover": [
+      "cover_enter",
+      "cover_exit",
+      "cover_shuffle_left",
+      "cover_shuffle_right",
+      "cover_peek_left",
+      "cover_peek_right",
+      "cover_corner_return",
+      "wall_knock",
+      "wall_inspect",
+      "wall_breach_windup",
+      "wall_breach_impact",
+      "wall_breach_rupture"
+    ],
+    "weapon": [
+      "unarmed_ready",
+      "weapon_draw",
+      "weapon_holster",
+      "weapon_aim",
+      "weapon_fire",
+      "weapon_recoil",
+      "weapon_reload",
+      "weapon_out_of_ammo",
+      "weapon_confiscated"
+    ],
+    "melee": [
+      "melee_1",
+      "melee_2",
+      "melee_3",
+      "melee_whiff",
+      "melee_hit_recovery",
+      "melee_stagger",
+      "melee_ko"
+    ],
+    "narrative": [
+      "capture_disarm",
+      "first_fox_sighting",
+      "fox_listen",
+      "fox_rescue",
+      "transceiver_listen",
+      "escape_recovery"
+    ],
+    "face": [
+      "eyes_look_at",
+      "eyes_blink",
+      "brow_micro",
+      "jaw_speech_sync",
+      "fatigue_micro"
+    ]
+  },
+  "required_control_actions": [
+    "MoveForward",
+    "MoveRight",
+    "Turn",
+    "LookUp",
+    "TurnRate",
+    "LookUpRate",
+    "Aim",
+    "Fire",
+    "Sprint",
+    "Crouch",
+    "Prone",
+    "Cover",
+    "Melee",
+    "Interact",
+    "ShoulderSwap",
+    "Codec",
+    "MissionLog",
+    "WeaponWindow",
+    "ItemWindow",
+    "UseItem"
+  ],
+  "required_test_cases": [
+    "captured_unarmed_aim",
+    "aim_with_weapon_both_shoulders",
+    "aim_pitch_yaw_extremes",
+    "crouch_aim_and_strafe",
+    "cover_peek_both_sides",
+    "wall_knock_not_player_location",
+    "breach_action_priority",
+    "save_reload_variant",
+    "rapid_input_stance_change",
+    "camera_occlusion_at_wall",
+    "muzzle_ray_blocked_by_cover",
+    "fox_rescue_interrupt",
+    "guard_patrol_sound_occlusion",
+    "first_time_identity_720p",
+    "browser_character_identity"
+  ],
+  "quality_gates": [
+    {
+      "id": "identity",
+      "status": "unverified",
+      "evidence": []
+    },
+    {
+      "id": "rig",
+      "status": "unverified",
+      "evidence": []
+    },
+    {
+      "id": "locomotion",
+      "status": "unverified",
+      "evidence": []
+    },
+    {
+      "id": "aim",
+      "status": "unverified",
+      "evidence": []
+    },
+    {
+      "id": "interaction",
+      "status": "unverified",
+      "evidence": []
+    },
+    {
+      "id": "narrative",
+      "status": "unverified",
+      "evidence": []
+    },
+    {
+      "id": "audio_accessibility",
+      "status": "unverified",
+      "evidence": []
+    },
+    {
+      "id": "performance",
+      "status": "unverified",
+      "evidence": []
+    },
+    {
+      "id": "browser_parity",
+      "status": "unverified",
+      "evidence": []
+    },
+    {
+      "id": "player_study",
+      "status": "unverified",
+      "evidence": []
+    }
+  ],
+  "source_status": {
+    "final_skeletal_meshes": false,
+    "real_anim_blendspaces": false,
+    "aim_offset_pose_assets": false,
+    "ik_rig": false,
+    "final_weapon_model": false,
+    "pbr_author_art": false,
+    "ue_compiled": false,
+    "packaged_playtest": false
+  }
+}
