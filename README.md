@@ -58,6 +58,10 @@ cd rust && cargo test && cargo build --release  # Includes engine-neutral TX-55 
 
 The [Shotmaker encounter contract](data/shotmaker_attack_contract.json) now distinguishes original three-shot shotgun spread from adjustable modern 3D cadence/spread parameters. The Unreal actor and connected prison-to-boss wing encode physical recovery-room breach, reclaimed handgun, inventory transmitter with radio beacon effect, Card 2 → Card 3 progression, and a fair line-of-sight attack system. [Original editable riot-gun geometry and WAV cues](assets/source/shotmaker/README.md) include an [Editor import script](unreal/MGRemaster/Content/Python/import_shotmaker_source_assets.py); this is **source only**—no UE5.7 compile, imported UAssets, finished skeletal models, animation or complete cinematic. See [source/evidence checkpoint](docs/IMPLEMENTATION_STATUS_2026_11_19.md).
 
+## Vertical-slice audio and art completion audit (19 November 2026)
+
+[Source asset inventory](data/vertical_slice_asset_inventory.json), [readable audit](docs/VERTICAL_SLICE_ASSET_COMPLETENESS_AUDIT.md), and [original transceiver WAV cues](assets/source/transceiver/audio/README.md) separate existing source files from *actual* Unreal imports. The new in-game call sound hooks **require importing** those SoundWaves using [Editor script](unreal/MGRemaster/Content/Python/import_transceiver_audio.py). No final voice, music stems, skinned character assets, or real Sequencer cutscenes are yet present. Validate source inventory with `python tools/validate_slice_asset_inventory.py`.
+
 ## Windows packaging
 
 On a Windows machine with UE5.7, Rust MSVC, Visual Studio C++:
