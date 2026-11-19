@@ -9,6 +9,7 @@ class UStaticMeshComponent;
 class USkeletalMeshComponent;
 class AMGPlayerCharacter;
 class USoundBase;
+class UPointLightComponent;
 
 /**
  * 1995 Shoot Gunner / Shotmaker. A three-blast spread attacker with a long,
@@ -49,6 +50,8 @@ public:
     UFUNCTION(BlueprintImplementableEvent, Category="Shotmaker|Presentation")
     void OnShotFired(int32 ShotIndex);
     UFUNCTION(BlueprintImplementableEvent, Category="Shotmaker|Presentation")
+    void OnPumpAction(int32 CompletedShotIndex);
+    UFUNCTION(BlueprintImplementableEvent, Category="Shotmaker|Presentation")
     void OnBossDefeated();
 private:
     enum class EAttackState : uint8 { Dormant, Searching, Warning, Volley, Recovery, Defeated };
@@ -71,12 +74,16 @@ private:
     UPROPERTY(Transient)
     USoundBase* ShotCycleCue = nullptr;
 
+    UPROPERTY(VisibleAnywhere, Category="Shotmaker|Presentation")
+    UPointLightComponent* MuzzleFlash = nullptr;
+    float MuzzleFlashRemaining = 0.f;
+
     // Modern 3D design hypotheses (NOT measured MSX2 firearm statistics).
     // Editable in a BP child and bounded in the actual gameplay methods.
     UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="0.5", ClampMax="3.0"))
     float WindupSeconds = .78f;
     UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="0.25", ClampMax="1.5"))
-    float IntervalSeconds = .34f;
+    float IntervalSeconds = .52f;
     UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="0.8", ClampMax="5.0"))
     float RecoverySeconds = 1.85f;
     UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="3", ClampMax="12"))

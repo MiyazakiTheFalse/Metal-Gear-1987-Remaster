@@ -3,6 +3,7 @@
 #include "MGPlayerCharacter.h"
 #include "MGEquipmentComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/PointLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
@@ -48,6 +49,15 @@ AMGShootGunnerActor::AMGShootGunnerActor()
     WeaponBarrel->SetRelativeLocation(FVector(83.f, 25.f, 34.f));
     WeaponBarrel->SetRelativeScale3D(FVector(.7f, .055f, .065f));
     if (Cube.Succeeded()) WeaponBarrel->SetStaticMesh(Cube.Object);
+
+    // Physical muzzle-origin visual tell. Final VFX/materials need UE test.
+    MuzzleFlash = CreateDefaultSubobject<UPointLightComponent>(TEXT("ShotmakerMuzzleFlash"));
+    MuzzleFlash->SetupAttachment(RootComponent);
+    MuzzleFlash->SetRelativeLocation(FVector(117.f, 23.f, 34.f));
+    MuzzleFlash->SetIntensity(9000.f);
+    MuzzleFlash->SetAttenuationRadius(280.f);
+    MuzzleFlash->SetLightColor(FLinearColor(1.f, .67f, .29f));
+    MuzzleFlash->SetVisibility(false);
 }
 
 void AMGShootGunnerActor::BeginPlay()
@@ -87,6 +97,8 @@ void AMGShootGunnerActor::SetEncounterActive(bool bEnabled)
     if (bDefeated) return;
     bActive = bEnabled;
     State = bEnabled ? EAttackState::Searching : EAttackState::Dormant;
+    MuzzleFlashRemaining = 0.f;
+    if (MuzzleFlash) MuzzleFlash->SetVisibility(false);
     StateClock = 0.f;
     ShotsFired = 0;
 }
@@ -115,6 +127,8 @@ bool AMGShootGunnerActor::CanSeePlayer(AMGPlayerCharacter* Player) const
 void AMGShootGunnerActor::Tick(float Dt)
 {
     Super::Tick(Dt);
+    MuzzleFlashRemaining = FMath::Max(0.f, MuzzleFlashRemaining - FMath::Max(Dt, 0.f));
+    if (MuzzleFlash) MuzzleFlash->SetVisibility(MuzzleFlashRemaining > 0.f);
     if (!bActive || bDefeated || !GetWorld()) return;
     AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     StateClock += FMath::Max(0.f, Dt);
@@ -159,7 +173,12 @@ void AMGShootGunnerActor::Tick(float Dt)
         SetActorRotation(Rot);
         // Aim hold is visible. If cover is reached before the volley, the
         // locked aim remains at the observed position, rewarding player agency.
-        if (StateClock >= FMath::Clamp(WindupSeconds, .5f, 3.f))
+        // No sideways/backwards muzzle fire: the body and gun must actually
+        // finish turning before their projectile traces become authoritative.
+        const FVector Facing = GetActorForwardVector().GetSafeNormal2D();
+        const FVector DesiredFacing = (LockedAimPoint - GetActorLocation()).GetSafeNormal2D();
+        const bool bAligned = FVector::DotProduct(Facing, DesiredFacing) >= 0.985f;
+        if (StateClock >= FMath::Clamp(WindupSeconds, .5f, 3.f) && bAligned)
         {
             State = EAttackState::Volley;
             StateClock = 0.f;
@@ -195,6 +214,8 @@ void AMGShootGunnerActor::FireShot(AMGPlayerCharacter* Player)
     // Never use camera-space traces through a different physical obstruction.
     const FVector Muzzle = GetActorLocation() +
         GetActorRotation().RotateVector(FVector(112.f, 23.f, 32.f));
+    MuzzleFlashRemaining = .085f;
+    if (MuzzleFlash) MuzzleFlash->SetVisibility(true);
     if (ShotBlastCue)
         UGameplayStatics::PlaySoundAtLocation(this, ShotBlastCue, Muzzle, .70f);
     const FVector ToAim = (LockedAimPoint - Muzzle).GetSafeNormal();
@@ -223,15 +244,17 @@ void AMGShootGunnerActor::FireShot(AMGPlayerCharacter* Player)
                        FMath::Clamp(MaxShotDamage, 12.f, 50.f)),
             nullptr, this, UDamageType::StaticClass());
     }
-    OnShotFired(ShotsFired);
+    const int32 CompletedShotIndex = ShotsFired;
+    OnShotFired(CompletedShotIndex);
+    OnPumpAction(CompletedShotIndex);
+    if (ShotCycleCue)
+        UGameplayStatics::PlaySoundAtLocation(this, ShotCycleCue, Muzzle, .64f);
     ++ShotsFired;
     if (ShotsFired >= 3)
     {
         ++VolleysCompleted;
         State = EAttackState::Recovery;
         StateClock = 0.f;
-        if (ShotCycleCue)
-            UGameplayStatics::PlaySoundAtLocation(this, ShotCycleCue, Muzzle, .64f);
     }
 }
 
@@ -255,6 +278,8 @@ void AMGShootGunnerActor::EnterDefeatedState()
     if (bDefeated) return;
     bDefeated = true;
     bActive = false;
+    MuzzleFlashRemaining = 0.f;
+    if (MuzzleFlash) MuzzleFlash->SetVisibility(false);
     State = EAttackState::Defeated;
     CollisionCapsule->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
     // Production must use an authored physical death performance/ragdoll.
