@@ -5,6 +5,7 @@
 
 class UStaticMeshComponent;
 class UCapsuleComponent;
+class USkeletalMeshComponent;
 
 UCLASS()
 class MGREMASTER_API AMGGuardActor : public AActor
@@ -23,6 +24,8 @@ public:
     // Sound stimulus carries a world location, never Snake's position.
     void HearWallKnock(const FVector& SoundLocation, const FVector& WallNormal, float HearingRadius, AActor* SoundInstigator);
     bool IsInvestigatingNoise() const { return DistractionPhase != EDistractionPhase::None; }
+    UFUNCTION(BlueprintPure, Category="Character|Art")
+    bool HasAuthoredCharacterArt() const;
 
 private:
     enum class EDistractionPhase : uint8 { None, React, Approach, Search, Return };
@@ -40,6 +43,9 @@ private:
 
     UPROPERTY(VisibleAnywhere, Category="Prototype")
     UStaticMeshComponent* ProxyBody;
+
+    UPROPERTY(VisibleAnywhere, Category="Character|Art")
+    USkeletalMeshComponent* CharacterMesh;
 
     FVector PatrolOrigin = FVector::ZeroVector;
     FVector LastKnownPlayerPosition = FVector::ZeroVector;

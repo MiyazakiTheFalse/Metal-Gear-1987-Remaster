@@ -8,6 +8,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UStaticMeshComponent;
 class UMGEquipmentComponent;
+class USkeletalMesh;
 
 UCLASS()
 class MGREMASTER_API AMGPlayerCharacter : public ACharacter
@@ -44,6 +45,10 @@ public:
     bool TryEnterCover();
     void LeaveCover();
     UMGEquipmentComponent* GetEquipment() const { return Equipment; }
+    // The inherited ACharacter skeletal mesh is the authored hero renderer.
+    // Capsule-driven gameplay and camera never depend on a particular character asset.
+    UFUNCTION(BlueprintPure, Category="Character|Art")
+    bool HasAuthoredCharacterArt() const;
     virtual float TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent,
         AController* EventInstigator, AActor* DamageCauser) override;
     void NotifyFeedback(const FString& Message, FName CueName = NAME_None);
@@ -59,6 +64,12 @@ private:
     UStaticMeshComponent* PrototypeBody;
     UPROPERTY(VisibleAnywhere, Category="Equipment")
     UMGEquipmentComponent* Equipment;
+
+    UPROPERTY(Transient)
+    USkeletalMesh* InfiltrationCharacterArt = nullptr;
+    UPROPERTY(Transient)
+    USkeletalMesh* DisarmedCharacterArt = nullptr;
+    bool bDisarmedArtApplied = false;
 
     UPROPERTY(EditAnywhere, Category="Controls|Time")
     float EquipmentTimeScale = 0.20f; // Engineering default, not a canonical franchise speed.

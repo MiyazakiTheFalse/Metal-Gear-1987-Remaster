@@ -3,6 +3,9 @@
 #include "MGPlayerCharacter.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Animation/AnimInstance.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -26,12 +29,38 @@ AMGGuardActor::AMGGuardActor()
     ProxyBody->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
     if (Cylinder.Succeeded()) ProxyBody->SetStaticMesh(Cylinder.Object);
+
+    CharacterMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("GuardSkeletalBody"));
+    CharacterMesh->SetupAttachment(RootComponent);
+    CharacterMesh->SetRelativeLocation(FVector(0.f, 0.f, -89.f));
+    CharacterMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void AMGGuardActor::BeginPlay()
 {
     Super::BeginPlay();
     PatrolOrigin = GetActorLocation();
+    if (!CharacterMesh->GetSkeletalMeshAsset())
+        if (USkeletalMesh* Asset = LoadObject<USkeletalMesh>(nullptr,
+                TEXT("/Game/Characters/Guard/SK_Guard_1995.SK_Guard_1995")))
+            CharacterMesh->SetSkeletalMeshAsset(Asset);
+    if (HasAuthoredCharacterArt())
+    {
+        if (!CharacterMesh->GetAnimClass())
+            if (UClass* Class = LoadClass<UAnimInstance>(nullptr,
+                    TEXT("/Game/Characters/Guard/ABP_Guard_1995.ABP_Guard_1995_C")))
+                CharacterMesh->SetAnimInstanceClass(Class);
+        ProxyBody->SetVisibility(false, true);
+        ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        CharacterMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+        CharacterMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+        CharacterMesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+    }
+}
+
+bool AMGGuardActor::HasAuthoredCharacterArt() const
+{
+    return CharacterMesh && CharacterMesh->GetSkeletalMeshAsset() != nullptr;
 }
 
 void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, const FVector& WallNormal, float HearingRadius, AActor* SoundInstigator)
@@ -159,8 +188,12 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
             Suspicion = 0.f;
             AwarenessState = 0;
             ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            CharacterMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             CollisionCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-            ProxyBody->SetRelativeRotation(FRotator(0.f, 0.f, 80.f));
+            // Until a KO/death montage is authored, preserve a readable fallback.
+            (HasAuthoredCharacterArt() ? static_cast<USceneComponent*>(CharacterMesh)
+                : static_cast<USceneComponent*>(ProxyBody))->SetRelativeRotation(
+                    FRotator(0.f, 0.f, 80.f));
             SetActorTickEnabled(false);
         }
     }
@@ -173,9 +206,11 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     if (bIncapacitated || !GetWorld()) return;
     StaggerSeconds = FMath::Max(0.f, StaggerSeconds - DeltaSeconds);
     AttackCooldown = FMath::Max(0.f, AttackCooldown - DeltaSeconds);
-    ProxyBody->SetRelativeRotation(FMath::RInterpTo(ProxyBody->GetRelativeRotation(),
-        StaggerSeconds > 0.f ? FRotator(0.f, 0.f, 12.f) : FRotator::ZeroRotator,
-        DeltaSeconds, 9.f));
+    // Do not counter-rotate an authored skeletal rig: its AnimBP owns hit reactions.
+    if (!HasAuthoredCharacterArt())
+        ProxyBody->SetRelativeRotation(FMath::RInterpTo(ProxyBody->GetRelativeRotation(),
+            StaggerSeconds > 0.f ? FRotator(0.f, 0.f, 12.f) : FRotator::ZeroRotator,
+            DeltaSeconds, 9.f));
     const AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (!Player) return;
 

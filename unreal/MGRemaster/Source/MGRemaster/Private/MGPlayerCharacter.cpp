@@ -10,6 +10,8 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Animation/AnimInstance.h"
 #include "CollisionShape.h"
 #include "Engine/Engine.h"
 #include "EngineUtils.h"
@@ -86,8 +88,36 @@ void AMGPlayerCharacter::BeginPlay()
         // Retain pause-compatible input for future UI; the transceiver itself never pauses play.
         PC->PrimaryActorTick.bTickEvenWhenPaused = true;
     }
+    // Asset names are shared with the editor importer. Missing assets retain the
+    // original greybox stand-in and never change movement or mission flags.
+    InfiltrationCharacterArt = GetMesh()->GetSkeletalMeshAsset();
+    if (!InfiltrationCharacterArt)
+        InfiltrationCharacterArt = LoadObject<USkeletalMesh>(nullptr,
+            TEXT("/Game/Characters/Snake/SK_Snake_1995_Infiltration.SK_Snake_1995_Infiltration"));
+    DisarmedCharacterArt = LoadObject<USkeletalMesh>(nullptr,
+        TEXT("/Game/Characters/Snake/SK_Snake_1995_Disarmed.SK_Snake_1995_Disarmed"));
+    if (InfiltrationCharacterArt)
+        GetMesh()->SetSkeletalMeshAsset(InfiltrationCharacterArt);
+    if (GetMesh()->GetSkeletalMeshAsset())
+    {
+        GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+        GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
+        GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+        // Imported humanoid skeletons are posed at ground level; actor origin is
+        // the centre of a 178 cm capsule. Orientation is fixed during FBX prep.
+        GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -89.f));
+        if (!GetMesh()->GetAnimClass())
+            if (UClass* Class = LoadClass<UAnimInstance>(nullptr,
+                    TEXT("/Game/Characters/Snake/ABP_Snake_1995.ABP_Snake_1995_C")))
+                GetMesh()->SetAnimInstanceClass(Class);
+    }
     ApplyMenuTimeState();
     UpdateMovementState();
+}
+
+bool AMGPlayerCharacter::HasAuthoredCharacterArt() const
+{
+    return GetMesh() && GetMesh()->GetSkeletalMeshAsset() != nullptr;
 }
 
 void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -113,8 +143,21 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     if (bPendingProne && bIsCrouched && !bIsProne)
         EnterProneAfterCrouch();
 
-    if (GetMesh())
-        PrototypeBody->SetVisibility(GetMesh()->GetSkeletalMeshAsset() == nullptr, true);
+    // Prison state chooses the unarmed outfit without respawning Snake or
+    // resetting aim/locomotion/camera. Swaps happen once per state change.
+    if (DisarmedCharacterArt)
+    {
+        bool bCaptured = false;
+        if (const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+                UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+            bCaptured = Mission->HasEquipmentConfiscated();
+        if (bDisarmedArtApplied != bCaptured)
+        {
+            GetMesh()->SetSkeletalMeshAsset(bCaptured ? DisarmedCharacterArt : InfiltrationCharacterArt);
+            bDisarmedArtApplied = bCaptured;
+        }
+    }
+    PrototypeBody->SetVisibility(GetMesh()->GetSkeletalMeshAsset() == nullptr, true);
 
     // A temporary prone/cover camera uses real collision and interpolated
     // pivot/shoulder geometry. Artists can replace the cylinder with a rig.

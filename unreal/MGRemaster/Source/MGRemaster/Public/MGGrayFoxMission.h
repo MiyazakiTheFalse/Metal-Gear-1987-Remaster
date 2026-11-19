@@ -41,7 +41,7 @@ private:
     UPROPERTY(Transient)
     AStaticMeshActor* EscapeWall = nullptr;
     UPROPERTY(Transient)
-    AStaticMeshActor* FoxProxy = nullptr;
+    AActor* FoxProxy = nullptr;
     UPROPERTY(Transient)
     AStaticMeshActor* ExitMarker = nullptr;
 

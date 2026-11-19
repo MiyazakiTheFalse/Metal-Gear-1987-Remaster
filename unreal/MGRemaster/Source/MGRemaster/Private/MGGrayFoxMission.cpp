@@ -3,6 +3,7 @@
 #include "MGGuardActor.h"
 #include "MGGrayFoxSaveGame.h"
 #include "MGPlayerCharacter.h"
+#include "MGPrisonerCharacter.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SceneComponent.h"
 #include "Engine/Engine.h"
@@ -95,9 +96,9 @@ void AMGGrayFoxMission::CreateGreybox()
     EscapeWall = SpawnBlock(TEXT("WeakWall_B"), FVector(470.f, 0.f, 90.f),
                             FVector(0.4f, 2.9f, 3.8f), true);
     // Restrained 3D blockout: not a claim about exact 1995 room measurements.
-    FoxProxy = SpawnBlock(TEXT("GrayFoxProxy"), FVector(130.f, 0.f, -11.f),
-                          FVector(0.5f, 0.5f, 1.78f), false);
-    // Proxy is visible, not an actual authored character rig or animation.
+    FoxProxy = GetWorld()->SpawnActor<AMGPrisonerCharacter>(
+        FVector(130.f, 0.f, -11.f), FRotator::ZeroRotator);
+    // The actor contains its own visible fallback and optional imported rig.
     SpawnBlock(TEXT("Bed"), FVector(-900.f, 240.f, -62.f),
                FVector(1.8f, 0.9f, 0.75f), true);
     SpawnBlock(TEXT("Bed"), FVector(110.f, 240.f, -62.f),
@@ -161,6 +162,8 @@ void AMGGrayFoxMission::RestoreVisualState()
         WeakWall->Destroy();
     if ((Flags & MG_FOX_EXIT_WALL_BREACHED) && IsValid(EscapeWall))
         EscapeWall->Destroy();
+    if (AMGPrisonerCharacter* Fox = Cast<AMGPrisonerCharacter>(FoxProxy))
+        Fox->SetRescued((Flags & MG_FOX_RESCUED) != 0);
 }
 
 void AMGGrayFoxMission::InitializePlayerIfReady()
@@ -226,6 +229,8 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         Dialogue = TEXT("The weakened wall gives way. Someone is in the adjacent cell.");
         break;
     case MG_FOX_RESCUE:
+        if (AMGPrisonerCharacter* Fox = Cast<AMGPrisonerCharacter>(FoxProxy))
+            Fox->SetRescued(true);
         // Placeholder original prose, not a published game-script transcription.
         Dialogue = TEXT("GRAY FOX: Metal Gear is real. Find the scientist behind it.");
         break;
