@@ -363,14 +363,17 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         Dialogue = TEXT("PRISON EXIT REACHED — THE INFILTRATION CONTINUES.");
         break;
     case MG_FOX_ENTER_SHOTMAKER:
-        Dialogue = TEXT("SHOOT GUNNER — AVOID THE SHOTGUN WHILE DISARMED.");
+        if (IsValid(Shotmaker)) Shotmaker->SetEncounterActive(true);
+        Dialogue = TEXT("SHOOT GUNNER — THREE SPREAD SHOTS. FIND COVER.");
         break;
     case MG_FOX_RECOVER_GEAR:
         if (Player && Player->GetEquipment())
             Player->GetEquipment()->SetConfiscated(false);
-        Dialogue = TEXT("GEAR RECOVERED — CHECK THE INVENTORY FOR COMPROMISE.");
+        if (IsValid(PlantedTransmitter)) PlantedTransmitter->SetActorHiddenInGame(false);
+        Dialogue = TEXT("GEAR RECOVERED — EQUIP THE HANDGUN. WHAT IS THAT DEVICE?");
         break;
     case MG_FOX_REMOVE_TRANSMITTER:
+        if (IsValid(PlantedTransmitter)) PlantedTransmitter->SetActorHiddenInGame(true);
         Dialogue = TEXT("ENEMY TRANSMITTER REMOVED.");
         break;
     case MG_FOX_DEFEAT_SHOTMAKER:
@@ -379,10 +382,12 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
     case MG_FOX_COLLECT_CARD3:
         if (Player && Player->GetEquipment())
             Player->GetEquipment()->AwardItem(TEXT("CARD3"), 1);
+        if (IsValid(Card3Pickup)) Card3Pickup->SetActorHiddenInGame(true);
         Dialogue = TEXT("CARD 3 RECOVERED — ROUTE FORWARD OPEN.");
         break;
     case MG_FOX_COMPLETE_SLICE:
-        Dialogue = TEXT("VERTICAL SLICE CHAPTER COMPLETE.");
+        if (IsValid(ChapterExit)) ChapterExit->Destroy();
+        Dialogue = TEXT("OUTER HEAVEN CONTINUES — CHAPTER COMPLETE.");
         break;
     default: break;
     }
@@ -430,7 +435,70 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
     if ((Flags & MG_FOX_EXIT_WALL_BREACHED) == 0
         && CanReach(Player, EscapeWall, 240.f))
         return ApplyAction(MG_FOX_BREACH_EXIT_WALL, Player);
+    if (!(Flags & MG_FOX_SHOTMAKER_ENCOUNTERED)) return false;
+
+    if (!(Flags & MG_FOX_GEAR_RECOVERED) && bGearDoorOpen
+        && CanReach(Player, GearBag, 200.f))
+        return ApplyAction(MG_FOX_RECOVER_GEAR, Player);
+    if ((Flags & MG_FOX_TRANSMITTER_PLANTED)
+        && !(Flags & MG_FOX_TRANSMITTER_REMOVED)
+        && CanReach(Player, PlantedTransmitter, 185.f))
+        return ApplyAction(MG_FOX_REMOVE_TRANSMITTER, Player);
+
+    if ((Flags & MG_FOX_SHOTMAKER_DEFEATED)
+        && !(Flags & MG_FOX_CARD3_RECOVERED))
+    {
+        if (!bCardDoorOpen && CanReach(Player, Card2Door, 235.f))
+        {
+            bool bHasCard2 = false;
+            if (const UMGEquipmentComponent* Inventory = Player->GetEquipment())
+                for (const FMGEquipmentEntry& Entry : Inventory->GetItems())
+                    if (Entry.Id == TEXT("CARD2") && Entry.bOwned)
+                        bHasCard2 = true;
+            if (bHasCard2)
+            {
+                bCardDoorOpen = true;
+                if (IsValid(Card2Door)) Card2Door->Destroy();
+                Dialogue = TEXT("CARD 2 VERIFIED — STOREROOM UNLOCKED.");
+            }
+            else Dialogue = TEXT("CARD 2 REQUIRED.");
+            DialogueTimeRemaining = 3.f;
+            return true;
+        }
+        if (bCardDoorOpen && CanReach(Player, Card3Pickup, 195.f))
+            return ApplyAction(MG_FOX_COLLECT_CARD3, Player);
+    }
+    if ((Flags & MG_FOX_CARD3_RECOVERED) && !(Flags & MG_FOX_SLICE_COMPLETED)
+        && CanReach(Player, ChapterExit, 235.f))
+        return ApplyAction(MG_FOX_COMPLETE_SLICE, Player);
     return false;
+}
+
+bool AMGGrayFoxMission::TryPunchRecoveryDoor(AMGPlayerCharacter* Player)
+{
+    if (!Player || !bPlayerInitialised || bGearDoorOpen ||
+        !(Flags & MG_FOX_SHOTMAKER_ENCOUNTERED) ||
+        (Flags & MG_FOX_GEAR_RECOVERED) ||
+        !CanReach(Player, GearDoor, 210.f))
+        return false;
+    ++RecoveryDoorPunches;
+    // Physical repeated impacts; count is a playtest hypothesis, not a
+    // transcribed 1987 number. Never use a single 'E' door disappearance.
+    if (RecoveryDoorPunches < 2)
+        Dialogue = TEXT("THE RECOVERY DOOR SHUDDERS. STRIKE AGAIN.");
+    else
+    {
+        bGearDoorOpen = true;
+        if (IsValid(GearDoor)) GearDoor->Destroy();
+        Dialogue = TEXT("RECOVERY ROOM OPEN — FIND THE CONFISCATED EQUIPMENT.");
+    }
+    DialogueTimeRemaining = 3.5f;
+    return true;
+}
+
+bool AMGGrayFoxMission::IsBossTelegraphing() const
+{
+    return IsValid(Shotmaker) && Shotmaker->IsTelegraphing();
 }
 
 bool AMGGrayFoxMission::HasEquipmentConfiscated() const
@@ -517,7 +585,17 @@ FString AMGGrayFoxMission::GetObjectiveText() const
         return TEXT("Find a route into the outer passage.");
     if (!(Flags & MG_FOX_LEFT_PRISON))
         return TEXT("Get past the guards and reach the far side of the corridor.");
-    return TEXT("Gray Fox rescued. You have escaped the prison.");
+    if (!(Flags & MG_FOX_SHOTMAKER_ENCOUNTERED))
+        return TEXT("Continue east through the security checkpoint.");
+    if (!(Flags & MG_FOX_GEAR_RECOVERED))
+        return TEXT("Avoid the shotgun. Punch open the southern recovery room.");
+    if (!(Flags & MG_FOX_SHOTMAKER_DEFEATED))
+        return TEXT("Fight with your recovered handgun. Use cover between volleys.");
+    if (!(Flags & MG_FOX_CARD3_RECOVERED))
+        return TEXT("Use Card 2 to open the northern storeroom and collect Card 3.");
+    if (!(Flags & MG_FOX_SLICE_COMPLETED))
+        return TEXT("Reach the sealed eastern passage with Card 3.");
+    return TEXT("Outer Heaven chapter complete.");
 }
 
 FString AMGGrayFoxMission::GetPacingHint() const
@@ -639,6 +717,14 @@ void AMGGrayFoxMission::Tick(float Dt)
     {
         ApplyAction(MG_FOX_ESCAPE, Player);
     }
+    if (Player && (Flags & MG_FOX_LEFT_PRISON)
+        && !(Flags & MG_FOX_SHOTMAKER_ENCOUNTERED)
+        && Player->GetActorLocation().X > BossThreshold.X)
+        ApplyAction(MG_FOX_ENTER_SHOTMAKER, Player);
+    if (Player && (Flags & MG_FOX_SHOTMAKER_ENCOUNTERED)
+        && !(Flags & MG_FOX_SHOTMAKER_DEFEATED)
+        && IsValid(Shotmaker) && Shotmaker->IsDefeated())
+        ApplyAction(MG_FOX_DEFEAT_SHOTMAKER, Player);
 }
 
 void AMGGrayFoxMission::RestartMission()
