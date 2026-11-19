@@ -165,9 +165,9 @@ void AMGGrayFoxMission::CreateBossWing()
     PlantedTransmitter = SpawnBlock(TEXT("PlantedTransmitter"), FVector(2790.f, -833.f, -30.f), FVector(.2f, .2f, .16f), false);
     if (IsValid(PlantedTransmitter)) PlantedTransmitter->SetActorHiddenInGame(true);
 
-    SpawnBlock(TEXT("BossLowCoverA"), FVector(1960.f, 170.f, -55.f), FVector(2.1f, 1.f, .9f), true);
-    SpawnBlock(TEXT("BossLowCoverB"), FVector(2610.f, -50.f, -55.f), FVector(1.1f, 1.6f, .9f), true);
-    SpawnBlock(TEXT("BossLowCoverC"), FVector(3330.f, 230.f, -55.f), FVector(1.4f, .8f, .9f), true);
+    SpawnBlock(TEXT("BossLowCoverA"), FVector(1960.f, 170.f, -25.f), FVector(2.1f, 1.f, 1.5f), true);
+    SpawnBlock(TEXT("BossLowCoverB"), FVector(2610.f, -50.f, -25.f), FVector(1.1f, 1.6f, 1.5f), true);
+    SpawnBlock(TEXT("BossLowCoverC"), FVector(3330.f, 230.f, -25.f), FVector(1.4f, .8f, 1.5f), true);
     ChapterExit = SpawnBlock(TEXT("ChapterExit"), FVector(3610.f, 0.f, 90.f), FVector(.45f, 2.2f, 3.8f), true);
     if (GetWorld())
         Shotmaker = GetWorld()->SpawnActor<AMGShootGunnerActor>(
@@ -755,7 +755,15 @@ void AMGGrayFoxMission::Tick(float Dt)
     if (Player && IsTransmitterActive() && IsValid(Shotmaker)
         && (Flags & MG_FOX_SHOTMAKER_ENCOUNTERED)
         && (Flags & MG_FOX_GEAR_RECOVERED))
-        Shotmaker->ReceiveTrackerPing(Player->GetActorLocation());
+    {
+        BeaconPulseTimer += FMath::Max(0.f, Dt);
+        if (BeaconPulseTimer >= 3.f)
+        {
+            Shotmaker->ReceiveTrackerPing(Player->GetActorLocation());
+            BeaconPulseTimer = 0.f;
+        }
+    }
+    else BeaconPulseTimer = 0.f;
     if (Player && (Flags & MG_FOX_SHOTMAKER_ENCOUNTERED)
         && !(Flags & MG_FOX_SHOTMAKER_DEFEATED)
         && IsValid(Shotmaker) && Shotmaker->IsDefeated())

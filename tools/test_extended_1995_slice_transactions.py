@@ -26,8 +26,9 @@ class ExtendedTransactionSourceTests(unittest.TestCase):
         self.assertIn('MG_FOX_CARD3_RECOVERED',RUST)
     def test_save_migration_remains_explicit(self):
         self.assertIn('const bool bLegacy = Save->SchemaVersion == 1',MISSION)
-        self.assertIn('Save->SchemaVersion = 2;',MISSION)
-        self.assertIn('uint32 SchemaVersion = 2;',SAVE)
+        self.assertIn('Save->SchemaVersion = 3;',MISSION)
+        self.assertIn('uint32 SchemaVersion = 3;',SAVE)
+        self.assertIn('Save->SchemaVersion == 2 || Save->SchemaVersion == 3',MISSION)
         self.assertIn('16383u',MISSION)
     def test_no_card_three_before_boss_defeat(self):
         self.assertIn('ACTION_COLLECT_CARD3 if flags & SHOTMAKER_DEFEATED != 0',RUST)

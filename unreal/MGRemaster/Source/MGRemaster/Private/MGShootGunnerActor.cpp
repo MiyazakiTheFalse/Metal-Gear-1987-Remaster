@@ -8,6 +8,7 @@
 #include "Engine/SkeletalMesh.h"
 #include "Engine/World.h"
 #include "Animation/AnimInstance.h"
+#include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -70,6 +71,15 @@ void AMGShootGunnerActor::BeginPlay()
         WeaponBody->SetRelativeScale3D(FVector::OneVector);
         WeaponBarrel->SetVisibility(false);
     }
+    // Authored original source audio files can be imported by
+    // Content/Python/import_shotmaker_source_assets.py. These are optional
+    // assets, not hidden copies of copyrighted Metal Gear recordings.
+    ShotWarningCue = LoadObject<USoundBase>(nullptr,
+        TEXT("/Game/Audio/Shotmaker/Shotmaker_AimCue.Shotmaker_AimCue"));
+    ShotBlastCue = LoadObject<USoundBase>(nullptr,
+        TEXT("/Game/Audio/Shotmaker/Shotmaker_Blast.Shotmaker_Blast"));
+    ShotCycleCue = LoadObject<USoundBase>(nullptr,
+        TEXT("/Game/Audio/Shotmaker/Shotmaker_Cycle.Shotmaker_Cycle"));
 }
 
 void AMGShootGunnerActor::SetEncounterActive(bool bEnabled)
@@ -135,6 +145,9 @@ void AMGShootGunnerActor::Tick(float Dt)
             StateClock = 0.f;
             ShotsFired = 0;
             OnTelegraphStarted();
+            if (ShotWarningCue)
+                UGameplayStatics::PlaySoundAtLocation(this, ShotWarningCue,
+                    GetActorLocation() + FVector(0.f, 0.f, 50.f), .68f);
         }
         return;
     }
@@ -182,6 +195,8 @@ void AMGShootGunnerActor::FireShot(AMGPlayerCharacter* Player)
     // 3D reinterpretation of 1987's visually LARGE spread projectiles.
     const FVector Muzzle = GetActorLocation() +
         GetActorRotation().RotateVector(FVector(112.f, 23.f, 32.f));
+    if (ShotBlastCue)
+        UGameplayStatics::PlaySoundAtLocation(this, ShotBlastCue, Muzzle, .70f);
     const FVector ToAim = (LockedAimPoint - Muzzle).GetSafeNormal();
     const FRotator Base = ToAim.Rotation();
     const float Offsets[] = {-6.f, -3.f, 0.f, 3.f, 6.f};
@@ -211,6 +226,8 @@ void AMGShootGunnerActor::FireShot(AMGPlayerCharacter* Player)
         ++VolleysCompleted;
         State = EAttackState::Recovery;
         StateClock = 0.f;
+        if (ShotCycleCue)
+            UGameplayStatics::PlaySoundAtLocation(this, ShotCycleCue, Muzzle, .64f);
     }
 }
 

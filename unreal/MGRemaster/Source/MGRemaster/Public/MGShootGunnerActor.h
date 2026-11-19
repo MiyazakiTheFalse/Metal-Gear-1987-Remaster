@@ -8,6 +8,7 @@ class UCapsuleComponent;
 class UStaticMeshComponent;
 class USkeletalMeshComponent;
 class AMGPlayerCharacter;
+class USoundBase;
 
 /**
  * 1995 Shoot Gunner / Shotmaker. A three-blast spread attacker with a long,
@@ -62,6 +63,13 @@ private:
     UStaticMeshComponent* WeaponBody;
     UPROPERTY(VisibleAnywhere)
     UStaticMeshComponent* WeaponBarrel;
+
+    UPROPERTY(Transient)
+    USoundBase* ShotWarningCue = nullptr;
+    UPROPERTY(Transient)
+    USoundBase* ShotBlastCue = nullptr;
+    UPROPERTY(Transient)
+    USoundBase* ShotCycleCue = nullptr;
 
     EAttackState State = EAttackState::Dormant;
     bool bActive = false;
