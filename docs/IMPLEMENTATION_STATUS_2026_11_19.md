@@ -45,3 +45,16 @@ Confirmed through connected GitHub: files committed to the branch; 20 registry e
 9. Packaged novice playtesting before advancing source contracts to engine-tested or shipped.
 
 **Quality principle:** never equate a design bible, toolchain source, placeholder model, unexecuted test, or imported asset with the player's experience. Keep the right story **and** tell it through credible choice, cinematic timing, world response and physically coherent art.
+
+
+## 19 November 2026 — Shoot Gunner connected-wing implementation pass
+
+**Added to the draft branch since this snapshot:** `MGShootGunnerActor.h/.cpp` source actor with a three-shot wide spread volley, constrained sight/muzzle raycasts, cover and explicit warning/recovery phases. **Current timings are tuneable 3D interpretations, not measurements of the 1987 attack.** Player handgun firing is separated from the original nonlethal test weapon.
+
+The Unreal prison greybox physically connects east into a boss wing; side rooms include a repeatedly punched recovery door, the confiscated bag, a **planted transmitter inside the recovered item inventory**, a Card-2 storeroom containing Card 3 and a chapter gate. Events advance through the existing Rust/C++ flag contract, and SchemaVersion 3 save logic tracks two weapon ammunition pools and migrates old prison checkpoints. The original transmitter gives the boss approximate periodic positional hints but cannot confer x-ray bullet hits; the player can discard it through the item menu. **This is an encounter implementation at source level, not a proven playable Unreal level.**
+
+**Original editable source assets authored:** `assets/source/shotmaker/riot_gun_proxy.obj` (19 separately editable parts), `riot_gun_game_mesh.obj` (single mesh with groups), matching MTL; original 22,050 Hz mono WAV cue files `Shotmaker_AimCue.wav`, `Shotmaker_Blast.wav`, `Shotmaker_Cycle.wav`. An Unreal Editor Python script imports these exact source assets into the paths expected by the C++ actor. No editor-side asset import was run; none of these is a final MGS4-quality licensed animation/rig. A procedural muzzle/reload cue is not professional gun Foley.
+
+**QA fixes:** cover collision raised to actual projectile height, corridor opening widened, boss radar projection corrected, periodic tracker hints rather than every-frame omniscience, and source tests adjusted from V2 to V3 save schema. New source/binary smoke checks verify key constraints and WAV headers once run locally.
+
+**Still blocking production quality:** authentic original version geometry/dialogue verification, earned pre-capture gameplay, specific asset licensing + full-body skeletal mesh rigging/retarget and animation, 3D actor–weapon hand/shoulder/muzzle socket contact, actual UE Sequencer cinematic playback, facial/VO/audio mix, UE5.7 compile and packaged novice playtesting. Never label this 'finished' until these gates are met.

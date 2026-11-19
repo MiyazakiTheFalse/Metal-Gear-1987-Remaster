@@ -48,9 +48,15 @@ python tools/validate_solid_snake_contract.py
 python tools/validate_full_game_bibles.py
 python tools/validate_cinematic_scenes.py
 python tools/validate_asset_selection.py
+# New source-only Shotmaker artifact and encounter checks:
+python -m unittest discover -s tools -p 'test_*.py'
 python tools/inspect_and_extract.py /path/to/Metal-Gear_J2ME_EN_v330.zip --output content
 cd rust && cargo test && cargo build --release  # Includes engine-neutral TX-55 sabotage tests
 ```
+
+## Shotmaker source pass (19 November 2026)
+
+The [Shotmaker encounter contract](data/shotmaker_attack_contract.json) now distinguishes original three-shot shotgun spread from adjustable modern 3D cadence/spread parameters. The Unreal actor and connected prison-to-boss wing encode physical recovery-room breach, reclaimed handgun, inventory transmitter with radio beacon effect, Card 2 → Card 3 progression, and a fair line-of-sight attack system. [Original editable riot-gun geometry and WAV cues](assets/source/shotmaker/README.md) include an [Editor import script](unreal/MGRemaster/Content/Python/import_shotmaker_source_assets.py); this is **source only**—no UE5.7 compile, imported UAssets, finished skeletal models, animation or complete cinematic. See [source/evidence checkpoint](docs/IMPLEMENTATION_STATUS_2026_11_19.md).
 
 ## Windows packaging
 
