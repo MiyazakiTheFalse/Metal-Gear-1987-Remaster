@@ -1,5 +1,6 @@
 #include "MGPlayerCharacter.h"
 #include "MGGrayFoxMission.h"
+#include "Sound/SoundBase.h"
 #include "MGGuardActor.h"
 #include "MGShootGunnerActor.h"
 #include "MGEquipmentComponent.h"
@@ -114,6 +115,21 @@ void AMGPlayerCharacter::BeginPlay()
     // Asset names are shared with the editor importer. Missing assets retain the
     // original greybox stand-in and never change movement or mission flags.
     // Optional authored weapon overrides the primitive test prop.
+    IncomingRadioSfx = LoadObject<USoundBase>(nullptr,
+        TEXT("/Game/Audio/Transceiver/Transceiver_Incoming.Transceiver_Incoming"));
+    ConnectRadioSfx = LoadObject<USoundBase>(nullptr,
+        TEXT("/Game/Audio/Transceiver/Transceiver_Connect.Transceiver_Connect"));
+    TuneRadioSfx = LoadObject<USoundBase>(nullptr,
+        TEXT("/Game/Audio/Transceiver/Transceiver_Tune.Transceiver_Tune"));
+    CloseRadioSfx = LoadObject<USoundBase>(nullptr,
+        TEXT("/Game/Audio/Transceiver/Transceiver_Close.Transceiver_Close"));
+    SignalRadioSfx = LoadObject<USoundBase>(nullptr,
+        TEXT("/Game/Audio/Transceiver/Transceiver_Signal.Transceiver_Signal"));
+    // Optional source assets can be imported via the Unreal Editor script.
+    // Missing audio must never break calls, suppress captions or block control.
+    if (!(IncomingRadioSfx && ConnectRadioSfx && TuneRadioSfx && CloseRadioSfx))
+        UE_LOG(LogTemp, Warning, TEXT("N313 transceiver audio not imported; textual calls remain fully functional."));
+
     StunGunArt = LoadObject<UStaticMesh>(nullptr,
         TEXT("/Game/Characters/Shared/Weapons/SM_StunPistol_1995.SM_StunPistol_1995"));
     HandgunArt = LoadObject<UStaticMesh>(nullptr,
@@ -188,6 +204,15 @@ void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AMGPlayerCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    if (IncomingConnectionDelay >= 0.f)
+    {
+        IncomingConnectionDelay -= FMath::Max(0.f, DeltaSeconds);
+        if (IncomingConnectionDelay < 0.f && bCodecOpen)
+        {
+            PlayRadioCue(ConnectRadioSfx, .48f);
+            CodecStatus = TEXT("CONNECTED — BIG BOSS / 120.85");
+        }
+    }
     CombatNoiseTimer = FMath::Max(0.f, CombatNoiseTimer - DeltaSeconds);
     WeaponRecoilTimer = FMath::Max(0.f, WeaponRecoilTimer - DeltaSeconds);
     MeleeVisualTimer = FMath::Max(0.f, MeleeVisualTimer - DeltaSeconds);
@@ -410,6 +435,11 @@ void AMGPlayerCharacter::ShoulderSwap()
     if (bCodecOpen)
     {
         TransceiverChannel = (TransceiverChannel + 1) % 2;
+        IncomingConnectionDelay = -1.f;
+        PlayRadioCue(TuneRadioSfx, .42f);
+        CodecStatus = TransceiverChannel == 0
+            ? TEXT("CONNECTED — KYLE SCHNEIDER / 120.79")
+            : TEXT("CONNECTED — BIG BOSS / 120.85");
         NotifyFeedback(TransceiverChannel == 0 ?
             TEXT("RADIO TUNED — SCHNEIDER / 120.79") :
             TEXT("RADIO TUNED — BIG BOSS / 120.85"), TEXT("select"));
@@ -978,6 +1008,12 @@ void AMGPlayerCharacter::ApplyMenuTimeState()
     UGameplayStatics::SetGlobalTimeDilation(this, Desired);
 }
 
+void AMGPlayerCharacter::PlayRadioCue(USoundBase* Cue, float Level) const
+{
+    if (Cue && GetWorld())
+        UGameplayStatics::PlaySound2D(this, Cue, FMath::Clamp(Level, 0.f, .8f));
+}
+
 void AMGPlayerCharacter::OpenIncomingMissionBriefing()
 {
     // An incoming 1995 transceiver call is NOT a mandatory stationary movie.
@@ -987,6 +1023,10 @@ void AMGPlayerCharacter::OpenIncomingMissionBriefing()
     bCodecOpen = true;
     TransceiverChannel = 1; // Real Big Boss, FOXHOUND 120.85
     CodecStatus = TEXT("INCOMING — BIG BOSS / 120.85");
+    // The sound motif plays as gameplay begins; there is no unskippable
+    // call animation and no missing intelligence on immediate close.
+    IncomingConnectionDelay = .94f;
+    PlayRadioCue(IncomingRadioSfx, .55f);
     ApplyMenuTimeState();
 }
 
@@ -996,7 +1036,9 @@ void AMGPlayerCharacter::ToggleCodec()
     if (bCodecOpen)
     {
         bCodecOpen = false;
+        IncomingConnectionDelay = -1.f;
         CodecStatus.Empty();
+        PlayRadioCue(CloseRadioSfx, .50f);
         ApplyMenuTimeState();
         NotifyFeedback(TEXT("TRANSCEIVER CLOSED"), TEXT("select"));
         return;
@@ -1009,7 +1051,10 @@ void AMGPlayerCharacter::ToggleCodec()
     ApplyMenuTimeState();
     bCodecOpen = true;
     TransceiverChannel = 0; // Kyle Schneider; Q changes to Big Boss.
+    IncomingConnectionDelay = -1.f;
     CodecStatus = TEXT("TRANSCEIVER ACTIVE — CHANGE CHANNEL Q / RS; CLOSE C / START");
+    PlayRadioCue(SignalRadioSfx, .20f);
+    PlayRadioCue(ConnectRadioSfx, .45f);
     NotifyFeedback(TEXT("TRANSCEIVER OPEN — SCHNEIDER / 120.79"), TEXT("select"));
 }
 

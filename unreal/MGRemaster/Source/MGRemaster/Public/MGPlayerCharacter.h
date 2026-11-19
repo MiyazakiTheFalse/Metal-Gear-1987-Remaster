@@ -9,6 +9,7 @@ class UCameraComponent;
 class UStaticMeshComponent;
 class UMGEquipmentComponent;
 class USkeletalMesh;
+class USoundBase;
 
 UCLASS()
 class MGREMASTER_API AMGPlayerCharacter : public ACharacter
@@ -95,6 +96,16 @@ private:
     UPROPERTY(EditAnywhere, Category="Controls|Time")
     float EquipmentTimeScale = 0.20f; // Engineering default, not a canonical franchise speed.
     bool bCodecOpen = false;
+
+    // Small original 1995-style UI cues. References are optional so the
+    // gameplay and mandatory intel remain accessible on an audio-less build.
+    UPROPERTY(Transient) USoundBase* IncomingRadioSfx = nullptr;
+    UPROPERTY(Transient) USoundBase* ConnectRadioSfx = nullptr;
+    UPROPERTY(Transient) USoundBase* TuneRadioSfx = nullptr;
+    UPROPERTY(Transient) USoundBase* CloseRadioSfx = nullptr;
+    UPROPERTY(Transient) USoundBase* SignalRadioSfx = nullptr;
+    float IncomingConnectionDelay = -1.f;
+    void PlayRadioCue(USoundBase* Cue, float Level = .55f) const;
     bool bIsProne = false;
     bool bPendingProne = false;
     bool bInCover = false;
