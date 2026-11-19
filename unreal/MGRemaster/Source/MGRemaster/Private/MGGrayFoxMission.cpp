@@ -146,7 +146,7 @@ void AMGGrayFoxMission::CreateBossWing()
     SpawnBlock(TEXT("BossFloor"), FVector(2550.f, 0.f, -150.f), FVector(24.f, 10.f, 1.f), true);
     SpawnBlock(TEXT("BossEastBoundary"), FVector(3750.f, 0.f, 90.f), FVector(.4f, 10.f, 3.8f), true);
     SpawnBlock(TEXT("BossNorthWallWest"), FVector(1650.f, 500.f, 90.f), FVector(5.f, .4f, 3.8f), true);
-    SpawnBlock(TEXT("BossNorthWallEast"), FVector(2950.f, 500.f, 90.f), FVector(16.f, .4f, 3.8f), true);
+    SpawnBlock(TEXT("BossNorthWallEast"), FVector(3025.f, 500.f, 90.f), FVector(14.5f, .4f, 3.8f), true);
     Card2Door = SpawnBlock(TEXT("Card2Door"), FVector(2100.f, 500.f, 90.f), FVector(4.f, .4f, 3.8f), true);
     SpawnBlock(TEXT("CardRoomFloor"), FVector(2100.f, 780.f, -150.f), FVector(9.f, 5.6f, 1.f), true);
     SpawnBlock(TEXT("CardRoomWest"), FVector(1640.f, 780.f, 90.f), FVector(.4f, 5.6f, 3.8f), true);
@@ -154,8 +154,8 @@ void AMGGrayFoxMission::CreateBossWing()
     SpawnBlock(TEXT("CardRoomNorth"), FVector(2100.f, 1080.f, 90.f), FVector(9.2f, .4f, 3.8f), true);
     Card3Pickup = SpawnBlock(TEXT("Card3Pickup"), FVector(2100.f, 845.f, -45.f), FVector(.35f, .14f, .9f), false);
 
-    SpawnBlock(TEXT("BossSouthWallWest"), FVector(2025.f, -500.f, 90.f), FVector(12.5f, .4f, 3.8f), true);
-    SpawnBlock(TEXT("BossSouthWallEast"), FVector(3415.f, -500.f, 90.f), FVector(6.7f, .4f, 3.8f), true);
+    SpawnBlock(TEXT("BossSouthWallWest"), FVector(2015.f, -500.f, 90.f), FVector(12.3f, .4f, 3.8f), true);
+    SpawnBlock(TEXT("BossSouthWallEast"), FVector(3335.f, -500.f, 90.f), FVector(8.3f, .4f, 3.8f), true);
     GearDoor = SpawnBlock(TEXT("GearDoor"), FVector(2775.f, -500.f, 90.f), FVector(2.9f, .4f, 3.8f), true);
     SpawnBlock(TEXT("GearRoomFloor"), FVector(2775.f, -785.f, -150.f), FVector(10.2f, 5.8f, 1.f), true);
     SpawnBlock(TEXT("GearRoomWest"), FVector(2265.f, -785.f, 90.f), FVector(.4f, 5.8f, 3.8f), true);
@@ -196,7 +196,7 @@ void AMGGrayFoxMission::BeginPlay()
         // Reject unknown bits and structurally impossible checkpoints.
         const uint32 F = Save->MissionFlags;
         const bool bLegacy = Save->SchemaVersion == 1;
-        const bool bRecognizedSchema = bLegacy || Save->SchemaVersion == 2;
+        const bool bRecognizedSchema = bLegacy || Save->SchemaVersion == 2 || Save->SchemaVersion == 3;
         const bool bValid = bRecognizedSchema
             && (F & ~(bLegacy ? 63u : 16383u)) == 0
             && (!(F & MG_FOX_CAPTURED) || (F & MG_FOX_CONFISCATED))
@@ -214,8 +214,8 @@ void AMGGrayFoxMission::BeginPlay()
         const FVector P = Save->CheckpointLocation;
         const bool bPositionSafe = !P.ContainsNaN()
             && P.X >= -1160.f
-            && P.X <= ((F & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 2950.f : 1310.f)
-            && FMath::Abs(P.Y) < 410.f
+            && P.X <= ((F & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 3650.f : 1310.f)
+            && FMath::Abs(P.Y) < ((F & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 1020.f : 410.f)
             && P.Z >= -95.f && P.Z <= 180.f
             // A stale save must not place the player beyond a solid, unopened wall.
             && ((F & MG_FOX_FIRST_WALL_BREACHED) || P.X < -350.f)
@@ -227,6 +227,9 @@ void AMGGrayFoxMission::BeginPlay()
         {
             Flags = F;
             SavedPosition = Save->CheckpointLocation;
+            LoadedSchemaVersion = Save->SchemaVersion;
+            LoadedHandgunRounds = Save->HandgunRounds;
+            LoadedStunRounds = Save->StunRounds;
             bHasLoadedSave = true;
         }
     }
@@ -242,6 +245,28 @@ void AMGGrayFoxMission::RestoreVisualState()
         EscapeWall->Destroy();
     if (AMGPrisonerCharacter* Fox = Cast<AMGPrisonerCharacter>(FoxProxy))
         Fox->SetRescued((Flags & MG_FOX_RESCUED) != 0);
+    if (Flags & MG_FOX_GEAR_RECOVERED)
+    {
+        bGearDoorOpen = true;
+        if (IsValid(GearDoor)) GearDoor->Destroy();
+    }
+    if (Flags & MG_FOX_CARD3_RECOVERED)
+    {
+        bCardDoorOpen = true;
+        if (IsValid(Card2Door)) Card2Door->Destroy();
+        if (IsValid(Card3Pickup)) Card3Pickup->SetActorHiddenInGame(true);
+    }
+    if (Flags & MG_FOX_SLICE_COMPLETED)
+        if (IsValid(ChapterExit)) ChapterExit->Destroy();
+    if (IsValid(PlantedTransmitter))
+        PlantedTransmitter->SetActorHiddenInGame(
+            !(Flags & MG_FOX_TRANSMITTER_PLANTED)
+            || (Flags & MG_FOX_TRANSMITTER_REMOVED));
+    if (IsValid(Shotmaker))
+    {
+        if (Flags & MG_FOX_SHOTMAKER_DEFEATED) Shotmaker->RestoreDefeated();
+        else if (Flags & MG_FOX_SHOTMAKER_ENCOUNTERED) Shotmaker->SetEncounterActive(true);
+    }
 }
 
 void AMGGrayFoxMission::InitializePlayerIfReady()
@@ -259,6 +284,11 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
     // Gear usability depends on the distinct actual recovery transaction.
     if (UMGEquipmentComponent* Inventory = Player->GetEquipment())
     {
+        if (bHasLoadedSave && LoadedSchemaVersion >= 3)
+        {
+            Inventory->RestoreHandgunRounds(LoadedHandgunRounds);
+            Inventory->RestoreStunRounds(LoadedStunRounds);
+        }
         Inventory->SetConfiscated((Flags & MG_FOX_GEAR_RECOVERED) == 0);
         // Rebuild a non-consumable from a completed mission transaction after
         // a checkpoint load. Never award it merely from a boss defeat.
@@ -284,9 +314,14 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
         UGameplayStatics::CreateSaveGameObject(UMGGrayFoxSaveGame::StaticClass()));
     if (!Save) return;
-    Save->SchemaVersion = 2;
+    Save->SchemaVersion = 3;
     Save->MissionFlags = Flags;
     Save->CheckpointLocation = Player ? Player->GetActorLocation() : CellStart;
+    if (Player && Player->GetEquipment())
+    {
+        Save->HandgunRounds = Player->GetEquipment()->GetHandgunRounds();
+        Save->StunRounds = Player->GetEquipment()->GetStunRounds();
+    }
     if (!UGameplayStatics::SaveGameToSlot(Save, SaveSlot, 0))
         UE_LOG(LogTemp, Warning, TEXT("Gray Fox: could not save mission checkpoint"));
 }
@@ -305,8 +340,6 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
     ElapsedSinceBeat = 0.f;
     SecondsSinceExploration = 0.f;
     bHasObservedPlayer = false;
-    SaveProgress(Player);
-
     switch (Action)
     {
     case MG_FOX_CAPTURE:
@@ -353,6 +386,9 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         break;
     default: break;
     }
+    // Save AFTER item and weapon transactions. A reload must match the
+    // currently visible inventory, not the previous frame's values.
+    SaveProgress(Player);
     // Short subtitle holds are placeholder reading windows; dialogue never locks control.
     DialogueTimeRemaining = Action == MG_FOX_RESCUE ? 7.f : 4.5f;
     return true;

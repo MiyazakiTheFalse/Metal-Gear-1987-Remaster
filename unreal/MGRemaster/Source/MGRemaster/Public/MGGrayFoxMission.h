@@ -70,6 +70,9 @@ private:
     bool bHasObservedPlayer = false;
     float DialogueTimeRemaining = 0.f;
     FVector SavedPosition = FVector::ZeroVector;
+    uint32 LoadedSchemaVersion = 0;
+    int32 LoadedHandgunRounds = 24;
+    int32 LoadedStunRounds = 8;
     FString Dialogue;
 
     AStaticMeshActor* SpawnBlock(FName Tag, const FVector& Centre,
