@@ -134,7 +134,7 @@ void AMGShootGunnerActor::Tick(float Dt)
                 if (Here.Y > 235.f) PatrolDirection = -1.f;
                 if (Here.Y < -205.f) PatrolDirection = 1.f;
             }
-            SetActorLocation(Here + FVector(0.f, PatrolDirection * 65.f * Dt, 0.f), true);
+            SetActorLocation(Here + FVector(0.f, PatrolDirection * FMath::Clamp(PatrolSpeedCmPerSec, 30.f, 110.f) * Dt, 0.f), true);
         }
         if (CanSeePlayer(Player))
         {
@@ -159,7 +159,7 @@ void AMGShootGunnerActor::Tick(float Dt)
         SetActorRotation(Rot);
         // Aim hold is visible. If cover is reached before the volley, the
         // locked aim remains at the observed position, rewarding player agency.
-        if (StateClock >= .78f)
+        if (StateClock >= FMath::Clamp(WindupSeconds, .5f, 3.f))
         {
             State = EAttackState::Volley;
             StateClock = 0.f;
@@ -172,14 +172,14 @@ void AMGShootGunnerActor::Tick(float Dt)
     {
         // The MSX2 attack has THREE large spread shots. Deliberate individual
         // spacing and longer burst recovery are 3D tuning hypotheses.
-        if (StateClock >= .34f)
+        if (StateClock >= FMath::Clamp(IntervalSeconds, .25f, 1.5f))
         {
             StateClock = 0.f;
             FireShot(Player);
         }
         return;
     }
-    if (State == EAttackState::Recovery && StateClock >= 1.85f)
+    if (State == EAttackState::Recovery && StateClock >= FMath::Clamp(RecoverySeconds, .8f, 5.f))
     {
         State = EAttackState::Searching;
         StateClock = 0.f;
@@ -190,20 +190,22 @@ void AMGShootGunnerActor::FireShot(AMGPlayerCharacter* Player)
 {
     if (State != EAttackState::Volley || ShotsFired >= 3 || !GetWorld())
         return;
-    // Deterministic five-ray cone, ~12 degree full spread. No behind-cover
-    // damage and no Unreal camera-based omniscient hit tests. This is a tunable
-    // 3D reinterpretation of 1987's visually LARGE spread projectiles.
+    // Authored 3D spread, with a bounded angular cone. Original MSX2
+    // documents three broad blasts, NOT a canonical pellet count or timing.
+    // Never use camera-space traces through a different physical obstruction.
     const FVector Muzzle = GetActorLocation() +
         GetActorRotation().RotateVector(FVector(112.f, 23.f, 32.f));
     if (ShotBlastCue)
         UGameplayStatics::PlaySoundAtLocation(this, ShotBlastCue, Muzzle, .70f);
     const FVector ToAim = (LockedAimPoint - Muzzle).GetSafeNormal();
     const FRotator Base = ToAim.Rotation();
-    const float Offsets[] = {-6.f, -3.f, 0.f, 3.f, 6.f};
+    const int32 Count = FMath::Clamp(PelletCount, 3, 9);
+    const float Spread = FMath::Clamp(HalfSpreadDegrees, 3.f, 12.f);
     int32 Hits = 0;
-    for (int32 Pellet = 0; Pellet < 5; ++Pellet)
+    for (int32 Pellet = 0; Pellet < Count; ++Pellet)
     {
-        const float Yaw = Offsets[Pellet] + (ShotsFired == 1 ? 1.2f : (ShotsFired == 2 ? -1.2f : 0.f));
+        const float Yaw = -Spread + (2.f * Spread * Pellet / (Count - 1))
+            + (ShotsFired == 1 ? 1.2f : (ShotsFired == 2 ? -1.2f : 0.f));
         const FVector Dir = FRotator(Base.Pitch, Base.Yaw + Yaw, 0.f).Vector();
         FCollisionQueryParams Query(SCENE_QUERY_STAT(MGShotmakerPellets), true, this);
         FHitResult Hit;
@@ -216,7 +218,9 @@ void AMGShootGunnerActor::FireShot(AMGPlayerCharacter* Player)
     {
         // One bounded damage transaction for a burst, not five independent
         // death callbacks or damage through corners from a camera trace.
-        UGameplayStatics::ApplyDamage(Player, FMath::Min(Hits * 8.f, 32.f),
+        UGameplayStatics::ApplyDamage(Player,
+            FMath::Min(Hits * FMath::Clamp(PelletDamage, 4.f, 16.f),
+                       FMath::Clamp(MaxShotDamage, 12.f, 50.f)),
             nullptr, this, UDamageType::StaticClass());
     }
     OnShotFired(ShotsFired);

@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "encounter": "SHOOT_GUNNER_SHOTMAKER",
+  "source_edition": "MSX2 game; Connect2Media J2ME v3.3.0 unverified",
+  "canon_facts": {
+    "ex_spetsnaz": "1987 Japanese manual backstory",
+    "weapon_class": "riot gun, specific make unverified",
+    "burst_shots": 3,
+    "wide_projectiles": true,
+    "player_begins_disarmed": true,
+    "recover_confiscated_inventory_before_defeat": true,
+    "hidden_transmitter_in_inventory": true,
+    "card2_to_card3_progression": true
+  },
+  "interpretation_tuning": {
+    "windup_seconds": 0.78,
+    "inter_shot_seconds": 0.34,
+    "recovery_seconds": 1.85,
+    "spread_half_degrees": 6,
+    "pellet_count": 5,
+    "pellet_damage": 8,
+    "damage_cap_per_shot": 32,
+    "patrol_speed_cm_per_sec": 65
+  },
+  "limits": {
+    "windup_seconds": [
+      0.5,
+      3
+    ],
+    "inter_shot_seconds": [
+      0.25,
+      1.5
+    ],
+    "recovery_seconds": [
+      0.8,
+      5
+    ],
+    "spread_half_degrees": [
+      3,
+      12
+    ],
+    "pellet_count": [
+      3,
+      9
+    ],
+    "pellet_damage": [
+      4,
+      16
+    ],
+    "damage_cap_per_shot": [
+      12,
+      50
+    ]
+  },
+  "artifacts": {
+    "boss_actor": "unreal/MGRemaster/Source/MGRemaster/Private/MGShootGunnerActor.cpp",
+    "boss_header": "unreal/MGRemaster/Source/MGRemaster/Public/MGShootGunnerActor.h",
+    "source_mesh": "assets/source/shotmaker/riot_gun_game_mesh.obj",
+    "source_audio": [
+      "assets/source/shotmaker/audio/Shotmaker_AimCue.wav",
+      "assets/source/shotmaker/audio/Shotmaker_Blast.wav",
+      "assets/source/shotmaker/audio/Shotmaker_Cycle.wav"
+    ],
+    "import_script": "unreal/MGRemaster/Content/Python/import_shotmaker_source_assets.py"
+  },
+  "qa": [
+    "Source uncompiled; Unreal 5.7 required",
+    "Player perceives warning from character action without reliance on HUD",
+    "Every pellet trace blocked by physical cover",
+    "Enemy cannot see or fire through solid wall",
+    "Three distinct blast sounds and animation notify cues",
+    "Player can reach gear room without repeated guaranteed damage",
+    "Inventory bug can be discarded with item selection",
+    "Card2 and Card3 survive reload without state duplication",
+    "Exact original edition map and dialogue crosschecked",
+    "Hand grip/pump/stock physically accurate in final rig"
+  ],
+  "references": [
+    "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/17103",
+    "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/35361"
+  ]
+}

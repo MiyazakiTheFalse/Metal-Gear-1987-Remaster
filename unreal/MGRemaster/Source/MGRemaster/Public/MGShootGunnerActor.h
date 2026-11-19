@@ -71,6 +71,25 @@ private:
     UPROPERTY(Transient)
     USoundBase* ShotCycleCue = nullptr;
 
+    // Modern 3D design hypotheses (NOT measured MSX2 firearm statistics).
+    // Editable in a BP child and bounded in the actual gameplay methods.
+    UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="0.5", ClampMax="3.0"))
+    float WindupSeconds = .78f;
+    UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="0.25", ClampMax="1.5"))
+    float IntervalSeconds = .34f;
+    UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="0.8", ClampMax="5.0"))
+    float RecoverySeconds = 1.85f;
+    UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="3", ClampMax="12"))
+    float HalfSpreadDegrees = 6.f;
+    UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="3", ClampMax="9"))
+    int32 PelletCount = 5;
+    UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="4", ClampMax="16"))
+    float PelletDamage = 8.f;
+    UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="12", ClampMax="50"))
+    float MaxShotDamage = 32.f;
+    UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="30", ClampMax="110"))
+    float PatrolSpeedCmPerSec = 65.f;
+
     EAttackState State = EAttackState::Dormant;
     bool bActive = false;
     bool bDefeated = false;
