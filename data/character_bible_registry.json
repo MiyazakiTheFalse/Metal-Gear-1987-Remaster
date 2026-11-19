@@ -1,0 +1,278 @@
+{
+  "schema_version": 1,
+  "edition": "MSX2 baseline; J2ME 3.3.0 cross-check outstanding",
+  "source_status": "source_authored_unverified",
+  "count": 20,
+  "entries": [
+    {
+      "id": "REAL_BIG_BOSS",
+      "label": "THE REAL BIG BOSS",
+      "path": "docs/CHARACTER_CAST_BIBLES/REAL_BIG_BOSS.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "VENOM_SNAKE",
+      "label": "VENOM SNAKE — THE OUTER HEAVEN BIG BOSS",
+      "path": "docs/CHARACTER_CAST_BIBLES/VENOM_SNAKE.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "GRAY_FOX",
+      "label": "GRAY FOX / GREY FOX",
+      "path": "docs/CHARACTER_CAST_BIBLES/GRAY_FOX.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "KYLE_SCHNEIDER",
+      "label": "KYLE SCHNEIDER",
+      "path": "docs/CHARACTER_CAST_BIBLES/KYLE_SCHNEIDER.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "DIANE",
+      "label": "DIANE",
+      "path": "docs/CHARACTER_CAST_BIBLES/DIANE.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "STEVE",
+      "label": "STEVE",
+      "path": "docs/CHARACTER_CAST_BIBLES/STEVE.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "JENNIFER",
+      "label": "JENNIFER",
+      "path": "docs/CHARACTER_CAST_BIBLES/JENNIFER.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "JENNIFERS_BROTHER",
+      "label": "JENNIFER'S BROTHER",
+      "path": "docs/CHARACTER_CAST_BIBLES/JENNIFERS_BROTHER.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "DRAGO_MADNAR",
+      "label": "DR. DRAGO PETTROVICH MADNAR",
+      "path": "docs/CHARACTER_CAST_BIBLES/DRAGO_MADNAR.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "ELLEN_MADNAR",
+      "label": "ELLEN / ELEN MADNAR",
+      "path": "docs/CHARACTER_CAST_BIBLES/ELLEN_MADNAR.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "SHOOT_GUNNER",
+      "label": "SHOOT GUNNER / SHOTMAKER",
+      "path": "docs/CHARACTER_CAST_BIBLES/SHOOT_GUNNER.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "MACHINEGUN_KID",
+      "label": "MACHINEGUN KID",
+      "path": "docs/CHARACTER_CAST_BIBLES/MACHINEGUN_KID.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "FIRE_TROOPER",
+      "label": "FIRE TROOPER",
+      "path": "docs/CHARACTER_CAST_BIBLES/FIRE_TROOPER.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "BLOODY_BRAD",
+      "label": "ARNOLD / BLOODY BRAD (TX-11)",
+      "path": "docs/CHARACTER_CAST_BIBLES/BLOODY_BRAD.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "DIRTY_DUCK",
+      "label": "COWARD DUCK / DIRTY DUCK",
+      "path": "docs/CHARACTER_CAST_BIBLES/DIRTY_DUCK.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "FIRST_MERCENARIES",
+      "label": "FOUR MERCENARIES — EARLY SQUAD",
+      "path": "docs/CHARACTER_CAST_BIBLES/FIRST_MERCENARIES.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "POW_INFORMANT",
+      "label": "PRISONER INTELLIGENCE CONTACT",
+      "path": "docs/CHARACTER_CAST_BIBLES/POW_INFORMANT.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "OUTER_HEAVEN_GUARD",
+      "label": "OUTER HEAVEN SECURITY GUARD",
+      "path": "docs/CHARACTER_CAST_BIBLES/OUTER_HEAVEN_GUARD.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "MADNAR_DECOY",
+      "label": "MADNAR IMPOSTOR / DECOY",
+      "path": "docs/CHARACTER_CAST_BIBLES/MADNAR_DECOY.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    },
+    {
+      "id": "TX55",
+      "label": "METAL GEAR TX-55",
+      "path": "docs/CHARACTER_CAST_BIBLES/TX55.md",
+      "status": "source_authored_unverified",
+      "source_classification": [
+        "C87",
+        "CL",
+        "I",
+        "U"
+      ],
+      "quality_gate": "edition+rights+rig+acting+UE5_compile+skip_save+720p+user_test"
+    }
+  ],
+  "source_urls": [
+    "https://www.konami.com/mg/archive/mg/chara.html",
+    "https://tcrf.tiago.zip/wiki/Metal_Gear_(MSX2)",
+    "https://thesnakesoup.org/metal-gear-msx-walkthrough/"
+  ],
+  "exclusions": [
+    "Solid Snake is specified in docs/SOLID_SNAKE_1995_PROTAGONIST_BIBLE.md",
+    "TX-55 encounter is specified in docs/TX55_METAL_GEAR_BOSS_BIBLE.md",
+    "Vehicles are encounter dossiers not individual human-character biographies"
+  ]
+}

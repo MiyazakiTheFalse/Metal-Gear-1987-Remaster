@@ -24,6 +24,12 @@ These features are unverified source implementation, not finished gameplay or pr
 - `docs/` — source audit, gameplay scope, graphics policy and build notes.
 - **1995 Solid Snake protagonist bible:** [binding identity/rig/aim/animation design](docs/SOLID_SNAKE_1995_PROTAGONIST_BIBLE.md), with [machine-checkable contract](data/solid_snake_character_contract.json). This is an authored specification, not imported/verified final character art.
 
+## Additional full-game lore and character bibles
+
+- [1995 continuity and cinematic treatment](docs/OUTER_HEAVEN_1995_CONTINUITY_TREATMENT.md) preserves the 1987 player perspective while reconciling later Big Boss and Venom canon.
+- [TX-55 boss bible](docs/TX55_METAL_GEAR_BOSS_BIBLE.md) preserves the 16-leg-charge sabotage puzzle and plans its cinematic/engineering climax.
+- [Significant-character individual bibles](docs/CHARACTER_CAST_BIBLES/README.md) with [auditable registry](data/character_bible_registry.json) cover original cast, encounters, allies, guards and both Big Boss identities. These are working source documents **not** imported models, rendered cinema or completed full-game systems.
+
 ## Global production doctrine — binding
 
 **Doctrine 000 — [How We Build](docs/DOCTRINE_000_HOW_WE_BUILD.md)** governs every other doctrine. Product quality is defined by the *method*: research and provenance, player-first intent, integrated execution, actual evidence, accessibility, source fidelity, performance and maintainability. Its [Doctrine 005 — Spatial Structure](docs/DOCTRINE_005_SPATIAL_STRUCTURE.md) companion binds topology and room rhythm to the same standards, with [area contracts](data/area_contracts.json). When requirements conflict, record an explicit decision and test the player's experience instead of allowing undocumented shortcuts.
