@@ -78,7 +78,19 @@ void AMGPrototypeHUD::DrawHUD()
     for (TActorIterator<AMGGuardActor> Guard(GetWorld()); Guard; ++Guard)
     {
         if (Guard->IsIncapacitated()) continue;
-        MaxThreat = FMath::Max(MaxThreat, static_cast<int32>(Guard->GetAwarenessState()));
+        // State of a distant patrol must not be mislabelled as a confirmed
+        // facility-wide enemy contact. Only direct local sight and a
+        // transmitted facility report can place the radar in ALERT.
+        const bool bDirectThreat = Guard->HasDirectVisualContact()
+            && Guard->GetAwarenessState() >= 3;
+        if (bDirectThreat) MaxThreat = FMath::Max(MaxThreat, 3);
+        else if (Guard->GetAwarenessPhase() ==
+                 EMGGuardAwarenessPhase::Searching ||
+                 Guard->GetAwarenessPhase() ==
+                 EMGGuardAwarenessPhase::Investigating ||
+                 Guard->GetAwarenessPhase() ==
+                 EMGGuardAwarenessPhase::Suspicious)
+            MaxThreat = FMath::Max(MaxThreat, 1);
         MaxSuspicion = FMath::Max(MaxSuspicion, Guard->GetSuspicion());
     }
 

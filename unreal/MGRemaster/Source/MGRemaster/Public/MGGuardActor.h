@@ -128,6 +128,7 @@ private:
     float CustodyThreatMemorySeconds = 0.f;
     float ContactEvidenceAge = 99.f;
     float PendingRadioDelay = 0.f;
+    FVector PendingConfirmedRadioSighting = FVector::ZeroVector;
     float SquadBroadcastCooldown = 0.f;
     float SearchForLastKnownSeconds = 0.f;
     float PursuitBlockedSeconds = 0.f;

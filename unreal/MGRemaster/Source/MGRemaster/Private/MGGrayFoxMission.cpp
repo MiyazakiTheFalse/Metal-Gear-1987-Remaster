@@ -856,7 +856,8 @@ void AMGGrayFoxMission::UpdateGuardAlert(float Dt)
             bActiveInvestigation |= Phase == EMGGuardAwarenessPhase::Suspicious ||
                 Phase == EMGGuardAwarenessPhase::Investigating ||
                 Phase == EMGGuardAwarenessPhase::Searching ||
-                Phase == EMGGuardAwarenessPhase::Confirming;
+                (Phase == EMGGuardAwarenessPhase::Confirming &&
+                 !G->IsIssuingChallenge());
         }
 
     if (FacilityAlertRemaining > 0.f)

@@ -454,7 +454,11 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     Frame.vision_half_angle_deg = 55.f;
     Frame.hearing_range_m = 11.f;
     Frame.visibility = Player->GetVisibilityFactor();
-    Frame.noise = Player->GetNoiseFactor();
+    // A footstep can still transmit through walls, but physical barriers
+    // reduce its useful evidence radius instead of creating an x-ray acoustic
+    // tracker. Direct visual proof remains a separate channel.
+    Frame.noise = Player->GetNoiseFactor() *
+        (bHasLineOfSight ? 1.f : .42f);
     Frame.suspicion = Suspicion;
     Frame.delta_seconds = DeltaSeconds;
     Frame.line_of_sight = bHasLineOfSight ? 1u : 0u;
@@ -524,6 +528,9 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     {
         bPendingRadioReport = true;
         PendingRadioDelay = .6f;
+        // Snapshot only what was actually SEEN when the report began. Later
+        // sound or body evidence cannot silently replace this radio payload.
+        PendingConfirmedRadioSighting = Player->GetActorLocation();
         SquadBroadcastCooldown = 9.f;
     }
     if (bPendingRadioReport)
@@ -532,13 +539,13 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         if (PendingRadioDelay <= 0.f)
         {
             bPendingRadioReport = false;
-            OnContactReported(LastKnownPlayerPosition);
+            OnContactReported(PendingConfirmedRadioSighting);
             if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
                     UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
-                Mission->NotifyGuardContactReported(LastKnownPlayerPosition);
+                Mission->NotifyGuardContactReported(PendingConfirmedRadioSighting);
             for (TActorIterator<AMGGuardActor> Ally(GetWorld()); Ally; ++Ally)
                 if (*Ally != this)
-                    Ally->ReceiveLocalSquadReport(LastKnownPlayerPosition, this);
+                    Ally->ReceiveLocalSquadReport(PendingConfirmedRadioSighting, this);
         }
     }
     // Close combat cannot fire the same tick a guard becomes alerted.
