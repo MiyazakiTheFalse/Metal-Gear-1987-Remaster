@@ -189,6 +189,12 @@ void AMGGuardActor::ReceiveLocalSquadReport(const FVector& SeenAt, const AActor*
 void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, const FVector& WallNormal, float HearingRadius, AActor* SoundInstigator)
 {
     if (bIncapacitated || !GetWorld() || AwarenessState >= 3) return;
+    // A discovered body is serious evidence. A random subsequent knock must
+    // not delete the guard's ongoing security investigation of a casualty.
+    if ((EvidenceKind == EMGGuardEvidenceKind::DiscoveredBody ||
+         EvidenceKind == EMGGuardEvidenceKind::SquadBodyReport) &&
+        EvidenceAge < 5.f)
+        return;
     const float Distance = FVector::Dist2D(GetActorLocation(), SoundLocation);
     if (Distance > HearingRadius) return;
     const FVector GuardSide = (GetActorLocation() - SoundLocation).GetSafeNormal2D();
@@ -212,8 +218,13 @@ void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, const FVector& W
     DistractionLocation = SoundLocation + GuardSide * 90.f;
     DistractionLocation.Z = GetActorLocation().Z;
     ObserveEvidence(EMGGuardEvidenceKind::StructuralImpact, DistractionLocation);
-    ReturnToPatrol = PatrolOrigin +
-        FVector(FMath::Clamp(GetActorLocation().X - PatrolOrigin.X, -180.f, 180.f), 0.f, 0.f);
+    // Return to the actual duty route, including Y-axis patrols. The older
+    // X-only projection stranded northern/southern corridor patrols away
+    // from their assigned sweep after checking a noise.
+    const float RouteOffset = FVector::DotProduct(
+        GetActorLocation() - PatrolOrigin, PatrolAxis);
+    ReturnToPatrol = PatrolOrigin + PatrolAxis *
+        FMath::Clamp(RouteOffset, -PatrolHalfLength, PatrolHalfLength);
     DistractionPhase = EDistractionPhase::React;
     DistractionTimer = FMath::Max(0.31f, 0.52f - ConsecutiveKnocks * 0.07f);
     InvestigationStuckTimer = 0.f;
@@ -259,7 +270,10 @@ bool AMGGuardActor::AdvanceNoiseInvestigation(float DeltaSeconds)
     // Direct visual confirmation supersedes noise. A guard who is merely
     // searching a body or responding to a radio report must NOT forget the
     // local sound stimulus just because numeric awareness reached 2.
-    if (bConfirmedVisualThisFrame && AwarenessState >= 3)
+    if ((bConfirmedVisualThisFrame && AwarenessState >= 3) ||
+        ((EvidenceKind == EMGGuardEvidenceKind::DiscoveredBody ||
+          EvidenceKind == EMGGuardEvidenceKind::SquadBodyReport) &&
+         EvidenceAge < 5.f))
     {
         DistractionPhase = EDistractionPhase::None;
         ConsecutiveKnocks = 0;
@@ -388,7 +402,7 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         }
     }
     BodyScanCountdown -= DeltaSeconds;
-    if (BodyScanCountdown <= 0.f && Role != EMGGuardRole::Custody)
+    if (BodyScanCountdown <= 0.f)
     {
         BodyScanCountdown = 0.70f;
         CheckVisibleIncapacitatedColleagues();
