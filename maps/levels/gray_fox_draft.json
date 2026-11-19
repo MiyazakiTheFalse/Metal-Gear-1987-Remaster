@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "status": "draft_unverified",
+  "target": "Connect2Media v3.3.0 a1",
+  "source_room_ids": null,
+  "measured_ue_clearances": null,
+  "route": [
+    {"area": "prison.yard", "next": "prison.snake_cell", "gate": "prisoner intel and voluntary surrender"},
+    {"area": "prison.snake_cell", "next": "prison.gray_fox_cell", "gate": "first wall opened"},
+    {"area": "prison.gray_fox_cell", "next": "prison.escape_corridor", "gate": "Fox intel and perpendicular second breach"},
+    {"area": "prison.escape_corridor", "next": "prison.property_office", "gate": "reach property area"},
+    {"area": "prison.property_office", "next": "prison.warden_room", "gate": "original loadout recovered"},
+    {"area": "prison.warden_room", "next": "slice checkpoint", "gate": "Shoot Gunner defeated and exit crossed"}
+  ],
+  "remake_additions": ["processing booth", "service turn", "cover arrangement", "exit threshold"],
+  "evidence_needed": ["target-edition room IDs and connections", "packaged Unreal camera clearance", "unfamiliar player traversal"]
+}

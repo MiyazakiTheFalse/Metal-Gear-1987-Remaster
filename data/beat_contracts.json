@@ -12,7 +12,7 @@
       "id": "gray_fox.capture_and_control",
       "kind": "story_transition",
       "intent": "Connect Snake's deliberate capture to loss of equipment and regain player control.",
-      "trigger": "Begin mission in cell checkpoint.",
+      "trigger": "Choose surrender at the processing post after prisoner intelligence.",
       "action": "Player can move, aim camera and inspect immediately.",
       "visual": {
         "foreshadow": "Equipment removed in earlier capture scene; prison cell reads as confined",
@@ -53,7 +53,7 @@
       "kind": "optional_radio",
       "intent": "Schneider provides credible architectural context without giving away the prison secret.",
       "trigger": "Player manually opens transceiver or accepts subtle incoming contact.",
-      "action": "Press C/Start to open/close; Q/right stick press changes manual channel. Walking and wall breach continue. The optional hint appears at the existing 14-second progress threshold.",
+      "action": "Open the optional pre-capture architectural contact. The cell receiver offers Big Boss; inspection remains immediately available.",
       "visual": {
         "foreshadow": "Architectural seams can be seen before radio use",
         "impact": "Provisional non-pausing HUD transcript with Schneider 120.79 and Big Boss 120.85; 3D listening animation and portrait are missing.",
@@ -100,7 +100,7 @@
       "kind": "environmental_puzzle",
       "intent": "Player notices that a repaired section may not be sound.",
       "trigger": "Inspection or approach near WeakWall_A.",
-      "action": "Observe textures, compare contact sounds, or act on prior knowledge.",
+      "action": "Face the repaired panel and strike deliberately. Each accepted impact advances its damage; the third opens the passage.",
       "visual": {
         "foreshadow": "Masonry seam and conduit join distinguish patch without glowing arrows",
         "impact": "Contact feedback identifies hollow candidate",
@@ -123,7 +123,7 @@
       },
       "state": {
         "transaction": "No hidden timer unlock; wall is eligible immediately",
-        "persistence": "Wall condition persists until breach",
+        "persistence": "Keep partial damage through checkpoint reload and opened panels after breakthrough.",
         "ai_knowledge": "Only meaningful audible impacts create guards' sound cues"
       },
       "interruptions": [
@@ -145,7 +145,7 @@
       "kind": "destruction_event",
       "intent": "Earned breakthrough shows a passage and confirms the player's inference.",
       "trigger": "Player E/X near WeakWall_A after capture.",
-      "action": "Immediate breach if eligibility is met; no presentation lock.",
+      "action": "Face the repaired panel and strike deliberately. Each accepted impact advances its damage; the third opens the passage.",
       "visual": {
         "foreshadow": "Weak seam visible at approach",
         "impact": "Impact/crack, debris and opening align with actual collision change",
@@ -165,7 +165,7 @@
       },
       "state": {
         "transaction": "Commit first-breach flag once",
-        "persistence": "Destroy blocker only on committed event, restore after load",
+        "persistence": "Keep partial damage through checkpoint reload and opened panels after breakthrough.",
         "ai_knowledge": "Noise only informs guards within plausible acoustic reach"
       },
       "interruptions": [
@@ -198,7 +198,7 @@
         "non_audio_equivalent": "Persist key information to mission log"
       },
       "timing": {
-        "start_event": "On rescue flag commit; 7-second temporary subtitle holds but no forced control lock.",
+        "start_event": "Start line-by-line subtitles on contact. Preserve all essential information in the transcript.",
         "feedback_target_ms": 150,
         "max_forced_lock_seconds": 0,
         "optional_hint_seconds": [],
@@ -228,7 +228,7 @@
       "kind": "destruction_event",
       "intent": "Release into dangerous escape lane with coherent spatial cause.",
       "trigger": "Player E/X near WeakWall_B after rescue.",
-      "action": "Immediate breach; player chooses stealth or haste.",
+      "action": "Face the repaired panel and strike deliberately. Each accepted impact advances its damage; the third opens the passage.",
       "visual": {
         "foreshadow": "Surface deterioration and clear exit route",
         "impact": "Breach debris and opening reveal legible corridor",
@@ -248,7 +248,7 @@
       },
       "state": {
         "transaction": "Exit-breach flag once",
-        "persistence": "Persistent opening on resume",
+        "persistence": "Keep partial damage through checkpoint reload and opened panels after breakthrough.",
         "ai_knowledge": "Any resulting guard response obeys real audibility"
       },
       "interruptions": [
@@ -352,11 +352,11 @@
       "kind": "mission_transition",
       "intent": "Resolve the threat with relief, not artificial speed manipulation.",
       "trigger": "Reach physical escape marker after second breach.",
-      "action": "Player retains locomotion and may finish without confrontation.",
+      "action": "Bypass or distract the perimeter patrol on the way to the personal-effects locker.",
       "visual": {
         "foreshadow": "Exit landmark established before escape",
-        "impact": "Completion notification follows actual checkpoint transaction",
-        "aftermath": "Environment remains readable after success"
+        "impact": "Entry to the property area opens after the prison escape.",
+        "aftermath": "Recovered kit restores gear choices for the upcoming confrontation."
       },
       "audio": {
         "origin": "Threat audio only if guards actually engaged",
@@ -383,6 +383,206 @@
       ],
       "verification": [
         "No replay of completed rescue/escape; player control returns"
+      ]
+    },
+    {
+      "id": "gray_fox.prisoner_intel",
+      "kind": "dialogue",
+      "intent": "Make the purpose of surrender intelligible.",
+      "trigger": "Speak to the prisoner in the yard.",
+      "action": "Approach or retreat before volunteering.",
+      "provenance": "comparative_msx2_pending_target_j2me",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "visual": {
+        "foreshadow": "The prisoner stands by the task light; a caption explains the post.",
+        "impact": "The prisoner stands by the task light; a caption explains the post.",
+        "aftermath": "Record prisoner contact."
+      },
+      "audio": {
+        "origin": "Quiet conversation in the yard.",
+        "response": "Quiet conversation in the yard.",
+        "non_audio_equivalent": "The prisoner stands by the task light; a caption explains the post."
+      },
+      "state": {
+        "transaction": "Record prisoner contact.",
+        "persistence": "Reload the committed checkpoint without repeating its presentation.",
+        "ai_knowledge": "Guard contact uses the existing sight and sound checks."
+      },
+      "timing": {
+        "start_event": "Speak to the prisoner in the yard.",
+        "feedback_target_ms": 120,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "hypothesis_until_playtested"
+      },
+      "interruptions": [
+        "reload",
+        "fast input",
+        "alert"
+      ],
+      "verification": [
+        "Approach or retreat before volunteering."
+      ]
+    },
+    {
+      "id": "gray_fox.approach",
+      "kind": "stealth",
+      "intent": "Give the player their equipment and one chance to use it.",
+      "trigger": "Leave the informant for the processing post.",
+      "action": "Fire a round before capture and check the recovered count.",
+      "provenance": "comparative_msx2_pending_target_j2me",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "visual": {
+        "foreshadow": "The desk, partition and patrolling silhouette mark the approach.",
+        "impact": "The desk, partition and patrolling silhouette mark the approach.",
+        "aftermath": "Preserve inventory expenditure until capture."
+      },
+      "audio": {
+        "origin": "Patrol and movement cues; a radio request is optional.",
+        "response": "Patrol and movement cues; a radio request is optional.",
+        "non_audio_equivalent": "The desk, partition and patrolling silhouette mark the approach."
+      },
+      "state": {
+        "transaction": "Preserve inventory expenditure until capture.",
+        "persistence": "Reload the committed checkpoint without repeating its presentation.",
+        "ai_knowledge": "Guard contact uses the existing sight and sound checks."
+      },
+      "timing": {
+        "start_event": "Leave the informant for the processing post.",
+        "feedback_target_ms": 120,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "hypothesis_until_playtested"
+      },
+      "interruptions": [
+        "reload",
+        "fast input",
+        "alert"
+      ],
+      "verification": [
+        "Fire a round before capture and check the recovered count."
+      ]
+    },
+    {
+      "id": "gray_fox.reclaim",
+      "kind": "inventory",
+      "intent": "Let the player recognise their own equipment.",
+      "trigger": "Interact with the property locker after escape.",
+      "action": "Reload with partial ammunition and previously equipped selection.",
+      "provenance": "comparative_msx2_pending_target_j2me",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "visual": {
+        "foreshadow": "A marked locker and opening shutter link the action to a new route.",
+        "impact": "A marked locker and opening shutter link the action to a new route.",
+        "aftermath": "Unlock the seized inventory and the combat route."
+      },
+      "audio": {
+        "origin": "A compact latch or selection cue accompanies recovery.",
+        "response": "A compact latch or selection cue accompanies recovery.",
+        "non_audio_equivalent": "A marked locker and opening shutter link the action to a new route."
+      },
+      "state": {
+        "transaction": "Unlock the seized inventory and the combat route.",
+        "persistence": "Reload the committed checkpoint without repeating its presentation.",
+        "ai_knowledge": "Guard contact uses the existing sight and sound checks."
+      },
+      "timing": {
+        "start_event": "Interact with the property locker after escape.",
+        "feedback_target_ms": 120,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "hypothesis_until_playtested"
+      },
+      "interruptions": [
+        "reload",
+        "fast input",
+        "alert"
+      ],
+      "verification": [
+        "Reload with partial ammunition and previously equipped selection."
+      ]
+    },
+    {
+      "id": "gray_fox.shoot_gunner",
+      "kind": "combat",
+      "intent": "Read an aimed threat, break sight and survive the firing cycle.",
+      "trigger": "Engage the warden after recovery.",
+      "action": "Avoid a shot by taking cover; win with depleted ammo via melee.",
+      "provenance": "comparative_msx2_pending_target_j2me",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "visual": {
+        "foreshadow": "Read the raised weapon from behind cover; the exit remains shut.",
+        "impact": "Read the raised weapon from behind cover; the exit remains shut.",
+        "aftermath": "On actual defeat persist the open exit."
+      },
+      "audio": {
+        "origin": "A mechanical cue precedes the shot. A discharge follows the attack.",
+        "response": "A mechanical cue precedes the shot. A discharge follows the attack.",
+        "non_audio_equivalent": "Read the raised weapon from behind cover; the exit remains shut."
+      },
+      "state": {
+        "transaction": "On actual defeat persist the open exit.",
+        "persistence": "Reload the committed checkpoint without repeating its presentation.",
+        "ai_knowledge": "Guard contact uses the existing sight and sound checks."
+      },
+      "timing": {
+        "start_event": "Engage the warden after recovery.",
+        "feedback_target_ms": 120,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "hypothesis_until_playtested"
+      },
+      "interruptions": [
+        "reload",
+        "fast input",
+        "alert"
+      ],
+      "verification": [
+        "Avoid a shot by taking cover; win with depleted ammo via melee."
+      ]
+    },
+    {
+      "id": "gray_fox.depart",
+      "kind": "mission_transition",
+      "intent": "Let Snake take the first step towards Pettrovich.",
+      "trigger": "Cross the open threshold after the fight.",
+      "action": "Wait after the fight; resume the checkpoint and leave once.",
+      "provenance": "comparative_msx2_pending_target_j2me",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "visual": {
+        "foreshadow": "The shutter opens on defeat and the next objective appears on crossing.",
+        "impact": "The shutter opens on defeat and the next objective appears on crossing.",
+        "aftermath": "Commit completion at the threshold."
+      },
+      "audio": {
+        "origin": "The mechanical shutter and receding combat sound leave room for quiet.",
+        "response": "The mechanical shutter and receding combat sound leave room for quiet.",
+        "non_audio_equivalent": "The shutter opens on defeat and the next objective appears on crossing."
+      },
+      "state": {
+        "transaction": "Commit completion at the threshold.",
+        "persistence": "Reload the committed checkpoint without repeating its presentation.",
+        "ai_knowledge": "Guard contact uses the existing sight and sound checks."
+      },
+      "timing": {
+        "start_event": "Cross the open threshold after the fight.",
+        "feedback_target_ms": 120,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "hypothesis_until_playtested"
+      },
+      "interruptions": [
+        "reload",
+        "fast input",
+        "alert"
+      ],
+      "verification": [
+        "Wait after the fight; resume the checkpoint and leave once."
       ]
     }
   ],

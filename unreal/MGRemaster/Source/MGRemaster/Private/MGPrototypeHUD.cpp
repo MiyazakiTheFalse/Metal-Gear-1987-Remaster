@@ -147,10 +147,10 @@ void AMGPrototypeHUD::DrawHUD()
         const FString Intel = Mission->GetMissionLogText();
         if (Player->IsMissionLogVisible() && !Intel.IsEmpty())
         {
-            DrawRect(HudPanel, Margin, Height - 167.f * UiScale,
-                     Width - 2.f * Margin, 41.f * UiScale);
+            DrawRect(HudPanel, Margin, Height - 310.f * UiScale,
+                     Width - 2.f * Margin, 77.f * UiScale);
             DrawText(Intel, HudGreen, Margin + 12.f * UiScale,
-                     Height - 156.f * UiScale, nullptr, 0.78f * UiScale, false);
+                     Height - 304.f * UiScale, nullptr, 0.78f * UiScale, false);
         }
         const FString Cue = Mission->GetRecentDialogue();
         if (!Cue.IsEmpty())
@@ -172,7 +172,7 @@ void AMGPrototypeHUD::DrawHUD()
         DrawRect(HudPanel, Margin, BoxY, BoxWidth, 52.f * UiScale);
         DrawText(TEXT("LB / ITEMS"), HudMuted, Margin + 8.f * UiScale,
                  BoxY + 5.f * UiScale, nullptr, 0.70f * UiScale, false);
-        DrawText(SlotLabel(Equip->GetItems(), Equip->GetEquippedItemIndex()), HudGreen,
+        DrawText(Equip->IsConfiscated() ? FString(TEXT("CONFISCATED")) : SlotLabel(Equip->GetItems(), Equip->GetEquippedItemIndex()), HudGreen,
                  Margin + 8.f * UiScale, BoxY + 27.f * UiScale,
                  nullptr, 0.82f * UiScale, false);
 
@@ -180,7 +180,7 @@ void AMGPrototypeHUD::DrawHUD()
         DrawRect(HudPanel, WeaponX, BoxY, BoxWidth, 52.f * UiScale);
         DrawText(TEXT("RB / WEAPONS"), HudMuted, WeaponX + 8.f * UiScale,
                  BoxY + 5.f * UiScale, nullptr, 0.70f * UiScale, false);
-        DrawText(SlotLabel(Equip->GetWeapons(), Equip->GetEquippedWeaponIndex()), HudGreen,
+        DrawText(Equip->IsConfiscated() ? FString(TEXT("CONFISCATED")) : SlotLabel(Equip->GetWeapons(), Equip->GetEquippedWeaponIndex()), HudGreen,
                  WeaponX + 8.f * UiScale, BoxY + 27.f * UiScale,
                  nullptr, 0.82f * UiScale, false);
 

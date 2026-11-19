@@ -3,7 +3,7 @@
 //! This is an adaptation of the MSX2 rescue, not J2ME-verified original timing.
 use crate::gray_fox::{
     CAPTURED, FIRST_WALL_BREACHED, GRAY_FOX_RESCUED,
-    EXIT_WALL_BREACHED, LEFT_PRISON, ALL_FLAGS,
+    EXIT_WALL_BREACHED, LEFT_PRISON, RECOVERED, SHOTMAKER_DOWN, ALL_FLAGS,
 };
 
 #[repr(C)]
@@ -43,6 +43,10 @@ pub fn evaluate(flags: u32, seconds_without_progress: f32, under_alert: bool)
         (REVELATION, 0.20, true)
     } else if flags & LEFT_PRISON == 0 {
         (ESCAPE_PRESSURE, 0.82, false)
+    } else if flags & RECOVERED == 0 {
+        (ESCAPE_PRESSURE, 0.48, false)
+    } else if flags & SHOTMAKER_DOWN == 0 {
+        (ESCAPE_PRESSURE, 0.88, false)
     } else {
         (RECOVERY, 0.05, true)
     };
@@ -87,7 +91,7 @@ mod tests {
     use crate::gray_fox::{EQUIPMENT_CONFISCATED, EXIT_WALL_BREACHED};
 
     #[test] fn tension_has_revelation_rest_and_escape_peak() {
-        let initial = CAPTURED | EQUIPMENT_CONFISCATED;
+        let initial = crate::gray_fox::INTEL | CAPTURED | EQUIPMENT_CONFISCATED;
         let a = evaluate(initial, 0.0, false).unwrap();
         let b = evaluate(initial | FIRST_WALL_BREACHED, 0.0, false).unwrap();
         let c = evaluate(initial | FIRST_WALL_BREACHED | GRAY_FOX_RESCUED, 0.0, false).unwrap();
@@ -101,7 +105,7 @@ mod tests {
     }
 
     #[test] fn hints_are_optional_and_avoid_combat_overlay() {
-        let state = CAPTURED | EQUIPMENT_CONFISCATED;
+        let state = crate::gray_fox::INTEL | CAPTURED | EQUIPMENT_CONFISCATED;
         assert_eq!(evaluate(state, 27.9, false).unwrap().hint_level, 0);
         assert_eq!(evaluate(state, 28.0, false).unwrap().hint_level, 1);
         assert_eq!(evaluate(state, 74.9, false).unwrap().hint_level, 1);
@@ -110,7 +114,7 @@ mod tests {
     }
 
     #[test] fn there_is_no_blocking_wait_in_pacing_model() {
-        let state = CAPTURED | EQUIPMENT_CONFISCATED;
+        let state = crate::gray_fox::INTEL | CAPTURED | EQUIPMENT_CONFISCATED;
         assert!(evaluate(state, 0.0, false).is_some());
         // The actual action transition remains legal at 0 seconds.
         assert!(crate::gray_fox::transition(

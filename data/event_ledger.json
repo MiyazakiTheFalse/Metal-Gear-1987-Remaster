@@ -31,7 +31,7 @@
       "control_policy": "retain_where_safe",
       "interruption_policy": "resumable",
       "spoiler_gate": "original_story_progression",
-      "developer_notes": "Prototype begins at captivity, with confiscation, first weakened wall, Gray Fox interaction, second weakened wall and escape. This ordering is supported by comparative MSX2 guides; exact Connect2Media J2ME placement and stage gates are NOT decoded. No time lock or fabricated story flag is claimed original.",
+      "developer_notes": "The remake opens at prisoner intelligence. Voluntary capture precedes the two breaches and contact. Recovery and the warden confrontation lead to the final exit. Target-edition room identities remain unverified.",
       "prototype": {
         "status": "source_implemented_uncompiled",
         "implementation_paths": [
@@ -40,11 +40,15 @@
           "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
         ],
         "actions": [
+          "contact",
           "capture",
           "breach_first_wall",
           "rescue_gray_fox",
           "breach_exit_wall",
-          "escape"
+          "escape",
+          "reclaim",
+          "defeat",
+          "depart"
         ],
         "pacing_phases": [
           "capture",
@@ -55,8 +59,8 @@
           "recovery"
         ],
         "hint_seconds": [
-          14,
-          35
+          28,
+          75
         ],
         "no_mandatory_wait": true,
         "source_map_geometry_verified": false,

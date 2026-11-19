@@ -8,15 +8,15 @@ USTRUCT(BlueprintType)
 struct FMGEquipmentEntry
 {
     GENERATED_BODY()
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, SaveGame)
     FName Id = NAME_None;
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, SaveGame)
     FString Label;
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, SaveGame)
     int32 Quantity = 0;
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, SaveGame)
     bool bOwned = false;
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, SaveGame)
     bool bConsumable = false;
 };
 
@@ -43,6 +43,7 @@ public:
     bool IsConfiscated() const { return bConfiscated; }
     FString GetEquipmentFeedback() const { return FeedbackSeconds > 0.f ? Feedback : FString(); }
 
+    void RestoreLoadout(const class UMGGrayFoxSaveGame& Save);
     void SetConfiscated(bool bSeized);
     void OpenWeaponWindow();
     void CloseWeaponWindow();

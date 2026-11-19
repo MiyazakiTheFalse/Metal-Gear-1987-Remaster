@@ -115,22 +115,6 @@ than 1 cm. Imported meshes do not constitute a completed level or a playable gam
 See docs/ASSET_REFERENCE_AND_SCALING.md. The J2ME 30x24 tile hypothesis is
 not a confirmed real-world room measurement; no fabricated metres-per-tile is used.
 
-## Gray Fox prison rescue — source vertical slice
+## Gray Fox prison sequence
 
-The first rescue scene has been authored as an Unreal 3D **greybox** and is now
-the default generated mission scene. Its provisional geometry has two weakened
-walls, a temporary Gray Fox proxy, a guarded escape lane, and contextual mission HUD.
-Use E or the gamepad left-face button near a target to interact. F9 resets the
-mission-specific save slot and reopens the current level. Capture confiscates the
-prototype stun weapon; mission flags and checkpoint positions persist.
-
-Rust now holds the ordered Gray Fox transition rules and a non-blocking pacing
-model (experimental 28/75-second optional hint candidates, exploration-aware suppression, quiet narrative beat, escalating escape).
-The Unreal scene has a reduced fallback state machine for iteration without Rust.
-See [pacing doctrine](docs/DOCTRINE_003_PACING.md) and
-[rescue implementation notes](docs/GRAY_FOX_RESCUE_IMPLEMENTATION.md).
-
-**Still missing:** verified J2ME prison map and script, final Gray Fox/Snake
-animations, real prison art, authentic scene audio, proper AI navigation/combat,
-and compilation/playtesting on an Unreal-capable workstation. Source is not yet
-a downloadable executable.
+The expanded mission begins at a prisoner contact and ends at the shutter beyond Shoot Gunner. See [the sequence, checkpoints and source boundaries](docs/GRAY_FOX_RESCUE_IMPLEMENTATION.md). The [browser playtest](browser/README.md) runs independently of Unreal. Open its index.html locally after copying the browser directory. The Unreal build remains unverified.

@@ -1,6 +1,8 @@
 #include "MGGuardActor.h"
 
 #include "MGPlayerCharacter.h"
+#include "MGPrisonAudio.h"
+#include "GameFramework/DamageType.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "DrawDebugHelpers.h"
@@ -26,6 +28,21 @@ AMGGuardActor::AMGGuardActor()
     ProxyBody->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
     if (Cylinder.Succeeded()) ProxyBody->SetStaticMesh(Cylinder.Object);
+}
+
+void AMGGuardActor::ConfigureShotmaker()
+{
+    bShotmaker = true;
+    Health = 255.f;
+    ProxyBody->SetRelativeScale3D(FVector(.9,.85,1.84));
+    Barrel = NewObject<UStaticMeshComponent>(this);
+    Barrel->SetStaticMesh(LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder")));
+    Barrel->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    Barrel->SetupAttachment(RootComponent);
+    Barrel->SetRelativeLocation(FVector(47,19,36));
+    Barrel->SetRelativeScale3D(FVector(.09,.09,.68));
+    Barrel->SetRelativeRotation(FRotator(65,0,0));
+    Barrel->RegisterComponent();
 }
 
 void AMGGuardActor::BeginPlay()
@@ -156,6 +173,7 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
         if (Health <= 0.f)
         {
             bIncapacitated = true;
+            if (Barrel) Barrel->SetVisibility(false);
             Suspicion = 0.f;
             AwarenessState = 0;
             ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -228,7 +246,37 @@ void AMGGuardActor::Tick(float DeltaSeconds)
 
     // Enemy attack only after an actual alert and physical approach.
     // Player health and HUD are authoritative; no invisible instant failure.
-    if (AwarenessState == 3 && Distance < 145.f && AttackCooldown <= 0.f)
+    if (bShotmaker)
+    {
+        const bool Visible = bHasLineOfSight && Distance < 1150.f;
+        if (AimRemaining < 0.f && Visible && AwarenessState >= 2 && AttackCooldown <= 0.f)
+        {
+            ShotDirection = (Target - Eye).GetSafeNormal();
+            SetActorRotation(FRotator(0,ShotDirection.Rotation().Yaw,0));
+            AimRemaining = .92f;
+            Barrel->SetRelativeRotation(FRotator(90,0,0));
+            MGPrisonAudio::Play(this, Eye, EMGPrisonCue::Rack);
+            const_cast<AMGPlayerCharacter*>(Player)->NotifyFeedback(TEXT("SHOOT GUNNER RAISES HIS WEAPON"));
+        }
+        if (AimRemaining >= 0.f)
+        {
+            AimRemaining -= DeltaSeconds;
+            if (AimRemaining <= 0.f)
+            {
+                FHitResult Impact;
+                GetWorld()->LineTraceSingleByChannel(Impact, Eye, Eye + ShotDirection * 1250.f, ECC_Visibility, Params);
+                if (Impact.GetActor() == Player)
+                    UGameplayStatics::ApplyDamage(Impact.GetActor(), 25.f, nullptr, this, UDamageType::StaticClass());
+                MGPrisonAudio::Play(this, Eye, EMGPrisonCue::Report);
+                Barrel->SetRelativeRotation(FRotator(65,0,0));
+                AimRemaining = -1.f;
+                AttackCooldown = 1.65f;
+            }
+            return;
+        }
+        if (Visible && AwarenessState >= 2) return;
+    }
+    if (!bShotmaker && bHasLineOfSight && AwarenessState == 3 && Distance < 145.f && AttackCooldown <= 0.f)
     {
         UGameplayStatics::ApplyDamage(const_cast<AMGPlayerCharacter*>(Player),
             12.f, nullptr, this, UDamageType::StaticClass());
