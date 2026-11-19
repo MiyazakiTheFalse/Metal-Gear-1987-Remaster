@@ -78,3 +78,8 @@ Browser source/output is currently distributed as a separate local conversation 
 - Source-faithful architecture, spatial ambience and guard reactions.
 - Xbox/keyboard playtesting and low-end Windows performance evidence.
 
+
+
+## 19 November 2026 — motion-fusion and approvals update
+
+The [asset-selection/motion-fusion bible](ANIMATION_MOTION_FUSION_AND_ASSET_SELECTION.md) and [source-quality manifest](../data/asset_source_quality_gates.json) now govern mixed source motions, physical gun/hand/contact checks, provenance and misleading completion claims. **None of the above candidates has been downloaded, imported or approved as final game art in this repository.** Run the standard-library validator using: python tools/validate_asset_selection.py .
