@@ -4,7 +4,8 @@
 use crate::gray_fox::{
     CAPTURED, FIRST_WALL_BREACHED, GRAY_FOX_RESCUED,
     EXIT_WALL_BREACHED, LEFT_PRISON, SHOTMAKER_ENCOUNTERED,
-    GEAR_RECOVERED, SHOTMAKER_DEFEATED, SLICE_COMPLETED, ALL_FLAGS,
+    GEAR_RECOVERED, SHOTMAKER_DEFEATED, CARD3_RECOVERED,
+    DETENTION_INTELLIGENCE, SLICE_COMPLETED, ALL_FLAGS,
 };
 
 #[repr(C)]
@@ -25,6 +26,9 @@ pub const RECOVERY: u32 = 5;
 pub const SHOTMAKER_THREAT: u32 = 6;
 pub const SHOTMAKER_RECOVERY_PUZZLE: u32 = 7;
 pub const SHOTMAKER_FIGHT: u32 = 8;
+pub const DETENTION_APPROACH: u32 = 9;
+pub const AFTERMATH_SEARCH: u32 = 10;
+pub const CHAPTER_EXIT: u32 = 11;
 
 // Provisional tuning candidates, NOT empirically optimal delays. The engine
 // further suppresses hints while the player is meaningfully investigating.
@@ -37,30 +41,41 @@ pub fn evaluate(flags: u32, seconds_without_progress: f32, under_alert: bool)
     -> Option<PacingOutput>
 {
     if flags & !ALL_FLAGS != 0 { return None; }
+    // Each phase is a change in the player's *information and capability*.
+    // Higher intensity does NOT spawn enemies or falsely manufacture alerts.
     let (phase, intensity, soft_pressure) = if flags & CAPTURED == 0 {
-        (CAPTURE_BEAT, 0.35, false)
+        if flags & DETENTION_INTELLIGENCE != 0 {
+            (DETENTION_APPROACH, 0.52, false)
+        } else {
+            (CAPTURE_BEAT, 0.22, true)
+        }
     } else if flags & FIRST_WALL_BREACHED == 0 {
-        (CELL_DISCOVERY, 0.15, true)
+        (CELL_DISCOVERY, 0.12, true)
     } else if flags & GRAY_FOX_RESCUED == 0 {
-        (BREAKTHROUGH, 0.40, false)
+        (BREAKTHROUGH, 0.42, false)
     } else if flags & EXIT_WALL_BREACHED == 0 {
-        (REVELATION, 0.20, true)
+        (REVELATION, 0.18, true)
     } else if flags & LEFT_PRISON == 0 {
-        (ESCAPE_PRESSURE, 0.82, false)
-    } else if flags & SLICE_COMPLETED != 0 || flags & SHOTMAKER_DEFEATED != 0 {
-        (RECOVERY, 0.05, true)
+        (ESCAPE_PRESSURE, 0.76, false)
+    } else if flags & SLICE_COMPLETED != 0 {
+        (RECOVERY, 0.03, true)
+    } else if flags & CARD3_RECOVERED != 0 {
+        (CHAPTER_EXIT, 0.28, true)
+    } else if flags & SHOTMAKER_DEFEATED != 0 {
+        (AFTERMATH_SEARCH, 0.10, true)
     } else if flags & GEAR_RECOVERED != 0 {
-        (SHOTMAKER_FIGHT, 0.92, false)
+        (SHOTMAKER_FIGHT, 0.93, false)
     } else if flags & SHOTMAKER_ENCOUNTERED != 0 {
         (SHOTMAKER_RECOVERY_PUZZLE, 0.86, false)
     } else {
-        (SHOTMAKER_THREAT, 0.73, false)
+        (SHOTMAKER_THREAT, 0.49, true)
     };
     let since = if seconds_without_progress.is_finite() {
         seconds_without_progress.max(0.0)
     } else { 0.0 };
-    let hint = if under_alert || phase == CAPTURE_BEAT || phase == RECOVERY
-        || phase >= SHOTMAKER_THREAT {
+    // Helpful when exploring or searching after a victory, never over
+    // actual hostile contact or during the active armed firefight.
+    let hint = if under_alert || phase == RECOVERY || phase == SHOTMAKER_FIGHT {
         0
     } else if since >= STRONG_HINT_AFTER_SECONDS {
         2
@@ -126,6 +141,37 @@ mod tests {
         // The actual action transition remains legal at 0 seconds.
         assert!(crate::gray_fox::transition(
             state, crate::gray_fox::ACTION_BREACH_FIRST_WALL).is_some());
+    }
+
+    #[test] fn opening_recovery_and_card_search_are_distinct_beats() {
+        let clue = DETENTION_INTELLIGENCE;
+        assert_eq!(evaluate(0, 0.0, false).unwrap().phase, CAPTURE_BEAT);
+        assert_eq!(evaluate(clue, 0.0, false).unwrap().phase, DETENTION_APPROACH);
+        let escaped = CAPTURED | EQUIPMENT_CONFISCATED | FIRST_WALL_BREACHED |
+            GRAY_FOX_RESCUED | EXIT_WALL_BREACHED | LEFT_PRISON;
+        assert_eq!(evaluate(escaped, 0.0, false).unwrap().phase, SHOTMAKER_THREAT);
+        let entered = escaped | SHOTMAKER_ENCOUNTERED;
+        assert_eq!(evaluate(entered, 0.0, false).unwrap().phase, SHOTMAKER_RECOVERY_PUZZLE);
+        let armed = entered | GEAR_RECOVERED;
+        assert_eq!(evaluate(armed, 0.0, false).unwrap().phase, SHOTMAKER_FIGHT);
+        let won = armed | SHOTMAKER_DEFEATED;
+        assert_eq!(evaluate(won, 0.0, false).unwrap().phase, AFTERMATH_SEARCH);
+        assert_eq!(evaluate(won | CARD3_RECOVERED, 0.0, false).unwrap().phase, CHAPTER_EXIT);
+        assert_eq!(evaluate(won | CARD3_RECOVERED | SLICE_COMPLETED, 0.0, false).unwrap().phase, RECOVERY);
+        assert!(evaluate(won, 0.0, false).unwrap().target_intensity
+            < evaluate(armed, 0.0, false).unwrap().target_intensity);
+    }
+
+    #[test] fn quiet_after_boss_can_help_and_fighting_never_shows_a_hint() {
+        let escaped = CAPTURED | EQUIPMENT_CONFISCATED | FIRST_WALL_BREACHED |
+            GRAY_FOX_RESCUED | EXIT_WALL_BREACHED | LEFT_PRISON;
+        let armed = escaped | SHOTMAKER_ENCOUNTERED | GEAR_RECOVERED;
+        assert_eq!(evaluate(armed, 150.0, false).unwrap().hint_level, 0);
+        let won = armed | SHOTMAKER_DEFEATED;
+        assert_eq!(evaluate(won, 75.0, false).unwrap().hint_level, 2);
+        assert_eq!(evaluate(won, 75.0, true).unwrap().hint_level, 0);
+        assert_eq!(evaluate(0, 75.0, false).unwrap().hint_level, 2);
+        assert_eq!(evaluate(DETENTION_INTELLIGENCE, 75.0, false).unwrap().hint_level, 2);
     }
 
     #[test] fn invalid_state_and_pointer_are_rejected() {

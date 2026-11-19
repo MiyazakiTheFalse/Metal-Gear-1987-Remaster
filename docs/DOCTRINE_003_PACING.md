@@ -48,3 +48,9 @@ Game-wide [Doctrine 004](DOCTRINE_004_INTEGRATED_EXPERIENCE.md) requires audiovi
 - [GDC 2017 Level Design Workshop](https://www.gamedeveloper.com/design/gdc-2017-level-design-workshop): early blockout and encounter testing for multiple play styles.
 
 **Acceptance:** a polished animation is never proof of good pacing. The sequence must be playable with mouse and gamepad, no mission dead-ends, and recorded evidence of sensible tempo on first and repeated attempts.
+
+## Full vertical-slice phase restoration (19 November 2026)
+
+The earlier implementation compressed almost all of Shoot Gunner into permanent danger and suppressed hints even **after** defeating him. The revised engine-neutral/Rust and C++ fallback phase map is: **0 infiltration and clue search → 9 detention approach → 1 vulnerable cell → 2 first breakthrough → 3 Gray Fox revelation → 4 escaping guards → 6 secure inner passage → 7 unarmed Shotmaker puzzle → 8 armed Shotmaker duel → 10 post-boss evidence search → 11 exit discovery → 5 complete**. The flags, not a runtime timer, move the phase forward; fresh first-time exploration and post-boss search both have optional staged help after 28/75 seconds of stalled progress. Real alarms and visible gunner volleys suppress prompts. The intensity number can drive **future** adaptive score and visual tone but **must never fabricate guard detection, healing, ammunition, kills or timed objectives**.
+
+The UI now communicates **intent** before a player learns the actual method. It tells Snake to investigate/recover/escape rather than immediately spoiling the exact wall, door, access card or transmitter solution. First and stronger hints provide the missing detail only after actual search failure. This doctrine change is an implemented source behaviour, pending UE5 playtest and source-edition verification.

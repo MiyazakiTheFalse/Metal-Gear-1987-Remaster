@@ -728,12 +728,15 @@ uint32 AMGGrayFoxMission::GetPacingPhase() const
         mg_gray_fox_pacing(Flags, ElapsedSinceBeat, bUnderAlert ? 1u : 0u, &Report))
         return Report.phase;
 #endif
-    if (!(Flags & MG_FOX_CAPTURED)) return 0;
+    if (!(Flags & MG_FOX_CAPTURED))
+        return (Flags & MG_FOX_DETENTION_INTELLIGENCE) ? 9 : 0;
     if (!(Flags & MG_FOX_FIRST_WALL_BREACHED)) return 1;
     if (!(Flags & MG_FOX_RESCUED)) return 2;
     if (!(Flags & MG_FOX_EXIT_WALL_BREACHED)) return 3;
     if (!(Flags & MG_FOX_LEFT_PRISON)) return 4;
-    if ((Flags & MG_FOX_SLICE_COMPLETED) || (Flags & MG_FOX_SHOTMAKER_DEFEATED)) return 5;
+    if (Flags & MG_FOX_SLICE_COMPLETED) return 5;
+    if (Flags & MG_FOX_CARD3_RECOVERED) return 11;
+    if (Flags & MG_FOX_SHOTMAKER_DEFEATED) return 10;
     if (Flags & MG_FOX_GEAR_RECOVERED) return 8;
     if (Flags & MG_FOX_SHOTMAKER_ENCOUNTERED) return 7;
     return 6;
@@ -741,7 +744,13 @@ uint32 AMGGrayFoxMission::GetPacingPhase() const
 
 uint32 AMGGrayFoxMission::GetHintLevel() const
 {
-    if (bUnderAlert || (Flags & MG_FOX_LEFT_PRISON)) return 0;
+    // Genuine detection and active volleys take precedence over optional
+    // navigation hints. Card search after victory is deliberately quiet.
+    const uint32 CurrentPhase = GetPacingPhase();
+    if (bUnderAlert || CurrentPhase == 8 || CurrentPhase == 5 ||
+        (IsValid(Shotmaker) &&
+         (Shotmaker->IsTelegraphing() || Shotmaker->IsFiringVolley())))
+        return 0;
     // Engine and Rust use matching candidates. These are hypotheses pending
     // first-time player tests, not canonical 'correct' hint delays.
     uint32 Level = ElapsedSinceBeat >= 75.f ? 2u : (ElapsedSinceBeat >= 28.f ? 1u : 0u);
@@ -765,6 +774,9 @@ FString AMGGrayFoxMission::GetPhaseText() const
     switch (GetPacingPhase())
     {
     case 0: return TEXT("INFILTRATION — N313");
+    case 9: return TEXT("DETENTION APPROACH");
+    case 10: return TEXT("AFTERMATH — SEARCH");
+    case 11: return TEXT("INNER ROUTE");
     case 1: return TEXT("CELL DISCOVERY");
     case 2: return TEXT("BREAKTHROUGH");
     case 3: return TEXT("REVELATION");
@@ -780,12 +792,12 @@ FString AMGGrayFoxMission::GetObjectiveText() const
 {
     if (!(Flags & MG_FOX_CAPTURED))
         return (Flags & MG_FOX_DETENTION_INTELLIGENCE)
-            ? TEXT("Use the guarded transport route. Avoid looking like an attacker.")
-            : TEXT("Reach the detained operative and learn where Gray Fox is held.");
+            ? TEXT("Investigate the transport security. Keep your weapon lowered.")
+            : TEXT("Trace Gray Fox's disappearance. Look for prisoners.");
     if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
-        return TEXT("Inspect the repaired seam. Use melee to weaken it.");
+        return TEXT("Examine the detention cell for an escape route.");
     if (!(Flags & MG_FOX_RESCUED))
-        return TEXT("Find Gray Fox in the adjacent cell. Face him and press E.");
+        return TEXT("Find and speak to Gray Fox.");
     if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
         return TEXT("Find a route into the outer passage.");
     if (!(Flags & MG_FOX_LEFT_PRISON))
@@ -793,15 +805,15 @@ FString AMGGrayFoxMission::GetObjectiveText() const
     if (!(Flags & MG_FOX_SHOTMAKER_ENCOUNTERED))
         return TEXT("Continue east through the security checkpoint.");
     if (!(Flags & MG_FOX_GEAR_RECOVERED))
-        return TEXT("Avoid the shotgun. Punch open the southern recovery room.");
+        return TEXT("Survive the gunner. Find your confiscated equipment.");
     if (IsTransmitterActive())
-        return TEXT("The enemy transmitter is exposing you. Discard it from the item menu.");
+        return TEXT("Your equipment has been tampered with. Inspect your items.");
     if (!(Flags & MG_FOX_SHOTMAKER_DEFEATED))
-        return TEXT("Fight with your recovered handgun. Use cover between volleys.");
+        return TEXT("Outmanoeuvre the gunner. Use cover between volleys.");
     if (!(Flags & MG_FOX_CARD3_RECOVERED))
-        return TEXT("Use Card 2 to open the northern storeroom and collect Card 3.");
+        return TEXT("Investigate the secured storeroom for a way forward.");
     if (!(Flags & MG_FOX_SLICE_COMPLETED))
-        return TEXT("Reach the sealed eastern passage with Card 3.");
+        return TEXT("Find the route deeper into Outer Heaven.");
     return TEXT("Outer Heaven chapter complete.");
 }
 
@@ -826,8 +838,25 @@ FString AMGGrayFoxMission::GetPacingHint() const
     if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
         return Level == 1 ? TEXT("Old work and new repairs might meet again.")
                           : TEXT("Investigate the unusual section of the next barrier.");
-    return Level == 1 ? TEXT("Keep low and use the obstacles to break line of sight.")
-                      : TEXT("Move east to the end of the passage, beyond the guards.");
+    if (!(Flags & MG_FOX_LEFT_PRISON))
+        return Level == 1 ? TEXT("Keep low and use the obstacles to break line of sight.")
+                          : TEXT("Move east to the end of the passage, beyond the guards.");
+    if (!(Flags & MG_FOX_SHOTMAKER_ENCOUNTERED))
+        return Level == 1 ? TEXT("The east passage is still open.")
+                          : TEXT("Continue east past the security checkpoint.");
+    if (!(Flags & MG_FOX_GEAR_RECOVERED))
+        return Level == 1 ? TEXT("Storage is separated from the open firing lane.")
+                          : TEXT("The southern recovery door yields to repeated strikes.");
+    if (!(Flags & MG_FOX_SHOTMAKER_DEFEATED))
+        return Level == 1 ? TEXT("A complete three-blast volley has a recovery window.")
+                          : TEXT("Return fire from cover after his third shot.");
+    if (!(Flags & MG_FOX_CARD3_RECOVERED))
+        return Level == 1 ? TEXT("Look for a door controlled by an earlier access card.")
+                          : TEXT("Use Card 2 at the northern storeroom, then search inside.");
+    if (!(Flags & MG_FOX_SLICE_COMPLETED))
+        return Level == 1 ? TEXT("The defeated boss guarded a route inward.")
+                          : TEXT("Bring Card 3 to the eastern security passage.");
+    return FString();
 }
 
 FString AMGGrayFoxMission::GetMissionLogText() const
