@@ -21,6 +21,7 @@ namespace
 {
     // Wall and floor positions are illustrative 3D blockout, not original 2D coordinates.
     const FVector CellStart(-950.f, 0.f, -11.f);
+    const FVector PreludeStart(-3520.f, -50.f, -11.f);
     const FVector ExitPoint(1150.f, 0.f, -11.f);
     const FVector BossThreshold(1570.f, 0.f, -11.f);
     const FString SaveSlot = TEXT("GrayFoxSliceV1");
@@ -103,6 +104,56 @@ AStaticMeshActor* AMGGrayFoxMission::SpawnBlock(
     return Actor;
 }
 
+void AMGGrayFoxMission::CreatePrelude()
+{
+    // Spatially isolated from the cell by the west prison wall: the actual
+    // change of space happens upon custody/transport, not a magic corridor.
+    // Source: full MSX2 opening includes prior infiltration + POW clue;
+    // exact J2ME architecture is unverified. This is a deliberate slice lead-in.
+    SpawnBlock(TEXT("PreludeFloor"), FVector(-2600.f, 0.f, -150.f),
+        FVector(26.f, 10.f, 1.f), true);
+    SpawnBlock(TEXT("PreludeWestBoundary"), FVector(-3900.f, 0.f, 90.f),
+        FVector(.4f, 10.f, 3.8f), true);
+    SpawnBlock(TEXT("PreludeNorthBoundary"), FVector(-2600.f, 500.f, 90.f),
+        FVector(26.f, .4f, 3.8f), true);
+    SpawnBlock(TEXT("PreludeSouthBoundary"), FVector(-2600.f, -500.f, 90.f),
+        FVector(26.f, .4f, 3.8f), true);
+
+    // Alternate northern/southern paths reward scouting rather than a single
+    // linear sprint to the objective. The centre route is quicker but exposed.
+    SpawnBlock(TEXT("PreludeUtility"), FVector(-3100.f, 60.f, -50.f),
+        FVector(2.9f, 1.3f, 1.4f), true);
+    SpawnBlock(TEXT("PreludeCargoA"), FVector(-2880.f, -250.f, -55.f),
+        FVector(1.8f, 1.5f, 1.3f), true);
+    SpawnBlock(TEXT("PreludeCargoB"), FVector(-2340.f, 30.f, -35.f),
+        FVector(2.4f, .85f, 1.7f), true);
+    SpawnBlock(TEXT("PreludeSecurityBooth"), FVector(-1920.f, 225.f, -15.f),
+        FVector(2.6f, 1.8f, 2.1f), true);
+    // The POW cannot be accidentally mistaken for Fox; bespoke POW human art
+    // is a separate import target; this is a non-colliding readable proxy.
+    POWInformant = SpawnBlock(TEXT("InformantPOW"),
+        FVector(-2590.f, 330.f, -33.f), FVector(.65f, .45f, 1.45f), false);
+
+    // Detention transport: its silhouette, not a quest teleport button, is the
+    // landmark. Two separated components for body/cab; artist substitutes later.
+    SpawnBlock(TEXT("CustodyTruckChassis"), FVector(-1590.f, -235.f, -28.f),
+        FVector(3.9f, 1.7f, 1.25f), true);
+    SpawnBlock(TEXT("CustodyTruckCab"), FVector(-1360.f, -235.f, 35.f),
+        FVector(1.65f, 1.7f, 2.15f), true);
+    CustodyMarker = SpawnBlock(TEXT("CustodyPoint"),
+        FVector(-1600.f, 75.f, -25.f), FVector(.25f, .3f, .55f), false);
+
+    // A quiet outer perimeter is not the prison's guarded corridor. Patrols
+    // are hand-positioned; hostile sight and hearing obey guard perception.
+    if (GetWorld())
+    {
+        GetWorld()->SpawnActor<AMGGuardActor>(
+            FVector(-3060.f, 280.f, -11.f), FRotator(0.f, -90.f, 0.f));
+        GetWorld()->SpawnActor<AMGGuardActor>(
+            FVector(-2100.f, -285.f, -11.f), FRotator(0.f, 135.f, 0.f));
+    }
+}
+
 void AMGGrayFoxMission::CreateGreybox()
 {
     // Unreal's basic cube is 100cm at scale 1. Floor top is -100cm.
@@ -136,7 +187,15 @@ void AMGGrayFoxMission::CreateGreybox()
                FVector(1.8f, 0.7f, 1.2f), true);
     SpawnBlock(TEXT("GuardCover"), FVector(1200.f, -200.f, -40.f),
                FVector(1.8f, 0.7f, 1.2f), true);
-    ExitMarker = SpawnBlock(TEXT("EscapeMarker"), ExitPoint, FVector(0.5f,0.5f,1.2f), false);
+    ExitMarker = SpawnBlock(TEXT("EscapeMarker"), ExitPoint, FVector(.5f,.5f,1.2f), false);
+    // Cracks are simple light-catching surface slivers. They are pre-authored
+    // at the weak seams but reveal more damage on each actual punch.
+    FirstWallCrack = SpawnBlock(TEXT("FirstWallDamage"),
+        FVector(-323.f, 0.f, 90.f), FVector(.05f, .10f, 1.6f), false);
+    SecondWallCrack = SpawnBlock(TEXT("SecondWallDamage"),
+        FVector(447.f, 0.f, 90.f), FVector(.05f, .10f, 1.6f), false);
+    if (IsValid(FirstWallCrack)) FirstWallCrack->SetActorHiddenInGame(true);
+    if (IsValid(SecondWallCrack)) SecondWallCrack->SetActorHiddenInGame(true);
 }
 
 void AMGGrayFoxMission::CreateBossWing()
@@ -187,6 +246,7 @@ void AMGGrayFoxMission::SpawnPerimeterGuards()
 void AMGGrayFoxMission::BeginPlay()
 {
     Super::BeginPlay();
+    CreatePrelude();
     CreateGreybox();
     CreateBossWing();
     SpawnPerimeterGuards();
@@ -213,17 +273,21 @@ void AMGGrayFoxMission::BeginPlay()
             && (!(F & MG_FOX_SLICE_COMPLETED) || (F & MG_FOX_CARD3_RECOVERED));
         const FVector P = Save->CheckpointLocation;
         const bool bPositionSafe = !P.ContainsNaN()
-            && P.X >= -1160.f
-            && P.X <= ((F & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 3650.f : 1310.f)
+            && P.X >= ((F & MG_FOX_CAPTURED) ? -1160.f : -3790.f)
+            && P.X <= ((F & MG_FOX_CAPTURED)
+                ? ((F & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 3650.f : 1310.f)
+                : -1300.f)
             && FMath::Abs(P.Y) < ((F & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 1020.f : 410.f)
             && P.Z >= -95.f && P.Z <= 180.f
             // A stale save must not place the player beyond a solid, unopened wall.
-            && ((F & MG_FOX_FIRST_WALL_BREACHED) || P.X < -350.f)
-            && ((F & MG_FOX_EXIT_WALL_BREACHED) || P.X < 420.f)
+            && (!(F & MG_FOX_CAPTURED)
+                || ((F & MG_FOX_FIRST_WALL_BREACHED) || P.X < -350.f))
+            && (!(F & MG_FOX_CAPTURED)
+                || ((F & MG_FOX_EXIT_WALL_BREACHED) || P.X < 420.f))
             // Later boss checkpoints cannot appear before the prison exit.
             && ((F & MG_FOX_LEFT_PRISON) || P.X < 1300.f);
         if (bValid && bPositionSafe
-            && (F & MG_FOX_CAPTURED))
+            && ((F & MG_FOX_CAPTURED) || (F & MG_FOX_DETENTION_INTELLIGENCE)))
         {
             Flags = F;
             SavedPosition = Save->CheckpointLocation;
@@ -239,6 +303,13 @@ void AMGGrayFoxMission::BeginPlay()
 
 void AMGGrayFoxMission::RestoreVisualState()
 {
+    if (((Flags & MG_FOX_DETENTION_INTELLIGENCE) || (Flags & MG_FOX_CAPTURED))
+        && IsValid(POWInformant))
+        POWInformant->SetActorHiddenInGame(true);
+    if ((Flags & MG_FOX_FIRST_WALL_BREACHED) && IsValid(FirstWallCrack))
+        FirstWallCrack->Destroy();
+    if ((Flags & MG_FOX_EXIT_WALL_BREACHED) && IsValid(SecondWallCrack))
+        SecondWallCrack->Destroy();
     if ((Flags & MG_FOX_FIRST_WALL_BREACHED) && IsValid(WeakWall))
         WeakWall->Destroy();
     if ((Flags & MG_FOX_EXIT_WALL_BREACHED) && IsValid(EscapeWall))
@@ -275,7 +346,7 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
     AMGPlayerCharacter* Player =
         Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (!Player) return;
-    Player->SetActorLocation(bHasLoadedSave ? SavedPosition : CellStart,
+    Player->SetActorLocation(bHasLoadedSave ? SavedPosition : PreludeStart,
                              false, nullptr, ETeleportType::TeleportPhysics);
     if (APlayerController* PC = Cast<APlayerController>(Player->GetController()))
         PC->SetControlRotation(FRotator(-8.f, 0.f, 0.f));
@@ -289,7 +360,8 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
             Inventory->RestoreHandgunRounds(LoadedHandgunRounds);
             Inventory->RestoreStunRounds(LoadedStunRounds);
         }
-        Inventory->SetConfiscated((Flags & MG_FOX_GEAR_RECOVERED) == 0);
+        Inventory->SetConfiscated((Flags & MG_FOX_CAPTURED)
+            && !(Flags & MG_FOX_GEAR_RECOVERED));
         if (IsTransmitterActive())
             Inventory->AwardItem(TEXT("TRANSMITTER"), 1);
         // Rebuild a non-consumable from a completed mission transaction after
@@ -300,13 +372,17 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
 
     if (!bHasLoadedSave)
     {
-        ApplyAction(MG_FOX_CAPTURE, Player);
-        Dialogue = TEXT("Equipment confiscated. Find a way out.");
-        DialogueTimeRemaining = 6.f;
+        // Open with the authentic transceiver paradigm, without stealing
+        // movement. Players can close it immediately or keep walking.
+        Player->OpenIncomingMissionBriefing();
+        Dialogue = TEXT("OPERATION INTRUDE N313 — BIG BOSS / 120.85.");
+        DialogueTimeRemaining = 7.f;
     }
     else
     {
-        Dialogue = TEXT("Prison checkpoint restored.");
+        Dialogue = (Flags & MG_FOX_CAPTURED)
+            ? TEXT("OPERATIVE CHECKPOINT RESTORED.")
+            : TEXT("INFILTRATION CHECKPOINT RESTORED.");
         DialogueTimeRemaining = 3.f;
     }
 }
@@ -318,7 +394,7 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     if (!Save) return;
     Save->SchemaVersion = 3;
     Save->MissionFlags = Flags;
-    Save->CheckpointLocation = Player ? Player->GetActorLocation() : CellStart;
+    Save->CheckpointLocation = Player ? Player->GetActorLocation() : PreludeStart;
     if (Player && Player->GetEquipment())
     {
         Save->HandgunRounds = Player->GetEquipment()->GetHandgunRounds();
@@ -345,7 +421,21 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
     switch (Action)
     {
     case MG_FOX_CAPTURE:
-        Dialogue = TEXT("You are unarmed. Observe the cell and look for an exit.");
+        if (Player)
+        {
+            // The exact camera/guard arrest and transportation performance is
+            // a Sequencer requirement; this commit is an honest functional
+            // handoff. Confiscation state commits BEFORE transfer.
+            if (Player->GetEquipment())
+                Player->GetEquipment()->SetConfiscated(true);
+            Player->SetActorLocation(CellStart, false, nullptr,
+                ETeleportType::TeleportPhysics);
+        }
+        Dialogue = TEXT("DETENTION — WEAPONS CONFISCATED. ASSESS THE CELL.");
+        break;
+    case MG_FOX_LEARN_DETENTION_ROUTE:
+        if (IsValid(POWInformant)) POWInformant->SetActorHiddenInGame(true);
+        Dialogue = TEXT("POW: THEY KEEP FOX IN SECRET DETENTION. THE TRUCK TAKES PRISONERS INSIDE.");
         break;
     case MG_FOX_BREACH_FIRST_WALL:
         if (IsValid(WeakWall)) WeakWall->Destroy();
@@ -433,15 +523,49 @@ bool AMGGrayFoxMission::CanReach(
 bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
 {
     if (!bPlayerInitialised || !Player) return false;
+    if (!(Flags & MG_FOX_CAPTURED))
+    {
+        if (!(Flags & MG_FOX_DETENTION_INTELLIGENCE)
+            && CanReach(Player, POWInformant, 225.f))
+            return ApplyAction(MG_FOX_LEARN_DETENTION_ROUTE, Player);
+        if (Flags & MG_FOX_DETENTION_INTELLIGENCE)
+        {
+            const FVector At = Player->GetActorLocation();
+            const bool bAtCustody = IsValid(CustodyMarker)
+                && FVector::Dist2D(At, CustodyMarker->GetActorLocation()) < 270.f;
+            if (bAtCustody)
+            {
+                if (Player->IsAiming() || Player->IsSprinting())
+                {
+                    Dialogue = TEXT("SECURITY: HANDS VISIBLE! STOP MOVING!");
+                    DialogueTimeRemaining = 2.5f;
+                    return true;
+                }
+                // The player deliberately steps into a real guard-controlled
+                // prisoner transport point; the guard has no reason to infer
+                // Snake's plan. A cinematic capture performance is pending.
+                return ApplyAction(MG_FOX_CAPTURE, Player);
+            }
+        }
+        return false;
+    }
     if ((Flags & MG_FOX_FIRST_WALL_BREACHED) == 0
         && CanReach(Player, WeakWall, 240.f))
-        return ApplyAction(MG_FOX_BREACH_FIRST_WALL, Player);
+    {
+        Dialogue = TEXT("THE REPAIRED CONCRETE SOUNDS HOLLOW. STRIKE IT.");
+        DialogueTimeRemaining = 3.f;
+        return true;
+    }
     if ((Flags & MG_FOX_RESCUED) == 0
         && CanReach(Player, FoxProxy, 210.f))
         return ApplyAction(MG_FOX_RESCUE, Player);
     if ((Flags & MG_FOX_EXIT_WALL_BREACHED) == 0
         && CanReach(Player, EscapeWall, 240.f))
-        return ApplyAction(MG_FOX_BREACH_EXIT_WALL, Player);
+    {
+        Dialogue = TEXT("ANOTHER FRESH REPAIR. TRY A PHYSICAL BREACH.");
+        DialogueTimeRemaining = 3.f;
+        return true;
+    }
     if (!(Flags & MG_FOX_SHOTMAKER_ENCOUNTERED)) return false;
 
     if (!(Flags & MG_FOX_GEAR_RECOVERED) && bGearDoorOpen
@@ -480,6 +604,38 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
         && CanReach(Player, ChapterExit, 235.f))
         return ApplyAction(MG_FOX_COMPLETE_SLICE, Player);
     return false;
+}
+
+bool AMGGrayFoxMission::TryPunchWeakWall(AMGPlayerCharacter* Player)
+{
+    if (!Player || !bPlayerInitialised || !(Flags & MG_FOX_CAPTURED))
+        return false;
+    const bool bFirst = !(Flags & MG_FOX_FIRST_WALL_BREACHED);
+    const bool bSecond = !bFirst && (Flags & MG_FOX_RESCUED)
+        && !(Flags & MG_FOX_EXIT_WALL_BREACHED);
+    if (!bFirst && !bSecond) return false;
+    AStaticMeshActor* Surface = bFirst ? WeakWall : EscapeWall;
+    if (!CanReach(Player, Surface, 190.f)) return false;
+    int32& Impacts = bFirst ? FirstWallStrikes : SecondWallStrikes;
+    ++Impacts;
+    AStaticMeshActor* Crack = bFirst ? FirstWallCrack : SecondWallCrack;
+    if (IsValid(Crack))
+    {
+        Crack->SetActorHiddenInGame(false);
+        // Accumulating light-catching fracture: physical player blows, not
+        // a timer-driven wall deletion or a ready-made explosion animation.
+        Crack->SetActorScale3D(FVector(1.f, FMath::Min(Impacts * .60f, 2.2f), 1.f));
+    }
+    const int32 Needed = bFirst ? 3 : 4; // playtest candidates, not 1987 numeric claims
+    if (Impacts < Needed)
+    {
+        Dialogue = Impacts == 1 ? TEXT("THE WALL SHIFTS. KEEP STRIKING THE SEAM.")
+                                : TEXT("THE CRACK IS DEEPENING.");
+        DialogueTimeRemaining = 2.5f;
+        return true;
+    }
+    return ApplyAction(bFirst ? MG_FOX_BREACH_FIRST_WALL
+                              : MG_FOX_BREACH_EXIT_WALL, Player);
 }
 
 bool AMGGrayFoxMission::TryPunchRecoveryDoor(AMGPlayerCharacter* Player)
@@ -585,7 +741,7 @@ FString AMGGrayFoxMission::GetPhaseText() const
 {
     switch (GetPacingPhase())
     {
-    case 0: return TEXT("CAPTURE");
+    case 0: return TEXT("INFILTRATION — N313");
     case 1: return TEXT("CELL DISCOVERY");
     case 2: return TEXT("BREAKTHROUGH");
     case 3: return TEXT("REVELATION");
@@ -599,8 +755,12 @@ FString AMGGrayFoxMission::GetPhaseText() const
 
 FString AMGGrayFoxMission::GetObjectiveText() const
 {
+    if (!(Flags & MG_FOX_CAPTURED))
+        return (Flags & MG_FOX_DETENTION_INTELLIGENCE)
+            ? TEXT("Use the guarded transport route. Avoid looking like an attacker.")
+            : TEXT("Reach the detained operative and learn where Gray Fox is held.");
     if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
-        return TEXT("Search your cell for a way out.");
+        return TEXT("Inspect the repaired seam. Use melee to weaken it.");
     if (!(Flags & MG_FOX_RESCUED))
         return TEXT("Find Gray Fox in the adjacent cell. Face him and press E.");
     if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
@@ -626,6 +786,14 @@ FString AMGGrayFoxMission::GetPacingHint() const
 {
     const uint32 Level = GetHintLevel();
     if (!Level) return FString();
+    if (!(Flags & MG_FOX_CAPTURED))
+    {
+        if (!(Flags & MG_FOX_DETENTION_INTELLIGENCE))
+            return Level == 1 ? TEXT("The northern cover has a captive nearby.")
+                              : TEXT("Check the guarded utility area for a detained informant.");
+        return Level == 1 ? TEXT("The transport vehicle is the route inside.")
+                          : TEXT("Approach the truck without aiming. Comply with the challenge.");
+    }
     if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
         return Level == 1 ? TEXT("The concrete has not all aged the same way.")
                           : TEXT("Look for an altered join in the wall. Examine it up close.");
@@ -641,7 +809,14 @@ FString AMGGrayFoxMission::GetPacingHint() const
 
 FString AMGGrayFoxMission::GetMissionLogText() const
 {
-    if (!(Flags & MG_FOX_RESCUED)) return FString();
+    if (!(Flags & MG_FOX_RESCUED))
+    {
+        if (Flags & MG_FOX_DETENTION_INTELLIGENCE)
+            return TEXT("POW INTEL: FOX IS DETAINED. A GUARDED TRANSPORT ENTERS THE SECRET CELLS.");
+        if (!(Flags & MG_FOX_CAPTURED))
+            return TEXT("OPERATION N313: INVESTIGATE FOX'S DISAPPEARANCE. BIG BOSS: 120.85.");
+        return FString();
+    }
     if (Flags & MG_FOX_CARD3_RECOVERED)
         return TEXT("GRAY FOX: METAL GEAR / MADNAR. CARD 3 ACQUIRED. CONTINUE INFILTRATION.");
     if (Flags & MG_FOX_SHOTMAKER_DEFEATED)
@@ -665,7 +840,24 @@ FString AMGGrayFoxMission::GetRecentDialogue() const
 
 FString AMGGrayFoxMission::GetTransceiverDialogue(int32 Channel) const
 {
-    // Remake-authored dialogue; Schneider knows architecture, not this prison layout.
+    // Remake-authored dialogue. Opening radio uses the original 120.85
+    // mission structure, but all lines below are ORIGINAL adaptation prose.
+    if (!(Flags & MG_FOX_CAPTURED))
+    {
+        if (Channel == 1)
+            return (Flags & MG_FOX_DETENTION_INTELLIGENCE)
+                ? TEXT("BIG BOSS: Gray Fox is inside. Use what you learned.\n"
+                       "BIG BOSS: Do not turn this into a firefight.\n"
+                       "SNAKE: Understood.")
+                : TEXT("BIG BOSS: Operation Intrude N313.\n"
+                       "BIG BOSS: Gray Fox disappeared inside Outer Heaven.\n"
+                       "BIG BOSS: Establish contact. Verify the weapon report.\n"
+                       "SNAKE: Metal Gear?\n"
+                       "BIG BOSS: Intelligence is incomplete. Find evidence.");
+        return TEXT("SCHNEIDER: Prisoners are being moved through this sector.\n"
+                    "SCHNEIDER: I don't have the inner-cell plans.\n"
+                    "SNAKE: I'll investigate.");
+    }
     if (Channel == 0)
     {
         if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))

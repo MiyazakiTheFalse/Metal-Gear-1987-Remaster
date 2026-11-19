@@ -57,6 +57,7 @@ public:
     virtual float TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent,
         AController* EventInstigator, AActor* DamageCauser) override;
     void NotifyFeedback(const FString& Message, FName CueName = NAME_None);
+    void OpenIncomingMissionBriefing();
 
     float GetVisibilityFactor() const;
 

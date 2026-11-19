@@ -23,6 +23,9 @@ public:
 
     bool TryInteract(AMGPlayerCharacter* Player);
     bool TryPunchRecoveryDoor(AMGPlayerCharacter* Player);
+    bool TryPunchWeakWall(AMGPlayerCharacter* Player);
+    bool IsPreludeActive() const { return (Flags & MG_FOX_CAPTURED) == 0; }
+    bool HasDetentionIntel() const { return (Flags & MG_FOX_DETENTION_INTELLIGENCE) != 0; }
     bool IsBossTelegraphing() const;
     bool IsTransmitterActive() const;
     bool DiscardTransmitter(AMGPlayerCharacter* Player);
@@ -49,6 +52,12 @@ private:
     AActor* FoxProxy = nullptr;
     UPROPERTY(Transient)
     AStaticMeshActor* ExitMarker = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* POWInformant = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* CustodyMarker = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* FirstWallCrack = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* SecondWallCrack = nullptr;
+    int32 FirstWallStrikes = 0;
+    int32 SecondWallStrikes = 0;
     UPROPERTY(Transient) AStaticMeshActor* GearDoor = nullptr;
     UPROPERTY(Transient) AStaticMeshActor* GearBag = nullptr;
     UPROPERTY(Transient) AStaticMeshActor* PlantedTransmitter = nullptr;
@@ -81,6 +90,7 @@ private:
     AStaticMeshActor* SpawnBlock(FName Tag, const FVector& Centre,
                                   const FVector& Scale, bool bBlockMovement);
     void CreateGreybox();
+    void CreatePrelude();
     void CreateBossWing();
     void SpawnPerimeterGuards();
     void InitializePlayerIfReady();

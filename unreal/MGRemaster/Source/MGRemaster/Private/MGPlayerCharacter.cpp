@@ -925,7 +925,9 @@ void AMGPlayerCharacter::MeleeAttack()
         // magically disappearing 'E' prop or a forced cinematic prompt.
         AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
             UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
-        if (Mission && Mission->TryPunchRecoveryDoor(this))
+        if (Mission && Mission->TryPunchWeakWall(this))
+            NotifyFeedback(TEXT("CONCRETE FRACTURE — IMPACT"), TEXT("impact"));
+        else if (Mission && Mission->TryPunchRecoveryDoor(this))
             NotifyFeedback(TEXT("DOOR IMPACT — HINGES STRAINING"), TEXT("impact"));
         else NotifyFeedback(TEXT("UNARMED STRIKE — NO TARGET"), TEXT("whoosh"));
     }
@@ -974,6 +976,18 @@ void AMGPlayerCharacter::ApplyMenuTimeState()
     // Global time dilation affects AI, movement and physics together.
     // Equipment menu rendering/input remains live. A real pause is separate.
     UGameplayStatics::SetGlobalTimeDilation(this, Desired);
+}
+
+void AMGPlayerCharacter::OpenIncomingMissionBriefing()
+{
+    // An incoming 1995 transceiver call is NOT a mandatory stationary movie.
+    // Always allow immediate close, movement and survival. Its identity and
+    // dialogue are read from the mission's authoritative stage.
+    CloseEquipmentWindows();
+    bCodecOpen = true;
+    TransceiverChannel = 1; // Real Big Boss, FOXHOUND 120.85
+    CodecStatus = TEXT("INCOMING — BIG BOSS / 120.85");
+    ApplyMenuTimeState();
 }
 
 void AMGPlayerCharacter::ToggleCodec()
