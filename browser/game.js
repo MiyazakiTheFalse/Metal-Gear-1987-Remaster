@@ -1176,7 +1176,44 @@ function drawCylinder(pos,scale,tint,yaw=0,material=0,tilt=0){drawPrimitive('cyl
 // Purpose-built low-poly original character prototypes, NOT imported Konami art.
 // Characters share a common proportioned humanoid skeleton. Animated segments
 // follow movement, stance and alert, and use rounded geometry, not block cubes.
+const fieldActors=[];
+let renderFields=null;
+try {
+ if(window.createFieldRenderer) renderFields=window.createFieldRenderer(gl,shader);
+} catch(error) {
+ console.warn('Field rig unavailable',error);
+ $('rigStatus').textContent='SIMPLIFIED CHARACTERS ACTIVE';
+}
+function queueFieldActor(actor,kind,time,dt){
+ const isSnake=kind==='player',isFox=kind==='fox', stance=actor.stance||0;
+ const prior=actor.fieldPose||(actor.fieldPose={x:actor.x,z:actor.z,phase:0,stride:0,crouch:0,prone:0,down:0});
+ const travel=Math.hypot(actor.x-prior.x,actor.z-prior.z);
+ prior.x=actor.x;prior.z=actor.z;
+ const step=dt>0&&travel<6?travel:0, blend=1-Math.exp(-dt*13);
+ prior.phase+=step*(actor.sprint?4.1:5.5);
+ prior.stride=lerp(prior.stride,clamp(step/Math.max(dt,.001)/2.6,0,1),blend);
+ prior.crouch=lerp(prior.crouch,stance===1?1:0,blend);
+ prior.prone=lerp(prior.prone,stance===2?1:0,blend);
+ prior.down=lerp(prior.down,actor.knocked||actor.alive===false?1:0,blend);
+ const strike=isSnake?Math.sin(Math.PI*clamp(((actor.attackUntil||0)-time)/.28,0,1)):0;
+ const tap=isSnake?Math.sin(Math.PI*clamp(((actor.knockUntil||0)-time)/.25,0,1)):0;
+ fieldActors.push({role:isSnake?'snake':isFox?'fox':'guard',actor,gear:isSnake&&kitAvailable(),
+  state:{...prior,time,strike,hit:actor.hitTimer>0?1:0,captive:isFox&&stage<2,
+   aim:actor.aim||actor.state===3?1:0,cover:actor.cover?.54+.46*tap:0}});
+ drawRound([actor.x,.013,actor.z],[.67,.018,.43],[.105,.13,.12],actor.yaw,mat.grate);
+ if(actor.shotVisual>0){
+  const muzzle=actor.yaw, intensity=actor.shotVisual/.18;
+  drawRound([actor.x+.81*Math.cos(muzzle),1.25,actor.z+.81*Math.sin(muzzle)],
+   [.18*intensity,.10*intensity,.10*intensity],[1,.74,.22],muzzle,3);
+ }
+ if(actor.state===3&&actor.aimTime>.10)
+  drawRound([actor.x,1.99,actor.z],[.12,.09,.12],[.93,.57,.20],0,3);
+}
 function human(actor,kind,t,dt){
+ if(renderFields&&actor!==informant&&!actor.boss){
+  queueFieldActor(actor,kind,t,dt);
+  return;
+ }
  const isPlayer=kind==='player',isGuard=kind==='guard',alive=isGuard?!actor.knocked:actor.alive!==false;
  const x=actor.x,z=actor.z,yaw=actor.yaw||0,c=Math.cos(yaw),s=Math.sin(yaw);
  // Gait phase advances with ACTUAL displacement, not wall-clock time.
@@ -1343,7 +1380,7 @@ function drawFrame(t,dt){let w=canvas.clientWidth,h=canvas.clientHeight,scale=wi
  }
  for(const f of footsteps)drawCube([f.x,.007,f.z],[.28,.009,.16],[.24,.22,.16]);
  for(const p of particles)drawCube([p.x,p.y,p.z],[.08,.07,.08],p.c);
- if(Math.hypot(cam.eye[0]-player.x,cam.eye[1]-(player.stance===2?.65:player.stance===1?1.14:1.56),cam.eye[2]-player.z)>.88)(!window.__MG_RIG_READY || (player.stance===2&&!window.__MG_RIG_PRONE))&&human(player,'player',t,dt);
+ if(Math.hypot(cam.eye[0]-player.x,cam.eye[1]-(player.stance===2?.65:player.stance===1?1.14:1.56),cam.eye[2]-player.z)>.88)(!window.__MG_RIG_READY || (player.stance===2&&!window.__MG_RIG_PRONE) || (player.stance===1&&!window.__MG_RIG_CROUCH))&&human(player,'player',t,dt);
  // Same persistent Gray Fox actor before and after rescue. No visual duplicate,
  // teleport, or proxy left behind when the player leaves the prison.
  if(!window.__MG_RIG_READY || (fox.stance===1&&!window.__MG_RIG_CROUCH))human(fox,'fox',t,dt);
@@ -1363,6 +1400,10 @@ function drawFrame(t,dt){let w=canvas.clientWidth,h=canvas.clientHeight,scale=wi
    const yaw=Math.atan2(dz,dx),tilt=Math.atan2(planar,dy);
    drawCylinder([(shot.x+shot.toX)*.5,(shot.y+shot.toY)*.5,(shot.z+shot.toZ)*.5],
      [.025,length,.025],[.91,.73,.32],yaw,3,tilt);
+ }
+ if(fieldActors.length){
+  renderFields(fieldActors,new Float32Array(pv));fieldActors.length=0;
+  gl.useProgram(program);currentMesh='';
  }
  // Render actual GLB skinned models in an optional transparent Three.js pass.
  // The original renderer and all gameplay systems remain authoritative.
@@ -1505,3 +1546,4 @@ if(window.__MG_TEST__){
 try{$('resume').disabled=!localStorage.getItem(STORAGE)}catch(e){$('resume').disabled=true}drawEquipment();if(location.hash==='#continue'){history.replaceState(null,'',location.pathname+location.search);start(true)}
 requestAnimationFrame(frame);
 })();
+

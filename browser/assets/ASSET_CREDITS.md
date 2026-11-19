@@ -1,3 +1,7 @@
+# Local character assets
+
+The default Snake, human Gray Fox and patrol guard models, vertex colours, skin weights and poses were authored for this playtest. Mesh profiles and motions are editable in field_rigs.js. The GLB exporter uses the same definitions. The comparison option below uses a separate donor model.
+
 # Rigged-character visual upgrade — source and licences
 
 **Status:** Optional streaming rendering layer. This file provides provenance, not a claim of final 1995 Solid Snake or Gray Fox likeness. The default browser engine and its independent procedural human models still work without internet.

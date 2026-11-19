@@ -3,6 +3,12 @@
   "policy": "No proprietary fan-made Metal Gear replicas or game rips are bundled. Every external model, texture, animation or sound requires asset-by-asset licence proof; author a coherent 1995 character style.",
   "built_in_original_assets": [
     {
+      "name": "field_rigs",
+      "type": "16-joint skinned characters",
+      "status": "default browser renderer",
+      "format": "Local WebGL meshes with editable GLB exports"
+    },
+    {
       "name": "procedural_humanoid_v3_prone_pose",
       "type": "browser mesh and joint animation",
       "status": "integrated",
