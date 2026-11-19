@@ -10,12 +10,15 @@ void UMGEquipmentComponent::BeginPlay()
     Super::BeginPlay();
     Weapons = {
         {FName(TEXT("NONE")), TEXT("NO WEAPON"), 0, true, false},
-        {FName(TEXT("STUN")), TEXT("STUN PISTOL [TEST]"), 8, true, false}
+        {FName(TEXT("STUN")), TEXT("STUN PISTOL [TEST]"), 8, true, false},
+        {FName(TEXT("HANDGUN")), TEXT("HANDGUN [SLICE PROXY]"), 24, true, false}
     };
     Items = {
         {FName(TEXT("NONE")), TEXT("NO ITEM"), 0, true, false},
         {FName(TEXT("RATION")), TEXT("RATION [TEST]"), 1, true, true},
         {FName(TEXT("CARD1")), TEXT("KEYCARD 1 [TEST]"), 0, false, false},
+        // Carryover from the earlier infiltration, not a claimed playable acquisition.
+        {FName(TEXT("CARD2")), TEXT("KEYCARD 2 [CARRYOVER]"), 0, true, false},
         {FName(TEXT("CARD3")), TEXT("KEYCARD 3 [SLICE]"), 0, false, false}
     };
     // A captured Snake cannot use pre-capture weapons or items. Test entries are
@@ -108,6 +111,38 @@ bool UMGEquipmentComponent::IsStunEquipped() const
     return !bConfiscated && Weapons.IsValidIndex(EquippedWeapon)
         && Weapons[EquippedWeapon].Id == FName(TEXT("STUN"))
         && IsAvailable(Weapons[EquippedWeapon]);
+}
+bool UMGEquipmentComponent::IsHandgunEquipped() const
+{
+    return !bConfiscated && Weapons.IsValidIndex(EquippedWeapon)
+        && Weapons[EquippedWeapon].Id == FName(TEXT("HANDGUN"))
+        && IsAvailable(Weapons[EquippedWeapon]);
+}
+int32 UMGEquipmentComponent::GetHandgunRounds() const
+{
+    for (const auto& Entry : Weapons)
+        if (Entry.Id == FName(TEXT("HANDGUN"))) return Entry.Quantity;
+    return 0;
+}
+bool UMGEquipmentComponent::ConsumeHandgunRound()
+{
+    if (!IsHandgunEquipped()) return false;
+    FMGEquipmentEntry& Slot = Weapons[EquippedWeapon];
+    if (Slot.Quantity <= 0) return false;
+    --Slot.Quantity;
+    return true;
+}
+void UMGEquipmentComponent::RestoreHandgunRounds(int32 Rounds)
+{
+    for (FMGEquipmentEntry& E : Weapons)
+        if (E.Id == FName(TEXT("HANDGUN")))
+            E.Quantity = FMath::Clamp(Rounds, 0, 999);
+}
+void UMGEquipmentComponent::RestoreStunRounds(int32 Rounds)
+{
+    for (FMGEquipmentEntry& E : Weapons)
+        if (E.Id == FName(TEXT("STUN")))
+            E.Quantity = FMath::Clamp(Rounds, 0, 999);
 }
 int32 UMGEquipmentComponent::GetStunRounds() const
 {

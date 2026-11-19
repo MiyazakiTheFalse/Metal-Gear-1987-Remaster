@@ -51,6 +51,12 @@ public:
     void SelectionPrevious();
     void SelectionNext();
     bool IsStunEquipped() const;
+    bool IsHandgunEquipped() const;
+    bool IsFirearmEquipped() const { return IsStunEquipped() || IsHandgunEquipped(); }
+    bool ConsumeHandgunRound();
+    int32 GetHandgunRounds() const;
+    void RestoreHandgunRounds(int32 Rounds);
+    void RestoreStunRounds(int32 Rounds);
     bool ConsumeStunRound();
     bool ConsumeRation();
     int32 GetStunRounds() const;

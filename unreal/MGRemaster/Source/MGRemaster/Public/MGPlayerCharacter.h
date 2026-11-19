@@ -77,6 +77,12 @@ private:
     UPROPERTY(VisibleAnywhere, Category="Character|Weapon")
     UStaticMeshComponent* WeaponGripVisual;
     bool bHasAuthoredWeaponMesh = false;
+    UPROPERTY(Transient)
+    UStaticMesh* StunGunArt = nullptr;
+    UPROPERTY(Transient)
+    UStaticMesh* HandgunArt = nullptr;
+    UPROPERTY(Transient)
+    UStaticMesh* ProxyWeaponArt = nullptr;
     float WeaponRecoilTimer = 0.f;
 
     UPROPERTY(Transient)

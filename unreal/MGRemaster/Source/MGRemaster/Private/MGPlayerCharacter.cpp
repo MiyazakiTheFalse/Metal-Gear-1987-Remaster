@@ -110,14 +110,11 @@ void AMGPlayerCharacter::BeginPlay()
     // Asset names are shared with the editor importer. Missing assets retain the
     // original greybox stand-in and never change movement or mission flags.
     // Optional authored weapon overrides the primitive test prop.
-    if (UStaticMesh* Prop = LoadObject<UStaticMesh>(nullptr,
-            TEXT("/Game/Characters/Shared/Weapons/SM_StunPistol_1995.SM_StunPistol_1995")))
-    {
-        WeaponBodyVisual->SetStaticMesh(Prop);
-        WeaponBodyVisual->SetRelativeScale3D(FVector::OneVector);
-        WeaponGripVisual->SetVisibility(false);
-        bHasAuthoredWeaponMesh = true;
-    }
+    StunGunArt = LoadObject<UStaticMesh>(nullptr,
+        TEXT("/Game/Characters/Shared/Weapons/SM_StunPistol_1995.SM_StunPistol_1995"));
+    HandgunArt = LoadObject<UStaticMesh>(nullptr,
+        TEXT("/Game/Characters/Shared/Weapons/SM_Handgun_1995.SM_Handgun_1995"));
+    ProxyWeaponArt = WeaponBodyVisual->GetStaticMesh();
     InfiltrationCharacterArt = GetMesh()->GetSkeletalMeshAsset();
     if (!InfiltrationCharacterArt)
         InfiltrationCharacterArt = LoadObject<USkeletalMesh>(nullptr,
@@ -146,14 +143,23 @@ void AMGPlayerCharacter::BeginPlay()
 
 bool AMGPlayerCharacter::HasReadyWeapon() const
 {
-    return Equipment && Equipment->IsStunEquipped();
+    return Equipment && Equipment->IsFirearmEquipped();
 }
 
 void AMGPlayerCharacter::UpdateWeaponPresentation()
 {
     const bool bCanHoldProp = HasAuthoredCharacterArt() && HasReadyWeapon()
         && GetMesh()->DoesSocketExist(TEXT("weapon_r"));
-    // Weapon stays in the hand when equipped; aiming changes upper-body pose.
+    // Do not show a stun pistol as a period handgun. Only the currently
+    // equipped weapon's matching mesh may replace the honest proxy.
+    UStaticMesh* Authored = (Equipment && Equipment->IsHandgunEquipped())
+        ? HandgunArt : StunGunArt;
+    UStaticMesh* Desired = Authored ? Authored : ProxyWeaponArt;
+    if (Desired && WeaponBodyVisual->GetStaticMesh() != Desired)
+        WeaponBodyVisual->SetStaticMesh(Desired);
+    bHasAuthoredWeaponMesh = Authored != nullptr;
+    WeaponBodyVisual->SetRelativeScale3D(Authored ? FVector::OneVector
+        : FVector(0.19f, 0.036f, 0.038f));
     // Weapon rendering is cosmetic and cannot bypass inventory confiscation.
     WeaponBodyVisual->SetVisibility(bCanHoldProp, true);
     WeaponGripVisual->SetVisibility(bCanHoldProp && !bHasAuthoredWeaponMesh, true);
@@ -718,18 +724,21 @@ void AMGPlayerCharacter::FireStun()
         NotifyFeedback(TEXT("HOLD AIM BEFORE FIRING"), TEXT("denied"));
         return;
     }
-    if (!Equipment || !Equipment->IsStunEquipped())
+    const bool bStun = Equipment && Equipment->IsStunEquipped();
+    const bool bHandgun = Equipment && Equipment->IsHandgunEquipped();
+    if (!bStun && !bHandgun)
     {
         NotifyFeedback(Equipment && Equipment->IsConfiscated() ?
             TEXT("WEAPONS CONFISCATED") : TEXT("NO WEAPON EQUIPPED"), TEXT("denied"));
         return;
     }
-    if (!Equipment->ConsumeStunRound())
+    if (!(bStun ? Equipment->ConsumeStunRound() : Equipment->ConsumeHandgunRound()))
     {
         NotifyFeedback(TEXT("OUT OF AMMUNITION"), TEXT("denied"));
         return;
     }
-    NotifyFeedback(TEXT("STUN ROUND FIRED"), TEXT("stun"));
+    NotifyFeedback(bStun ? TEXT("STUN ROUND FIRED") : TEXT("HANDGUN FIRED"),
+                   bStun ? TEXT("stun") : TEXT("shoot"));
     WeaponRecoilTimer = 0.18f;
     CombatNoiseTimer = 0.55f;
     // Camera ray determines crosshair target; a second ray enforces obstruction
@@ -751,7 +760,8 @@ void AMGPlayerCharacter::FireStun()
     FHitResult MuzzleHit;
     if (GetWorld()->LineTraceSingleByChannel(MuzzleHit, Muzzle, Target, ECC_Visibility, Params) && MuzzleHit.GetActor())
     {
-        UGameplayStatics::ApplyDamage(MuzzleHit.GetActor(), 100.f, Controller, this, UDamageType::StaticClass());
+        UGameplayStatics::ApplyDamage(MuzzleHit.GetActor(),
+            bStun ? 100.f : 26.f, Controller, this, UDamageType::StaticClass());
     }
 }
 
