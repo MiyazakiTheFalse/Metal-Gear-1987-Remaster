@@ -7,6 +7,14 @@ class UStaticMeshComponent;
 class UCapsuleComponent;
 class USkeletalMeshComponent;
 
+// Source-only operational role. The custody role is security procedure,
+// not a different 'evil/innocent' faction and not scripted awareness.
+UENUM(BlueprintType)
+enum class EMGGuardRole : uint8
+{
+    Patrol, Prison, Custody
+};
+
 UCLASS()
 class MGREMASTER_API AMGGuardActor : public AActor
 {
@@ -19,6 +27,10 @@ public:
                              AController* EventInstigator, AActor* DamageCauser) override;
 
     bool IsIncapacitated() const { return bIncapacitated; }
+    void SetRole(EMGGuardRole NewRole) { Role = NewRole; }
+    bool CanAcceptDetention(const class AMGPlayerCharacter* Suspect) const;
+    bool IsIssuingChallenge() const { return bCustodyChallenge; }
+    void ReceiveLocalSquadReport(const FVector& SeenAt, const AActor* Sender);
     uint32 GetAwarenessState() const { return AwarenessState; }
     float GetSuspicion() const { return Suspicion; }
     // Sound stimulus carries a world location, never Snake's position.
@@ -47,7 +59,18 @@ private:
     UPROPERTY(VisibleAnywhere, Category="Character|Art")
     USkeletalMeshComponent* CharacterMesh;
 
+    UPROPERTY(EditAnywhere, Category="Security|Doctrine")
+    EMGGuardRole Role = EMGGuardRole::Patrol;
     FVector PatrolOrigin = FVector::ZeroVector;
+    bool bCustodyChallenge = false;
+    bool bPendingRadioReport = false;
+    float ChallengeAge = 0.f;
+    float ContactEvidenceAge = 99.f;
+    float PendingRadioDelay = 0.f;
+    float SquadBroadcastCooldown = 0.f;
+    float SearchForLastKnownSeconds = 0.f;
+    float PursuitBlockedSeconds = 0.f;
+    int32 FlankSide = 1;
     FVector LastKnownPlayerPosition = FVector::ZeroVector;
     bool bPatrolForward = true;
     bool bIncapacitated = false;

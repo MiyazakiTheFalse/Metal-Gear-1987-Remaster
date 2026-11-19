@@ -147,10 +147,20 @@ void AMGGrayFoxMission::CreatePrelude()
     // are hand-positioned; hostile sight and hearing obey guard perception.
     if (GetWorld())
     {
-        GetWorld()->SpawnActor<AMGGuardActor>(
-            FVector(-3060.f, 280.f, -11.f), FRotator(0.f, -90.f, 0.f));
-        GetWorld()->SpawnActor<AMGGuardActor>(
-            FVector(-2100.f, -285.f, -11.f), FRotator(0.f, 135.f, 0.f));
+        if (AMGGuardActor* PatrolA = GetWorld()->SpawnActor<AMGGuardActor>(
+            FVector(-3060.f, 280.f, -11.f), FRotator(0.f, -90.f, 0.f)))
+            PatrolA->SetRole(EMGGuardRole::Patrol);
+        if (AMGGuardActor* PatrolB = GetWorld()->SpawnActor<AMGGuardActor>(
+            FVector(-2100.f, -285.f, -11.f), FRotator(0.f, 135.f, 0.f)))
+            PatrolB->SetRole(EMGGuardRole::Patrol);
+        CustodyOfficerA = GetWorld()->SpawnActor<AMGGuardActor>(
+            FVector(-1720.f, 205.f, -11.f), FRotator(0.f, 180.f, 0.f));
+        CustodyOfficerB = GetWorld()->SpawnActor<AMGGuardActor>(
+            FVector(-1510.f, 265.f, -11.f), FRotator(0.f, 180.f, 0.f));
+        if (IsValid(CustodyOfficerA))
+            CustodyOfficerA->SetRole(EMGGuardRole::Custody);
+        if (IsValid(CustodyOfficerB))
+            CustodyOfficerB->SetRole(EMGGuardRole::Custody);
     }
 }
 
@@ -535,6 +545,19 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
                 && FVector::Dist2D(At, CustodyMarker->GetActorLocation()) < 270.f;
             if (bAtCustody)
             {
+                // An actual custody guard must have observed and challenged
+                // Snake. The security system does NOT know this is his plan.
+                const bool bChallenged =
+                    (IsValid(CustodyOfficerA)
+                     && CustodyOfficerA->CanAcceptDetention(Player))
+                    || (IsValid(CustodyOfficerB)
+                        && CustodyOfficerB->CanAcceptDetention(Player));
+                if (!bChallenged)
+                {
+                    Dialogue = TEXT("FIND A POSITION WHERE SECURITY CAN SEE YOU.");
+                    DialogueTimeRemaining = 2.8f;
+                    return true;
+                }
                 if (Player->IsAiming() || Player->IsSprinting())
                 {
                     Dialogue = TEXT("SECURITY: HANDS VISIBLE! STOP MOVING!");

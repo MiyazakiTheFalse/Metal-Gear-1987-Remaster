@@ -11,6 +11,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 #include "mg_legacy_core.h"
+#include "EngineUtils.h"
 
 AMGGuardActor::AMGGuardActor()
 {
@@ -61,6 +62,36 @@ void AMGGuardActor::BeginPlay()
 bool AMGGuardActor::HasAuthoredCharacterArt() const
 {
     return CharacterMesh && CharacterMesh->GetSkeletalMeshAsset() != nullptr;
+}
+
+bool AMGGuardActor::CanAcceptDetention(const AMGPlayerCharacter* Suspect) const
+{
+    if (Role != EMGGuardRole::Custody || bIncapacitated || !bCustodyChallenge ||
+        !IsValid(Suspect) || Suspect->IsAiming() || Suspect->IsSprinting())
+        return false;
+    if (FVector::Dist2D(GetActorLocation(), Suspect->GetActorLocation()) > 620.f)
+        return false;
+    // Unarmed/procedurally compliant suspect. The custody officer has an
+    // observable legal reason to detain, not foreknowledge of Snake's plan.
+    FHitResult Hit;
+    FCollisionQueryParams Trace(SCENE_QUERY_STAT(MGCustodyLOS), false, this);
+    const bool bHit = GetWorld() && GetWorld()->LineTraceSingleByChannel(
+        Hit, GetActorLocation() + FVector(0,0,65.f),
+        Suspect->GetActorLocation() + FVector(0,0,65.f), ECC_Visibility, Trace);
+    return !bHit || Hit.GetActor() == Suspect;
+}
+
+void AMGGuardActor::ReceiveLocalSquadReport(const FVector& SeenAt, const AActor* Sender)
+{
+    if (bIncapacitated || AwarenessState >= 3 || !IsValid(Sender)
+        || FVector::Dist2D(GetActorLocation(), Sender->GetActorLocation()) > 950.f)
+        return;
+    // Radio shares last *observed* location only; it does not mark the player
+    // in a world-state oracle, force precise lock, or grant through-wall hits.
+    LastKnownPlayerPosition = SeenAt;
+    SearchForLastKnownSeconds = 4.0f;
+    Suspicion = FMath::Max(Suspicion, .66f);
+    AwarenessState = FMath::Max(AwarenessState, 2u);
 }
 
 void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, const FVector& WallNormal, float HearingRadius, AActor* SoundInstigator)
@@ -206,6 +237,9 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     if (bIncapacitated || !GetWorld()) return;
     StaggerSeconds = FMath::Max(0.f, StaggerSeconds - DeltaSeconds);
     AttackCooldown = FMath::Max(0.f, AttackCooldown - DeltaSeconds);
+    SquadBroadcastCooldown = FMath::Max(0.f, SquadBroadcastCooldown - DeltaSeconds);
+    SearchForLastKnownSeconds = FMath::Max(0.f,
+        SearchForLastKnownSeconds - DeltaSeconds);
     // Do not counter-rotate an authored skeletal rig: its AnimBP owns hit reactions.
     if (!HasAuthoredCharacterArt())
         ProxyBody->SetRelativeRotation(FMath::RInterpTo(ProxyBody->GetRelativeRotation(),
@@ -223,6 +257,30 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     const FVector Target = Player->GetActorLocation() + FVector(0.f, 0.f, 55.f);
     const bool bTraceHit = GetWorld()->LineTraceSingleByChannel(Hit, Eye, Target, ECC_Visibility, Params);
     const bool bHasLineOfSight = !bTraceHit || Hit.GetActor() == Player;
+
+    // The officers at the detention truck CHALLENGE instead of automatically
+    // attacking a compliant nearby suspect. Challenge requires first-hand
+    // sight and is revoked if the suspect retreats behind geometry.
+    if (Role == EMGGuardRole::Custody && !bIncapacitated)
+    {
+        const bool bNear = Distance < 690.f;
+        const bool bThreatening = Player->IsAiming();
+        bCustodyChallenge = bNear && bHasLineOfSight && !bThreatening;
+        if (bCustodyChallenge)
+        {
+            ChallengeAge += DeltaSeconds;
+            const FVector Direction = ToPlayer.GetSafeNormal2D();
+            if (!Direction.IsNearlyZero())
+                SetActorRotation(FMath::RInterpTo(GetActorRotation(),
+                    Direction.Rotation(), DeltaSeconds, 3.5f));
+            AwarenessState = 1;
+            Suspicion = FMath::Max(Suspicion, .35f);
+            // No damage, chase or magical confiscation on this frame. The
+            // player commits compliance via physical custody handoff.
+            return;
+        }
+        ChallengeAge = 0.f;
+    }
     const FVector Forward = GetActorForwardVector();
 
     MgGuardFrame Frame = {};
@@ -245,7 +303,10 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         Suspicion = Result.suspicion;
         AwarenessState = Result.state;
         if (Result.sees_player || Result.hears_player)
+        {
             LastKnownPlayerPosition = Player->GetActorLocation();
+            ContactEvidenceAge = 0.f;
+        }
     }
 #else
     // Reduced fallback for editor prototyping only; use the Rust native ABI
@@ -258,12 +319,47 @@ void AMGGuardActor::Tick(float DeltaSeconds)
          (bAudible ? Frame.noise * 0.40f : 0.f) -
          ((!bVisible && !bAudible) ? 0.12f : 0.f)), 0.f, 1.f);
     AwarenessState = Suspicion >= 0.99f ? 3 : Suspicion >= 0.68f ? 2 : Suspicion >= 0.22f ? 1 : 0;
-    if (bVisible || bAudible) LastKnownPlayerPosition = Player->GetActorLocation();
+    if (bVisible || bAudible)
+    {
+        LastKnownPlayerPosition = Player->GetActorLocation();
+        ContactEvidenceAge = 0.f;
+    }
 #endif
 
-    // Enemy attack only after an actual alert and physical approach.
-    // Player health and HUD are authoritative; no invisible instant failure.
-    if (AwarenessState == 3 && Distance < 145.f && AttackCooldown <= 0.f)
+    // Actual sensory evidence expires. A guard can search an old position,
+    // but must reacquire Snake before inflicting harm.
+    ContactEvidenceAge = FMath::Min(ContactEvidenceAge + DeltaSeconds, 100.f);
+    if (AwarenessState == 3 && ContactEvidenceAge > 4.5f)
+    {
+        AwarenessState = 2;
+        Suspicion = FMath::Min(Suspicion, .67f);
+        SearchForLastKnownSeconds = FMath::Max(SearchForLastKnownSeconds, 3.f);
+    }
+    // Half-second radio call, only on actually evidenced fresh contact. Nearby
+    // colleagues receive last known position, not Snake's live world transform.
+    if (AwarenessState == 3 && bHasLineOfSight && ContactEvidenceAge < .5f
+        && SquadBroadcastCooldown <= 0.f && !bPendingRadioReport)
+    {
+        bPendingRadioReport = true;
+        PendingRadioDelay = .6f;
+        SquadBroadcastCooldown = 9.f;
+    }
+    if (bPendingRadioReport)
+    {
+        PendingRadioDelay -= DeltaSeconds;
+        if (PendingRadioDelay <= 0.f)
+        {
+            bPendingRadioReport = false;
+            for (TActorIterator<AMGGuardActor> Ally(GetWorld()); Ally; ++Ally)
+                if (*Ally != this)
+                    Ally->ReceiveLocalSquadReport(LastKnownPlayerPosition, this);
+        }
+    }
+    // Actual physical line of sight is required to deal a melee wound;
+    // remembered sound/equipment beacons are not permission to hit through wall.
+    if (AwarenessState == 3 && bHasLineOfSight
+        && ContactEvidenceAge < 1.f && Distance < 145.f
+        && AttackCooldown <= 0.f)
     {
         UGameplayStatics::ApplyDamage(const_cast<AMGPlayerCharacter*>(Player),
             12.f, nullptr, this, UDamageType::StaticClass());
@@ -276,13 +372,30 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     {
         // Noise behaviour already selected movement/turning for this frame.
     }
-    else if (AwarenessState == 3)
+    else if (AwarenessState == 3 || SearchForLastKnownSeconds > 0.f)
     {
-        const FVector Direction = (LastKnownPlayerPosition - GetActorLocation()).GetSafeNormal2D();
-        if (!Direction.IsNearlyZero())
+        const FVector Location = GetActorLocation();
+        const FVector ToLast = LastKnownPlayerPosition - Location;
+        const FVector Direction = ToLast.GetSafeNormal2D();
+        if (!Direction.IsNearlyZero() && ToLast.Size2D() > 105.f)
         {
-            SetActorLocation(GetActorLocation() + Direction * 185.f * DeltaSeconds, true);
-            SetActorRotation(Direction.Rotation());
+            // Collision-aware pursuit. No teleport, no infinite straight-line
+            // wall scraping; try a bounded, alternating flank if blocked.
+            MoveToward(LastKnownPlayerPosition, 185.f, DeltaSeconds);
+            const float Progress = FVector::Dist2D(Location, GetActorLocation());
+            PursuitBlockedSeconds = Progress < 1.f
+                ? PursuitBlockedSeconds + DeltaSeconds : 0.f;
+            if (PursuitBlockedSeconds > .7f)
+            {
+                const FVector Lateral(-Direction.Y * FlankSide,
+                                     Direction.X * FlankSide, 0.f);
+                MoveToward(GetActorLocation() + Lateral * 175.f, 110.f, DeltaSeconds);
+                if (PursuitBlockedSeconds > 1.8f)
+                {
+                    FlankSide = -FlankSide;
+                    PursuitBlockedSeconds = 0.f;
+                }
+            }
         }
     }
     else if (AwarenessState > 0)

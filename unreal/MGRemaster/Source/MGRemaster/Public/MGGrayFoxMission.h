@@ -6,6 +6,7 @@
 class AStaticMeshActor;
 class AMGPlayerCharacter;
 class AMGShootGunnerActor;
+class AMGGuardActor;
 class UStaticMesh;
 
 /**
@@ -54,6 +55,8 @@ private:
     AStaticMeshActor* ExitMarker = nullptr;
     UPROPERTY(Transient) AStaticMeshActor* POWInformant = nullptr;
     UPROPERTY(Transient) AStaticMeshActor* CustodyMarker = nullptr;
+    UPROPERTY(Transient) AMGGuardActor* CustodyOfficerA = nullptr;
+    UPROPERTY(Transient) AMGGuardActor* CustodyOfficerB = nullptr;
     UPROPERTY(Transient) AStaticMeshActor* FirstWallCrack = nullptr;
     UPROPERTY(Transient) AStaticMeshActor* SecondWallCrack = nullptr;
     int32 FirstWallStrikes = 0;
