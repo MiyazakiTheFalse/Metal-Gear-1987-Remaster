@@ -2,8 +2,8 @@
   "schema_version": 1,
   "doctrine": "DOCTRINE_004",
   "scope": "game_wide",
-  "coverage_status": "seed_only_not_exhaustive",
-  "note": "Seed registry for key prison and stealth beats; all future player-facing features must add a contract and pass production gates.",
+  "coverage_status": "expanded_full_slice_source_contracts_not_playtested",
+  "note": "Expanded opening, earned custody, prison wall damage, connected Shoot Gunner wing, inventory tracking and postboss access. Source status only; exact J2ME layout and final cinematic/audio assets not certified.",
   "beats": [
     {
       "provenance": "remake_adaptation_pending_j2me",
@@ -12,12 +12,12 @@
       "id": "gray_fox.capture_and_control",
       "kind": "story_transition",
       "intent": "Connect Snake's deliberate capture to loss of equipment and regain player control.",
-      "trigger": "Begin mission in cell checkpoint.",
-      "action": "Player can move, aim camera and inspect immediately.",
+      "trigger": "After prisoner intelligence and a visibly observed guard custody challenge near the transport; fresh game begins outside prison.",
+      "action": "Player controls the approach and must lower arms/stop threatening movement; custody officer observes and challenges before one capture/confiscation event. The move to the cell is presently a functional scene handoff, not a filmed arrest.",
       "visual": {
-        "foreshadow": "Equipment removed in earlier capture scene; prison cell reads as confined",
-        "impact": "Confiscation notification appears when mission capture commits",
-        "aftermath": "Snake resumes control in unchanged uniform, without weapons"
+        "foreshadow": "Detention truck, officers and alternate outer-yard lanes are spatially present before capture",
+        "impact": "Original C++ source commits inventory confiscation and transfers Snake to the cell; finished guard animations/cutscene pending",
+        "aftermath": "Snake retains his 1995 uniform and starts a vulnerable cell discovery phase"
       },
       "audio": {
         "origin": "Close cell hum and restrained ambience",
@@ -25,15 +25,15 @@
         "non_audio_equivalent": "Onscreen confiscated-equipment status"
       },
       "timing": {
-        "start_event": "Capture flag commit",
+        "start_event": "Observed guard challenge (~0.75-second provisional acting cue), then explicit player interaction",
         "feedback_target_ms": 120,
         "max_forced_lock_seconds": 0,
         "optional_hint_seconds": [],
         "timing_status": "hypothesis_until_playtested"
       },
       "state": {
-        "transaction": "Capture + confiscation flags once",
-        "persistence": "Checkpoint resumes with no repeated capture cue",
+        "transaction": "One guarded MG_FOX_CAPTURE event commits capture/confiscation, after a real challenge",
+        "persistence": "Checkpoint is inside the cell, old prison saves remain loadable",
         "ai_knowledge": "Guard awareness not fabricated"
       },
       "interruptions": [
@@ -42,7 +42,8 @@
         "rapid_input"
       ],
       "verification": [
-        "Capture once; immediate control; save/reload without duplicate"
+        "Capture once; immediate control; save/reload without duplicate",
+        "No actor inside static collision; capture requires real LOS and not aiming/sprinting"
       ]
     },
     {
@@ -52,20 +53,20 @@
       "id": "gray_fox.architecture_seed",
       "kind": "optional_radio",
       "intent": "Schneider provides credible architectural context without giving away the prison secret.",
-      "trigger": "Player manually opens transceiver or accepts subtle incoming contact.",
-      "action": "Press C/Start to open/close; Q/right stick press changes manual channel. Walking and wall breach continue. The optional hint appears at the existing 14-second progress threshold.",
+      "trigger": "Fresh mission starts outside the prison with Big Boss's incoming 120.85 call, or manual C call later.",
+      "action": "Incoming call stages lines at 1.65-second visual intervals after ring; player may walk/close/tune; Q switches Big Boss and Schneider. All intel remains accessible independently of listening.",
       "visual": {
-        "foreshadow": "Architectural seams can be seen before radio use",
-        "impact": "Provisional non-pausing HUD transcript with Schneider 120.79 and Big Boss 120.85; 3D listening animation and portrait are missing.",
+        "foreshadow": "Incoming radio panel at opening, not a stationary exposition cutscene",
+        "impact": "Five source-authored radio cue SoundWaves referenced by code, actual Unreal import not yet proven",
         "aftermath": "Radio UI exits without camera teleport"
       },
       "audio": {
         "origin": "Dry receiver voice rather than 3D world broadcast",
-        "response": "Placeholder UI confirmation only; no licensed voiced dialogue or authentic transceiver beep is supplied. Future spatially non-diegetic receiver EQ and sound mix must retain threat cues.",
+        "response": "Original source WAV incoming/connect/tune/close/signal cues; C++ plays if imported, no final VO or score.",
         "non_audio_equivalent": "Subtitles and readable transcript"
       },
       "timing": {
-        "start_event": "Optional manual player request at any time; unobtrusive incoming prompt only when pacing hint is eligible.",
+        "start_event": "Player placed in PreludeStart; first connection after .94s if still open; no mandatory animation lock",
         "feedback_target_ms": 150,
         "max_forced_lock_seconds": 0,
         "optional_hint_seconds": [
@@ -89,7 +90,8 @@
       "verification": [
         "No call required to breach; transcript readable; channel identity correct",
         "Confiscation does not block the transceiver; it does not pause or prevent movement",
-        "No automatic radio VO or clue is required to breach; live dialogue not voice-recorded"
+        "No automatic radio VO or clue is required to breach; live dialogue not voice-recorded",
+        "Partial transcript reveal and prompt do not prevent movement, tune or close"
       ]
     },
     {
@@ -144,11 +146,11 @@
       "id": "gray_fox.first_breach",
       "kind": "destruction_event",
       "intent": "Earned breakthrough shows a passage and confirms the player's inference.",
-      "trigger": "Player E/X near WeakWall_A after capture.",
-      "action": "Immediate breach if eligibility is met; no presentation lock.",
+      "trigger": "First-wall melee F/A reaches physical weak seam after actual capture.",
+      "action": "Three purposeful melee impacts progressively expose damage, then the first passage collision is removed; no timed gate or E-to-disappear shortcut.",
       "visual": {
         "foreshadow": "Weak seam visible at approach",
-        "impact": "Impact/crack, debris and opening align with actual collision change",
+        "impact": "Progressive crack visibility follows actual blows; pending authored debris/audio",
         "aftermath": "Opening remains and can be traversed"
       },
       "audio": {
@@ -157,7 +159,7 @@
         "non_audio_equivalent": "Captions/visible dust and collision-open confirmation"
       },
       "timing": {
-        "start_event": "First successful interaction",
+        "start_event": "Melee contact, with existing 0.35s player strike cooldown (candidate)",
         "feedback_target_ms": 120,
         "max_forced_lock_seconds": 0,
         "optional_hint_seconds": [],
@@ -175,7 +177,8 @@
         "frame_drop"
       ],
       "verification": [
-        "Same checkpoint state after skip/reload; no cover attach to breachable actor"
+        "Same checkpoint state after skip/reload; no cover attach to breachable actor",
+        "Repeated strikes are observable and interruptible; wall only commits final breach on third"
       ]
     },
     {
@@ -227,11 +230,11 @@
       "id": "gray_fox.second_breach",
       "kind": "destruction_event",
       "intent": "Release into dangerous escape lane with coherent spatial cause.",
-      "trigger": "Player E/X near WeakWall_B after rescue.",
-      "action": "Immediate breach; player chooses stealth or haste.",
+      "trigger": "Second-wall melee F/A after Gray Fox has actually been rescued.",
+      "action": "Four physical blows progressively expose the second seam before the corridor opens. Movement remains live.",
       "visual": {
         "foreshadow": "Surface deterioration and clear exit route",
-        "impact": "Breach debris and opening reveal legible corridor",
+        "impact": "Provisional crack stages and collision removal, later high-fidelity destruction required",
         "aftermath": "Collision and sight lines agree with visible opening"
       },
       "audio": {
@@ -240,7 +243,7 @@
         "non_audio_equivalent": "Visual wall-open signal plus captions"
       },
       "timing": {
-        "start_event": "Second breach flag commits",
+        "start_event": "Melee contact after rescue, no scene progress on timer",
         "feedback_target_ms": 120,
         "max_forced_lock_seconds": 0,
         "optional_hint_seconds": [],
@@ -258,7 +261,8 @@
         "save_reload"
       ],
       "verification": [
-        "No forced wait; sound stimulus never points to Snake directly"
+        "No forced wait; sound stimulus never points to Snake directly",
+        "Second passage cannot open before Gray Fox rescue; fourth contact commits"
       ]
     },
     {
@@ -351,12 +355,12 @@
       "id": "gray_fox.escape_and_recovery",
       "kind": "mission_transition",
       "intent": "Resolve the threat with relief, not artificial speed manipulation.",
-      "trigger": "Reach physical escape marker after second breach.",
-      "action": "Player retains locomotion and may finish without confrontation.",
+      "trigger": "Reach the corridor's physical escape point after second breach.",
+      "action": "Commit LEFT_PRISON checkpoint; player continues on foot east into the connected Shoot Gunner wing rather than the slice ending here.",
       "visual": {
         "foreshadow": "Exit landmark established before escape",
         "impact": "Completion notification follows actual checkpoint transaction",
-        "aftermath": "Environment remains readable after success"
+        "aftermath": "Eastern passage continues physically to the boss wing (authored Unreal blockout only)"
       },
       "audio": {
         "origin": "Threat audio only if guards actually engaged",
@@ -371,7 +375,7 @@
         "timing_status": "hypothesis_until_playtested"
       },
       "state": {
-        "transaction": "Escape flag once",
+        "transaction": "Escape flag once, transition into approach phase; NOT slice completion",
         "persistence": "Checkpoint persists",
         "ai_knowledge": "AI memory not forcibly erased just to make calm"
       },
@@ -382,8 +386,389 @@
         "rapid_completion"
       ],
       "verification": [
-        "No replay of completed rescue/escape; player control returns"
+        "No replay of completed rescue/escape; player control returns",
+        "Prison corridor and boss wing connected; after escape no abrupt mission ending"
       ]
+    },
+    {
+      "id": "prelude.incoming_briefing",
+      "kind": "radio_call",
+      "provenance": "MSX2_comparative_remake_adaptation_pending_J2ME_check",
+      "intent": "Introduce N313 and the vanished Gray Fox while preserving first-second control.",
+      "trigger": "Fresh start at the outer-yard position.",
+      "action": "A short ring, then progressive Big Boss text; C closes, Q tunes and player may move.",
+      "visual": {
+        "foreshadow": "Visible distant industrial approach and player movement before exposition",
+        "impact": "Original radio tones and transcript in non-pausing overlay",
+        "aftermath": "Call ends, but quest intelligence stays in objective/log"
+      },
+      "audio": {
+        "origin": "Headset UI",
+        "response": "Five original source WAVs with no imported VO; no in-engine proof",
+        "non_audio_equivalent": "Readable transcript and frequency"
+      },
+      "timing": {
+        "start_event": "Immediately on fresh prelude spawn; 0.94s connection cue",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "candidate_until_UFive_playtest"
+      },
+      "state": {
+        "transaction": "No mission flag required from call completion",
+        "persistence": "Call can be skipped, replayed or retuned",
+        "ai_knowledge": "Radio does not magically alert guards"
+      },
+      "interruptions": [
+        "quick_player_action",
+        "save_reload",
+        "muted_sound",
+        "controller_input"
+      ],
+      "verification": [
+        "Opening remains optional",
+        "Tones cancel without trailing on immediate close"
+      ],
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified"
+    },
+    {
+      "id": "prelude.pow_intelligence",
+      "kind": "information_reveal",
+      "provenance": "MSX2_comparative_remake_adaptation_pending_J2ME_check",
+      "intent": "Make captivity a plausible choice informed by another human.",
+      "trigger": "Player approaches/investigates a captive on the northern route.",
+      "action": "Talk to POW by E after actually reaching them, store detention intel once.",
+      "visual": {
+        "foreshadow": "POW position can be spotted from cover but is not a teleporting waypoint",
+        "impact": "Flag and mission-log record from genuine interaction",
+        "aftermath": "The transport becomes an informed risk, not an unexplained surrender"
+      },
+      "audio": {
+        "origin": "Local frightened prisoner voice, not yet recorded",
+        "response": "Source-only text from POW",
+        "non_audio_equivalent": "Speaker label and intel log"
+      },
+      "timing": {
+        "start_event": "Successful POW interaction",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "candidate_until_UFive_playtest"
+      },
+      "state": {
+        "transaction": "DETENTION_INTELLIGENCE once",
+        "persistence": "Stays known after reload, transport only offers custody once clue earned",
+        "ai_knowledge": "POW knows detention route, not Venom or whole base"
+      },
+      "interruptions": [
+        "quick_player_action",
+        "save_reload",
+        "muted_sound",
+        "controller_input"
+      ],
+      "verification": [
+        "Missing POW never grants clue",
+        "Early or repeat interaction does not duplicate"
+      ],
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified"
+    },
+    {
+      "id": "prelude.custody_procedure",
+      "kind": "stealth_to_custody",
+      "provenance": "MSX2_comparative_remake_adaptation_pending_J2ME_check",
+      "intent": "Make arrest feel earned without killing Snake or signalling that he wants it.",
+      "trigger": "POW clue obtained and officer observes Snake near the guarded transport.",
+      "action": "Enter the detention approach with hands lowered, wait for actual challenged guard and interact to comply.",
+      "visual": {
+        "foreshadow": "Visible transport, both officers and a corridor wide enough for tactics",
+        "impact": "Guard voice/pose hook then actual gear confiscation state",
+        "aftermath": "Control resumes in same clothing in prison, not instant scripted death"
+      },
+      "audio": {
+        "origin": "Guard's own world-space challenge, not dramatic score cue",
+        "response": "No recorded VO or final Sequencer yet; stage callback exists",
+        "non_audio_equivalent": "Guard's facing and caption of challenge"
+      },
+      "timing": {
+        "start_event": "Officer's actual LOS and ~0.75s challenge readiness, not a global wait timer",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "candidate_until_UFive_playtest"
+      },
+      "state": {
+        "transaction": "CAPTURE+CONFISCATED commits once",
+        "persistence": "Legacy prison checkpoints remain valid",
+        "ai_knowledge": "Officer knows only what was seen/heard"
+      },
+      "interruptions": [
+        "quick_player_action",
+        "save_reload",
+        "muted_sound",
+        "controller_input"
+      ],
+      "verification": [
+        "Hostile aiming postpones compliant custody",
+        "Officer cannot arrest through booth",
+        "New geometry clear at capsule/eye level"
+      ],
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified"
+    },
+    {
+      "id": "shotmaker.entrance_reveal",
+      "kind": "encounter_intro",
+      "provenance": "MSX2_comparative_remake_adaptation_pending_J2ME_check",
+      "intent": "Contrast prison respite with an escalating and clearly telegraphed weapon threat.",
+      "trigger": "Snake crosses the connected eastern threshold after leaving prison.",
+      "action": "Boss actor searches until real sight; guns become dangerous only through a readable aiming warning.",
+      "visual": {
+        "foreshadow": "Opening line of sight frames cover and southern recovery-room geometry",
+        "impact": "Three-shot pattern becomes learnable through physical events",
+        "aftermath": "Player keeps route back and enough decision space to retreat"
+      },
+      "audio": {
+        "origin": "Distant footsteps/mechanical aim",
+        "response": "Synth cue source awaits Unreal import, no production intro cinematics",
+        "non_audio_equivalent": "Visual gunner warning and HUD cue"
+      },
+      "timing": {
+        "start_event": "First real sighting after player enters the boss sector",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "candidate_until_UFive_playtest"
+      },
+      "state": {
+        "transaction": "SHOTMAKER_ENCOUNTERED once; no damage from presentation",
+        "persistence": "Save resumes postthreshold, boss's intro is not replay-authoritative",
+        "ai_knowledge": "Gunner has real LOS, not scripted knowledge from camera"
+      },
+      "interruptions": [
+        "quick_player_action",
+        "save_reload",
+        "muted_sound",
+        "controller_input"
+      ],
+      "verification": [
+        "Opening cannot hurt during locked cinematic",
+        "No X-ray aiming or guaranteed first hit"
+      ],
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified"
+    },
+    {
+      "id": "shotmaker.reclaimed_equipment",
+      "kind": "survival_puzzle",
+      "provenance": "MSX2_comparative_remake_adaptation_pending_J2ME_check",
+      "intent": "Convert being unarmed into an earned recovery of options.",
+      "trigger": "Snake finds southern breachable recovery-room door and confiscated bag.",
+      "action": "Punch door twice, physically enter and interact with bag; weapon state and planted tracker commit together.",
+      "visual": {
+        "foreshadow": "Doors and cover are visible before the encounter is solved",
+        "impact": "Inventory visibly becomes available from genuine pickup",
+        "aftermath": "Players can now fight and notice the unwanted item"
+      },
+      "audio": {
+        "origin": "Metal impacts and bag rustle",
+        "response": "Only proxy impacts, final Foley absent",
+        "non_audio_equivalent": "Weapon/item list shows ownership"
+      },
+      "timing": {
+        "start_event": "Two real door impacts then bag interaction, not forced timer",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "candidate_until_UFive_playtest"
+      },
+      "state": {
+        "transaction": "GEAR_RECOVERED + TRANSMITTER_PLANTED",
+        "persistence": "Equipment and ammunition reconstitute from durable save, not regenerated each death",
+        "ai_knowledge": "Boss still requires visibility to hurt Snake"
+      },
+      "interruptions": [
+        "quick_player_action",
+        "save_reload",
+        "muted_sound",
+        "controller_input"
+      ],
+      "verification": [
+        "Recovery cannot be granted by passing near bag",
+        "Door/pickup should remain coherent after checkpoint"
+      ],
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified"
+    },
+    {
+      "id": "shotmaker.tracker_revelation",
+      "kind": "inventory_discovery",
+      "provenance": "MSX2_comparative_remake_adaptation_pending_J2ME_check",
+      "intent": "Give the planted device a readable tactical consequence and an agency-restoring solution.",
+      "trigger": "Gear recovered; unwanted transmitter appears in actual item list.",
+      "action": "Equip and discard unwanted item; alternatively inspect the physical recovery evidence.",
+      "visual": {
+        "foreshadow": "An unfamiliar inventory object undermines newly regained freedom",
+        "impact": "Removal stops the approximate periodic beacon",
+        "aftermath": "Diminished enemy tracking after player diagnosis"
+      },
+      "audio": {
+        "origin": "Short interference cue candidate",
+        "response": "Final danger/alert mix not authored; debug HUD warns while active",
+        "non_audio_equivalent": "Item label, log and radar indicate ongoing tracking"
+      },
+      "timing": {
+        "start_event": "Player chooses disposal (no imposed lock)",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "candidate_until_UFive_playtest"
+      },
+      "state": {
+        "transaction": "TRANSMITTER_REMOVED event only from an owned item",
+        "persistence": "Persistent after save/reload",
+        "ai_knowledge": "Transmitter informs approximate position, not through-wall damage"
+      },
+      "interruptions": [
+        "quick_player_action",
+        "save_reload",
+        "muted_sound",
+        "controller_input"
+      ],
+      "verification": [
+        "Must remain in inventory until discarded",
+        "Do not get automatically removed by an unrelated boss hit"
+      ],
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified"
+    },
+    {
+      "id": "shotmaker.three_blast_duel",
+      "kind": "boss_combat",
+      "provenance": "MSX2_comparative_remake_adaptation_pending_J2ME_check",
+      "intent": "Make the three-wide-shot specialist tactically learnable and personally intimidating.",
+      "trigger": "Shotmaker has a real unobstructed line of sight on the player.",
+      "action": "Read windup, evade three blasts, exploit recovery, aim handgun; roughly ten accepted pistol hits defeat.",
+      "visual": {
+        "foreshadow": "A human gunner's posture and weapon direction announce danger",
+        "impact": "Muzzle rays, damage, pumping and recovery follow physical direction",
+        "aftermath": "Victorious silence follows real defeat, not cutscene authored kill"
+      },
+      "audio": {
+        "origin": "Muzzle-origin blast/pump sounds",
+        "response": "Original source effects and source mesh exist but are not UE imported/approved",
+        "non_audio_equivalent": "Warning HUD and cover line readability"
+      },
+      "timing": {
+        "start_event": "Observed sight then telegraph, no fixed arrival clock",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "candidate_until_UFive_playtest"
+      },
+      "state": {
+        "transaction": "DEFEAT_SHOTMAKER on actor's real defeat",
+        "persistence": "A killed boss remains defeated after checkpoint",
+        "ai_knowledge": "Boss does not have x-ray aim through cover"
+      },
+      "interruptions": [
+        "quick_player_action",
+        "save_reload",
+        "muted_sound",
+        "controller_input"
+      ],
+      "verification": [
+        "Never damage a player during forced camera",
+        "Handgun hits require physical trace",
+        "Damage count matches 1987 guide baseline pending playtest"
+      ],
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified"
+    },
+    {
+      "id": "shotmaker.aftermath_and_access",
+      "kind": "reward_navigation",
+      "provenance": "MSX2_comparative_remake_adaptation_pending_J2ME_check",
+      "intent": "Allow silence and agency after the fight, then earn the next access card.",
+      "trigger": "Boss is down, then player explores northern storeroom and eastern route.",
+      "action": "Find Card-2 gate, interact, collect Card 3 and open east chapter passage.",
+      "visual": {
+        "foreshadow": "Protected storage implies reward without revealing all loot early",
+        "impact": "Separate Card3 pickup and route-out milestones",
+        "aftermath": "Quiet phase then small rise as operation continues"
+      },
+      "audio": {
+        "origin": "Ambient room decay, no forced triumph music",
+        "response": "Score and final transition not yet authored",
+        "non_audio_equivalent": "Discoverable room geometry and log"
+      },
+      "timing": {
+        "start_event": "Player performs card interactions immediately when eligible",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "candidate_until_UFive_playtest"
+      },
+      "state": {
+        "transaction": "CARD3_RECOVERED then SLICE_COMPLETED separately",
+        "persistence": "Replay does not duplicate items or resurrect boss",
+        "ai_knowledge": "No unrelated wave just because the boss died"
+      },
+      "interruptions": [
+        "quick_player_action",
+        "save_reload",
+        "muted_sound",
+        "controller_input"
+      ],
+      "verification": [
+        "Postboss search has staged hints after inactivity",
+        "Never unlock exit solely on boss death"
+      ],
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified"
+    },
+    {
+      "id": "presentation.phase_authority",
+      "kind": "presentation_pacing",
+      "provenance": "MSX2_comparative_remake_adaptation_pending_J2ME_check",
+      "intent": "Synchronize eventual score, lighting and cinematic beats with *committed* gameplay events.",
+      "trigger": "New committed phase from Rust/C++ state map, including load/first start.",
+      "action": "Broadcast phase previous/current and suggested intensity once, without writing flags.",
+      "visual": {
+        "foreshadow": "Use contrast across infiltration, vulnerability, revelation, pressure and aftermath",
+        "impact": "Blueprint OnPacingBeatChanged is notification only",
+        "aftermath": "No artificial delay, fabricated reinforcements or forced recovery cutscene"
+      },
+      "audio": {
+        "origin": "Later original adaptive score stems",
+        "response": "None imported; callbacks are currently inert when unbound",
+        "non_audio_equivalent": "HUD phase label and context hint exist"
+      },
+      "timing": {
+        "start_event": "At actual saved-state restoration or mission transaction",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "candidate_until_UFive_playtest"
+      },
+      "state": {
+        "transaction": "None: phase is a derived projection",
+        "persistence": "Callback carries no inventory, collision, kill or save authority",
+        "ai_knowledge": "Only real enemies control awareness"
+      },
+      "interruptions": [
+        "quick_player_action",
+        "save_reload",
+        "muted_sound",
+        "controller_input"
+      ],
+      "verification": [
+        "No repeated callback every tick",
+        "Elapsed time never unlocks an action"
+      ],
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified"
     }
   ],
   "supreme_doctrine": "DOCTRINE_000",

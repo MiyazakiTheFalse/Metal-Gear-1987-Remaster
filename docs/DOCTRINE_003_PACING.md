@@ -12,16 +12,20 @@ Game-wide [Doctrine 004](DOCTRINE_004_INTEGRATED_EXPERIENCE.md) requires audiovi
 
 | Phase | Player feeling | Design intent | How implemented |
 |---|---|---|---|
-| Capture | Shock | One brief loss, regain agency | First mission-state transaction confiscates equipment; spawn in cell |
-| Cell discovery | Vulnerability / curiosity | Safe observation, clues, camera control | First weakened wall can be breached immediately; hint increases if stuck |
-| Breakthrough | Short exertion | Fast, tangible progress | Breach reveals adjacent cell; player moves freely |
+| Opening radio + clue | Curiosity / agency | Introduce N313 while moving, find POW intelligence | Staged non-pausing Big Boss transceiver and physical northern POW location |
+| Earned custody | Vulnerability / calculated risk | Submit after a real guard challenge; no suspicious suicide | Guard LOS and 0.75s procedural challenge; capture state and temporary teleport, full film scene still absent |
+| Cell discovery | Isolation / resourcefulness | Investigate seam without a scripted wait | First wall needs three genuine melee impacts; hint increases only when exploration stalls |
+| Breakthrough | Physical effort / progress | Repeated blows matter | Second wall needs four hits after Fox; routes and collision open on committed impacts |
 | Revelation | Narrative emphasis / release | Time to absorb Gray Fox's intelligence | Rescue commits once; no automatic unrelated reinforcement wave or forced wait |
 | Escape | Rising threat | Consequence-driven urgency | Second wall opens the route; guard pressure resumes, player chooses tactics |
-| Recovery | Relief | Let story resonate before next challenge | Milestone records completion; avoid instant extra threats |
+| Boss approach / unarmed | Dread / tactical problem | Make room and gear recovery a learnable puzzle | Connected east wing, guarded sightlines, breachable south bag room |
+| Armed Shoot Gunner fight | Mastery / danger | Three fair wide blasts, recoil and cooldown | Cover-blocked muzzle tracing, ten-hit handgun boss target |
+| Aftermath / Card 3 | Breathing space / discovery | Let player choose when to proceed | Quiet search, Card-2 storeroom, separate Card-3 pickup and exit |
+| Final recovery | Relief / continuation | Exit chapter without fake pursuit | Complete only at east passage after card collected |
 
 ### Behaviour constraints
 
-1. **No compulsory dwell times.** The first wall and rescue interactives are actionable as soon as prerequisites are met. Narrative cue playback must not gate the state transaction.
+1. **No compulsory dwell times.** The first wall can receive its first strike and the rescue can be triggered as soon as prerequisites are met; wall damage itself takes multiple genuine actions, never a waiting timer. Narrative cue playback must not gate the state transaction.
 2. **Hints only after inactivity.** First optional environmental nudge no earlier than 28 seconds since mission progress and only after 6 seconds without meaningful movement/camera scanning; stronger hint no earlier than 75 seconds and after 10 seconds quiet. Anti-stall overrides allow a soft hint after 100 seconds and stronger one after 150 seconds, even if the player is still moving. All values are *untested tuning hypotheses*, and manual radio is available immediately. Values are tuning hypotheses and require playtests; never overlay during a real guard alert.
 3. **Earned quiet.** The revelation phase should not spontaneously spawn unrelated combatants. It does not magically erase guards who actually saw or heard Snake.
 4. **Play-space is pacing.** Player cell supports observation; first breach is short; Fox cell has room to stand and hear dialogue; escape route supports cover, camera clearance and an approaching threat. Verified J2ME geometry remains source-of-truth; greybox coordinates are provisional.
