@@ -19,7 +19,9 @@ void UMGEquipmentComponent::BeginPlay()
         {FName(TEXT("CARD1")), TEXT("KEYCARD 1 [TEST]"), 0, false, false},
         // Carryover from the earlier infiltration, not a claimed playable acquisition.
         {FName(TEXT("CARD2")), TEXT("KEYCARD 2 [CARRYOVER]"), 0, true, false},
-        {FName(TEXT("CARD3")), TEXT("KEYCARD 3 [SLICE]"), 0, false, false}
+        {FName(TEXT("CARD3")), TEXT("KEYCARD 3 [SLICE]"), 0, false, false},
+        // This is placed in Snake's actual inventory when his gear is returned.
+        {FName(TEXT("TRANSMITTER")), TEXT("UNKNOWN TRANSMITTER"), 0, false, false}
     };
     // A captured Snake cannot use pre-capture weapons or items. Test entries are
     // deliberately marked provisional rather than claims about J2ME inventory.
@@ -162,6 +164,35 @@ bool UMGEquipmentComponent::ConsumeStunRound()
     --Slot.Quantity;
     return true;
 }
+bool UMGEquipmentComponent::HasPlantedTransmitter() const
+{
+    for (const FMGEquipmentEntry& E : Items)
+        if (E.Id == TEXT("TRANSMITTER"))
+            return E.bOwned;
+    return false;
+}
+bool UMGEquipmentComponent::IsTransmitterEquipped() const
+{
+    return !bConfiscated && Items.IsValidIndex(EquippedItem)
+        && Items[EquippedItem].Id == TEXT("TRANSMITTER") && Items[EquippedItem].bOwned;
+}
+bool UMGEquipmentComponent::DiscardPlantedTransmitter()
+{
+    if (bConfiscated) return false;
+    for (FMGEquipmentEntry& Entry : Items)
+        if (Entry.Id == TEXT("TRANSMITTER") && Entry.bOwned)
+        {
+            Entry.bOwned = false;
+            Entry.Quantity = 0;
+            if (Items.IsValidIndex(EquippedItem) && Items[EquippedItem].Id == TEXT("TRANSMITTER"))
+                EquippedItem = 0;
+            if (Items.IsValidIndex(ItemSelection) && Items[ItemSelection].Id == TEXT("TRANSMITTER"))
+                ItemSelection = 0;
+            return true;
+        }
+    return false;
+}
+
 bool UMGEquipmentComponent::ConsumeRation()
 {
     if (bConfiscated || !Items.IsValidIndex(EquippedItem)

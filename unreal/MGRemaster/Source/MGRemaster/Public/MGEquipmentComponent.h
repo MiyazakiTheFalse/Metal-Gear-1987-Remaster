@@ -59,6 +59,9 @@ public:
     void RestoreStunRounds(int32 Rounds);
     bool ConsumeStunRound();
     bool ConsumeRation();
+    bool IsTransmitterEquipped() const;
+    bool HasPlantedTransmitter() const;
+    bool DiscardPlantedTransmitter();
     int32 GetStunRounds() const;
 
     // Designed for eventual room/item pickup and mission SaveGame integration.
