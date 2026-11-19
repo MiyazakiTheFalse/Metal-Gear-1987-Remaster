@@ -22,3 +22,6 @@ Independent receiver, synthetic buttstock, rubber buttpad, grip, trigger guard, 
 - [KS-23 by Sassiska](https://sketchfab.com/3d-models/ks-23-shotgun-4eb00431f389451fb010c9f34f5a497b) — CC BY page, model not imported
 
 **Art approval gate:** legal provenance, unmistakable 1995 identity, retargeted animation, physical contacts/attachments and screenshot evidence. This source mesh gives us something editable, not an MGS4-quality finished firearm.
+
+
+Unreal source importer: [instructions](IMPORT_TO_UNREAL.md), [single-object OBJ](riot_gun_game_mesh.obj), [Editor Python script](../../../unreal/MGRemaster/Content/Python/import_shotmaker_source_assets.py). These are source assets and script, not evidence the Editor imported or tested them.

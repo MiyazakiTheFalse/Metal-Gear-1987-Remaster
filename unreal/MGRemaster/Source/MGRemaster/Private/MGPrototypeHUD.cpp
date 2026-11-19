@@ -3,6 +3,7 @@
 #include "MGEquipmentComponent.h"
 #include "MGGrayFoxMission.h"
 #include "MGGuardActor.h"
+#include "MGShootGunnerActor.h"
 #include "MGPlayerCharacter.h"
 #include "Engine/Canvas.h"
 #include "EngineUtils.h"
@@ -61,8 +62,10 @@ void AMGPrototypeHUD::DrawHUD()
              Margin + 12.f * UiScale, Margin + 62.f * UiScale,
              nullptr, 0.78f * UiScale, false);
 
-    // Actual guard awareness drives radar vs threat overlay.
-    int32 MaxThreat = 0;
+    // Transmitter alert is a real signal, not an invisible normal patrol.
+    const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
+    int32 MaxThreat = Mission && Mission->IsTransmitterActive() ? 3 : 0;
     float MaxSuspicion = 0.f;
     for (TActorIterator<AMGGuardActor> Guard(GetWorld()); Guard; ++Guard)
     {
@@ -100,31 +103,39 @@ void AMGPrototypeHUD::DrawHUD()
         const float RW = RadarSize - 26.f * UiScale;
         const float RH = 91.f * UiScale;
         DrawRect(FLinearColor(0.05f, 0.13f, 0.13f, 1.f), X0, Y0, RW, RH);
-        // Provisional prison topology; replace with verified original map data.
-        const float SpanX = 26.6f * 100.f;
-        const float SpanY = 10.f * 100.f;
-        for (const float DividerWorldX : {-410.f, 450.f})
+        // Prison and connected Shotmaker wing require different radar scales.
+        const bool bBossWing = Player->GetActorLocation().X > 1350.f;
+        const float MinX = bBossWing ? 1350.f : -1250.f;
+        const float SpanX = bBossWing ? 2400.f : 2650.f;
+        const float MinY = bBossWing ? -1105.f : -500.f;
+        const float SpanY = bBossWing ? 2210.f : 1000.f;
+        if (!bBossWing)
+            for (const float DividerWorldX : {-300.f, 470.f})
+            {
+                const float V = X0 + FMath::Clamp((DividerWorldX - MinX) / SpanX, 0.f, 1.f) * RW;
+                DrawRect(HudMuted, V, Y0, 2.f * UiScale, RH * .34f);
+                DrawRect(HudMuted, V, Y0 + RH * .66f, 2.f * UiScale, RH * .34f);
+            }
+        auto MarkPoint = [this, X0, Y0, RW, RH, UiScale, MinX, SpanX, MinY, SpanY](
+            const FVector& World, const FLinearColor& Tint, float Size)
         {
-            const float V = X0 + FMath::Clamp((DividerWorldX + 1250.f) / SpanX, 0.f, 1.f) * RW;
-            DrawRect(HudMuted, V, Y0, 2.f * UiScale, RH * 0.34f);
-            DrawRect(HudMuted, V, Y0 + RH * 0.66f, 2.f * UiScale, RH * 0.34f);
-        }
-        auto MarkPoint = [this, X0, Y0, RW, RH, UiScale](const FVector& World,
-                        const FLinearColor& Tint, float Size)
-        {
-            const float Px = X0 + FMath::Clamp((World.X + 1250.f) / 2660.f, 0.f, 1.f) * RW;
-            const float Py = Y0 + FMath::Clamp((World.Y + 500.f) / 1000.f, 0.f, 1.f) * RH;
-            DrawRect(Tint, Px - Size * 0.5f * UiScale, Py - Size * 0.5f * UiScale,
+            if (World.X < MinX || World.X > MinX + SpanX ||
+                World.Y < MinY || World.Y > MinY + SpanY) return;
+            const float Px = X0 + FMath::Clamp((World.X - MinX) / SpanX, 0.f, 1.f) * RW;
+            const float Py = Y0 + FMath::Clamp((World.Y - MinY) / SpanY, 0.f, 1.f) * RH;
+            DrawRect(Tint, Px - Size * .5f * UiScale, Py - Size * .5f * UiScale,
                      Size * UiScale, Size * UiScale);
         };
         MarkPoint(Player->GetActorLocation(), HudGreen, 7.f);
         for (TActorIterator<AMGGuardActor> Guard(GetWorld()); Guard; ++Guard)
             if (!Guard->IsIncapacitated())
                 MarkPoint(Guard->GetActorLocation(), MaxThreat == 1 ? HudAmber : HudRed, 5.f);
+        if (bBossWing)
+            for (TActorIterator<AMGShootGunnerActor> Gunner(GetWorld()); Gunner; ++Gunner)
+                if (Gunner->IsEncounterActive() && !Gunner->IsDefeated())
+                    MarkPoint(Gunner->GetActorLocation(), HudRed, 8.f);
     }
 
-    const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
-        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
     if (Mission)
     {
         if (Mission->IsTransmitterActive())

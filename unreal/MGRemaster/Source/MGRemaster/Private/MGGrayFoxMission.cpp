@@ -112,8 +112,8 @@ void AMGGrayFoxMission::CreateGreybox()
     SpawnBlock(TEXT("SouthBoundary"), FVector(75.f, -500.f, 90.f), FVector(26.5f, 0.4f, 3.8f), true);
     SpawnBlock(TEXT("WestBoundary"), FVector(-1250.f, 0.f, 90.f), FVector(0.4f, 10.f, 3.8f), true);
     // Connected opening: 400cm wide. Never teleport to the boss.
-    SpawnBlock(TEXT("EastBoundaryNorth"), FVector(1400.f, 350.f, 90.f), FVector(.4f, 3.f, 3.8f), true);
-    SpawnBlock(TEXT("EastBoundarySouth"), FVector(1400.f, -350.f, 90.f), FVector(.4f, 3.f, 3.8f), true);
+    SpawnBlock(TEXT("EastBoundaryNorth"), FVector(1400.f, 375.f, 90.f), FVector(.4f, 2.5f, 3.8f), true);
+    SpawnBlock(TEXT("EastBoundarySouth"), FVector(1400.f, -375.f, 90.f), FVector(.4f, 2.5f, 3.8f), true);
 
     for (const float X : {-300.f, 470.f})
     {
