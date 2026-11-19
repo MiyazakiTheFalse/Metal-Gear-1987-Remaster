@@ -22,6 +22,8 @@ public:
     virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
     bool IsAiming() const { return bAiming; }
+    bool HasReadyWeapon() const;
+    float GetFiringPoseAlpha() const { return WeaponRecoilTimer > 0.f ? WeaponRecoilTimer / 0.18f : 0.f; }
     bool IsSprinting() const { return bSprinting && !bIsCrouched && !bAiming; }
     bool IsMissionLogVisible() const { return bShowMissionLog; }
     bool IsCodecOpen() const { return bCodecOpen; }
@@ -64,6 +66,15 @@ private:
     UStaticMeshComponent* PrototypeBody;
     UPROPERTY(VisibleAnywhere, Category="Equipment")
     UMGEquipmentComponent* Equipment;
+
+    // Optional visible prop uses right-hand weapon_r socket of the imported rig.
+    // Concealed when disarmed, unarmed or when the skeleton/socket is absent.
+    UPROPERTY(VisibleAnywhere, Category="Character|Weapon")
+    UStaticMeshComponent* WeaponBodyVisual;
+    UPROPERTY(VisibleAnywhere, Category="Character|Weapon")
+    UStaticMeshComponent* WeaponGripVisual;
+    bool bHasAuthoredWeaponMesh = false;
+    float WeaponRecoilTimer = 0.f;
 
     UPROPERTY(Transient)
     USkeletalMesh* InfiltrationCharacterArt = nullptr;
@@ -139,4 +150,5 @@ private:
     void CloseEquipmentWindows();
 
     void UpdateMovementState();
+    void UpdateWeaponPresentation();
 };

@@ -30,6 +30,14 @@ AMGPlayerCharacter::AMGPlayerCharacter()
     PrimaryActorTick.bCanEverTick = true;
     GetCapsuleComponent()->InitCapsuleSize(35.f, 89.f);
     Equipment = CreateDefaultSubobject<UMGEquipmentComponent>(TEXT("Equipment"));
+    WeaponBodyVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponBodyVisual"));
+    WeaponBodyVisual->SetupAttachment(GetMesh(), TEXT("weapon_r"));
+    WeaponBodyVisual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    WeaponBodyVisual->SetVisibility(false);
+    WeaponGripVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponGripVisual"));
+    WeaponGripVisual->SetupAttachment(WeaponBodyVisual);
+    WeaponGripVisual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    WeaponGripVisual->SetVisibility(false);
     // Reference height: 178 cm (official MG2 profile; provisional for 1995).
     GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
     GetCharacterMovement()->CrouchedHalfHeight = 55.f;
@@ -48,6 +56,17 @@ AMGPlayerCharacter::AMGPlayerCharacter()
     PrototypeBody->SetRelativeScale3D(FVector(0.7f, 0.7f, 1.78f));
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
     if (Cylinder.Succeeded()) PrototypeBody->SetStaticMesh(Cylinder.Object);
+    // A minimal 1995-compatible test prop makes aim alignment inspectable as
+    // soon as a rig has a hand socket. It is NOT a finished pistol model.
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
+    if (Cube.Succeeded())
+    {
+        WeaponBodyVisual->SetStaticMesh(Cube.Object);
+        WeaponGripVisual->SetStaticMesh(Cube.Object);
+        WeaponBodyVisual->SetRelativeScale3D(FVector(0.19f, 0.036f, 0.038f));
+        WeaponGripVisual->SetRelativeLocation(FVector(-3.f, 0.f, -7.f));
+        WeaponGripVisual->SetRelativeScale3D(FVector(0.47f, 1.f, 2.6f));
+    }
 
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
@@ -90,6 +109,15 @@ void AMGPlayerCharacter::BeginPlay()
     }
     // Asset names are shared with the editor importer. Missing assets retain the
     // original greybox stand-in and never change movement or mission flags.
+    // Optional authored weapon overrides the primitive test prop.
+    if (UStaticMesh* Prop = LoadObject<UStaticMesh>(nullptr,
+            TEXT("/Game/Characters/Shared/Weapons/SM_StunPistol_1995.SM_StunPistol_1995")))
+    {
+        WeaponBodyVisual->SetStaticMesh(Prop);
+        WeaponBodyVisual->SetRelativeScale3D(FVector::OneVector);
+        WeaponGripVisual->SetVisibility(false);
+        bHasAuthoredWeaponMesh = true;
+    }
     InfiltrationCharacterArt = GetMesh()->GetSkeletalMeshAsset();
     if (!InfiltrationCharacterArt)
         InfiltrationCharacterArt = LoadObject<USkeletalMesh>(nullptr,
@@ -113,6 +141,22 @@ void AMGPlayerCharacter::BeginPlay()
     }
     ApplyMenuTimeState();
     UpdateMovementState();
+    UpdateWeaponPresentation();
+}
+
+bool AMGPlayerCharacter::HasReadyWeapon() const
+{
+    return Equipment && Equipment->IsStunEquipped();
+}
+
+void AMGPlayerCharacter::UpdateWeaponPresentation()
+{
+    const bool bCanHoldProp = HasAuthoredCharacterArt() && HasReadyWeapon()
+        && GetMesh()->DoesSocketExist(TEXT("weapon_r"));
+    // Weapon stays in the hand when equipped; aiming changes upper-body pose.
+    // Weapon rendering is cosmetic and cannot bypass inventory confiscation.
+    WeaponBodyVisual->SetVisibility(bCanHoldProp, true);
+    WeaponGripVisual->SetVisibility(bCanHoldProp && !bHasAuthoredWeaponMesh, true);
 }
 
 bool AMGPlayerCharacter::HasAuthoredCharacterArt() const
@@ -135,6 +179,7 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     CombatNoiseTimer = FMath::Max(0.f, CombatNoiseTimer - DeltaSeconds);
+    WeaponRecoilTimer = FMath::Max(0.f, WeaponRecoilTimer - DeltaSeconds);
     MeleeVisualTimer = FMath::Max(0.f, MeleeVisualTimer - DeltaSeconds);
     WallKnockVisualTimer = FMath::Max(0.f, WallKnockVisualTimer - DeltaSeconds);
     CoverReattachCooldown = FMath::Max(0.f, CoverReattachCooldown - DeltaSeconds);
@@ -158,6 +203,7 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
         }
     }
     PrototypeBody->SetVisibility(GetMesh()->GetSkeletalMeshAsset() == nullptr, true);
+    UpdateWeaponPresentation();
 
     // A temporary prone/cover camera uses real collision and interpolated
     // pivot/shoulder geometry. Artists can replace the cylinder with a rig.
@@ -684,6 +730,7 @@ void AMGPlayerCharacter::FireStun()
         return;
     }
     NotifyFeedback(TEXT("STUN ROUND FIRED"), TEXT("stun"));
+    WeaponRecoilTimer = 0.18f;
     CombatNoiseTimer = 0.55f;
     // Camera ray determines crosshair target; a second ray enforces obstruction
     // between the character and target. Prototype nonlethal incapacitation only.
