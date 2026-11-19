@@ -205,11 +205,34 @@ void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, const FVector& W
 
 void AMGGuardActor::MoveToward(const FVector& Destination, float Speed, float DeltaSeconds)
 {
-    const FVector Diff = (Destination - GetActorLocation()).GetSafeNormal2D();
-    if (Diff.IsNearlyZero()) return;
-    const FVector Step = Diff * FMath::Min(Speed * DeltaSeconds, FVector::Dist2D(Destination, GetActorLocation()));
-    SetActorLocation(GetActorLocation() + Step, true);
-    SetActorRotation(FMath::RInterpTo(GetActorRotation(), Diff.Rotation(), DeltaSeconds, 6.f));
+    if (DeltaSeconds <= SMALL_NUMBER) return;
+    const FVector Before = GetActorLocation();
+    const FVector Delta = Destination - Before;
+    const float Distance = Delta.Size2D();
+    if (Distance < 1.f)
+    {
+        SmoothedGroundVelocity = FMath::VInterpTo(
+            SmoothedGroundVelocity, FVector::ZeroVector, DeltaSeconds, 9.f);
+        ActualGroundSpeedCmPerSec = 0.f;
+        return;
+    }
+    const FVector Direction = Delta.GetSafeNormal2D();
+    // Actual acceleration/braking rather than snapping directly to full speed
+    // or flipping 180 degrees while the body remains standing still.
+    const float DesiredSpeed = FMath::Min(
+        FMath::Max(0.f, Speed), Distance * 4.5f);
+    SmoothedGroundVelocity = FMath::VInterpTo(
+        SmoothedGroundVelocity, Direction * DesiredSpeed, DeltaSeconds, 6.f);
+    SetActorLocation(Before + SmoothedGroundVelocity * DeltaSeconds, true);
+    const FVector Travel = GetActorLocation() - Before;
+    ActualGroundSpeedCmPerSec = Travel.Size2D() / DeltaSeconds;
+    if (Travel.Size2D() < 0.2f)
+        SmoothedGroundVelocity = FMath::VInterpTo(
+            SmoothedGroundVelocity, FVector::ZeroVector, DeltaSeconds, 10.f);
+    if (Travel.Size2D() > 0.2f)
+        SetActorRotation(FMath::RInterpTo(
+            GetActorRotation(), Travel.GetSafeNormal2D().Rotation(),
+            DeltaSeconds, 5.5f));
 }
 
 bool AMGGuardActor::AdvanceNoiseInvestigation(float DeltaSeconds)
@@ -313,6 +336,11 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     if (bIncapacitated || !GetWorld()) return;
     StaggerSeconds = FMath::Max(0.f, StaggerSeconds - DeltaSeconds);
+    // No movement in this frame unless the state actually produces a step.
+    // An AnimBP can use actual capsule travel speed, not a phantom target
+    // velocity that animates running feet against an obstructing wall.
+    ActualGroundSpeedCmPerSec = FMath::FInterpTo(
+        ActualGroundSpeedCmPerSec, 0.f, DeltaSeconds, 8.f);
     AttackCooldown = FMath::Max(0.f, AttackCooldown - DeltaSeconds);
     SquadBroadcastCooldown = FMath::Max(0.f, SquadBroadcastCooldown - DeltaSeconds);
     CustodyThreatMemorySeconds = FMath::Max(0.f,

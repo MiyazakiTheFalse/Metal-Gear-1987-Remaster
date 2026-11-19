@@ -51,6 +51,8 @@ public:
     UFUNCTION(BlueprintPure, Category="Security|Acting")
     EMGGuardPosture GetGuardPosture() const { return PresentedPosture; }
     UFUNCTION(BlueprintPure, Category="Security|Acting")
+    float GetActualGroundSpeedCmPerSec() const { return ActualGroundSpeedCmPerSec; }
+    UFUNCTION(BlueprintPure, Category="Security|Acting")
     FVector GetEvidenceLocation() const { return LastKnownPlayerPosition; }
     UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
     void OnPostureChanged(EMGGuardPosture Previous, EMGGuardPosture Current);
@@ -108,6 +110,8 @@ private:
     FVector BodyReportLocation = FVector::ZeroVector;
     EMGGuardPosture PresentedPosture = EMGGuardPosture::Patrol;
     TSet<AMGGuardActor*> SeenIncapacitatedColleagues;
+    FVector SmoothedGroundVelocity = FVector::ZeroVector;
+    float ActualGroundSpeedCmPerSec = 0.f;
     FVector PatrolAxis = FVector::ForwardVector;
     float PatrolHalfLength = 180.f;
     float PatrolSpeed = 90.f;
