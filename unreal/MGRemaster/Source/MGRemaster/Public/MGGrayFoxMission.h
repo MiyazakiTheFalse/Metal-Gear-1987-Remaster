@@ -14,6 +14,12 @@ class APointLight;
  * Self-contained, provisional Gray Fox prison greybox.
  * Original MSX2 event structure; J2ME room geometry has NOT been verified.
  */
+UENUM(BlueprintType)
+enum class EMGFacilitySecurityState : uint8
+{
+    Normal, Caution, Alert, Evasion, StandDown
+};
+
 UCLASS()
 class MGREMASTER_API AMGGrayFoxMission : public AActor
 {
@@ -32,6 +38,13 @@ public:
     bool IsTransmitterActive() const;
     bool DiscardTransmitter(AMGPlayerCharacter* Player);
     bool HasEquipmentConfiscated() const;
+    void NotifyGuardContactReported(const FVector& LastSeenPosition);
+    void NotifyGuardBodyReported(const FVector& EvidencePosition);
+    UFUNCTION(BlueprintPure, Category="Mission|Security")
+    EMGFacilitySecurityState GetFacilitySecurityState() const { return FacilitySecurityState; }
+    UFUNCTION(BlueprintImplementableEvent, Category="Mission|Security")
+    void OnFacilitySecurityStateChanged(EMGFacilitySecurityState Previous,
+                                        EMGFacilitySecurityState Current);
     uint32 GetMissionFlags() const { return Flags; }
     FString GetObjectiveText() const;
     FString GetPacingHint() const;
@@ -86,6 +99,13 @@ private:
     bool bPlayerInitialised = false;
     bool bHasLoadedSave = false;
     bool bUnderAlert = false;
+    EMGFacilitySecurityState FacilitySecurityState = EMGFacilitySecurityState::Normal;
+    float FacilityAlertRemaining = 0.f;
+    float FacilityEvasionRemaining = 0.f;
+    float FacilityCautionRemaining = 0.f;
+    float FacilityStandDownRemaining = 0.f;
+    FVector LastFacilityEvidence = FVector::ZeroVector;
+    void SetFacilitySecurityState(EMGFacilitySecurityState NewState);
     float ElapsedSinceBeat = 0.f;
     // Hints are offered when exploration stalls, not simply after entering a room.
     float SecondsSinceExploration = 0.f;
@@ -119,6 +139,6 @@ private:
                   float MaxDistanceCm) const;
     uint32 GetPacingPhase() const;
     uint32 GetHintLevel() const;
-    void UpdateGuardAlert();
+    void UpdateGuardAlert(float DeltaSeconds);
     void NotifyPacingPhaseIfChanged();
 };

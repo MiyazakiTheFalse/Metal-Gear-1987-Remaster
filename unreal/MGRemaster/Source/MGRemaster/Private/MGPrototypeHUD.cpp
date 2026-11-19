@@ -65,7 +65,15 @@ void AMGPrototypeHUD::DrawHUD()
     // Transmitter alert is a real signal, not an invisible normal patrol.
     const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
+    const EMGFacilitySecurityState Facility = Mission ?
+        Mission->GetFacilitySecurityState() : EMGFacilitySecurityState::Normal;
     int32 MaxThreat = Mission && Mission->IsTransmitterActive() ? 3 : 0;
+    if (Facility == EMGFacilitySecurityState::Alert)
+        MaxThreat = FMath::Max(MaxThreat, 3);
+    else if (Facility == EMGFacilitySecurityState::Evasion)
+        MaxThreat = FMath::Max(MaxThreat, 2);
+    else if (Facility == EMGFacilitySecurityState::Caution)
+        MaxThreat = FMath::Max(MaxThreat, 1);
     float MaxSuspicion = 0.f;
     for (TActorIterator<AMGGuardActor> Guard(GetWorld()); Guard; ++Guard)
     {
@@ -103,13 +111,15 @@ void AMGPrototypeHUD::DrawHUD()
         const float RW = RadarSize - 26.f * UiScale;
         const float RH = 91.f * UiScale;
         DrawRect(FLinearColor(0.05f, 0.13f, 0.13f, 1.f), X0, Y0, RW, RH);
-        // Prison and connected Shotmaker wing require different radar scales.
+        // Three separate physical maps. The earlier projection clamped the
+        // entire prelude and its guards onto the left prison-radar edge.
+        const bool bPrelude = Player->GetActorLocation().X < -1250.f;
         const bool bBossWing = Player->GetActorLocation().X > 1350.f;
-        const float MinX = bBossWing ? 1350.f : -1250.f;
-        const float SpanX = bBossWing ? 2400.f : 2650.f;
+        const float MinX = bPrelude ? -3900.f : (bBossWing ? 1350.f : -1250.f);
+        const float SpanX = bPrelude ? 2700.f : (bBossWing ? 2400.f : 2650.f);
         const float MinY = bBossWing ? -1105.f : -500.f;
         const float SpanY = bBossWing ? 2210.f : 1000.f;
-        if (!bBossWing)
+        if (!bBossWing && !bPrelude)
             for (const float DividerWorldX : {-300.f, 470.f})
             {
                 const float V = X0 + FMath::Clamp((DividerWorldX - MinX) / SpanX, 0.f, 1.f) * RW;

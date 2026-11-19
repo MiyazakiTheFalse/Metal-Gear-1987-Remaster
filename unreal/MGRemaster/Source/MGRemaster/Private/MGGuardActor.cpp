@@ -1,6 +1,7 @@
 #include "MGGuardActor.h"
 
 #include "MGPlayerCharacter.h"
+#include "MGGrayFoxMission.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -377,9 +378,14 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     {
         BodyReportDelay -= DeltaSeconds;
         if (BodyReportDelay < 0.f)
+        {
             for (TActorIterator<AMGGuardActor> Ally(GetWorld()); Ally; ++Ally)
                 if (*Ally != this)
                     Ally->ReceiveEnvironmentalReport(BodyReportLocation, this);
+            if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+                    UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+                Mission->NotifyGuardBodyReported(BodyReportLocation);
+        }
     }
     BodyScanCountdown -= DeltaSeconds;
     if (BodyScanCountdown <= 0.f && Role != EMGGuardRole::Custody)
@@ -527,6 +533,9 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         {
             bPendingRadioReport = false;
             OnContactReported(LastKnownPlayerPosition);
+            if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+                    UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+                Mission->NotifyGuardContactReported(LastKnownPlayerPosition);
             for (TActorIterator<AMGGuardActor> Ally(GetWorld()); Ally; ++Ally)
                 if (*Ally != this)
                     Ally->ReceiveLocalSquadReport(LastKnownPlayerPosition, this);

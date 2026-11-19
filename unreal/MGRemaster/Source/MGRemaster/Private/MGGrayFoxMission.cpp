@@ -812,16 +812,89 @@ bool AMGGrayFoxMission::HasEquipmentConfiscated() const
         && (Flags & MG_FOX_GEAR_RECOVERED) == 0;
 }
 
-void AMGGrayFoxMission::UpdateGuardAlert()
+void AMGGrayFoxMission::SetFacilitySecurityState(EMGFacilitySecurityState NewState)
 {
-    bUnderAlert = IsTransmitterActive();
-    if (!GetWorld()) return;
-    for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
-        if (It->GetAwarenessState() >= 3 && !It->IsIncapacitated())
+    if (FacilitySecurityState == NewState) return;
+    const EMGFacilitySecurityState Previous = FacilitySecurityState;
+    FacilitySecurityState = NewState;
+    OnFacilitySecurityStateChanged(Previous, NewState);
+}
+
+void AMGGrayFoxMission::NotifyGuardContactReported(const FVector& LastSeenPosition)
+{
+    // Only an actual transmitted guard sighting creates installation alert.
+    LastFacilityEvidence = LastSeenPosition;
+    FacilityAlertRemaining = FMath::Max(FacilityAlertRemaining, 10.f);
+    FacilityEvasionRemaining = 7.f;
+    SetFacilitySecurityState(EMGFacilitySecurityState::Alert);
+}
+
+void AMGGrayFoxMission::NotifyGuardBodyReported(const FVector& EvidencePosition)
+{
+    // A discovered body raises *caution*, never a perfect enemy location.
+    LastFacilityEvidence = EvidencePosition;
+    FacilityCautionRemaining = FMath::Max(FacilityCautionRemaining, 9.f);
+    if (FacilitySecurityState != EMGFacilitySecurityState::Alert &&
+        FacilitySecurityState != EMGFacilitySecurityState::Evasion)
+        SetFacilitySecurityState(EMGFacilitySecurityState::Caution);
+}
+
+void AMGGrayFoxMission::UpdateGuardAlert(float Dt)
+{
+    const float Step = FMath::Max(Dt, 0.f);
+    FacilityAlertRemaining = FMath::Max(0.f, FacilityAlertRemaining - Step);
+    FacilityCautionRemaining = FMath::Max(0.f, FacilityCautionRemaining - Step);
+    bool bLocalConfirmedContact = false;
+    bool bActiveInvestigation = false;
+    if (GetWorld())
+        for (TActorIterator<AMGGuardActor> G(GetWorld()); G; ++G)
         {
-            bUnderAlert = true;
-            break;
+            if (G->IsIncapacitated()) continue;
+            bLocalConfirmedContact |= G->HasDirectVisualContact()
+                && G->GetAwarenessState() >= 3;
+            const EMGGuardAwarenessPhase Phase = G->GetAwarenessPhase();
+            bActiveInvestigation |= Phase == EMGGuardAwarenessPhase::Suspicious ||
+                Phase == EMGGuardAwarenessPhase::Investigating ||
+                Phase == EMGGuardAwarenessPhase::Searching ||
+                Phase == EMGGuardAwarenessPhase::Confirming;
         }
+
+    if (FacilityAlertRemaining > 0.f)
+        SetFacilitySecurityState(EMGFacilitySecurityState::Alert);
+    else if (FacilitySecurityState == EMGFacilitySecurityState::Alert)
+    {
+        FacilityEvasionRemaining = FMath::Max(FacilityEvasionRemaining, 7.f);
+        SetFacilitySecurityState(EMGFacilitySecurityState::Evasion);
+    }
+    else if (FacilitySecurityState == EMGFacilitySecurityState::Evasion)
+    {
+        FacilityEvasionRemaining = FMath::Max(0.f, FacilityEvasionRemaining - Step);
+        if (FacilityEvasionRemaining <= 0.f)
+        {
+            FacilityCautionRemaining = FMath::Max(FacilityCautionRemaining, 5.f);
+            SetFacilitySecurityState(EMGFacilitySecurityState::Caution);
+        }
+    }
+    else if (bActiveInvestigation || FacilityCautionRemaining > 0.f ||
+             IsTransmitterActive())
+        SetFacilitySecurityState(EMGFacilitySecurityState::Caution);
+    else if (FacilitySecurityState == EMGFacilitySecurityState::Caution)
+    {
+        FacilityStandDownRemaining = 3.f;
+        SetFacilitySecurityState(EMGFacilitySecurityState::StandDown);
+    }
+    else if (FacilitySecurityState == EMGFacilitySecurityState::StandDown)
+    {
+        FacilityStandDownRemaining = FMath::Max(0.f, FacilityStandDownRemaining - Step);
+        if (FacilityStandDownRemaining <= 0.f)
+            SetFacilitySecurityState(EMGFacilitySecurityState::Normal);
+    }
+
+    // A local direct sighting or planted transmitter still suppresses hints,
+    // even before a guard has successfully transmitted a facility alarm.
+    bUnderAlert = bLocalConfirmedContact || IsTransmitterActive() ||
+        FacilitySecurityState == EMGFacilitySecurityState::Alert ||
+        FacilitySecurityState == EMGFacilitySecurityState::Evasion;
 }
 
 uint32 AMGGrayFoxMission::GetPacingPhase() const
@@ -1109,7 +1182,7 @@ void AMGGrayFoxMission::Tick(float Dt)
     ElapsedSinceBeat += FMath::Max(0.f, Dt);
     DialogueTimeRemaining = FMath::Max(0.f, DialogueTimeRemaining - Dt);
     UpdateZoneLighting(Dt);
-    UpdateGuardAlert();
+    UpdateGuardAlert(Dt);
     AMGPlayerCharacter* Player =
         Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (Player)
