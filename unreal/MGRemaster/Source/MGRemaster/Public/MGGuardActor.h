@@ -23,6 +23,21 @@ enum class EMGGuardPosture : uint8
     Patrol, Notice, Investigate, Search, Challenge, Report, Engage, Strike, Incapacitated
 };
 
+// Local security belief, distinct from the guard's assigned duty and the
+// action/animation it performs. Nothing here grants GPS knowledge of Snake.
+UENUM(BlueprintType)
+enum class EMGGuardAwarenessPhase : uint8
+{
+    Routine, Suspicious, Investigating, Confirming, Engaged, Searching, Returning, Incapacitated
+};
+
+UENUM(BlueprintType)
+enum class EMGGuardEvidenceKind : uint8
+{
+    None, HeardMovement, StructuralImpact, ObservedIntruder, SquadSighting,
+    DiscoveredBody, SquadBodyReport, Wounded
+};
+
 UCLASS()
 class MGREMASTER_API AMGGuardActor : public AActor
 {
@@ -52,6 +67,19 @@ public:
     EMGGuardPosture GetGuardPosture() const { return PresentedPosture; }
     UFUNCTION(BlueprintPure, Category="Security|Acting")
     float GetActualGroundSpeedCmPerSec() const { return ActualGroundSpeedCmPerSec; }
+    UFUNCTION(BlueprintPure, Category="Security|State")
+    EMGGuardAwarenessPhase GetAwarenessPhase() const { return SecurityPhase; }
+    UFUNCTION(BlueprintPure, Category="Security|State")
+    EMGGuardEvidenceKind GetEvidenceKind() const { return EvidenceKind; }
+    UFUNCTION(BlueprintPure, Category="Security|State")
+    bool HasDirectVisualContact() const { return bConfirmedVisualThisFrame; }
+    UFUNCTION(BlueprintPure, Category="Security|State")
+    float GetTimeInSecurityState() const { return TimeInSecurityState; }
+    UFUNCTION(BlueprintPure, Category="Security|State")
+    bool IsAlertedByThreat() const { return SecurityPhase == EMGGuardAwarenessPhase::Engaged; }
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|State")
+    void OnAwarenessPhaseChanged(EMGGuardAwarenessPhase Previous, EMGGuardAwarenessPhase Current,
+                                 EMGGuardEvidenceKind CurrentEvidence);
     UFUNCTION(BlueprintPure, Category="Security|Acting")
     FVector GetEvidenceLocation() const { return LastKnownPlayerPosition; }
     UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
@@ -108,6 +136,13 @@ private:
     float BodyScanCountdown = 0.f;
     float BodyReportDelay = -1.f;
     FVector BodyReportLocation = FVector::ZeroVector;
+    EMGGuardAwarenessPhase SecurityPhase = EMGGuardAwarenessPhase::Routine;
+    EMGGuardEvidenceKind EvidenceKind = EMGGuardEvidenceKind::None;
+    float TimeInSecurityState = 0.f;
+    float EvidenceAge = 99.f;
+    bool bConfirmedVisualThisFrame = false;
+    void SetSecurityPhase(EMGGuardAwarenessPhase NewPhase);
+    void ObserveEvidence(EMGGuardEvidenceKind Kind, const FVector& Location);
     EMGGuardPosture PresentedPosture = EMGGuardPosture::Patrol;
     TSet<AMGGuardActor*> SeenIncapacitatedColleagues;
     FVector SmoothedGroundVelocity = FVector::ZeroVector;

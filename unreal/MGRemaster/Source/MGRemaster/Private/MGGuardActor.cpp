@@ -96,6 +96,22 @@ bool AMGGuardActor::CanAcceptDetention(const AMGPlayerCharacter* Suspect) const
     return !bHit || Hit.GetActor() == Suspect;
 }
 
+void AMGGuardActor::SetSecurityPhase(EMGGuardAwarenessPhase NewPhase)
+{
+    if (SecurityPhase == NewPhase) return;
+    const EMGGuardAwarenessPhase Old = SecurityPhase;
+    SecurityPhase = NewPhase;
+    TimeInSecurityState = 0.f;
+    OnAwarenessPhaseChanged(Old, NewPhase, EvidenceKind);
+}
+
+void AMGGuardActor::ObserveEvidence(EMGGuardEvidenceKind Kind, const FVector& Location)
+{
+    EvidenceKind = Kind;
+    EvidenceAge = 0.f;
+    LastKnownPlayerPosition = Location; // search destination; may be a BODY, not a Snake sighting
+}
+
 void AMGGuardActor::SetGuardPosture(EMGGuardPosture Desired)
 {
     if (PresentedPosture == Desired) return;
@@ -111,7 +127,7 @@ void AMGGuardActor::ReceiveEnvironmentalReport(const FVector& EvidenceAt, const 
         return;
     // This is the location of a discovered *body* or disturbed environment,
     // NOT a report of Snake's current or last directly seen coordinates.
-    LastKnownPlayerPosition = EvidenceAt;
+    ObserveEvidence(EMGGuardEvidenceKind::SquadBodyReport, EvidenceAt);
     Suspicion = FMath::Max(Suspicion, .72f);
     AwarenessState = FMath::Max(AwarenessState, 2u);
     SearchForLastKnownSeconds = FMath::Max(SearchForLastKnownSeconds, 5.5f);
@@ -144,7 +160,7 @@ void AMGGuardActor::CheckVisibleIncapacitatedColleagues()
             ECC_Visibility, Params);
         if (bOccluded && Hit.GetActor() != Colleague) continue;
         SeenIncapacitatedColleagues.Add(Colleague);
-        LastKnownPlayerPosition = Colleague->GetActorLocation();
+        ObserveEvidence(EMGGuardEvidenceKind::DiscoveredBody, Colleague->GetActorLocation());
         Suspicion = FMath::Max(Suspicion, .78f);
         AwarenessState = FMath::Max(AwarenessState, 2u);
         SearchForLastKnownSeconds = FMath::Max(SearchForLastKnownSeconds, 7.f);
@@ -163,7 +179,7 @@ void AMGGuardActor::ReceiveLocalSquadReport(const FVector& SeenAt, const AActor*
         return;
     // Radio shares last *observed* location only; it does not mark the player
     // in a world-state oracle, force precise lock, or grant through-wall hits.
-    LastKnownPlayerPosition = SeenAt;
+    ObserveEvidence(EMGGuardEvidenceKind::SquadSighting, SeenAt);
     SearchForLastKnownSeconds = 4.0f;
     Suspicion = FMath::Max(Suspicion, .66f);
     AwarenessState = FMath::Max(AwarenessState, 2u);
@@ -194,6 +210,7 @@ void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, const FVector& W
         0 : FMath::Min(ConsecutiveKnocks + 1, 3);
     DistractionLocation = SoundLocation + GuardSide * 90.f;
     DistractionLocation.Z = GetActorLocation().Z;
+    ObserveEvidence(EMGGuardEvidenceKind::StructuralImpact, DistractionLocation);
     ReturnToPatrol = PatrolOrigin +
         FVector(FMath::Clamp(GetActorLocation().X - PatrolOrigin.X, -180.f, 180.f), 0.f, 0.f);
     DistractionPhase = EDistractionPhase::React;
@@ -238,8 +255,10 @@ void AMGGuardActor::MoveToward(const FVector& Destination, float Speed, float De
 bool AMGGuardActor::AdvanceNoiseInvestigation(float DeltaSeconds)
 {
     if (DistractionPhase == EDistractionPhase::None) return false;
-    // Real visual detection and combat stimuli supersede a mere sound cue.
-    if (AwarenessState >= 2)
+    // Direct visual confirmation supersedes noise. A guard who is merely
+    // searching a body or responding to a radio report must NOT forget the
+    // local sound stimulus just because numeric awareness reached 2.
+    if (bConfirmedVisualThisFrame && AwarenessState >= 3)
     {
         DistractionPhase = EDistractionPhase::None;
         ConsecutiveKnocks = 0;
@@ -311,11 +330,13 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
         // A victim can react and report contact; damage never silently vanishes.
         Suspicion = 1.f;
         AwarenessState = 3;
-        if (DamageCauser) LastKnownPlayerPosition = DamageCauser->GetActorLocation();
+        if (DamageCauser)
+            ObserveEvidence(EMGGuardEvidenceKind::Wounded, DamageCauser->GetActorLocation());
         if (Health <= 0.f)
         {
             bIncapacitated = true;
             SetGuardPosture(EMGGuardPosture::Incapacitated);
+            SetSecurityPhase(EMGGuardAwarenessPhase::Incapacitated);
             Suspicion = 0.f;
             AwarenessState = 0;
             ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -335,6 +356,9 @@ void AMGGuardActor::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     if (bIncapacitated || !GetWorld()) return;
+    TimeInSecurityState += FMath::Max(0.f, DeltaSeconds);
+    EvidenceAge = FMath::Min(120.f, EvidenceAge + FMath::Max(0.f, DeltaSeconds));
+    bConfirmedVisualThisFrame = false;
     StaggerSeconds = FMath::Max(0.f, StaggerSeconds - DeltaSeconds);
     // No movement in this frame unless the state actually produces a step.
     // An AnimBP can use actual capsule travel speed, not a phantom target
@@ -397,6 +421,7 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         bCustodyChallenge = bCanChallenge;
         if (bCustodyChallenge)
         {
+            SetSecurityPhase(EMGGuardAwarenessPhase::Confirming);
             SetGuardPosture(EMGGuardPosture::Challenge);
             AttackWindupSeconds = 0.f;
             ChallengeAge += DeltaSeconds;
@@ -438,9 +463,11 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         bConfirmedVisualNow = Result.sees_player != 0 && bHasLineOfSight;
         if (Result.sees_player || Result.hears_player)
         {
-            // Footsteps are a place to investigate, not instant permission to
-            // turn and injure Snake through a body or cinematic camera.
-            LastKnownPlayerPosition = Player->GetActorLocation();
+            // The *cause* of contact is retained. Hearing does not confer
+            // direct sight or permission to strike a target behind cover.
+            ObserveEvidence(Result.sees_player
+                ? EMGGuardEvidenceKind::ObservedIntruder
+                : EMGGuardEvidenceKind::HeardMovement, Player->GetActorLocation());
             ContactEvidenceAge = 0.f;
         }
     }
@@ -458,7 +485,9 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     bConfirmedVisualNow = bVisible;
     if (bVisible || bAudible)
     {
-        LastKnownPlayerPosition = Player->GetActorLocation();
+        ObserveEvidence(bVisible
+            ? EMGGuardEvidenceKind::ObservedIntruder
+            : EMGGuardEvidenceKind::HeardMovement, Player->GetActorLocation());
         ContactEvidenceAge = 0.f;
     }
 #endif
@@ -466,6 +495,7 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     // Actual sensory evidence expires. A guard can search an old position,
     // but must reacquire Snake before inflicting harm.
     ContactEvidenceAge = FMath::Min(ContactEvidenceAge + DeltaSeconds, 100.f);
+    bConfirmedVisualThisFrame = bConfirmedVisualNow;
     VisualConfirmationSeconds = bConfirmedVisualNow
         ? FMath::Min(VisualConfirmationSeconds + DeltaSeconds, 1.5f) : 0.f;
     // The solver's fast decay must not erase explicit squad/body
@@ -532,6 +562,27 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     else AttackWindupSeconds = 0.f;
 
     if (StaggerSeconds > 0.f) return;
+    // Local awareness stays distinct from duty and acting. Combat needs
+    // actual visual proof; a body/noise/radio report creates investigation,
+    // not an omniscient 'enemy spotted' state.
+    if (bConfirmedVisualNow && AwarenessState >= 3)
+        SetSecurityPhase(EMGGuardAwarenessPhase::Engaged);
+    else if (bConfirmedVisualNow && AwarenessState >= 1)
+        SetSecurityPhase(EMGGuardAwarenessPhase::Confirming);
+    else if (DistractionPhase == EDistractionPhase::React ||
+             DistractionPhase == EDistractionPhase::Approach)
+        SetSecurityPhase(EMGGuardAwarenessPhase::Investigating);
+    else if (DistractionPhase == EDistractionPhase::Search ||
+             SearchForLastKnownSeconds > 0.f || AwarenessState >= 2)
+        SetSecurityPhase(EMGGuardAwarenessPhase::Searching);
+    else if (DistractionPhase == EDistractionPhase::Return ||
+             (EvidenceAge < 9.f && AwarenessState == 0))
+        SetSecurityPhase(EMGGuardAwarenessPhase::Returning);
+    else if (AwarenessState == 1)
+        SetSecurityPhase(EMGGuardAwarenessPhase::Suspicious);
+    else
+        SetSecurityPhase(EMGGuardAwarenessPhase::Routine);
+
     // States are presented as acting intentions. Missing AnimBPs still have
     // truthful collision and AI behavior; art cannot change these states.
     if (AttackWindupSeconds > 0.f)
