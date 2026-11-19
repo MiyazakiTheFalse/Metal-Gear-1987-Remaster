@@ -13,6 +13,9 @@
 #include "mg_legacy_core.h"
 #include "EngineUtils.h"
 
+// The perception model may classify an audible footfall as suspicious; only
+// a fresh sight confirmation authorises aimed close-range damage.
+
 AMGGuardActor::AMGGuardActor()
 {
     PrimaryActorTick.bCanEverTick = true;
@@ -81,6 +84,66 @@ bool AMGGuardActor::CanAcceptDetention(const AMGPlayerCharacter* Suspect) const
         Hit, GetActorLocation() + FVector(0,0,65.f),
         Suspect->GetActorLocation() + FVector(0,0,65.f), ECC_Visibility, Trace);
     return !bHit || Hit.GetActor() == Suspect;
+}
+
+void AMGGuardActor::SetGuardPosture(EMGGuardPosture Desired)
+{
+    if (PresentedPosture == Desired) return;
+    const EMGGuardPosture Old = PresentedPosture;
+    PresentedPosture = Desired;
+    OnPostureChanged(Old, Desired);
+}
+
+void AMGGuardActor::ReceiveEnvironmentalReport(const FVector& EvidenceAt, const AActor* Sender)
+{
+    if (bIncapacitated || !IsValid(Sender) || AwarenessState == 3 ||
+        FVector::Dist2D(GetActorLocation(), Sender->GetActorLocation()) > 950.f)
+        return;
+    // This is the location of a discovered *body* or disturbed environment,
+    // NOT a report of Snake's current or last directly seen coordinates.
+    LastKnownPlayerPosition = EvidenceAt;
+    Suspicion = FMath::Max(Suspicion, .72f);
+    AwarenessState = FMath::Max(AwarenessState, 2u);
+    SearchForLastKnownSeconds = FMath::Max(SearchForLastKnownSeconds, 5.5f);
+    SetGuardPosture(EMGGuardPosture::Search);
+}
+
+void AMGGuardActor::CheckVisibleIncapacitatedColleagues(const AMGPlayerCharacter* Player)
+{
+    if (bIncapacitated || !GetWorld()) return;
+    // Small slice population; evaluate infrequently, and do not see a body
+    // through walls, around the back of the head or from unlimited range.
+    for (TActorIterator<AMGGuardActor> Other(GetWorld()); Other; ++Other)
+    {
+        AMGGuardActor* Colleague = *Other;
+        if (Colleague == this || !Colleague->IsIncapacitated() ||
+            SeenIncapacitatedColleagues.Contains(Colleague))
+            continue;
+        const FVector ToBody = Colleague->GetActorLocation() - GetActorLocation();
+        const float Range = ToBody.Size2D();
+        const bool bNearby = Range < 180.f;
+        if (Range > 720.f || (!bNearby && FVector::DotProduct(
+                GetActorForwardVector().GetSafeNormal2D(),
+                ToBody.GetSafeNormal2D()) < 0.42f))
+            continue;
+        FHitResult Hit;
+        FCollisionQueryParams Params(SCENE_QUERY_STAT(MGBodyEvidenceLOS), false, this);
+        const bool bOccluded = GetWorld()->LineTraceSingleByChannel(
+            Hit, GetActorLocation() + FVector(0,0,65.f),
+            Colleague->GetActorLocation() + FVector(0,0,45.f),
+            ECC_Visibility, Params);
+        if (bOccluded && Hit.GetActor() != Colleague) continue;
+        SeenIncapacitatedColleagues.Add(Colleague);
+        LastKnownPlayerPosition = Colleague->GetActorLocation();
+        Suspicion = FMath::Max(Suspicion, .78f);
+        AwarenessState = FMath::Max(AwarenessState, 2u);
+        SearchForLastKnownSeconds = FMath::Max(SearchForLastKnownSeconds, 7.f);
+        BodyReportLocation = Colleague->GetActorLocation();
+        BodyReportDelay = 1.2f;
+        OnBodyDiscovered(BodyReportLocation);
+        SetGuardPosture(EMGGuardPosture::Investigate);
+        break; // One discovery / report action per brief scan.
+    }
 }
 
 void AMGGuardActor::ReceiveLocalSquadReport(const FVector& SeenAt, const AActor* Sender)
@@ -209,6 +272,7 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
     const float Accepted = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
     if (DamageAmount > 0.f && !bIncapacitated)
     {
+        AttackWindupSeconds = 0.f; // A genuine interruption cancels a strike.
         Health = FMath::Max(0.f, Health - DamageAmount);
         StaggerSeconds = 0.22f;
         // A victim can react and report contact; damage never silently vanishes.
@@ -218,6 +282,7 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
         if (Health <= 0.f)
         {
             bIncapacitated = true;
+            SetGuardPosture(EMGGuardPosture::Incapacitated);
             Suspicion = 0.f;
             AwarenessState = 0;
             ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -244,6 +309,23 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         CustodyThreatMemorySeconds - DeltaSeconds);
     SearchForLastKnownSeconds = FMath::Max(0.f,
         SearchForLastKnownSeconds - DeltaSeconds);
+    // A body report is a separate type of intelligence from confirmed enemy
+    // contact. Nearby colleagues investigate the evidence, not Snake's GPS.
+    if (BodyReportDelay >= 0.f)
+    {
+        BodyReportDelay -= DeltaSeconds;
+        if (BodyReportDelay < 0.f)
+            for (TActorIterator<AMGGuardActor> Ally(GetWorld()); Ally; ++Ally)
+                if (*Ally != this)
+                    Ally->ReceiveEnvironmentalReport(BodyReportLocation, this);
+    }
+    BodyScanCountdown -= DeltaSeconds;
+    if (BodyScanCountdown <= 0.f && Role != EMGGuardRole::Custody)
+    {
+        BodyScanCountdown = 0.70f;
+        CheckVisibleIncapacitatedColleagues(
+            Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0)));
+    }
     // Do not counter-rotate an authored skeletal rig: its AnimBP owns hit reactions.
     if (!HasAuthoredCharacterArt())
         ProxyBody->SetRelativeRotation(FMath::RInterpTo(ProxyBody->GetRelativeRotation(),
@@ -278,6 +360,8 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         bCustodyChallenge = bCanChallenge;
         if (bCustodyChallenge)
         {
+            SetGuardPosture(EMGGuardPosture::Challenge);
+            AttackWindupSeconds = 0.f;
             ChallengeAge += DeltaSeconds;
             if (bFirstChallengeFrame) OnCustodyChallenge();
             const FVector Direction = ToPlayer.GetSafeNormal2D();
@@ -308,13 +392,17 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     Frame.line_of_sight = bHasLineOfSight ? 1u : 0u;
 
     MgGuardResult Result = {};
+    bool bConfirmedVisualNow = false;
 #if MG_WITH_RUST
     if (mg_core_abi_version() == 1 && mg_step_guard(&Frame, &Result))
     {
         Suspicion = Result.suspicion;
         AwarenessState = Result.state;
+        bConfirmedVisualNow = Result.sees_player != 0 && bHasLineOfSight;
         if (Result.sees_player || Result.hears_player)
         {
+            // Footsteps are a place to investigate, not instant permission to
+            // turn and injure Snake through a body or cinematic camera.
             LastKnownPlayerPosition = Player->GetActorLocation();
             ContactEvidenceAge = 0.f;
         }
@@ -330,6 +418,7 @@ void AMGGuardActor::Tick(float DeltaSeconds)
          (bAudible ? Frame.noise * 0.40f : 0.f) -
          ((!bVisible && !bAudible) ? 0.12f : 0.f)), 0.f, 1.f);
     AwarenessState = Suspicion >= 0.99f ? 3 : Suspicion >= 0.68f ? 2 : Suspicion >= 0.22f ? 1 : 0;
+    bConfirmedVisualNow = bVisible;
     if (bVisible || bAudible)
     {
         LastKnownPlayerPosition = Player->GetActorLocation();
@@ -340,6 +429,15 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     // Actual sensory evidence expires. A guard can search an old position,
     // but must reacquire Snake before inflicting harm.
     ContactEvidenceAge = FMath::Min(ContactEvidenceAge + DeltaSeconds, 100.f);
+    VisualConfirmationSeconds = bConfirmedVisualNow
+        ? FMath::Min(VisualConfirmationSeconds + DeltaSeconds, 1.5f) : 0.f;
+    // The solver's fast decay must not erase explicit squad/body
+    // investigation. It is *evidence* that fades, not hidden combat privilege.
+    if (SearchForLastKnownSeconds > 0.f && AwarenessState < 2)
+    {
+        AwarenessState = 2;
+        Suspicion = FMath::Max(Suspicion, .68f);
+    }
     if (AwarenessState == 3 && ContactEvidenceAge > 4.5f)
     {
         AwarenessState = 2;
@@ -348,7 +446,7 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     }
     // Half-second radio call, only on actually evidenced fresh contact. Nearby
     // colleagues receive last known position, not Snake's live world transform.
-    if (AwarenessState == 3 && bHasLineOfSight && ContactEvidenceAge < .5f
+    if (AwarenessState == 3 && bConfirmedVisualNow
         && SquadBroadcastCooldown <= 0.f && !bPendingRadioReport)
     {
         bPendingRadioReport = true;
@@ -361,23 +459,57 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         if (PendingRadioDelay <= 0.f)
         {
             bPendingRadioReport = false;
+            OnContactReported(LastKnownPlayerPosition);
             for (TActorIterator<AMGGuardActor> Ally(GetWorld()); Ally; ++Ally)
                 if (*Ally != this)
                     Ally->ReceiveLocalSquadReport(LastKnownPlayerPosition, this);
         }
     }
-    // Actual physical line of sight is required to deal a melee wound;
-    // remembered sound/equipment beacons are not permission to hit through wall.
-    if (AwarenessState == 3 && bHasLineOfSight
-        && ContactEvidenceAge < 1.f && Distance < 145.f
-        && AttackCooldown <= 0.f)
+    // Close combat cannot fire the same tick a guard becomes alerted.
+    // A real face-on visual lock starts a readable wind-up; Snake may break
+    // sight, retreat or stagger the guard to cancel the impending strike.
+    const float FacingDot = FVector::DotProduct(
+        GetActorForwardVector().GetSafeNormal2D(), ToPlayer.GetSafeNormal2D());
+    const bool bValidStrike = AwarenessState == 3 && bConfirmedVisualNow
+        && VisualConfirmationSeconds >= .16f && Distance < 150.f
+        && FacingDot >= .68f && StaggerSeconds <= 0.f;
+    if (bValidStrike && AttackCooldown <= 0.f)
     {
-        UGameplayStatics::ApplyDamage(const_cast<AMGPlayerCharacter*>(Player),
-            12.f, nullptr, this, UDamageType::StaticClass());
-        AttackCooldown = 1.2f;
+        if (AttackWindupSeconds <= 0.f)
+        {
+            AttackWindupSeconds = .38f;
+            OnMeleeWarning();
+        }
+        else
+        {
+            AttackWindupSeconds -= FMath::Max(0.f, DeltaSeconds);
+            if (AttackWindupSeconds <= 0.f)
+            {
+                UGameplayStatics::ApplyDamage(const_cast<AMGPlayerCharacter*>(Player),
+                    12.f, nullptr, this, UDamageType::StaticClass());
+                OnMeleeImpact();
+                AttackCooldown = 1.25f;
+            }
+        }
     }
+    else AttackWindupSeconds = 0.f;
 
     if (StaggerSeconds > 0.f) return;
+    // States are presented as acting intentions. Missing AnimBPs still have
+    // truthful collision and AI behavior; art cannot change these states.
+    if (AttackWindupSeconds > 0.f)
+        SetGuardPosture(EMGGuardPosture::Strike);
+    else if (bPendingRadioReport)
+        SetGuardPosture(EMGGuardPosture::Report);
+    else if (AwarenessState >= 3)
+        SetGuardPosture(EMGGuardPosture::Engage);
+    else if (DistractionPhase != EDistractionPhase::None || SearchForLastKnownSeconds > 0.f)
+        SetGuardPosture(EMGGuardPosture::Investigate);
+    else if (AwarenessState == 2)
+        SetGuardPosture(EMGGuardPosture::Search);
+    else if (AwarenessState == 1)
+        SetGuardPosture(EMGGuardPosture::Notice);
+    else SetGuardPosture(EMGGuardPosture::Patrol);
     // Noise investigations are interruptible by real detection/alert.
     if (AdvanceNoiseInvestigation(DeltaSeconds))
     {

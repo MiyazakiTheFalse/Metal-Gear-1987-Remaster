@@ -15,6 +15,14 @@ enum class EMGGuardRole : uint8
     Patrol, Prison, Custody
 };
 
+// Acting/animation channel, derived from real observed evidence only.
+// No animation or sound writes an authoritative suspicion/mission flag.
+UENUM(BlueprintType)
+enum class EMGGuardPosture : uint8
+{
+    Patrol, Notice, Investigate, Search, Challenge, Report, Engage, Strike, Incapacitated
+};
+
 UCLASS()
 class MGREMASTER_API AMGGuardActor : public AActor
 {
@@ -39,6 +47,21 @@ public:
     void ReceiveLocalSquadReport(const FVector& SeenAt, const AActor* Sender);
     uint32 GetAwarenessState() const { return AwarenessState; }
     float GetSuspicion() const { return Suspicion; }
+    UFUNCTION(BlueprintPure, Category="Security|Acting")
+    EMGGuardPosture GetGuardPosture() const { return PresentedPosture; }
+    UFUNCTION(BlueprintPure, Category="Security|Acting")
+    FVector GetEvidenceLocation() const { return LastKnownPlayerPosition; }
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
+    void OnPostureChanged(EMGGuardPosture Previous, EMGGuardPosture Current);
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
+    void OnMeleeWarning();
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
+    void OnMeleeImpact();
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
+    void OnContactReported(const FVector& EvidenceLocation);
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
+    void OnBodyDiscovered(const FVector& BodyLocation);
+    void ReceiveEnvironmentalReport(const FVector& EvidenceAt, const AActor* Sender);
     // Sound stimulus carries a world location, never Snake's position.
     void HearWallKnock(const FVector& SoundLocation, const FVector& WallNormal, float HearingRadius, AActor* SoundInstigator);
     bool IsInvestigatingNoise() const { return DistractionPhase != EDistractionPhase::None; }
@@ -77,6 +100,15 @@ private:
     float SquadBroadcastCooldown = 0.f;
     float SearchForLastKnownSeconds = 0.f;
     float PursuitBlockedSeconds = 0.f;
+    float AttackWindupSeconds = 0.f;
+    float VisualConfirmationSeconds = 0.f;
+    float BodyScanCountdown = 0.f;
+    float BodyReportDelay = -1.f;
+    FVector BodyReportLocation = FVector::ZeroVector;
+    EMGGuardPosture PresentedPosture = EMGGuardPosture::Patrol;
+    TSet<TWeakObjectPtr<AMGGuardActor>> SeenIncapacitatedColleagues;
+    void SetGuardPosture(EMGGuardPosture Desired);
+    void CheckVisibleIncapacitatedColleagues(const class AMGPlayerCharacter* Player);
     int32 FlankSide = 1;
     UPROPERTY(EditAnywhere, Category="Security|Debug")
     bool bShowPerceptionDebug = false;
