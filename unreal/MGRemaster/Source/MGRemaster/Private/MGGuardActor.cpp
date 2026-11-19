@@ -410,6 +410,14 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     const FVector Target = Player->GetActorLocation() + FVector(0.f, 0.f, 55.f);
     const bool bTraceHit = GetWorld()->LineTraceSingleByChannel(Hit, Eye, Target, ECC_Visibility, Params);
     const bool bHasLineOfSight = !bTraceHit || Hit.GetActor() == Player;
+    const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
+    const EMGFacilitySecurityState BaseState = Mission
+        ? Mission->GetFacilitySecurityState() : EMGFacilitySecurityState::Normal;
+    const bool bFacilityLockdown = BaseState == EMGFacilitySecurityState::Alert ||
+        BaseState == EMGFacilitySecurityState::Evasion;
+    const bool bFacilityCaution = bFacilityLockdown ||
+        BaseState == EMGFacilitySecurityState::Caution;
 
     // The officers at the detention truck CHALLENGE instead of automatically
     // attacking a compliant nearby suspect. Challenge requires first-hand
@@ -422,7 +430,8 @@ void AMGGuardActor::Tick(float DeltaSeconds)
             CustodyThreatMemorySeconds = 3.5f;
         const bool bCanChallenge = bNear && bHasLineOfSight
             && !bThreatening && !Player->IsProne()
-            && CustodyThreatMemorySeconds <= 0.f && AwarenessState < 3;
+            && CustodyThreatMemorySeconds <= 0.f && AwarenessState < 3
+            && !bFacilityLockdown;
         const bool bFirstChallengeFrame = bCanChallenge && !bCustodyChallenge;
         bCustodyChallenge = bCanChallenge;
         if (bCustodyChallenge)
@@ -450,9 +459,12 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     Frame.guard_pos = {GetActorLocation().X / 100.f, GetActorLocation().Y / 100.f};
     Frame.guard_forward = {Forward.X, Forward.Y};
     Frame.player_pos = {Player->GetActorLocation().X / 100.f, Player->GetActorLocation().Y / 100.f};
-    Frame.vision_range_m = 12.f;
-    Frame.vision_half_angle_deg = 55.f;
-    Frame.hearing_range_m = 11.f;
+    // Elevated security means more deliberate attention, not omniscient AI.
+    // Rust and editor fallback read the SAME actual tuned sensor envelope.
+    Frame.vision_range_m = bFacilityLockdown ? 13.2f :
+        (bFacilityCaution ? 12.6f : 12.f);
+    Frame.vision_half_angle_deg = bFacilityLockdown ? 60.f : 55.f;
+    Frame.hearing_range_m = bFacilityLockdown ? 12.2f : 11.f;
     Frame.visibility = Player->GetVisibilityFactor();
     // A footstep can still transmit through walls, but physical barriers
     // reduce its useful evidence radius instead of creating an x-ray acoustic
@@ -484,9 +496,14 @@ void AMGGuardActor::Tick(float DeltaSeconds)
 #else
     // Reduced fallback for editor prototyping only; use the Rust native ABI
     // for the full independently tested perception implementation.
-    const bool bFacing = FVector::DotProduct(Forward.GetSafeNormal2D(), ToPlayer.GetSafeNormal2D()) > 0.57f;
-    const bool bVisible = bHasLineOfSight && bFacing && Distance < 1200.f;
-    const bool bAudible = Distance < 1100.f && Frame.noise > 0.1f;
+    const float FacingThreshold =
+        FMath::Cos(FMath::DegreesToRadians(Frame.vision_half_angle_deg));
+    const bool bFacing = FVector::DotProduct(
+        Forward.GetSafeNormal2D(), ToPlayer.GetSafeNormal2D()) > FacingThreshold;
+    const bool bVisible = bHasLineOfSight && bFacing &&
+        Distance < Frame.vision_range_m * 100.f;
+    const bool bAudible = Distance < Frame.hearing_range_m * 100.f &&
+        Frame.noise > 0.1f;
     Suspicion = FMath::Clamp(Suspicion + DeltaSeconds *
         ((bVisible ? Frame.visibility * 0.95f : 0.f) +
          (bAudible ? Frame.noise * 0.40f : 0.f) -
@@ -594,7 +611,7 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     else if (DistractionPhase == EDistractionPhase::Return ||
              (EvidenceAge < 9.f && AwarenessState == 0))
         SetSecurityPhase(EMGGuardAwarenessPhase::Returning);
-    else if (AwarenessState == 1)
+    else if (AwarenessState == 1 || bFacilityLockdown)
         SetSecurityPhase(EMGGuardAwarenessPhase::Suspicious);
     else
         SetSecurityPhase(EMGGuardAwarenessPhase::Routine);
@@ -611,7 +628,7 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         SetGuardPosture(EMGGuardPosture::Investigate);
     else if (AwarenessState == 2)
         SetGuardPosture(EMGGuardPosture::Search);
-    else if (AwarenessState == 1)
+    else if (AwarenessState == 1 || bFacilityLockdown)
         SetGuardPosture(EMGGuardPosture::Notice);
     else SetGuardPosture(EMGGuardPosture::Patrol);
     // Noise investigations are interruptible by real detection/alert.
@@ -656,7 +673,9 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         // The two transport officers hold actual security posts, rather than
         // walking away from the arrest point because a generic patrol tick
         // was reused. Their scan is subtle and visible to the player.
-        const float Scan = 23.f * FMath::Sin(GetWorld()->GetTimeSeconds() * .75f);
+        const float Scan = (bFacilityCaution ? 31.f : 23.f) *
+            FMath::Sin(GetWorld()->GetTimeSeconds() *
+                (bFacilityCaution ? 1.1f : .75f));
         SetActorRotation(FMath::RInterpTo(GetActorRotation(),
             FRotator(0.f, StationFacing.Yaw + Scan, 0.f), DeltaSeconds, 1.8f));
     }
