@@ -24,6 +24,26 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     Velocity.Z = 0.f;
     GroundSpeed = FMath::Clamp(Velocity.Size(), 0.f, 750.f);
     bMoving = GroundSpeed > 8.f;
+    const float CurrentYaw = Owner->GetActorRotation().Yaw;
+    bStartedMoving = bStoppedMoving = false;
+    AccelerationCmPerSecSquared = 0.f;
+    YawVelocityDegreesPerSec = 0.f;
+    if (bHaveKinematicSample && DeltaSeconds > KINDA_SMALL_NUMBER)
+    {
+        AccelerationCmPerSecSquared = FMath::Clamp(
+            (GroundSpeed - PreviousSpeed) / DeltaSeconds, -6000.f, 6000.f);
+        YawVelocityDegreesPerSec = FMath::Clamp(
+            FMath::FindDeltaAngleDegrees(PreviousYaw, CurrentYaw) / DeltaSeconds,
+            -1440.f, 1440.f);
+        bStartedMoving = PreviousSpeed < 18.f && GroundSpeed >= 18.f;
+        bStoppedMoving = PreviousSpeed >= 18.f && GroundSpeed < 18.f;
+    }
+    PreviousSpeed = GroundSpeed;
+    PreviousYaw = CurrentYaw;
+    bHaveKinematicSample = true;
+    BrakingBlend = FMath::FInterpTo(BrakingBlend,
+        bMoving && AccelerationCmPerSecSquared < -180.f ? 1.f : 0.f,
+        DeltaSeconds, 9.f);
     const FVector Local = Owner->GetActorTransform().InverseTransformVectorNoScale(Velocity);
     TravelDirectionDegrees = bMoving ?
         FMath::RadiansToDegrees(FMath::Atan2(Local.Y, Local.X)) : 0.f;
@@ -31,16 +51,31 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     bCrouched = bProne = bAiming = bSprinting = bInCover = false;
     bWeaponReady = false;
     FireRecoilAlpha = 0.f;
+    bIsFiring = false;
+    IntentStrength = 0.f;
+    IntentDirectionDegrees = 0.f;
+    bReversalRequested = false;
     bCornerPeeking = bKnocking = bInvestigating = bIncapacitated = bRescued = false;
     CoverShuffleDirection = 0.f;
     AwarenessState = 0;
     if (const AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(Owner))
     {
+        const FVector Input = Player->GetLastMovementInputVector().GetSafeNormal2D();
+        IntentStrength = FMath::Clamp(Input.Size(), 0.f, 1.f);
+        if (IntentStrength > 0.05f)
+        {
+            const FVector LocalInput = Owner->GetActorTransform().InverseTransformVectorNoScale(Input);
+            IntentDirectionDegrees = FMath::RadiansToDegrees(
+                FMath::Atan2(LocalInput.Y, LocalInput.X));
+            bReversalRequested = bMoving && GroundSpeed > 60.f &&
+                FVector::DotProduct(Input, Velocity.GetSafeNormal2D()) < -0.5f;
+        }
         bCrouched = Player->GetCharacterMovement()->IsCrouching();
         bProne = Player->IsProne();
         bAiming = Player->IsAiming();
         bWeaponReady = Player->HasReadyWeapon();
         FireRecoilAlpha = Player->GetFiringPoseAlpha();
+        bIsFiring = FireRecoilAlpha > 0.f && bWeaponReady;
         if (Player->GetController())
         {
             const FRotator Control = Player->GetController()->GetControlRotation();

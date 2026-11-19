@@ -24,6 +24,9 @@ public:
     bool IsAiming() const { return bAiming; }
     bool HasReadyWeapon() const;
     float GetFiringPoseAlpha() const { return WeaponRecoilTimer > 0.f ? WeaponRecoilTimer / 0.18f : 0.f; }
+    // Animation firing is a visual cue from a committed inventory-authorised shot.
+    UFUNCTION(BlueprintPure, Category="Character|Weapon")
+    bool IsFiringVisual() const { return HasReadyWeapon() && WeaponRecoilTimer > 0.f; }
     bool IsSprinting() const { return bSprinting && !bIsCrouched && !bAiming; }
     bool IsMissionLogVisible() const { return bShowMissionLog; }
     bool IsCodecOpen() const { return bCodecOpen; }

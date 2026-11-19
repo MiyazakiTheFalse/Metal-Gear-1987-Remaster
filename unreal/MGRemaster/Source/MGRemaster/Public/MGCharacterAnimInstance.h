@@ -20,6 +20,24 @@ public:
     float TravelDirectionDegrees = 0.f;
     UPROPERTY(BlueprintReadOnly, Category="MG|Locomotion")
     bool bMoving = false;
+    // Unfiltered owner displacement is the truth for capsule-driven animation.
+    // Pose search/BlendSpaces can choose a clip from these, never drive the AI.
+    UPROPERTY(BlueprintReadOnly, Category="MG|Locomotion")
+    float AccelerationCmPerSecSquared = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Locomotion")
+    float YawVelocityDegreesPerSec = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Locomotion")
+    float IntentDirectionDegrees = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Locomotion")
+    float IntentStrength = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Locomotion")
+    bool bStartedMoving = false;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Locomotion")
+    bool bStoppedMoving = false;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Locomotion")
+    bool bReversalRequested = false;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Locomotion")
+    float BrakingBlend = 0.f;
     UPROPERTY(BlueprintReadOnly, Category="MG|Posture")
     bool bCrouched = false;
     UPROPERTY(BlueprintReadOnly, Category="MG|Posture")
@@ -36,6 +54,8 @@ public:
     bool bWeaponReady = false;
     UPROPERTY(BlueprintReadOnly, Category="MG|Aim")
     float FireRecoilAlpha = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Aim")
+    bool bIsFiring = false;
     UPROPERTY(BlueprintReadOnly, Category="MG|Posture")
     bool bSprinting = false;
     UPROPERTY(BlueprintReadOnly, Category="MG|Cover")
@@ -58,4 +78,7 @@ public:
 private:
     FVector PreviousLocation = FVector::ZeroVector;
     bool bHavePreviousLocation = false;
+    bool bHaveKinematicSample = false;
+    float PreviousSpeed = 0.f;
+    float PreviousYaw = 0.f;
 };

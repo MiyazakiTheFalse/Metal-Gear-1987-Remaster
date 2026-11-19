@@ -740,7 +740,14 @@ void AMGPlayerCharacter::FireStun()
     FHitResult CameraHit;
     const bool bCameraHit = GetWorld()->LineTraceSingleByChannel(CameraHit, CameraStart, CameraEnd, ECC_Visibility, Params);
     const FVector Target = bCameraHit ? CameraHit.ImpactPoint : CameraEnd;
-    const FVector Muzzle = GetActorLocation() + FVector(0.f, 0.f, 45.f);
+    // Camera picks intended aim point. The actual weapon muzzle (if a valid
+    // authored socket exists) owns physical obstruction; shooting through a
+    // wall because a camera can see past it is never allowed.
+    const bool bHasMuzzleSocket = HasAuthoredCharacterArt()
+        && WeaponBodyVisual->IsVisible() && WeaponBodyVisual->DoesSocketExist(TEXT("muzzle"));
+    const FVector Muzzle = bHasMuzzleSocket ?
+        WeaponBodyVisual->GetSocketLocation(TEXT("muzzle")) :
+        (GetActorLocation() + FVector(0.f, 0.f, 45.f));
     FHitResult MuzzleHit;
     if (GetWorld()->LineTraceSingleByChannel(MuzzleHit, Muzzle, Target, ECC_Visibility, Params) && MuzzleHit.GetActor())
     {
