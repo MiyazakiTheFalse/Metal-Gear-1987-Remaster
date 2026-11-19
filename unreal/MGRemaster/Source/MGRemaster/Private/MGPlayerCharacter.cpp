@@ -1,6 +1,7 @@
 #include "MGPlayerCharacter.h"
 #include "MGGrayFoxMission.h"
 #include "Sound/SoundBase.h"
+#include "Components/AudioComponent.h"
 #include "MGGuardActor.h"
 #include "MGShootGunnerActor.h"
 #include "MGEquipmentComponent.h"
@@ -115,21 +116,7 @@ void AMGPlayerCharacter::BeginPlay()
     // Asset names are shared with the editor importer. Missing assets retain the
     // original greybox stand-in and never change movement or mission flags.
     // Optional authored weapon overrides the primitive test prop.
-    IncomingRadioSfx = LoadObject<USoundBase>(nullptr,
-        TEXT("/Game/Audio/Transceiver/Transceiver_Incoming.Transceiver_Incoming"));
-    ConnectRadioSfx = LoadObject<USoundBase>(nullptr,
-        TEXT("/Game/Audio/Transceiver/Transceiver_Connect.Transceiver_Connect"));
-    TuneRadioSfx = LoadObject<USoundBase>(nullptr,
-        TEXT("/Game/Audio/Transceiver/Transceiver_Tune.Transceiver_Tune"));
-    CloseRadioSfx = LoadObject<USoundBase>(nullptr,
-        TEXT("/Game/Audio/Transceiver/Transceiver_Close.Transceiver_Close"));
-    SignalRadioSfx = LoadObject<USoundBase>(nullptr,
-        TEXT("/Game/Audio/Transceiver/Transceiver_Signal.Transceiver_Signal"));
-    // Optional source assets can be imported via the Unreal Editor script.
-    // Missing audio must never break calls, suppress captions or block control.
-    if (!(IncomingRadioSfx && ConnectRadioSfx && TuneRadioSfx && CloseRadioSfx))
-        UE_LOG(LogTemp, Warning, TEXT("N313 transceiver audio not imported; textual calls remain fully functional."));
-
+    EnsureRadioSfxLoaded();
     StunGunArt = LoadObject<UStaticMesh>(nullptr,
         TEXT("/Game/Characters/Shared/Weapons/SM_StunPistol_1995.SM_StunPistol_1995"));
     HandgunArt = LoadObject<UStaticMesh>(nullptr,
@@ -192,6 +179,7 @@ bool AMGPlayerCharacter::HasAuthoredCharacterArt() const
 
 void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    StopIncomingRing();
     // Ensure a checkpoint restart cannot inherit a slowed or paused world.
     if (GetWorld())
     {
@@ -209,6 +197,8 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
         IncomingConnectionDelay -= FMath::Max(0.f, DeltaSeconds);
         if (IncomingConnectionDelay < 0.f && bCodecOpen)
         {
+            StopIncomingRing();
+            EnsureRadioSfxLoaded();
             PlayRadioCue(ConnectRadioSfx, .48f);
             CodecStatus = TEXT("CONNECTED — BIG BOSS / 120.85");
         }
@@ -435,6 +425,8 @@ void AMGPlayerCharacter::ShoulderSwap()
     if (bCodecOpen)
     {
         TransceiverChannel = (TransceiverChannel + 1) % 2;
+        StopIncomingRing();
+        EnsureRadioSfxLoaded();
         IncomingConnectionDelay = -1.f;
         PlayRadioCue(TuneRadioSfx, .42f);
         CodecStatus = TransceiverChannel == 0
@@ -1008,6 +1000,34 @@ void AMGPlayerCharacter::ApplyMenuTimeState()
     UGameplayStatics::SetGlobalTimeDilation(this, Desired);
 }
 
+void AMGPlayerCharacter::EnsureRadioSfxLoaded()
+{
+    // Mission BeginPlay and Player BeginPlay order is not guaranteed. Loading
+    // on the first incoming call as well avoids a silent initial chirp.
+    if (!IncomingRadioSfx)
+        IncomingRadioSfx = LoadObject<USoundBase>(nullptr,
+            TEXT("/Game/Audio/Transceiver/Transceiver_Incoming.Transceiver_Incoming"));
+    if (!ConnectRadioSfx)
+        ConnectRadioSfx = LoadObject<USoundBase>(nullptr,
+            TEXT("/Game/Audio/Transceiver/Transceiver_Connect.Transceiver_Connect"));
+    if (!TuneRadioSfx)
+        TuneRadioSfx = LoadObject<USoundBase>(nullptr,
+            TEXT("/Game/Audio/Transceiver/Transceiver_Tune.Transceiver_Tune"));
+    if (!CloseRadioSfx)
+        CloseRadioSfx = LoadObject<USoundBase>(nullptr,
+            TEXT("/Game/Audio/Transceiver/Transceiver_Close.Transceiver_Close"));
+    if (!SignalRadioSfx)
+        SignalRadioSfx = LoadObject<USoundBase>(nullptr,
+            TEXT("/Game/Audio/Transceiver/Transceiver_Signal.Transceiver_Signal"));
+}
+
+void AMGPlayerCharacter::StopIncomingRing()
+{
+    if (IsValid(ActiveIncomingRing))
+        ActiveIncomingRing->Stop(); // No lingering ring when the call is skipped.
+    ActiveIncomingRing = nullptr;
+}
+
 void AMGPlayerCharacter::PlayRadioCue(USoundBase* Cue, float Level) const
 {
     if (Cue && GetWorld())
@@ -1019,6 +1039,8 @@ void AMGPlayerCharacter::OpenIncomingMissionBriefing()
     // An incoming 1995 transceiver call is NOT a mandatory stationary movie.
     // Always allow immediate close, movement and survival. Its identity and
     // dialogue are read from the mission's authoritative stage.
+    EnsureRadioSfxLoaded();
+    StopIncomingRing();
     CloseEquipmentWindows();
     bCodecOpen = true;
     TransceiverChannel = 1; // Real Big Boss, FOXHOUND 120.85
@@ -1026,16 +1048,20 @@ void AMGPlayerCharacter::OpenIncomingMissionBriefing()
     // The sound motif plays as gameplay begins; there is no unskippable
     // call animation and no missing intelligence on immediate close.
     IncomingConnectionDelay = .94f;
-    PlayRadioCue(IncomingRadioSfx, .55f);
+    if (IncomingRadioSfx && GetWorld())
+        ActiveIncomingRing = UGameplayStatics::SpawnSound2D(
+            this, IncomingRadioSfx, .55f);
     ApplyMenuTimeState();
 }
 
 void AMGPlayerCharacter::ToggleCodec()
 {
     if (!GetWorld()) return;
+    EnsureRadioSfxLoaded();
     if (bCodecOpen)
     {
         bCodecOpen = false;
+        StopIncomingRing();
         IncomingConnectionDelay = -1.f;
         CodecStatus.Empty();
         PlayRadioCue(CloseRadioSfx, .50f);
@@ -1047,6 +1073,7 @@ void AMGPlayerCharacter::ToggleCodec()
     // 1995 transceiver: separate from seized inventory and weapons, and never
     // treated as an implanted 2005-era Codec. Manual, optional, replayable,
     // non-pausing: players remain free to move and solve the wall immediately.
+    StopIncomingRing();
     CloseEquipmentWindows();
     ApplyMenuTimeState();
     bCodecOpen = true;

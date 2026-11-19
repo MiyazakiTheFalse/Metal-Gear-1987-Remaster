@@ -10,6 +10,7 @@ class UStaticMeshComponent;
 class UMGEquipmentComponent;
 class USkeletalMesh;
 class USoundBase;
+class UAudioComponent;
 
 UCLASS()
 class MGREMASTER_API AMGPlayerCharacter : public ACharacter
@@ -104,7 +105,10 @@ private:
     UPROPERTY(Transient) USoundBase* TuneRadioSfx = nullptr;
     UPROPERTY(Transient) USoundBase* CloseRadioSfx = nullptr;
     UPROPERTY(Transient) USoundBase* SignalRadioSfx = nullptr;
+    UPROPERTY(Transient) UAudioComponent* ActiveIncomingRing = nullptr;
     float IncomingConnectionDelay = -1.f;
+    void EnsureRadioSfxLoaded();
+    void StopIncomingRing();
     void PlayRadioCue(USoundBase* Cue, float Level = .55f) const;
     bool bIsProne = false;
     bool bPendingProne = false;
