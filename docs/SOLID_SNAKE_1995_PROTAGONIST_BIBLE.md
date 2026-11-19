@@ -260,3 +260,10 @@ All gates are **UNVERIFIED** until there is archived evidence.
 - Internal: `docs/ASSET_ACQUISITION_AND_ANIMATION_PLAN.md`, `docs/GRAY_FOX_VERTICAL_SLICE_QUALITY_BAR.md`, `docs/DOCTRINE_004_INTEGRATED_EXPERIENCE.md`, `data/beat_contracts.json`, `unreal/MGRemaster/Config/DefaultInput.ini`.
 
 **Update protocol:** Any change to physical identity, rig, source interpretation, input priority, pose state, aim/camera, weapon attachment or required cinematic must update this bible and the machine-checkable contract in the same PR. Never raise a gate from unverified without actual recorded evidence.
+
+
+## Addendum — Snake's distinctive echo question and 1995 viewpoint (19 November 2026)
+
+Snake often repeats a term he has just heard **as a question**. Preserve this recognisable dialogue rhythm, including dry humour, while directing each instance as a *different action*: asking for confirmation, expressing disbelief, buying a tactical second, compelling a witness to explain, or puncturing pompous exposition. It does **not** indicate he is incapable of reading a room. A question must expose an important missing fact or character relationship; a camera hold/face reaction can be more effective than adding another line. Capture the intention in the dialogue direction track.
+
+His identity as a talented FOXHOUND rookie is never overruled by later MGSV audience knowledge: he cannot know about Venom's double or his own later legend in 1995. The real Big Boss's helpful radio guidance must remain credible early; Snake's doubts grow through **discovered contradictions**, not retroactive personality rewriting. In-engine cinema must retain the exact active Snake mesh/gear/sockets and player camera handoff. See [1995 continuity](OUTER_HEAVEN_1995_CONTINUITY_TREATMENT.md) and [cinematic shot contracts](../data/cinematic_scene_contracts.json).

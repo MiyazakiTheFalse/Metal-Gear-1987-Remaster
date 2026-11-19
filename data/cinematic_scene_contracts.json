@@ -1,0 +1,307 @@
+{
+  "schema_version": 1,
+  "doctrine": "DOCTRINE_004",
+  "source_status": "MSX2_reference_with_J2ME_unverified",
+  "implementation_status": "design_only_uncompiled",
+  "scenes": [
+    {
+      "id": "capture",
+      "title": "The Seizure",
+      "phase": "pre_prison",
+      "status": "design_only",
+      "source_class": "C87+I",
+      "player_knowledge": "A rescued POW has given a credible reason that a deliberately taken prisoner could access Gray Fox. Guards must not know that Snake wants capture.",
+      "world_trigger": "Guard custody is credibly established by player choices and observable nonlethal encounter.",
+      "state_commit": "Capture and confiscation transaction owned by mission logic; retained outfit and equipment snapshot.",
+      "skip": "Commit identical captivity state, stored equipment, control rotation and camera handoff; no skipped health damage.",
+      "shots": [
+        {
+          "id": "establish_risk",
+          "camera": "Wide tracking observation",
+          "purpose": "Establish real guard routes, security truck and one plausible nonlethal approach; no giant quest arrow."
+        },
+        {
+          "id": "encirclement",
+          "camera": "Low restrained handheld",
+          "purpose": "Guards communicate in-world and take positions based on actual detection; Snake does not inexplicably lower a weapon in full view."
+        },
+        {
+          "id": "confiscation",
+          "camera": "Intimate functional inserts",
+          "purpose": "Weapon grip released, pouch and radio check, equipment becomes inventory-locked at the same physical beat."
+        },
+        {
+          "id": "return_to_player",
+          "camera": "Matching gameplay-over-shoulder",
+          "purpose": "Snake remains clothed and recognisable; cell camera becomes player camera without teleport."
+        }
+      ],
+      "asset_gates": [
+        "Recognisable 1995 Snake full rig, hands and face",
+        "Period guard procedural detention animation",
+        "Security truck and authentic custody architecture",
+        "Equipment removal props and socket parity",
+        "In-world guard voice/radio and cloth/metal Foley"
+      ],
+      "failures": [
+        "Snake killed by mandatory surrender",
+        "Guards behave as if they know a trap",
+        "Equipment appears/disappears independent of transaction"
+      ]
+    },
+    {
+      "id": "gray_fox",
+      "title": "Gray Fox — Recognition and Intelligence",
+      "phase": "prison",
+      "status": "design_only",
+      "source_class": "C87+I",
+      "player_knowledge": "Snake knows Gray Fox is missing, not the true identity of Outer Heaven's commander.",
+      "world_trigger": "After player physically breaches the wall and approaches the prisoner.",
+      "state_commit": "Fox rescue and mandatory Metal Gear/Madnar intelligence stored when interaction commits, not when actor finishes talking.",
+      "skip": "All required intel logged and Fox rescued; retain player's exact unlocked position and inputs; optional replay of dialogue.",
+      "shots": [
+        {
+          "id": "recognise",
+          "camera": "Dirty frame from prison breach",
+          "purpose": "New face emerges from shadow with natural sightline; Fox reacts to the actual noise of the breach."
+        },
+        {
+          "id": "confirm",
+          "camera": "Restrained two-person axis",
+          "purpose": "Snake and Fox recognise one another; leave space for breath and a dry Snake echo question."
+        },
+        {
+          "id": "metal_gear",
+          "camera": "Closer, slower compression",
+          "purpose": "Fox's delivery changes the entire mission; show apprehension, not a speculative flash-forward to TX-55."
+        },
+        {
+          "id": "handback",
+          "camera": "Match active cell/corridor",
+          "purpose": "Physical dialogue aftermath; no automatic guard wave spawned to force pace."
+        }
+      ],
+      "asset_gates": [
+        "Two recognisable period-appropriate human faces",
+        "Gray Fox prisoner clothing distinct from Snake's olive kit",
+        "Fatigued animation and lip sync",
+        "Cell sound/light layering and Foley",
+        "Skippable caption/transcript"
+      ],
+      "failures": [
+        "Cyborg ninja costume in 1995",
+        "Fox suddenly reveals Venom truth",
+        "Audio-only clue lost on skip"
+      ]
+    },
+    {
+      "id": "shotgunner_intro",
+      "title": "Shoot Gunner — Unarmed Confrontation",
+      "phase": "post_prison",
+      "status": "design_only",
+      "source_class": "C87+I",
+      "player_knowledge": "Snake is still disarmed; the recovery route is in the playable arena.",
+      "world_trigger": "Player crosses actual encounter threshold after corridor traversal.",
+      "state_commit": "Boss encounter begins as player-space fact; attack/health windows never driven by Sequencer completion.",
+      "skip": "Boss is in same position/attack state as watching; first attack cannot begin until control is actually returned and telegraph is available.",
+      "shots": [
+        {
+          "id": "entry",
+          "camera": "Industrial spatial reveal",
+          "purpose": "Show a practical shotgun soldier guarding an exit and the place to manoeuvre, not a comic-book exposition pose."
+        },
+        {
+          "id": "weapon",
+          "camera": "Mid/close functional inserts",
+          "purpose": "Correct weapon stock contact, grip, pump and sound without threatening player during a forced lock."
+        },
+        {
+          "id": "escape_route",
+          "camera": "Composed environmental contrast",
+          "purpose": "Recovery-room door is legible but not pointed out by an omniscient HUD."
+        },
+        {
+          "id": "handback",
+          "camera": "Continuous player eye line",
+          "purpose": "Aim, footwork and camera match game; boss has a readable first action."
+        }
+      ],
+      "asset_gates": [
+        "Shoot Gunner identifiable rig and shotgun",
+        "Weapon ready/fire/reload montages",
+        "Recovery-room door and inventory props",
+        "Foley/muzzle flash in correct physical location"
+      ],
+      "failures": [
+        "Unavoidable damage during intro",
+        "Snake spontaneously has his gun",
+        "Boss starts firing from camera rather than muzzle"
+      ]
+    },
+    {
+      "id": "shotgunner_aftermath",
+      "title": "Shoot Gunner — Consequences",
+      "phase": "post_boss",
+      "status": "design_only",
+      "source_class": "C87+I",
+      "player_knowledge": "Snake defeated a local security boss through surviving and rearming.",
+      "world_trigger": "Boss defeat confirmed by authoritative health transaction.",
+      "state_commit": "Boss defeat, Card 3 pickup and slice completion are **separate** actions, not all committed by montage.",
+      "skip": "Boss remains down, collectible remains available, no double loot or early completion.",
+      "shots": [
+        {
+          "id": "impact",
+          "camera": "Maintain spatial violence",
+          "purpose": "A clear causal final impact, believable body momentum and actual weapon fall."
+        },
+        {
+          "id": "silence",
+          "camera": "Held environmental composition",
+          "purpose": "Let room noise and Snake's breathing carry the triumph; do not invent grand death speech."
+        },
+        {
+          "id": "card",
+          "camera": "Close contextual action",
+          "purpose": "The new access card becomes discoverable and player-driven; no automatic duplicate rewards."
+        }
+      ],
+      "asset_gates": [
+        "Defeat reaction and collision-safe ragdoll",
+        "Retained boss gear/weapon mesh",
+        "Card pickup interaction pose",
+        "Accurate occlusion and room reverberation"
+      ],
+      "failures": [
+        "Loot granted by skipping cinematic",
+        "Card 3 absent on reload",
+        "Killed boss stands up after checkpoint"
+      ]
+    },
+    {
+      "id": "madnar",
+      "title": "Madnar and Ellen — Earned Technical Truth",
+      "phase": "campaign",
+      "status": "design_only",
+      "source_class": "C87+I",
+      "player_knowledge": "Snake needs Madnar's own technical instructions after saving Ellen; he does not know the sixteenth charge direction.",
+      "world_trigger": "Ellen genuinely rescued and Madnar available in original event sequence.",
+      "state_commit": "First fifteen directions captured in replayable intel; the sixteenth remains unknown.",
+      "skip": "Log is complete for known instructions even if scene skipped; neither final direction nor a free explosive is granted.",
+      "shots": [
+        {
+          "id": "parent",
+          "camera": "Private grounded two-shot",
+          "purpose": "His daughter's safety changes how he sees Snake without casting 1995 scientist as future villain."
+        },
+        {
+          "id": "technical",
+          "camera": "Hand-prop engineering shot",
+          "purpose": "Physical leg weakpoint schematic and audible explanation, not a detached HUD slideshow."
+        },
+        {
+          "id": "gap",
+          "camera": "Uncomfortable unfilled silence",
+          "purpose": "His missing final direction feels human and mechanically significant."
+        }
+      ],
+      "asset_gates": [
+        "Madnar and Ellen distinct rigged faces",
+        "Plausible machine plans and physical props",
+        "Lip sync, gesture retarget and writable intel log"
+      ],
+      "failures": [
+        "Future allegiance revealed early",
+        "Sixteenth direction given in objective",
+        "Mandatory intel lost to skip"
+      ]
+    },
+    {
+      "id": "tx55",
+      "title": "TX-55 — The Weight of a Weapon",
+      "phase": "finale",
+      "status": "design_only",
+      "source_class": "C87+CL+I",
+      "player_knowledge": "Snake has first fifteen instructions and must infer the final leg placement.",
+      "world_trigger": "Player reaches final hangar with required explosives, Madnar intel and a valid world state.",
+      "state_commit": "Sixteen validated leg charge placements alone destroy TX-55; cinema only listens for accepted state.",
+      "skip": "Laser phase, charge progress, ammo, Snake position, camera and escape state identical whether reveal/catastrophe viewed or skipped.",
+      "shots": [
+        {
+          "id": "threshold",
+          "camera": "Low axial facility architecture",
+          "purpose": "Reveal scale first through architecture, then one vast machine; no running Titan boss substitution."
+        },
+        {
+          "id": "machine",
+          "camera": "Patient engineering close detail",
+          "purpose": "Armour, weak feet, gantry, power and laser cams all read as working physical systems."
+        },
+        {
+          "id": "agency",
+          "camera": "Match to third-person camera",
+          "purpose": "Show safe lanes before returning control. Lasers do not inflict damage while control locked."
+        },
+        {
+          "id": "failure",
+          "camera": "Reactive mechanical choreography",
+          "purpose": "Charge 16 drives structural failure, alarms and actual object state, not presentation deciding win."
+        },
+        {
+          "id": "human_climax",
+          "camera": "Character-size reset",
+          "purpose": "Transition from immense machine to intimate betrayal by the man believed to be Big Boss (production Venom)."
+        }
+      ],
+      "asset_gates": [
+        "Original TX-55 recognisable high/low LOD",
+        "Real leg sockets, laser geometry and honest damage layers",
+        "Cinematic camera and player camera match",
+        "Engineering destruction and audio source coherence"
+      ],
+      "failures": [
+        "TX-55 walks as default original mechanic",
+        "Missing charge solves itself",
+        "Camera takeover causes unseen laser damage",
+        "Venom identity announced in 1995"
+      ]
+    },
+    {
+      "id": "final_boss",
+      "title": "Outer Heaven — Betrayal of Command",
+      "phase": "finale",
+      "status": "design_only",
+      "source_class": "C87+CL+I",
+      "player_knowledge": "Snake believes the adversary is real Big Boss; he has no reason to know the double's true nature.",
+      "world_trigger": "TX-55 destroyed; escape/crisis sequence committed by mission logic.",
+      "state_commit": "Final opponent is physically distinct actor from the real radio commander; game victory and escape state own mission consequences.",
+      "skip": "Identical boss readiness, radio availability and escape countdown; no premature identity unmasking.",
+      "shots": [
+        {
+          "id": "recognition",
+          "camera": "Deliberately spare reveal",
+          "purpose": "Player recognises Big Boss's public persona; Snake's trust is shattered, not explained away."
+        },
+        {
+          "id": "conflict",
+          "camera": "Close movement within gameplay space",
+          "purpose": "Performance holds command-versus-rookie power imbalance, then shifts to equal combat control."
+        },
+        {
+          "id": "handback",
+          "camera": "Exact camera/position match",
+          "purpose": "Countdown/AI starts only after a fair player-control handoff."
+        }
+      ],
+      "asset_gates": [
+        "Distinct hidden Venom rig and convincing public Big Boss portrayal",
+        "Credible age/size/physicality and battle animation",
+        "Source-aligned dialogue and responsive boss staging"
+      ],
+      "failures": [
+        "Early MGSV twist exposition",
+        "Two Big Bosses mistakenly treated as same physical actor",
+        "Cutscene ends with unavoidable lethal hit"
+      ]
+    }
+  ]
+}

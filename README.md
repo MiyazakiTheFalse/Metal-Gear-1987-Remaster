@@ -30,6 +30,8 @@ These features are unverified source implementation, not finished gameplay or pr
 - [TX-55 boss bible](docs/TX55_METAL_GEAR_BOSS_BIBLE.md) preserves the 16-leg-charge sabotage puzzle and plans its cinematic/engineering climax.
 - [Significant-character individual bibles](docs/CHARACTER_CAST_BIBLES/README.md) with [auditable registry](data/character_bible_registry.json) cover original cast, encounters, allies, guards and both Big Boss identities. These are working source documents **not** imported models, rendered cinema or completed full-game systems.
 
+The [in-engine cinematic direction bible](docs/CINEMATIC_DIRECTION_AND_CUTSCENE_BIBLE.md) and [shot/skip contracts](data/cinematic_scene_contracts.json) cover capture, Gray Fox, Shoot Gunner, Madnar, TX-55 and the final confrontation. These are source-level cinematic designs, not finished Unreal sequences.
+
 ## Global production doctrine — binding
 
 **Doctrine 000 — [How We Build](docs/DOCTRINE_000_HOW_WE_BUILD.md)** governs every other doctrine. Product quality is defined by the *method*: research and provenance, player-first intent, integrated execution, actual evidence, accessibility, source fidelity, performance and maintainability. Its [Doctrine 005 — Spatial Structure](docs/DOCTRINE_005_SPATIAL_STRUCTURE.md) companion binds topology and room rhythm to the same standards, with [area contracts](data/area_contracts.json). When requirements conflict, record an explicit decision and test the player's experience instead of allowing undocumented shortcuts.
@@ -44,6 +46,7 @@ python tools/validate_beat_contracts.py
 python tools/validate_area_contracts.py
 python tools/validate_solid_snake_contract.py
 python tools/validate_full_game_bibles.py
+python tools/validate_cinematic_scenes.py
 python tools/inspect_and_extract.py /path/to/Metal-Gear_J2ME_EN_v330.zip --output content
 cd rust && cargo test && cargo build --release  # Includes engine-neutral TX-55 sabotage tests
 ```
