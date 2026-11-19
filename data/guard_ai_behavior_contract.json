@@ -167,7 +167,8 @@
     "OnBodyDiscovered",
     "OnContactReported",
     "OnCustodyChallenge",
-    "OnFacilitySecurityStateChanged"
+    "OnFacilitySecurityStateChanged",
+    "OnGuardCallout"
   ],
   "critical_invariants": [
     "Duty remains independent of alert/awareness/tactical animation.",
@@ -181,7 +182,8 @@
     "The previous guard behavior returns to the actual patrol axis, including north/south routes.",
     "Facility conditions modify attention, not visibility through concrete or invulnerability to stealth.",
     "Exploration pacing never fabricates a reported security incident.",
-    "Animation and audio callbacks cannot own combat hits, flags or checkpoint state."
+    "Animation and audio callbacks cannot own combat hits, flags or checkpoint state.",
+    "Only guards within 950cm can show provisional state-driven captions on Snake's HUD; no global omniscient subtitles."
   ],
   "known_gaps": [
     "No animation-blueprint implementation of these states or authored guard voice barks.",
@@ -189,7 +191,8 @@
     "Facility security-state timers are presently session runtime values and are not restored as a full world snapshot after save/load.",
     "Navigation remains bounded steering with swept collision, not full NavMesh/path tactical planning.",
     "More nuanced morale, fatigue, chain of command and sector-local radio networks are design work, not committed systems.",
-    "Original J2ME encounter geography and patrol assignment have not been source verified."
+    "Original J2ME encounter geography and patrol assignment have not been source verified.",
+    "Present contextual guard text cues are not recorded acting, final spoken dialogue, sound propagation or time-accurate lip animation."
   ],
   "approved_in_unreal": false
 }

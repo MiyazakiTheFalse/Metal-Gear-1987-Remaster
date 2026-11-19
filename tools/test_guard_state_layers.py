@@ -63,6 +63,14 @@ class GuardStateLayerSourceTests(unittest.TestCase):
         self.assertIn("GetFacilitySecurityState()",HUD)
         self.assertIn("EMGGuardAwarenessPhase::Searching",HUD)
 
+    def test_guard_barks_follow_actual_events_not_omnipresent_hud(self):
+        self.assertIn("EmitGuardCallout(TEXT(\"CustodyChallenge\")",GUARD)
+        self.assertIn("EmitGuardCallout(TEXT(\"BodyDiscovered\")",GUARD)
+        self.assertIn("EmitGuardCallout(TEXT(\"RadioContact\")",GUARD)
+        self.assertIn("CalloutRemaining = FMath::Max(",GUARD)
+        self.assertIn("GetActiveGuardCallout()",HUD)
+        self.assertIn("Distance < NearestCalloutCm",HUD)
+
     def test_not_falsely_marked_tested(self):
         self.assertFalse(CONTRACT["approved_in_unreal"])
         self.assertEqual(CONTRACT["status"],"committed_source_uncompiled")

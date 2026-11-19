@@ -64,3 +64,11 @@ Use a matrix: duty (3) × awareness (8) × evidence (8) × facility (5). Not eve
 **Gates before 'production AI':** compile on the right UE5.7 toolchain, playtest each combination with no audio and no debug colours, simulate frame-rate spikes, test occluding doors/walls, check guard navigation around arbitrary geometry, and compare state logs against recorded player captures. The present implementation is a playable-*source* foundation, not proof of those outcomes.
 
 See [machine-readable guard AI contract](../data/guard_ai_behavior_contract.json) and [security-state regression source checks](../tools/test_guard_state_layers.py).
+
+## 19 November addendum — player-facing dialogue and actual facility report
+
+The C++ guard now emits short **context-bound, non-global caption cues** for specific changes: “What was that?” after sound suspicion; “Check that noise” on investigation; “Intruder!” on confirmed combat sight; “Lost visual” after contact; “Man down!” on real body discovery; “Halt, keep your hands visible” for an actual custody challenge; and a radio report after its 0.6-second communication delay. The HUD displays the nearest guard's current callout **only within 950cm**. No VO or MGS trademark audio is imported or implied; `OnGuardCallout(FName)` provides the future sound/animation link.
+
+The local report now snapshots the **last confirmed visual position** when a radio call begins. A later footstep or body report cannot quietly replace that payload. An actor's temporary suspicion does not by itself trigger global Alert. An actual transmitted sighting changes the facility state; the implementation gives all guards a slight, bounded vigilance increase while the installation remains on Alert/Evasion. Custody officers will not accept an ordinary nonthreatening detention during that lockdown, but guards still need individual evidence before pursuing or striking Snake.
+
+**Temporary/prototype numbers:** facility Alert 10s, Evasion 7s, short Caution 5s, StandDown 3s. They control source state only; no validated scripted waves, bespoke VO, dynamic score or visual animations exist. Security-mode timers are not yet included in checkpoint persistence. The original MSX2 and the supplied J2ME edition are not used as proof of these *new* modern AI numerical parameters.
