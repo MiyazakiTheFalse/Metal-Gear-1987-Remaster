@@ -25,3 +25,14 @@ Animation never fabricates gameplay state or overrides validated mission progres
 ## Actual review and completion gates
 A first-time player identifies safe windows and the route to recover gear without brute-force deaths.
 **Not yet met:** source-edition line-by-line confirmation, physical face/rig/weapon render, cinematic blocking test, animation/voice sample, UE5.7 compile, captured 720p comparison, save/skip failure test and unfamiliar-player comprehension test. Remain **unverified** until evidence exists.
+
+
+## 19 November source audit — signature weapon and boss combat
+
+MSX2 Japanese manual background: former Soviet Spetsnaz operative, specialising in **riot guns**; exact make/model **not canonical**. Reference: https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/17103 and scanned Konami 1987 manual: https://www.ne.jp/asahi/hzk/kommander/mg1manual.pdf .
+
+**Verified 1987 gameplay via MSX2 guide:** boss makes **three spread shotgun blasts in a row** and moves about the room. The original blast projectiles are large and damaging; the source does not mandate a real-world reload interval, specific number of pellets or a concrete weapon weight. https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/35361 and https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/65155 .
+
+**Redesign hypotheses:** 5 physically traced pellets at up to ±6 degrees, a 0.78-second aim cue, three shots 0.34 seconds apart, a 1.85-second burst recovery. All are **playtesting candidates**, not reconstructed 1987 numeric values. Do not give the boss instantaneous aim tracking through walls, or unblockable damage during cinematics. The hero handgun is regained in a breached side room; original remote-controlled missiles remain a later, desirable fully playable equipment feature. Source actor: Unreal / MGShootGunnerActor. Original editable weapon candidate: [riot_gun_proxy.obj](../../assets/source/shotmaker/riot_gun_proxy.obj).
+
+**Community response:** fans often joke about his literal original name, but others want a remake to turn him into a punishing large-gauge breacher who forces range control. Treat that as a creative suggestion rather than canon. https://www.reddit.com/r/metalgearsolid/comments/1b3scn6 .
