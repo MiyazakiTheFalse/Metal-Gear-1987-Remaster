@@ -61,7 +61,7 @@ AMGGuardActor::AMGGuardActor()
     SidearmMuzzleLight = CreateDefaultSubobject<UPointLightComponent>(
         TEXT("GuardSidearmMuzzleFlash"));
     SidearmMuzzleLight->SetupAttachment(SecuritySidearm);
-    SidearmMuzzleLight->SetRelativeLocation(FVector(21.f, 0.f, 3.f));
+    SidearmMuzzleLight->SetRelativeLocation(FVector(52.f, 0.f, 0.f));
     SidearmMuzzleLight->SetIntensity(6100.f);
     SidearmMuzzleLight->SetAttenuationRadius(190.f);
     SidearmMuzzleLight->SetCastShadows(false);
@@ -85,6 +85,7 @@ void AMGGuardActor::BeginPlay()
     {
         SecuritySidearm->SetStaticMesh(Sidearm);
         SecuritySidearm->SetRelativeScale3D(FVector::OneVector);
+        SidearmMuzzleLight->SetRelativeLocation(FVector(21.f, 0.f, 3.f));
     }
     if (!CharacterMesh->GetSkeletalMeshAsset())
         if (USkeletalMesh* Asset = LoadObject<USkeletalMesh>(nullptr,
@@ -1153,7 +1154,9 @@ void AMGGuardActor::Tick(float DeltaSeconds)
                 const FVector Muzzle = (SecuritySidearm->IsVisible() &&
                     SecuritySidearm->DoesSocketExist(TEXT("muzzle")))
                     ? SecuritySidearm->GetSocketLocation(TEXT("muzzle"))
-                    : GetActorLocation() + FVector(0.f, 0.f, 62.f);
+                    : (SecuritySidearm->IsVisible() && SidearmMuzzleLight
+                        ? SidearmMuzzleLight->GetComponentLocation()
+                        : GetActorLocation() + FVector(0.f, 0.f, 62.f));
                 const FVector ActualTarget =
                     Player->GetActorLocation() + FVector(0.f, 0.f, 48.f);
                 FHitResult ShotHit;
