@@ -13,6 +13,7 @@
 #include "Engine/Engine.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/World.h"
+#include "Sound/SoundBase.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -530,6 +531,19 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
             Fox->SetRescued(true);
         // Placeholder original prose, not a published game-script transcription.
         Dialogue = TEXT("GRAY FOX: Metal Gear is real. Find the scientist behind it.");
+        // Optional dry recorded human voice, positioned at the actual cell.
+        // The player receives the rescue + intelligence even with no VO asset.
+        if (IsValid(FoxProxy))
+        {
+            if (USoundBase* Cue = LoadObject<USoundBase>(nullptr,
+                    TEXT("/Game/Audio/VO/gray_fox/VO_fox_rescue_01.VO_fox_rescue_01")))
+            {
+                UGameplayStatics::PlaySoundAtLocation(this, Cue,
+                    FoxProxy->GetActorLocation(), .78f);
+                OnNarrativeVoiceStarted(TEXT("gray_fox"),
+                    TEXT("VO_fox_rescue_01"), Cue->GetDuration());
+            }
+        }
         break;
     case MG_FOX_BREACH_EXIT_WALL:
         if (IsValid(EscapeWall)) EscapeWall->Destroy();
