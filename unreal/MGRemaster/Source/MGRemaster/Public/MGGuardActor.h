@@ -67,6 +67,9 @@ public:
     bool IsBodyBeingDragged() const { return bBodyBeingDragged; }
     bool TryMoveBodyTo(const FVector& ProposedPosition, const AActor* DraggingActor);
     void SetBodyBeingDragged(bool bDragged);
+    void SetBodyPersistenceId(FName StableId) { BodyPersistenceId = StableId; }
+    FName GetBodyPersistenceId() const { return BodyPersistenceId; }
+    void RestoreIncapacitatedBody(const FVector& Position, bool bUnconscious);
     UFUNCTION(BlueprintImplementableEvent, Category="Security|Body")
     void OnBodyDragChanged(bool bIsDragged);
     void SetRole(EMGGuardRole NewRole) { Role = NewRole; }
@@ -258,6 +261,7 @@ private:
     bool bIncapacitated = false;
     bool bBodyDead = false; // Shot lethality != nonlethal melee unconsciousness.
     bool bBodyBeingDragged = false;
+    FName BodyPersistenceId = NAME_None; // Assigned by mission, not actor iteration order.
     float Suspicion = 0.f;
     float Health = 100.f;
     float StaggerSeconds = 0.f;
