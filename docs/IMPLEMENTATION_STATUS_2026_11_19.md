@@ -103,3 +103,12 @@ Structural source assertions and machine-contract updates are committed in `tool
 - Asset inventory now records new source items without claiming approval; animation/voice/hair quality gates remain open.
 
 **Verification boundary:** source contract/manifest and mesh topology can be structurally inspected; only real Unreal engine import, compiler and novice level playtesting can validate actual smoothness, hand-head integration, performance, character likeness and final dialogue quality. Keep PR in draft.
+
+
+## 20 November — narrative negative-space doctrine, factual edition correction, five optional world traces
+
+Narrative expansion now follows [Doctrine 006: Narrative Negative Space](DOCTRINE_006_NARRATIVE_NEGATIVE_SPACE.md). The rule is to explain how the 1995 fortress functions without spoiling who actually commands Outer Heaven, why real Big Boss's guidance becomes misleading, Gray Fox's limited information, or the retrospective identity meaning of the `The Phantom Pain` ending. The original MSX2 is the primary source; earlier references to `metalgear.dr-sunny.info` as an original MSX script were incorrect because that site identifies its transcript as the NES version. Primary MSX2 script and Japanese MSX2 comparison are now explicitly referenced.
+
+**Actual C++ source implemented in `MGGrayFoxMission`:** optional cargo, duty/transport, cell repair, inventory-custody and dog-kennel evidence actors. All five are physically placed against existing scene geometry, require the player's facing/range and unobstructed world-space interaction test, and use the already implemented accessible subtitle channel. None calls `SaveProgress`, `ApplyAction` or any security/plot mutation. This is environmentally grounded optional flavour; no main objective needs them.
+
+**Production status:** replace greybox cube-prop markers with approved physical paper/clipboard/supply art; review in engine for legibility at 720p, prop placement, camera obstruction, audio availability, stealth-risk interference and source edition fidelity. Four new Python source tests were authored and 11 connector-side checks passed; Python tests, UE compilation and player tests remain **not executed**. Keep PR #3 a draft until actually integrated and validated.
