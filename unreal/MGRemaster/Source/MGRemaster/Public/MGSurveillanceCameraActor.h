@@ -26,6 +26,7 @@ public:
     /** Root yaw faces surveillance sector. Sweeps around that initial heading. */
     void ConfigureSector(float HalfAngleDegrees, float RangeCm);
     bool TryDisableAtControlPanel(const AMGPlayerCharacter* Player);
+    FVector GetControlPanelWorldLocation() const;
     UFUNCTION(BlueprintPure, Category="MG|Security|Camera")
     bool IsOperational() const { return bOperational; }
     UFUNCTION(BlueprintPure, Category="MG|Security|Camera")
