@@ -5,6 +5,7 @@
 #include "MGGuardActor.h"
 #include "MGShootGunnerActor.h"
 #include "MGEquipmentComponent.h"
+#include "MGSpentCasingActor.h"
 
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
@@ -229,6 +230,22 @@ void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AMGPlayerCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    if (PendingHandgunCasingSeconds >= 0.f)
+    {
+        PendingHandgunCasingSeconds -= FMath::Max(0.f, DeltaSeconds);
+        if (PendingHandgunCasingSeconds < 0.f && GetWorld())
+        {
+            // Only conventional fired brass uses the actual ejector path.
+            // No brass spawned for the unverified 1995 stun-dart test prop.
+            const FVector Source = WeaponBodyVisual->IsVisible() &&
+                WeaponBodyVisual->DoesSocketExist(TEXT("ejection_port"))
+                ? WeaponBodyVisual->GetSocketLocation(TEXT("ejection_port"))
+                : GetActorLocation() + FVector(8.f, 18.f, 68.f);
+            AMGSpentCasingActor::Eject(GetWorld(), EMGCasingType::HandgunBrass,
+                Source, WeaponBodyVisual->GetComponentRotation());
+            OnHandgunCasingEjected();
+        }
+    }
     if (IncomingConnectionDelay >= 0.f)
     {
         IncomingConnectionDelay -= FMath::Max(0.f, DeltaSeconds);
@@ -815,6 +832,10 @@ void AMGPlayerCharacter::FireStun()
                    bStun ? TEXT("stun") : TEXT("shoot"));
     WeaponRecoilTimer = 0.18f;
     CombatNoiseTimer = 0.55f;
+    if (bHandgun)
+        PendingHandgunCasingSeconds = .065f; // Slide extraction follows ignition.
+    // The non-canonical wired-dart test firearm NEVER creates brass.
+
     // Camera ray determines crosshair target; a second ray enforces obstruction
     // between the character and target. Prototype nonlethal incapacitation only.
     const FVector CameraStart = FollowCamera->GetComponentLocation();
