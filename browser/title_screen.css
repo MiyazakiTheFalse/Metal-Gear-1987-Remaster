@@ -125,7 +125,43 @@
  #intro .mg-title__action small{font-size:8px}
  .mg-title__chapter{font-size:10px}
 }
+/* Briefing, pause and records belong to the same tactical UI family. */
+#briefing .mg-briefing-panel {
+  width:min(760px,96vw);max-height:90dvh;overflow-y:auto;
+  border-top:3px solid #8eb6a3;box-shadow:0 22px 70px #000c;
+  background:linear-gradient(150deg,#0c2625f6,#061212fa 72%);
+}
+.mg-briefing__duo{display:grid;grid-template-columns:1fr .90fr 1fr;
+  gap:10px;align-items:center;padding:13px 10px;margin:15px 0 20px;
+  border:1px solid #446f6299;background:linear-gradient(90deg,#112b29b5,#051413ef,#122c29b5)}
+.mg-briefing__head{display:flex;flex-direction:column;align-items:center;gap:5px;
+  text-align:center;color:#cee6d6;font:700 11px/1.4 ui-monospace,monospace;letter-spacing:.06em}
+.mg-briefing__head small{color:#7cba9c;font-size:9px}
+.mg-title__portrait{width:min(140px,100%);aspect-ratio:200/236;
+  border:1px solid #679a7e66;background:#102b29;overflow:hidden}
+.mg-title__portrait .mg-codec-portrait-art{width:100%;height:100%;
+  display:block;animation:mg-live-brief 7.2s ease-in-out infinite}
+.mg-title__portrait .mg-codec-eyelids{transform-origin:100px 110px;
+  transform:scaleY(0);animation:mg-blink-brief 6.2s linear infinite}
+.mg-briefing__comms{text-align:center;color:#8fbaa6;
+  font:700 9px/1.5 ui-monospace,monospace;letter-spacing:.12em;display:grid;gap:12px}
+.mg-briefing__freq{font-size:clamp(18px,4vw,28px);color:#a7e0b7;letter-spacing:.08em}
+.mg-briefing__notice{padding-left:11px;border-left:2px solid #9e9b78;
+  color:#aab9a9;font-size:11px}
+.mg-briefing__actions{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+#pause .panel,#intel .panel{border-top:3px solid #8ac3a9;
+  background:linear-gradient(140deg,#0c2627f9,#061214f9);
+  box-shadow:0 24px 70px #000c}
+@keyframes mg-live-brief{0%,100%{transform:translateY(0)}
+  50%{transform:translateY(1.6px)}}
+@keyframes mg-blink-brief{0%,16%,17%,18%,61%,62%,63%,100%{transform:scaleY(0)}
+  16.5%,61.5%{transform:scaleY(1)}}
+@media(max-width:600px){.mg-briefing__duo{gap:6px;padding:8px 5px}
+ .mg-briefing__head{font-size:9px}.mg-briefing__head small{font-size:7px}
+ .mg-briefing__comms{font-size:7px;gap:5px}}
 @media(prefers-reduced-motion:reduce){
- .mg-title__sweep,.mg-title__noise{animation:none}
+ .mg-title__sweep,.mg-title__noise,
+ .mg-title__portrait .mg-codec-portrait-art,
+ .mg-title__portrait .mg-codec-eyelids{animation:none}
  #intro .mg-title__action{transition:none}
 }
