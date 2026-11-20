@@ -66,7 +66,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.001",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype"
     },
     {
       "id": "CS.P01.INSERT",
@@ -146,7 +149,11 @@
         "recorded dialogue/VO and emotion",
         "shot lighting and lens QA",
         "Unreal PIE and browser gameplay capture"
-      ]
+      ],
+      "primarySceneId": "CIN.001",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype",
+      "triggerClarification": "Source opening camera is CIN.001, not a separate filmed patrol observation at CIN.002."
     },
     {
       "id": "CS.P01.TRUCKS",
@@ -205,7 +212,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P01.CARD1",
@@ -264,7 +274,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.003",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P01.ELEVATOR",
@@ -329,7 +342,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P01.FREIGHT",
@@ -382,7 +398,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P02.CCTV",
@@ -440,7 +459,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.004",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P02.PILLAR",
@@ -504,7 +526,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P02.CARD2",
@@ -568,7 +593,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P02.BOX",
@@ -626,7 +654,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.006",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P02.MERCENARIES",
@@ -697,7 +728,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.007",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P02.LASER",
@@ -761,7 +795,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P02.RETURN",
@@ -819,7 +856,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P03.CUSTODY",
@@ -905,7 +945,10 @@
         "recorded dialogue/VO and emotion",
         "shot lighting and lens QA",
         "Unreal PIE and browser gameplay capture"
-      ]
+      ],
+      "primarySceneId": "CIN.008",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype"
     },
     {
       "id": "CS.P03.CELL",
@@ -984,7 +1027,11 @@
         "recorded dialogue/VO and emotion",
         "shot lighting and lens QA",
         "Unreal PIE and browser gameplay capture"
-      ]
+      ],
+      "primarySceneId": "CIN.008",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype",
+      "triggerClarification": "The source cell-awakening shot follows actual custody transfer, not first wall break. It is a sub-shot of CIN.008; CIN.009 remains unimplemented."
     },
     {
       "id": "CS.P03.FOX",
@@ -1070,7 +1117,10 @@
         "recorded dialogue/VO and emotion",
         "shot lighting and lens QA",
         "Unreal PIE and browser gameplay capture"
-      ]
+      ],
+      "primarySceneId": "CIN.010",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype"
     },
     {
       "id": "CS.P03.ESCAPE",
@@ -1135,7 +1185,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.011",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P03.CODEC",
@@ -1188,7 +1241,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P04.SHOTMAKER",
@@ -1274,7 +1330,10 @@
         "recorded dialogue/VO and emotion",
         "shot lighting and lens QA",
         "Unreal PIE and browser gameplay capture"
-      ]
+      ],
+      "primarySceneId": "CIN.012",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype"
     },
     {
       "id": "CS.P04.GEAR",
@@ -1338,7 +1397,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.014",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P04.TRACKER",
@@ -1397,7 +1459,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.015",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P04.DOWN",
@@ -1477,7 +1542,10 @@
         "recorded dialogue/VO and emotion",
         "shot lighting and lens QA",
         "Unreal PIE and browser gameplay capture"
-      ]
+      ],
+      "primarySceneId": "CIN.016",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype"
     },
     {
       "id": "CS.P04.CARD3",
@@ -1556,7 +1624,10 @@
         "recorded dialogue/VO and emotion",
         "shot lighting and lens QA",
         "Unreal PIE and browser gameplay capture"
-      ]
+      ],
+      "primarySceneId": "CIN.017",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype"
     },
     {
       "id": "CS.P05.DOGS",
@@ -1615,7 +1686,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.018",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P05.DUCT",
@@ -1679,7 +1753,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P05.KID",
@@ -1750,7 +1827,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.020",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P05.PARACHUTE",
@@ -1814,7 +1894,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.021",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P06.ROOF",
@@ -1878,7 +1961,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P06.HIND",
@@ -1949,7 +2035,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.022",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P06.DROP",
@@ -2019,7 +2108,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.023",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P06.TANK",
@@ -2090,7 +2182,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.024",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P07.INDUSTRY",
@@ -2155,7 +2250,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P07.DOZER",
@@ -2226,7 +2324,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.025",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P07.FIRE",
@@ -2297,7 +2398,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.026",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P07.CARD6",
@@ -2355,7 +2459,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P08.JENNIFER",
@@ -2407,7 +2514,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.027",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P08.MADNAR",
@@ -2478,7 +2588,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.029",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P08.TX11",
@@ -2549,7 +2662,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.030",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P09.RETURN1",
@@ -2607,7 +2723,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P09.ELLEN",
@@ -2678,7 +2797,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.031",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P09.TUNNEL",
@@ -2742,7 +2864,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P09.MADNAR_RETURN",
@@ -2813,7 +2938,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.032",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P09.DUCK",
@@ -2885,7 +3013,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.033",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P09.RETURN3",
@@ -2943,7 +3074,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
     },
     {
       "id": "CS.P10.TRUTH",
@@ -3014,7 +3148,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.034",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P10.BETRAYAL",
@@ -3085,7 +3222,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.035",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P10.TX55",
@@ -3156,7 +3296,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.036",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P10.DETONATION",
@@ -3227,7 +3370,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.037",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P10.BIGBOSS",
@@ -3298,7 +3444,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.038",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P10.ESCAPE",
@@ -3362,7 +3511,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.039",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     },
     {
       "id": "CS.P10.ENDING",
@@ -3432,7 +3584,10 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
-      ]
+      ],
+      "primarySceneId": "CIN.040",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
     }
   ],
   "currentPassScope": [
@@ -3450,5 +3605,10 @@
     "real Play-in-Editor compile and capture evidence"
   ],
   "firstPlayableSceneCount": 7,
-  "firstPlayableSceneStatus": "source-only cinematic shots; no Unreal compile, lip sync, motion capture, production art or runtime proof"
+  "firstPlayableSceneStatus": "Rough camera source exists for seven supplemental shot concepts, but only six canonical cinematic contracts have first-pass camera triggers in both builds; none compile or have finished art/VO verified.",
+  "canonicalStatusAuthority": false,
+  "masterRegistry": "data/FULL_CAMPAIGN_CINEMATIC_BEAT_REGISTRY_1995.json",
+  "sceneStatusIsDerivedFrom": "data/FULL_CAMPAIGN_CINEMATIC_BEAT_REGISTRY_1995.json",
+  "primaryMatchedSceneCount": 36,
+  "optionalCameraAccentsNotInPrimary": 15
 }
