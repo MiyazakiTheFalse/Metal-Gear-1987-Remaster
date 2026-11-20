@@ -92,6 +92,8 @@ public:
     UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
     void OnPostureChanged(EMGGuardPosture Previous, EMGGuardPosture Current);
     UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
+    void OnCartonInspectionConfirmed(); // Animation/prop gesture only; source rules own perception.
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
     void OnMeleeWarning();
     UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
     void OnMeleeImpact();
@@ -174,6 +176,8 @@ private:
     FVector PatrolOrigin = FVector::ZeroVector;
     bool bCustodyChallenge = false;
     bool bCartonInspectionAnnounced = false; // Resets when box leaves eye-level range.
+    bool bCartonIdentitySpoken = false;
+    float CartonInspectionSeconds = 0.f;
     bool bPendingRadioReport = false;
     float ChallengeAge = 0.f;
     float CustodyThreatMemorySeconds = 0.f;
