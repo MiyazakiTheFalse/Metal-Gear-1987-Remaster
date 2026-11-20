@@ -3,6 +3,7 @@
 #include "Sound/SoundBase.h"
 #include "Components/AudioComponent.h"
 #include "MGGuardActor.h"
+#include "MGSurveillanceCameraActor.h"
 #include "MGShootGunnerActor.h"
 #include "MGEquipmentComponent.h"
 #include "MGSpentCasingActor.h"
@@ -266,6 +267,8 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     WeaponRecoilTimer = FMath::Max(0.f, WeaponRecoilTimer - DeltaSeconds);
     MeleeVisualTimer = FMath::Max(0.f, MeleeVisualTimer - DeltaSeconds);
     WallKnockVisualTimer = FMath::Max(0.f, WallKnockVisualTimer - DeltaSeconds);
+    PhysicalInteractionRemaining = FMath::Max(0.f,
+        PhysicalInteractionRemaining - FMath::Max(0.f, DeltaSeconds));
     CoverReattachCooldown = FMath::Max(0.f, CoverReattachCooldown - DeltaSeconds);
     // Start prone only once CharacterMovement has established a valid crouch
     // base position. Never fake a prone pose with a standing collision capsule.
@@ -534,6 +537,18 @@ float AMGPlayerCharacter::GetVisibilityFactor() const
     return bIsCrouched ? 0.36f : 1.f;
 }
 
+void AMGPlayerCharacter::BeginPhysicalInteraction(
+    const FVector& WorldTarget, FName InteractionKind, float DurationSeconds)
+{
+    // A contact cue points to a REAL actor or traced physical surface.
+    // This event NEVER owns mission/camera/health state; the authoritative
+    // gameplay transaction has already succeeded.
+    PhysicalInteractionWorldTarget = WorldTarget;
+    PhysicalInteractionKind = InteractionKind;
+    PhysicalInteractionRemaining = FMath::Clamp(DurationSeconds, .10f, 1.20f);
+    OnPhysicalInteractionStarted(InteractionKind, WorldTarget);
+}
+
 void AMGPlayerCharacter::Interact()
 {
     if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
@@ -549,13 +564,36 @@ void AMGPlayerCharacter::Interact()
             else if (Changed & 8u) NotifyFeedback(TEXT("GRAY FOX RESCUED — INTEL LOG UPDATED"), TEXT("rescue"));
             else if (Changed & 16u) NotifyFeedback(TEXT("ESCAPE ROUTE OPEN"), TEXT("breach"));
         }
-        else if (bInCover)
+        else
         {
-            LeaveCover();
-            NotifyFeedback(TEXT("LEFT COVER"), TEXT("select"));
+            // E is also a grounded world interaction: the player must stand
+            // at a service isolator and actually reach it. A remote camera
+            // focus/reticle alone cannot disable security across the room.
+            bool bHandledControl = false;
+            for (TActorIterator<AMGSurveillanceCameraActor> CCTV(GetWorld()); CCTV; ++CCTV)
+            {
+                if (CCTV->TryDisableAtControlPanel(this))
+                {
+                    BeginPhysicalInteraction(CCTV->GetControlPanelWorldLocation(),
+                        TEXT("CameraIsolator"), .65f);
+                    NotifyFeedback(TEXT("CCTV ISOLATED — LOCAL POWER OFF"),
+                        TEXT("select"));
+                    bHandledControl = true;
+                    break;
+                }
+            }
+            if (!bHandledControl)
+            {
+                if (bInCover)
+                {
+                    LeaveCover();
+                    NotifyFeedback(TEXT("LEFT COVER"), TEXT("select"));
+                }
+                else if (!TryEnterCover())
+                    NotifyFeedback(TEXT("NO ACTION AVAILABLE — MOVE CLOSER AND FACE TARGET"),
+                        TEXT("denied"));
+            }
         }
-        else if (!TryEnterCover())
-            NotifyFeedback(TEXT("NO ACTION AVAILABLE — MOVE CLOSER AND FACE TARGET"), TEXT("denied"));
     }
 }
 
@@ -779,6 +817,7 @@ void AMGPlayerCharacter::KnockOnWall()
     NextWallKnockTime = Now + 0.70f;
     WallKnockVisualTimer = 0.30f;
     CoverPeekAlpha = 0.f;
+    BeginPhysicalInteraction(Hit.ImpactPoint, TEXT("WallKnock"), .30f);
     const UPrimitiveComponent* Wall = Hit.GetComponent();
     const bool bMetal = Wall && Wall->ComponentHasTag(TEXT("MG_Surface_Metal"));
     const bool bWood = Wall && Wall->ComponentHasTag(TEXT("MG_Surface_Wood"));
@@ -1004,6 +1043,9 @@ void AMGPlayerCharacter::MeleeAttack()
     }
     if (Target)
     {
+        BeginPhysicalInteraction(
+            Target->GetActorLocation() + FVector(0.f, 0.f, 55.f),
+            TEXT("MeleeImpact"), .22f);
         const float ComboDamage[3] = {35.f, 35.f, 40.f};
         UGameplayStatics::ApplyDamage(Target, ComboDamage[MeleeComboStep - 1],
             Controller, this, UDamageType::StaticClass());
