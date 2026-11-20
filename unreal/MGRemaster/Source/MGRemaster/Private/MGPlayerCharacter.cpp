@@ -188,8 +188,18 @@ bool AMGPlayerCharacter::HasReadyWeapon() const
 
 void AMGPlayerCharacter::UpdateWeaponPresentation()
 {
+    // The shared source GLBs contain an actual hand_R joint but do not yet
+    // contain a separately authored weapon_r socket. Prefer the artist socket
+    // when it exists, otherwise attach to the REAL imported hand bone.
+    const FName HandSocket = GetMesh()->DoesSocketExist(TEXT("weapon_r"))
+        ? FName(TEXT("weapon_r"))
+        : GetMesh()->GetBoneIndex(TEXT("hand_R")) != INDEX_NONE
+            ? FName(TEXT("hand_R")) : NAME_None;
     const bool bCanHoldProp = HasAuthoredCharacterArt() && HasReadyWeapon()
-        && GetMesh()->DoesSocketExist(TEXT("weapon_r"));
+        && HandSocket != NAME_None;
+    if (bCanHoldProp && WeaponBodyVisual->GetAttachSocketName() != HandSocket)
+        WeaponBodyVisual->AttachToComponent(GetMesh(),
+            FAttachmentTransformRules::SnapToTargetNotIncludingScale, HandSocket);
     // Do not show a stun pistol as a period handgun. Only the currently
     // equipped weapon's matching mesh may replace the honest proxy.
     UStaticMesh* Authored = (Equipment && Equipment->IsHandgunEquipped())
