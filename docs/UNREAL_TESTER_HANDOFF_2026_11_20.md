@@ -26,7 +26,7 @@ git rev-parse HEAD
 .\scripts\unreal_tester_preflight.ps1 -UnrealRoot "C:\Program Files\Epic Games\UE_5.7"
 ```
 
-**If any preflight check fails, report the first failing command and complete output; do not proceed as if the build is verified.** The script checks Git, engine paths, 16 browser test checkpoints (simulated harness evidence), four core GLB binary contracts, Python source contracts and Rust tests. It cannot run the Unreal Editor in this project-authoring session.
+**If any preflight check fails, report the first failing command and complete output; do not proceed as if the build is verified.** The script checks Git, engine paths, 17 browser test checkpoints (simulated harness evidence), four core GLB binary contracts, Python source contracts and Rust tests. It cannot run the Unreal Editor in this project-authoring session.
 
 ## Import visual character rigs before judging character quality
 
@@ -72,7 +72,7 @@ This runs local Python+Node contracts, verifies the GLBs under Unreal `Content/S
 
 ## Updated first-floor 1987 acquisition checks
 
-In each of the **three separately accessible supply trucks**, interact with the physical prop from the rear cargo entrance. The west grants one ration, middle grants Card 1, east grants binoculars. Confirm that the HUD provides local interaction affordance, item ownership survives custody/recovery and reload, consumed rations do not refill, and binoculars change optical FOV without revealing enemies through cover. These are authored mechanics, not yet PIE-tested. Track source changes and test contracts in [the opening implementation record](ORIGINAL_TRUCK_OPENING_IMPLEMENTATION_2026_11_20.md).
+In each of the **three separately accessible supply trucks**, interact with the physical prop from the rear cargo entrance. After physically recovering gear, verify that the return freight shutter at the west prison boundary opens and allows genuine backtracking into the original yard; do **not** grant missing Card 1 automatically. Return to the centre truck if the player skipped it, collect it, and reload the resulting checkpoint while standing in the yard. The west grants one ration, middle grants Card 1, east grants binoculars. Confirm that the HUD provides local interaction affordance, item ownership survives custody/recovery and reload, consumed rations do not refill, and binoculars change optical FOV without revealing enemies through cover. These are authored mechanics, not yet PIE-tested. Track source changes and test contracts in [the opening implementation record](ORIGINAL_TRUCK_OPENING_IMPLEMENTATION_2026_11_20.md).
 
 ## Pass/fail expectations
 
