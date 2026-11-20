@@ -49,7 +49,7 @@ We are developing **the entire original game** with an MGS-style third-person pr
 |---|---|---|---|
 | 1 | Four mercenaries | Pre-Fox team tactics, asymmetric posts, credible reloads, maneuver and suppression; avoid a scripted firing squad | Design only |
 | 2 | Shoot Gunner / Shotmaker | Three broad, well-telegraphed blasts; pumped hulls; cover; recover gear; viable handgun/SMG/missile approaches when source-approved | Source mechanics, not UE verified |
-| 3 | Machinegun Kid | Suppressive cone, line-of-fire cover degradation, earned reposition; finite burst/reload windows, no invulnerable corner | Design only |
+| 3 | Machinegun Kid | Suppressive cone, line-of-fire cover degradation, earned reposition; finite burst/reload windows, no invulnerable corner | Browser/Unreal source prototypes; no UE compile or playtest |
 | 4 | Hind D | Rooftop vertical cover, rotor wash, grenade-lead aiming, physically exposed aircraft vulnerability; protect original identity | Design only |
 | 5 | Tank | Armour invalidates pistol spam; mines on a visible vehicle route, turret tell, escape bays, damaging collision | Design only |
 | 6 | Bulldozer | Slow but consequential mass, telegraphed push and clearance geometry, grenade trajectory and readable retreats | Design only |
