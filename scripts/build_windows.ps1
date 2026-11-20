@@ -52,7 +52,8 @@ $RequiredMeshes = @(
   'Snake\SK_Snake_1995_Infiltration.uasset',
   'GrayFox\SK_GrayFox_1995_Prisoner.uasset',
   'Guard\SK_Guard_1995.uasset',
-  'Bosses\Shotmaker\SK_Shotmaker_1995.uasset'
+  'Bosses\Shotmaker\SK_Shotmaker_1995.uasset',
+  'Bosses\MachinegunKid\SK_MachinegunKid_1995.uasset'
 )
 foreach ($Relative in $RequiredMeshes) {
   $Native = Join-Path (Join-Path $Repo 'unreal\MGRemaster\Content\Characters') $Relative
@@ -61,6 +62,33 @@ foreach ($Relative in $RequiredMeshes) {
   }
 }
 
+# Native source-clip smoke gate: the earlier project could package five static
+# imported skeletal meshes while rendering them forever in T-poses/Idle.
+# Require the minimum clips our actual 1995 gameplay fallback calls.
+$RequiredAnimations = @(
+  'Snake\Animations\AS_Snake_Idle.uasset',
+  'Snake\Animations\AS_Snake_Walk.uasset',
+  'Snake\Animations\AS_Snake_Run.uasset',
+  'Snake\Animations\AS_Snake_Crouch.uasset',
+  'Snake\Animations\AS_Snake_Prone.uasset',
+  'Snake\Animations\AS_Snake_Aim.uasset',
+  'Snake\Animations\AS_Snake_Down.uasset',
+  'GrayFox\Animations\AS_GrayFox_Captive.uasset',
+  'GrayFox\Animations\AS_GrayFox_IdleWary.uasset',
+  'Guard\Animations\AS_Guard_Walk.uasset',
+  'Guard\Animations\AS_Guard_IdleAlert.uasset',
+  'Guard\Animations\AS_Guard_Down.uasset',
+  'Bosses\Shotmaker\Animations\AS_Shotmaker_Shoulder.uasset',
+  'Bosses\Shotmaker\Animations\AS_Shotmaker_Recoil.uasset',
+  'Bosses\MachinegunKid\Animations\AS_MachinegunKid_Aim.uasset',
+  'Bosses\MachinegunKid\Animations\AS_MachinegunKid_Reaching.uasset'
+)
+foreach ($Relative in $RequiredAnimations) {
+  $Native = Join-Path (Join-Path $Repo 'unreal\MGRemaster\Content\Characters') $Relative
+  if (-not (Test-Path $Native)) {
+    throw "Missing native gameplay AnimationSequence: $Native. Import skeletal GLBs with clips in UE5.7; do not package an idle-only cast."
+  }
+}
 Write-Host 'Cooking, staging and packaging Unreal...'
 $UatArgs = @('BuildCookRun', "-project=$Project", '-noP4', '-platform=Win64', '-clientconfig=Development', '-build', '-cook', '-stage', '-pak', '-archive', '-prereqs', "-archivedirectory=$ArchiveDirectory")
 & $UAT @UatArgs
