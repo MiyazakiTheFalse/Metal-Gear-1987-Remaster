@@ -82,7 +82,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "first_pass_dialogue_or_contract"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -92,6 +93,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "FORMAL_ORDER",
+              "actorIds": [
+                "snake",
+                "bigBoss"
+              ],
+              "delivery": "briefing",
+              "source": "planned",
+              "dramaticPurpose": "Big Boss sets a narrow objective; Snake answers precisely but asks one sharp question about uncertainty",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.001",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -125,7 +145,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -135,6 +156,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.002",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -165,7 +193,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -175,7 +204,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P01.ration",
@@ -205,7 +236,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -215,7 +247,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P01.card1",
@@ -245,7 +279,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -255,6 +290,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.003",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -285,7 +327,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -295,7 +338,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P01.mask",
@@ -325,7 +370,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -335,7 +381,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P01.handgun",
@@ -368,7 +416,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -378,7 +427,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P01.mines",
@@ -408,7 +459,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -418,7 +470,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P01.cover",
@@ -448,7 +502,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -458,7 +513,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P01.elevator",
@@ -488,7 +545,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -498,7 +556,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P01.freight",
@@ -531,7 +591,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "first_pass_dialogue_or_contract"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -541,10 +602,26 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [
+            {
+              "key": "WORKER_LIFE",
+              "actorIds": [
+                "snake",
+                "schneider"
+              ],
+              "delivery": "optional_world",
+              "source": "planned",
+              "dramaticPurpose": "A mundane logistics detail reminds Snake that Outer Heaven has routines and ordinary workers, not only targets",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": []
         }
       ],
-      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest"
+      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest",
+      "storyQuestion": "Can Snake make an independent observation while carrying a precise order?",
+      "storyPacing": "briefing → first pressure → ordinary human logistics"
     },
     {
       "id": "P02",
@@ -590,7 +667,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -600,6 +678,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.004",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -630,7 +715,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -640,7 +726,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P02.pow1",
@@ -670,7 +758,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -680,7 +769,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P02.gas",
@@ -710,7 +801,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -720,7 +812,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P02.pow2",
@@ -750,7 +844,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -760,7 +855,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P02.pillar",
@@ -790,7 +887,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -800,7 +898,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P02.card2",
@@ -830,7 +930,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -840,7 +941,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P02.remote",
@@ -870,7 +973,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -880,7 +984,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P02.electric",
@@ -910,7 +1016,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -920,6 +1027,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.005",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -950,7 +1064,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -960,7 +1075,21 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [
+            {
+              "key": "PERSON_NOT_TUTORIAL",
+              "actorIds": [
+                "snake",
+                "diane"
+              ],
+              "delivery": "optional_codec",
+              "source": "planned",
+              "dramaticPurpose": "After acquiring Diane's frequency, ask what she needs to assess an unfamiliar boss; she refuses to guess without evidence",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": []
         },
         {
           "id": "P02.box",
@@ -990,7 +1119,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1000,6 +1130,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.006",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -1030,7 +1167,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1040,6 +1178,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.007",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -1070,7 +1215,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1080,7 +1226,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P02.grenade",
@@ -1110,7 +1258,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1120,7 +1269,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P02.pow4",
@@ -1150,7 +1301,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1160,7 +1312,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P02.laser",
@@ -1190,7 +1344,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1200,7 +1355,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P02.pow5",
@@ -1230,7 +1387,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1240,7 +1398,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P02.return1",
@@ -1270,7 +1430,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1280,7 +1441,21 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [
+            {
+              "key": "CARTOGRAPHY_TRUST",
+              "actorIds": [
+                "snake",
+                "schneider"
+              ],
+              "delivery": "optional_codec",
+              "source": "planned",
+              "dramaticPurpose": "Snake's firsthand account corrects Schneider's outdated map; he updates only that corridor",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": []
         },
         {
           "id": "P02.smg",
@@ -1310,7 +1485,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1320,7 +1496,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P02.pow6",
@@ -1350,7 +1528,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1360,10 +1539,14 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         }
       ],
-      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest"
+      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest",
+      "storyQuestion": "Does the fortress correspond to what trusted contacts think they know?",
+      "storyPacing": "hazard → prisoner voices → practical box relief → mercenaries"
     },
     {
       "id": "P03",
@@ -1406,7 +1589,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "first_pass_dialogue_or_contract"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1416,6 +1600,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "COMMAND_OUT_OF_RANGE",
+              "actorIds": [
+                "snake",
+                "bigBoss"
+              ],
+              "delivery": "cinematic",
+              "source": "first_pass_source_candidate",
+              "dramaticPurpose": "Sudden isolation makes the comforting command voice an absence, not proof of betrayal",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.008",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -1449,7 +1652,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1459,7 +1663,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P03.wall1",
@@ -1492,7 +1698,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "first_pass_dialogue_or_contract"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1502,6 +1709,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "LISTEN_NOT_TELL",
+              "actorIds": [
+                "snake",
+                "schneider"
+              ],
+              "delivery": "optional_codec",
+              "source": "first_pass_source_candidate",
+              "dramaticPurpose": "Snake tests Schneider's incomplete architectural knowledge against a hollow wall",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.009",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -1535,7 +1761,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "first_pass_dialogue_or_contract"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1545,6 +1772,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "RESCUE_FOX_PEER",
+              "actorIds": [
+                "snake",
+                "grayFox"
+              ],
+              "delivery": "cinematic",
+              "source": "first_pass_source_candidate",
+              "dramaticPurpose": "Fox doubts anyone would come; Snake answers by physically reaching him, earning wary professional respect",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.010",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -1578,7 +1824,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1588,6 +1835,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.011",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -1621,7 +1875,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "first_pass_dialogue_or_contract"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1631,7 +1886,21 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [
+            {
+              "key": "FOX_CAN_STILL_HELP",
+              "actorIds": [
+                "snake",
+                "grayFox"
+              ],
+              "delivery": "optional_world",
+              "source": "first_pass_source_candidate",
+              "dramaticPurpose": "Fox identifies a guard's work rhythm, not enemy positions through walls",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": []
         },
         {
           "id": "P03.codec",
@@ -1664,7 +1933,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1674,7 +1944,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P03.bodies",
@@ -1704,7 +1976,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1714,10 +1987,14 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         }
       ],
-      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest"
+      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest",
+      "storyQuestion": "Can Snake trust himself with no kit and no voice of command?",
+      "storyPacing": "capture silence → curiosity → Fox companionship → escape"
     },
     {
       "id": "P04",
@@ -1760,7 +2037,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "first_pass_dialogue_or_contract"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1770,6 +2048,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "COMBAT_WITHOUT_THE_WHEEL",
+              "actorIds": [
+                "snake",
+                "grayFox"
+              ],
+              "delivery": "short_cinematic",
+              "source": "first_pass_source_candidate",
+              "dramaticPurpose": "Fox's exhaustion and Snake's observation determine how they face a prison boss",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.012",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -1803,7 +2100,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1813,7 +2111,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P04.evade",
@@ -1846,7 +2146,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1856,6 +2157,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.013",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -1889,7 +2197,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1899,7 +2208,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P04.bag",
@@ -1932,7 +2243,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "first_pass_dialogue_or_contract"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1942,6 +2254,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "PERSONAL_EFFECTS",
+              "actorIds": [
+                "snake",
+                "bigBoss"
+              ],
+              "delivery": "optional_codec",
+              "source": "first_pass_source_candidate",
+              "dramaticPurpose": "Recovered gear feels different when Snake realises it has been handled and labelled",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.014",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -1975,7 +2306,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "first_pass_dialogue_or_contract"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -1985,6 +2317,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "TRANSMITTER_UNEASE",
+              "actorIds": [
+                "snake",
+                "bigBoss"
+              ],
+              "delivery": "optional_codec",
+              "source": "first_pass_source_candidate",
+              "dramaticPurpose": "Snake asks why his gear is transmitting. Command offers a plausible incomplete answer, not a confession",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.015",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -2018,7 +2369,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2028,6 +2380,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.016",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -2061,7 +2420,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "first_pass_dialogue_or_contract"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2071,10 +2431,31 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "CLEARANCE_RECONTEXTUALIZED",
+              "actorIds": [
+                "snake",
+                "schneider"
+              ],
+              "delivery": "optional_codec",
+              "source": "first_pass_source_candidate",
+              "dramaticPurpose": "Different doors mean new choices; Schneider cautions that floor plans and access permissions disagree",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.017",
+              "status": "design_only"
+            }
           ]
         }
       ],
-      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest"
+      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest",
+      "storyQuestion": "Is the equipment he trusted itself reliable?",
+      "storyPacing": "boss warning → gear regained → suspicious transmitter → new clearance"
     },
     {
       "id": "P05",
@@ -2120,7 +2501,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "first_pass_dialogue_or_contract"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2130,6 +2512,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "COST_OF_CONTACT",
+              "actorIds": [
+                "snake",
+                "grayFox"
+              ],
+              "delivery": "optional_world",
+              "source": "planned",
+              "dramaticPurpose": "Fox notices guard/dog routine at a distance while Snake controls a route",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.018",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -2163,7 +2564,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2173,6 +2575,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.019",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -2203,7 +2612,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2213,7 +2623,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P05.suit",
@@ -2243,7 +2655,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2253,7 +2666,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P05.uniform",
@@ -2283,7 +2698,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2293,7 +2709,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P05.lift",
@@ -2323,7 +2741,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2333,7 +2752,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P05.boxB2",
@@ -2363,7 +2784,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2373,7 +2795,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P05.mines2",
@@ -2403,7 +2827,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2413,7 +2838,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P05.powB2",
@@ -2443,7 +2870,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2453,7 +2881,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P05.controller",
@@ -2483,7 +2913,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2493,7 +2924,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P05.ir",
@@ -2523,7 +2956,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2533,7 +2967,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P05.kid",
@@ -2566,7 +3002,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "first_pass_dialogue_or_contract"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2576,6 +3013,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "ASK_FOR_WEAKNESS",
+              "actorIds": [
+                "snake",
+                "diane"
+              ],
+              "delivery": "optional_codec",
+              "source": "planned",
+              "dramaticPurpose": "Diane's advice on suppressive fire is cautious and based on audible reload rhythm",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.020",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -2606,7 +3062,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2616,7 +3073,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P05.parachute",
@@ -2649,7 +3108,8 @@
             "browser_runtime": "source_prototype",
             "unreal_runtime": "source_prototype",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "first_pass_dialogue_or_contract"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2659,10 +3119,31 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "ROOF_ON_OWN_TERMS",
+              "actorIds": [
+                "snake",
+                "bigBoss"
+              ],
+              "delivery": "optional_codec",
+              "source": "planned",
+              "dramaticPurpose": "Command gives a broad instruction; Snake chooses the safe route from earned reconnaissance",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.021",
+              "status": "design_only"
+            }
           ]
         }
       ],
-      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest"
+      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest",
+      "storyQuestion": "What does rescuing a teammate oblige Snake to do next?",
+      "storyPacing": "dog tension → architecture puzzle → focused combat → breathing room"
     },
     {
       "id": "P06",
@@ -2704,7 +3185,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2714,7 +3196,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P06.powRoof",
@@ -2744,7 +3228,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2754,7 +3239,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P06.hind",
@@ -2784,7 +3271,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2794,6 +3282,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "AIR_THREAT",
+              "actorIds": [
+                "snake",
+                "diane"
+              ],
+              "delivery": "optional_codec",
+              "source": "planned",
+              "dramaticPurpose": "Diane warns about rotor wash/cover without telling Snake to use equipment he cannot own yet",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.022",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -2824,7 +3331,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2834,6 +3342,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.023",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -2864,7 +3379,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2874,7 +3390,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P06.card4",
@@ -2904,7 +3422,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2914,7 +3433,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P06.mineDetector",
@@ -2944,7 +3465,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2954,7 +3476,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P06.returnTruck",
@@ -2984,7 +3508,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -2994,7 +3519,21 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [
+            {
+              "key": "REVISIT_A_CHANGED_WORLD",
+              "actorIds": [
+                "snake",
+                "schneider"
+              ],
+              "delivery": "optional_codec",
+              "source": "planned",
+              "dramaticPurpose": "Previously learned loading schedules now help Snake choose a return trip",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": []
         },
         {
           "id": "P06.tank",
@@ -3024,7 +3563,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3034,10 +3574,19 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.024",
+              "status": "design_only"
+            }
           ]
         }
       ],
-      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest"
+      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest",
+      "storyQuestion": "Can independent observation become decisive under a much larger enemy?",
+      "storyPacing": "roof scale reveal → tactical adaptation → landing → tank"
     },
     {
       "id": "P07",
@@ -3079,7 +3628,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3089,7 +3639,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P07.bulldozer",
@@ -3119,7 +3671,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3129,6 +3682,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.025",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -3159,7 +3719,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3169,7 +3730,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P07.card5",
@@ -3199,7 +3762,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3209,7 +3773,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P07.powB2",
@@ -3239,7 +3805,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3249,7 +3816,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P07.water",
@@ -3279,7 +3848,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3289,7 +3859,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P07.fire",
@@ -3319,7 +3891,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3329,6 +3902,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "DANGER_HAS_COST",
+              "actorIds": [
+                "snake",
+                "diane"
+              ],
+              "delivery": "optional_codec",
+              "source": "planned",
+              "dramaticPurpose": "Diane's tactical voice briefly cracks after witnessing the stakes, then recovers",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.026",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -3359,7 +3951,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3369,7 +3962,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P07.returnElevator",
@@ -3399,7 +3994,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3409,10 +4005,14 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         }
       ],
-      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest"
+      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest",
+      "storyQuestion": "Who is helping, and who will carry the consequences of this raid?",
+      "storyPacing": "machine danger → human contact → fire confrontation"
     },
     {
       "id": "P08",
@@ -3453,7 +4053,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3463,6 +4064,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "INSIDER_RULES",
+              "actorIds": [
+                "snake",
+                "jennifer"
+              ],
+              "delivery": "optional_codec",
+              "source": "planned",
+              "dramaticPurpose": "Jennifer tests whether Snake is careful enough to keep her inside position undiscovered",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.027",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -3493,7 +4113,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3503,7 +4124,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P08.madnar",
@@ -3533,7 +4156,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3543,6 +4167,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "DEMAND_EVIDENCE",
+              "actorIds": [
+                "snake",
+                "madnar"
+              ],
+              "delivery": "cinematic",
+              "source": "planned",
+              "dramaticPurpose": "Madnar fears for Ellen; Snake cannot obtain the pattern until he does the work",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.029",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -3573,7 +4216,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3583,6 +4227,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.028",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -3613,7 +4264,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3623,6 +4275,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "HELP_WITH_LIMITS",
+              "actorIds": [
+                "snake",
+                "jennifer"
+              ],
+              "delivery": "optional_codec",
+              "source": "planned",
+              "dramaticPurpose": "Insider information and robot movement provide alternatives to taking lethal damage",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.030",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -3653,7 +4324,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3663,7 +4335,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P08.compass",
@@ -3693,7 +4367,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3703,7 +4378,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P08.flashlight",
@@ -3733,7 +4410,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3743,7 +4421,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P08.pow",
@@ -3773,7 +4453,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3783,10 +4464,14 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         }
       ],
-      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest"
+      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest",
+      "storyQuestion": "What does Snake owe the civilians whose lives are being used as leverage?",
+      "storyPacing": "insider contact → doctor confrontation → two-robot threat"
     },
     {
       "id": "P09",
@@ -3830,7 +4515,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3840,7 +4526,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P09.ellen",
@@ -3870,7 +4558,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3880,6 +4569,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "PERSON_NOT_ACCESS_CARD",
+              "actorIds": [
+                "snake",
+                "ellen"
+              ],
+              "delivery": "cinematic",
+              "source": "planned",
+              "dramaticPurpose": "Ellen reacts as an individual with agency; rescue is emotionally complete before any reward",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.031",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -3910,7 +4618,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3920,7 +4629,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P09.madnarReturn",
@@ -3950,7 +4661,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -3960,6 +4672,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "EARNED_PATTERN",
+              "actorIds": [
+                "snake",
+                "madnar"
+              ],
+              "delivery": "cinematic",
+              "source": "planned",
+              "dramaticPurpose": "Madnar's resistance yields to direct evidence Ellen is alive; he provides the original sequence",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.032",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -3990,7 +4721,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4000,7 +4732,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P09.b3Visit1",
@@ -4030,7 +4764,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4040,7 +4775,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P09.oxygen",
@@ -4070,7 +4807,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4080,7 +4818,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P09.backToB2",
@@ -4110,7 +4850,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4120,7 +4861,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P09.drain",
@@ -4150,7 +4893,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4160,7 +4904,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P09.duck",
@@ -4190,7 +4936,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4200,6 +4947,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "BROTHER_NOT_AN_OBJECTIVE",
+              "actorIds": [
+                "snake",
+                "jennifer"
+              ],
+              "delivery": "cinematic",
+              "source": "planned",
+              "dramaticPurpose": "The brother rescue pays off a long-established human fear, not a last-minute fetch quest",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.033",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -4230,7 +4996,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4240,7 +5007,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P09.restock",
@@ -4270,7 +5039,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4280,7 +5050,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P09.backToB3",
@@ -4310,7 +5082,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4320,10 +5093,14 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         }
       ],
-      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest"
+      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest",
+      "storyQuestion": "Will Snake expend time and risk to fulfil a promise?",
+      "storyPacing": "long backtrack → Ellen quiet close-up → return to Madnar → hostage boss"
     },
     {
       "id": "P10",
@@ -4365,7 +5142,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4375,6 +5153,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "MISSING_CONTEXT",
+              "actorIds": [
+                "snake",
+                "resistancePOWs"
+              ],
+              "delivery": "cinematic",
+              "source": "planned",
+              "dramaticPurpose": "A rescued prisoner makes earlier commands newly disturbing, without retconning prior knowledge",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.034",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -4405,7 +5202,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4415,6 +5213,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "MENTOR_BECOMES_TARGET",
+              "actorIds": [
+                "snake",
+                "bigBoss"
+              ],
+              "delivery": "cinematic",
+              "source": "planned",
+              "dramaticPurpose": "The familiar codec timbre becomes personally unsettling, not merely a boss announcement",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.035",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -4445,7 +5262,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4455,7 +5273,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P10.gas",
@@ -4485,7 +5305,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4495,7 +5316,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P10.electric",
@@ -4525,7 +5348,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4535,7 +5359,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P10.pattern",
@@ -4565,7 +5391,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4575,7 +5402,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P10.tx55",
@@ -4605,7 +5434,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4615,6 +5445,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "STAND_BY_EVIDENCE",
+              "actorIds": [
+                "snake",
+                "madnar"
+              ],
+              "delivery": "cinematic",
+              "source": "planned",
+              "dramaticPurpose": "Destroying Metal Gear validates earned science, courage and deliberate preparation",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.036",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -4645,7 +5494,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4655,6 +5505,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.037",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -4685,7 +5542,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4695,6 +5553,25 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "FINAL_ARGUMENT",
+              "actorIds": [
+                "snake",
+                "bigBoss"
+              ],
+              "delivery": "cinematic",
+              "source": "planned",
+              "dramaticPurpose": "Two actors with shared history clash; Snake's actions carry the answer, not a monologue",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.038",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -4725,7 +5602,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4735,7 +5613,9 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
-          ]
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": []
         },
         {
           "id": "P10.ladder",
@@ -4765,7 +5645,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "not_required_for_every_minor_pickup"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4775,6 +5656,13 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [],
+          "cinematicScenes": [
+            {
+              "id": "CIN.039",
+              "status": "design_only"
+            }
           ]
         },
         {
@@ -4805,7 +5693,8 @@
             "browser_runtime": "not_started",
             "unreal_runtime": "not_started",
             "automated_test": "not_started",
-            "player_playtest": "not_started"
+            "player_playtest": "not_started",
+            "story_and_character": "design_only"
           },
           "needsToBeDone": [
             "document all entry/exit doors, return routes and physical clearance",
@@ -4815,10 +5704,31 @@
             "animate actual realistic costume-correct rig and context speech",
             "audio/muzzle/impact/cinematic feedback",
             "save/load/skip/re-entry and novice test in both engines"
+          ],
+          "relationshipBeats": [
+            {
+              "key": "WHAT_CAME_HOME",
+              "actorIds": [
+                "snake",
+                "grayFox"
+              ],
+              "delivery": "ending",
+              "source": "planned",
+              "dramaticPurpose": "A brief quiet aftermath considers the humans Snake met and helped, without narrating future lore",
+              "productionPerformance": "not_final"
+            }
+          ],
+          "cinematicScenes": [
+            {
+              "id": "CIN.040",
+              "status": "design_only"
+            }
           ]
         }
       ],
-      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest"
+      "milestoneDoD": "end-to-end original route, real enemy maps, actual rigs, 1987 item and card order, persistent state, UE compile/PIE, novice playtest",
+      "storyQuestion": "What does the rookie do when the person he trusted is the threat?",
+      "storyPacing": "final prisoner truth → silent preparation → TX-55 → confrontation → escape"
     }
   ],
   "areas": [
@@ -6520,7 +7430,12 @@
     "unmappedCoordinates": 52,
     "prototypeEnemyActorsMapped": 14,
     "prototypeEnemyAreasMapped": 5,
-    "canonicalAreaCoordinatesVerified": 0
+    "canonicalAreaCoordinatesVerified": 0,
+    "relationshipBeatContracts": 29,
+    "earnedCinematicContracts": 40,
+    "relationshipsWithRecordedPerformance": 0
   },
-  "sourceImplementationGate": "undefined Source-authored Unreal guard coordinates are separately inventoried in data/UNREAL_PROTOTYPE_ENEMY_DEPLOYMENTS_1995.json and must not be mistaken for original screen coordinates."
+  "sourceImplementationGate": "undefined Source-authored Unreal guard coordinates are separately inventoried in data/UNREAL_PROTOTYPE_ENEMY_DEPLOYMENTS_1995.json and must not be mistaken for original screen coordinates.",
+  "linkedStoryRegistry": "data/FULL_CAMPAIGN_STORY_AND_RELATIONSHIP_ARCS_1995.json",
+  "linkedCinematicRegistry": "data/FULL_CAMPAIGN_CINEMATIC_BEAT_REGISTRY_1995.json"
 }
