@@ -395,9 +395,117 @@
           "recorded": false
         }
       ]
+    },
+    {
+      "scene_id": "guard_question",
+      "context": "world",
+      "lines": [
+        {
+          "speaker": "guard",
+          "text": "What was that?",
+          "clip": "VO_guard_question_01",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "guard_investigate",
+      "context": "world",
+      "lines": [
+        {
+          "speaker": "guard",
+          "text": "Check that noise.",
+          "clip": "VO_guard_investigate_01",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "guard_contact",
+      "context": "world",
+      "lines": [
+        {
+          "speaker": "guard",
+          "text": "Intruder!",
+          "clip": "VO_guard_contact_01",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "guard_lostsight",
+      "context": "world",
+      "lines": [
+        {
+          "speaker": "guard",
+          "text": "Lost visual. Search the area.",
+          "clip": "VO_guard_lostsight_01",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "guard_return",
+      "context": "world",
+      "lines": [
+        {
+          "speaker": "guard",
+          "text": "Back to post.",
+          "clip": "VO_guard_return_01",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "guard_bodydiscovered",
+      "context": "world",
+      "lines": [
+        {
+          "speaker": "guard",
+          "text": "Man down!",
+          "clip": "VO_guard_bodydiscovered_01",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "guard_custodychallenge",
+      "context": "world",
+      "lines": [
+        {
+          "speaker": "guard",
+          "text": "Halt. Keep your hands visible.",
+          "clip": "VO_guard_custodychallenge_01",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "guard_radiocontact",
+      "context": "world",
+      "lines": [
+        {
+          "speaker": "guard",
+          "text": "Hostile contact. Request support.",
+          "clip": "VO_guard_radiocontact_01",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "shotmaker_intro",
+      "context": "world",
+      "lines": [
+        {
+          "speaker": "shotmaker",
+          "text": "You made it out of your cell. Not out of my prison.",
+          "clip": "VO_shotmaker_intro_01",
+          "recorded": false
+        }
+      ]
     }
   ],
   "unmet": "No voice samples, masters, processed exports, approval sessions, lip-sync, spatial mix or UE sound assets currently present.",
-  "audio_clip_count": 36,
-  "subtitle_line_count": 40
+  "audio_clip_count": 45,
+  "subtitle_line_count": 49
 }
