@@ -41,6 +41,8 @@ public:
     bool IsDefeated() const { return bDefeated; }
     UFUNCTION(BlueprintPure, Category="Shotmaker|Gameplay")
     bool IsEncounterActive() const { return bActive; }
+    UStaticMeshComponent* GetHeldWeaponVisual() const { return WeaponBody; }
+    USkeletalMeshComponent* GetRigMesh() const { return CharacterMesh; }
     UFUNCTION(BlueprintPure, Category="Shotmaker|Animation")
     bool IsTelegraphing() const { return State == EAttackState::Warning; }
     UFUNCTION(BlueprintPure, Category="Shotmaker|Animation")
