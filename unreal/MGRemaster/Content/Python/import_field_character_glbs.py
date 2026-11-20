@@ -87,19 +87,27 @@ def import_prototype(role: str):
             f"{role}: expected exactly one SkeletalMesh, found {skeletal}. "
             f"Imported paths: {imported}. Check glTF/Interchange skeletal importer."
         )
-    mesh = unreal.EditorAssetLibrary.load_asset(skeletal[0])
+    if not unreal.EditorAssetLibrary.does_asset_exist(target):
+        raise RuntimeError(
+            f"{role}: skeletal import exists at {skeletal[0]}, but the runtime "
+            f"expects {target}. Rename/move the imported asset to that exact "
+            "target in Unreal Editor, then rerun this importer preflight."
+        )
+    mesh = unreal.EditorAssetLibrary.load_asset(target)
+    if not isinstance(mesh, unreal.SkeletalMesh):
+        raise TypeError(f"Target {target} does not resolve to a skeletal mesh.")
     skeleton = mesh.get_editor_property("skeleton")
     if skeleton is None:
         raise RuntimeError(f"{role}: no real Skeleton after import")
     unreal.log(
-        f"{role}: skeletal source imported at {skeletal[0]}, "
+        f"{role}: skeletal source imported at {target}, "
         f"{len(meta['animations'])} authored source animation clips. "
         "Retarget orientation, verify all AnimationSequences, AnimBP, PBR and "
         "720p appearance separately. NOT production art."
     )
     # Do not rename importer output: callers must validate the exact loaded
     # path. No blueprints are auto-assigned from a mismatching generated name.
-    return skeletal[0]
+    return target
 
 
 def main():
