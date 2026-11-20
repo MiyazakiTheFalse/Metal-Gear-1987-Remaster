@@ -2,6 +2,8 @@
 
 #include "MGPlayerCharacter.h"
 #include "MGGrayFoxMission.h"
+#include "MGSpentCasingActor.h"
+#include "Components/PointLightComponent.h"
 #include "Sound/SoundBase.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -47,6 +49,15 @@ AMGGuardActor::AMGGuardActor()
     SecuritySidearm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     SecuritySidearm->SetCastShadow(true);
     SecuritySidearm->SetVisibility(false);
+    SidearmMuzzleLight = CreateDefaultSubobject<UPointLightComponent>(
+        TEXT("GuardSidearmMuzzleFlash"));
+    SidearmMuzzleLight->SetupAttachment(SecuritySidearm);
+    SidearmMuzzleLight->SetRelativeLocation(FVector(21.f, 0.f, 3.f));
+    SidearmMuzzleLight->SetIntensity(6100.f);
+    SidearmMuzzleLight->SetAttenuationRadius(190.f);
+    SidearmMuzzleLight->SetCastShadows(false);
+    SidearmMuzzleLight->SetLightColor(FLinearColor(1.f, .68f, .33f));
+    SidearmMuzzleLight->SetVisibility(false);
 }
 
 void AMGGuardActor::BeginPlay()
@@ -55,6 +66,8 @@ void AMGGuardActor::BeginPlay()
     PatrolOrigin = GetActorLocation();
     StationFacing = GetActorRotation();
     SidearmRounds = FMath::Clamp(SidearmMagazineCapacity, 4, 16);
+    SidearmShotSound = LoadObject<USoundBase>(nullptr,
+        TEXT("/Game/Audio/Weapons/GuardSidearm_Shot.GuardSidearm_Shot"));
     // A missing licensed art asset cannot become a fake successful import.
     // When present, the new original handgun source can serve security roles
     // until approved, distinct guard-specific service arms are supplied.
@@ -455,6 +468,8 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
         if (Health <= 0.f)
         {
             bIncapacitated = true;
+            PendingSidearmCaseSeconds = -1.f;
+            if (SidearmMuzzleLight) SidearmMuzzleLight->SetVisibility(false);
             SetGuardPosture(EMGGuardPosture::Incapacitated);
             SetSecurityPhase(EMGGuardAwarenessPhase::Incapacitated);
             Suspicion = 0.f;
@@ -476,6 +491,24 @@ void AMGGuardActor::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     if (bIncapacitated || !GetWorld()) return;
+    SidearmMuzzleFlashRemaining = FMath::Max(0.f,
+        SidearmMuzzleFlashRemaining - FMath::Max(0.f, DeltaSeconds));
+    if (SidearmMuzzleLight)
+        SidearmMuzzleLight->SetVisibility(SidearmMuzzleFlashRemaining > 0.f);
+    if (PendingSidearmCaseSeconds >= 0.f)
+    {
+        PendingSidearmCaseSeconds -= FMath::Max(0.f, DeltaSeconds);
+        if (PendingSidearmCaseSeconds < 0.f)
+        {
+            const FVector CaseLocation = SecuritySidearm->IsVisible() &&
+                SecuritySidearm->DoesSocketExist(TEXT("ejection_port"))
+                ? SecuritySidearm->GetSocketLocation(TEXT("ejection_port"))
+                : GetActorLocation() + FVector(10.f, 18.f, 65.f);
+            AMGSpentCasingActor::Eject(GetWorld(), EMGCasingType::HandgunBrass,
+                CaseLocation, SecuritySidearm->GetComponentRotation());
+            OnSidearmCasingEjected();
+        }
+    }
     TimeInSecurityState += FMath::Max(0.f, DeltaSeconds);
     CalloutRemaining = FMath::Max(0.f, CalloutRemaining - FMath::Max(0.f, DeltaSeconds));
     EvidenceAge = FMath::Min(120.f, EvidenceAge + FMath::Max(0.f, DeltaSeconds));
@@ -795,6 +828,11 @@ void AMGGuardActor::Tick(float DeltaSeconds)
                     UGameplayStatics::ApplyDamage(
                         const_cast<AMGPlayerCharacter*>(Player),
                         7.f, nullptr, this, UDamageType::StaticClass());
+                SidearmMuzzleFlashRemaining = .075f;
+                if (SidearmShotSound)
+                    UGameplayStatics::PlaySoundAtLocation(this, SidearmShotSound,
+                        Muzzle, .62f);
+                PendingSidearmCaseSeconds = .065f;
                 OnSidearmFired(SidearmRounds, bHitPlayer);
             }
         }
