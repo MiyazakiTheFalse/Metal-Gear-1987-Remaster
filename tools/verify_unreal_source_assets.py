@@ -16,7 +16,27 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 CHARACTERS = ROOT / "unreal" / "MGRemaster" / "Content" / "SourceAssets" / "Characters"
 BROWSER = ROOT / "browser" / "assets" / "models"
-ROLE_NAMES = ("snake", "fox", "guard", "shoot_gunner")
+ROLE_NAMES = (
+    "snake", "fox", "guard", "shoot_gunner",
+    "real_big_boss",
+    "venom_snake",
+    "kyle_schneider",
+    "diane",
+    "steve",
+    "jennifer",
+    "jennifers_brother",
+    "drago_madnar",
+    "ellen_madnar",
+    "machinegun_kid",
+    "fire_trooper",
+    "dirty_duck",
+    "pow_informant",
+    "madnar_decoy",
+    "mercenary_1",
+    "mercenary_2",
+    "mercenary_3",
+    "mercenary_4",
+)
 COMMON_CLIPS = {
     "Idle", "IdleAlert", "IdleLook", "IdleWary", "Walk", "Run", "Crouch", "Prone", "Down",
     "Aim", "Cover", "Melee", "Reaching", "Hit",
