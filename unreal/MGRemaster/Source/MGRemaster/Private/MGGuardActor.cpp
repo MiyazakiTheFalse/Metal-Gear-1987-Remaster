@@ -11,6 +11,7 @@
 #include "Engine/SkeletalMesh.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimSequence.h"
+#include "MGPrototypeAnimationFallback.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -106,6 +107,64 @@ void AMGGuardActor::BeginPlay()
             SecuritySidearm->SetVisibility(SecuritySidearm->GetStaticMesh() != nullptr);
         }
     }
+}
+
+void AMGGuardActor::SetPrototypeAnimationSource(const FString& Folder,
+                                                const FString& Prefix)
+{
+    PrototypeAnimationFolder = Folder;
+    PrototypeAnimationPrefix = Prefix;
+    PrototypeAnimationRequest = NAME_None;
+}
+void AMGGuardActor::PlayPrototypeActing(FName Requested, float Rate)
+{
+    MGPrototypeAnimationFallback::Apply(CharacterMesh,
+        PrototypeAnimationFolder, PrototypeAnimationPrefix, Requested,
+        PrototypeAnimationRequest, Rate);
+}
+void AMGGuardActor::UpdatePrototypeFallbackAnimation()
+{
+    FName Clip = TEXT("Idle");
+    const float Speed = ActualGroundSpeedCmPerSec; // previous committed step
+    if (bIncapacitated) Clip = TEXT("Down");
+    else if (StaggerSeconds > 0.f) Clip = TEXT("Hit");
+    else if (bSidearmReloading) Clip = TEXT("Reaching");
+    else if (AttackWindupSeconds > 0.f) Clip = TEXT("Melee");
+    else if (bSidearmAiming || SidearmShotCooldown > .55f)
+        Clip = TEXT("Aim");
+    else if (bPendingRadioReport) Clip = TEXT("RadioListen");
+    else if (Speed > 135.f) Clip = TEXT("Run");
+    else if (Speed > 18.f) Clip = TEXT("Walk");
+    else if (AwarenessState >= 3) Clip = TEXT("IdleAlert");
+    else if (SecurityPhase == EMGGuardAwarenessPhase::Searching ||
+             SecurityPhase == EMGGuardAwarenessPhase::Investigating)
+        Clip = TEXT("IdleLook");
+    else if (AwarenessState >= 1) Clip = TEXT("IdleWary");
+    else if (GetWorld())
+    {
+        const int32 IdleBeat = FMath::FloorToInt((GetWorld()->GetTimeSeconds() +
+            (GetUniqueID() % 13) * .55f) / 9.5f) % 8;
+        Clip = IdleBeat == 2 ? TEXT("IdleLook") :
+            IdleBeat == 6 ? TEXT("IdleWary") : TEXT("Idle");
+    }
+    const float Rate = Clip == TEXT("Walk") || Clip == TEXT("Run")
+        ? FMath::Clamp(Speed / (Clip == TEXT("Run") ? 320.f : 95.f), .65f, 1.55f)
+        : 1.f;
+    PlayPrototypeActing(Clip, Rate);
+}
+void AMGGuardActor::ApplyIncapacitatedVisual()
+{
+    // Source Down already rotates the joints to the ground. Without it,
+    // retain the honest fallen proxy rather than leaving an upright T-pose.
+    const bool SourceDown = HasAuthoredCharacterArt() &&
+        CharacterMesh->GetAnimClass() == nullptr &&
+        MGPrototypeAnimationFallback::FindClip(PrototypeAnimationFolder,
+            PrototypeAnimationPrefix, TEXT("Down")) != nullptr;
+    if (SourceDown) PlayPrototypeActing(TEXT("Down"));
+    USceneComponent* Body = HasAuthoredCharacterArt()
+        ? static_cast<USceneComponent*>(CharacterMesh)
+        : static_cast<USceneComponent*>(ProxyBody);
+    Body->SetRelativeRotation(FRotator(0.f, 0.f, SourceDown ? 0.f : 80.f));
 }
 
 void AMGGuardActor::ConfigurePatrol(const FVector& Axis,
@@ -581,10 +640,7 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
             ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             CharacterMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             CollisionCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-            // Until a KO/death montage is authored, preserve a readable fallback.
-            (HasAuthoredCharacterArt() ? static_cast<USceneComponent*>(CharacterMesh)
-                : static_cast<USceneComponent*>(ProxyBody))->SetRelativeRotation(
-                    FRotator(0.f, 0.f, 80.f));
+            ApplyIncapacitatedVisual();
             SetActorTickEnabled(false);
         }
     }
@@ -610,9 +666,7 @@ void AMGGuardActor::RestoreIncapacitatedBody(
     ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     CharacterMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     CollisionCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    (HasAuthoredCharacterArt() ? static_cast<USceneComponent*>(CharacterMesh)
-        : static_cast<USceneComponent*>(ProxyBody))->SetRelativeRotation(
-            FRotator(0.f, 0.f, 80.f));
+    ApplyIncapacitatedVisual();
     SetGuardPosture(EMGGuardPosture::Incapacitated);
     SetSecurityPhase(EMGGuardAwarenessPhase::Incapacitated);
     SetActorTickEnabled(false);
@@ -652,7 +706,9 @@ bool AMGGuardActor::TryMoveBodyTo(
 void AMGGuardActor::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
-    if (bIncapacitated || !GetWorld()) return;
+    if (!GetWorld()) return;
+    UpdatePrototypeFallbackAnimation();
+    if (bIncapacitated) return;
     SidearmMuzzleFlashRemaining = FMath::Max(0.f,
         SidearmMuzzleFlashRemaining - FMath::Max(0.f, DeltaSeconds));
     if (SidearmMuzzleLight)
