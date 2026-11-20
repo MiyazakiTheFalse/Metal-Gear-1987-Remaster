@@ -101,6 +101,7 @@ private:
     int32 RecoveryDoorPunches = 0;
     bool bGearDoorOpen = false;
     bool bCardDoorOpen = false;
+    bool bPostCard3ServiceEntered = false;
 
     uint32 Flags = 0;
     bool bPlayerInitialised = false;
@@ -133,6 +134,7 @@ private:
     void CreateGreybox();
     void CreatePrelude();
     void CreateBossWing();
+    void CreatePostCard3Service();
     void CreateZoneLighting();
     void UpdateZoneLighting(float DeltaSeconds);
     void SpawnPerimeterGuards();
