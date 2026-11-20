@@ -20,15 +20,19 @@ class ExtendedTransactionSourceTests(unittest.TestCase):
             self.assertIn("pub const "+name+": u32 = 1 << "+str(val.bit_length()-1),RUST)
             self.assertIn("#define MG_FOX_"+name+" "+str(val)+"u",HDR)
     def test_gear_capture_and_card_restoration(self):
-        self.assertIn('Inventory->SetConfiscated((Flags & MG_FOX_GEAR_RECOVERED) == 0)',MISSION)
+        self.assertIn('Inventory->SetConfiscated((Flags & MG_FOX_CAPTURED)',MISSION)
+        self.assertIn('&& !(Flags & MG_FOX_GEAR_RECOVERED)',MISSION)
         self.assertIn('Inventory->AwardItem(TEXT("CARD3"), 1)',MISSION)
         self.assertIn('FName(TEXT("CARD3"))',EQUIP)
         self.assertIn('MG_FOX_CARD3_RECOVERED',RUST)
     def test_save_migration_remains_explicit(self):
         self.assertIn('const bool bLegacy = Save->SchemaVersion == 1',MISSION)
-        self.assertIn('Save->SchemaVersion = 3;',MISSION)
-        self.assertIn('uint32 SchemaVersion = 3;',SAVE)
-        self.assertIn('Save->SchemaVersion == 2 || Save->SchemaVersion == 3',MISSION)
+        self.assertIn('Save->SchemaVersion = 4;',MISSION)
+        self.assertIn('Save->bEarnedHandgun = bEarlyHandgunAcquired;',MISSION)
+        self.assertIn('uint32 SchemaVersion = 4;',SAVE)
+        self.assertIn('bool bEarnedHandgun = false;',SAVE)
+        self.assertIn('Save->SchemaVersion == 2',MISSION)
+        self.assertIn('Save->SchemaVersion == 3 || Save->SchemaVersion == 4',MISSION)
         self.assertIn('16383u',MISSION)
     def test_no_card_three_before_boss_defeat(self):
         self.assertIn('ACTION_COLLECT_CARD3 if flags & SHOTMAKER_DEFEATED != 0',RUST)
