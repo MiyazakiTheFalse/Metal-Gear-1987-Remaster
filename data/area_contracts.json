@@ -3,7 +3,7 @@
   "doctrine": "DOCTRINE_005",
   "supreme_doctrine": "DOCTRINE_000",
   "scope": "game_wide",
-  "coverage_status": "source_greybox_PostCard3_dog_corridor_and_prone_duct;_explosive_gate_design_only",
+  "coverage_status": "12_areas_11_source_greyboxes_1_future_boundary_the_original_still_unverified",
   "areas": [
     {
       "provenance": "comparative_msx2_pending_target_j2me",
@@ -258,7 +258,8 @@
       "stage": "infiltration",
       "beat_ids": [
         "prelude.incoming_briefing",
-        "prelude.pow_intelligence"
+        "prelude.pow_intelligence",
+        "prelude.handgun_pickup"
       ],
       "provenance": "MSX2_comparative_pending_J2ME_geometry",
       "verification_status": "unverified",
@@ -783,15 +784,28 @@
         "start_event": "Crossing physical threshold",
         "feedback_target_ms": 150,
         "forced_lock_seconds": 0,
-        "tempo_role": "postboss_new_threat"
+        "tempo_role": "postboss_new_threat",
+        "trigger": "Crossing physical threshold",
+        "hint_policy": "No forced prompts; inspect actual readable spatial evidence before optional contextual hints",
+        "lock_seconds": 0
       },
       "accessibility": {
         "non_audio": "Readable dog movement and lunge; captions/animations pending",
-        "posture": "Player can avoid with no required gun"
+        "posture": "Player can avoid with no required gun",
+        "color_independent": true,
+        "caption_plan": "Readable dog movement and lunge; captions/animations pending; must be evaluated in UE at 720p",
+        "control_plan": "Player can avoid with no required gun; use the existing controller input and physical collision"
       },
       "failure": {
         "deaths": "Existing chapter checkpoint saved after entering corridor",
-        "recovery": "Dog checkpoint body state persistence still pending"
+        "recovery": "Dog checkpoint body state persistence still pending",
+        "interrupts": [
+          "exit and reenter",
+          "save and reload",
+          "alarm and evasion",
+          "low-posture camera occlusion",
+          "no imported skeletal art"
+        ]
       },
       "tests": [
         "No premature entry before chapter flags",
@@ -855,15 +869,28 @@
         "start_event": "Player toggles physical prone",
         "feedback_target_ms": 120,
         "forced_lock_seconds": 0,
-        "tempo_role": "rest_before_next_stealth_exposure"
+        "tempo_role": "rest_before_next_stealth_exposure",
+        "trigger": "Player toggles physical prone",
+        "hint_policy": "No forced prompts; inspect actual readable spatial evidence before optional contextual hints",
+        "lock_seconds": 0
       },
       "accessibility": {
         "non_audio": "Collision/stance feedback",
-        "posture": "Exit if no overhead obstruction; no automatic warp"
+        "posture": "Exit if no overhead obstruction; no automatic warp",
+        "color_independent": true,
+        "caption_plan": "Collision/stance feedback; must be evaluated in UE at 720p",
+        "control_plan": "Exit if no overhead obstruction; no automatic warp; use the existing controller input and physical collision"
       },
       "failure": {
         "deaths": "Ordinary checkpoint",
-        "recovery": "Reversible duck/crawl"
+        "recovery": "Reversible duck/crawl",
+        "interrupts": [
+          "exit and reenter",
+          "save and reload",
+          "alarm and evasion",
+          "low-posture camera occlusion",
+          "no imported skeletal art"
+        ]
       },
       "tests": [
         "Prone enters; crouch blocked",
@@ -927,15 +954,28 @@
         "start_event": "Not yet implemented",
         "feedback_target_ms": 150,
         "forced_lock_seconds": 0,
-        "tempo_role": "next_campaign_problem"
+        "tempo_role": "next_campaign_problem",
+        "trigger": "Not yet implemented",
+        "hint_policy": "No forced prompts; inspect actual readable spatial evidence before optional contextual hints",
+        "lock_seconds": 0
       },
       "accessibility": {
         "non_audio": "No misleading objective claiming the wall can be opened yet",
-        "posture": "No softlock; can retreat"
+        "posture": "No softlock; can retreat",
+        "color_independent": true,
+        "caption_plan": "No misleading objective claiming the wall can be opened yet; must be evaluated in UE at 720p",
+        "control_plan": "No softlock; can retreat; use the existing controller input and physical collision"
       },
       "failure": {
         "deaths": "Current checkpoint",
-        "recovery": "Backtrack possible"
+        "recovery": "Backtrack possible",
+        "interrupts": [
+          "exit and reenter",
+          "save and reload",
+          "alarm and evasion",
+          "low-posture camera occlusion",
+          "no imported skeletal art"
+        ]
       },
       "tests": [
         "No fake access beyond wall",
