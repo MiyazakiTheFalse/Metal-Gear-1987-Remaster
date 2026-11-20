@@ -31,4 +31,6 @@ private:
     UPROPERTY(VisibleAnywhere, Category="Prototype")
     UStaticMeshComponent* PlaceholderBody;
     bool bRescued = false;
+    FName PrototypeAnimationRequest = NAME_None;
+    void UpdatePrototypeFallbackAnimation();
 };
