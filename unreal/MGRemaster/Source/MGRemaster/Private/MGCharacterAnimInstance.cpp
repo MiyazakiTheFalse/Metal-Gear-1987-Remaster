@@ -7,6 +7,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
+#include "Engine/World.h"
 
 void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -125,6 +126,9 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
         if (Player->IsMeleeVisualActive()) Desired = EMGPerformanceAction::Melee;
         else if (bKnocking) Desired = EMGPerformanceAction::WallKnock;
         else if (bIsFiring) Desired = EMGPerformanceAction::Fire;
+        else if (Player->HasPhysicalInteractionContact() &&
+                 Player->GetPhysicalInteractionKind() == TEXT("CameraIsolator"))
+            Desired = EMGPerformanceAction::EnvironmentInteract;
         else if (bProne) Desired = EMGPerformanceAction::Prone;
         else if (bCornerPeeking) Desired = EMGPerformanceAction::CoverPeek;
         else if (bInCover) Desired = EMGPerformanceAction::Cover;
@@ -262,4 +266,102 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
         AimPitchDegrees = FMath::FInterpTo(AimPitchDegrees, 0.f, DeltaSeconds, 12.f);
         AimYawDegrees = FMath::FInterpTo(AimYawDegrees, 0.f, DeltaSeconds, 12.f);
     }
+    // PHYSICAL ARTICULATION / CONTACT PASS
+    // Not a procedural animation replacement: exact-bone offsets and planted
+    // foot normals are input to authored animation layers and IK solvers.
+    // The native collision/movement controller remains the sole authority.
+    const USkeletalMeshComponent* SkeletalBody = GetSkelMeshComponent();
+    const UWorld* GroundWorld = SkeletalBody ? SkeletalBody->GetWorld() : nullptr;
+    const bool bHasFeet = SkeletalBody && SkeletalBody->GetSkeletalMeshAsset()
+        && SkeletalBody->DoesSocketExist(TEXT("foot_l"))
+        && SkeletalBody->DoesSocketExist(TEXT("foot_r"));
+    const bool bFeetCanPlant = bHasFeet && GroundWorld
+        && !bProne && !bIncapacitated && GroundSpeed < 420.f;
+    float LeftDesired = 0.f, RightDesired = 0.f;
+    bool bLeftGrounded = false, bRightGrounded = false;
+    FVector LeftNormal = FVector::UpVector;
+    FVector RightNormal = FVector::UpVector;
+    if (bFeetCanPlant)
+    {
+        auto ProbeSole = [GroundWorld, SkeletalBody, Owner](
+            const FName Bone, float& Offset, FVector& Normal) -> bool
+        {
+            const FVector Sole = SkeletalBody->GetSocketLocation(Bone);
+            FHitResult GroundHit;
+            FCollisionQueryParams Params(SCENE_QUERY_STAT(MGGroundedFoot), false, Owner);
+            const bool bHit = GroundWorld->LineTraceSingleByChannel(
+                GroundHit, Sole + FVector(0.f, 0.f, 32.f),
+                Sole - FVector(0.f, 0.f, 76.f), ECC_Visibility, Params);
+            if (!bHit || GroundHit.ImpactNormal.Z < .66f) return false;
+            // Small limits stop impossible leg stretching on stairs and
+            // mean we do not hide an unreachable ledge with a joint offset.
+            Offset = FMath::Clamp(GroundHit.ImpactPoint.Z - Sole.Z + 2.f,
+                -14.f, 14.f);
+            Normal = GroundHit.ImpactNormal;
+            return true;
+        };
+        bLeftGrounded = ProbeSole(TEXT("foot_l"), LeftDesired, LeftNormal);
+        bRightGrounded = ProbeSole(TEXT("foot_r"), RightDesired, RightNormal);
+    }
+    bValidGroundFootProbes = bLeftGrounded && bRightGrounded;
+    LeftGroundNormalWS = bLeftGrounded ? LeftNormal : FVector::UpVector;
+    RightGroundNormalWS = bRightGrounded ? RightNormal : FVector::UpVector;
+    // No phantom foot IK while falling, sprinting or missing rig/sockets.
+    const float PlantWeight = bValidGroundFootProbes
+        ? FMath::Clamp((420.f - GroundSpeed) / 290.f, .0f, 1.f) : 0.f;
+    FootGroundingAlpha = FMath::FInterpTo(
+        FootGroundingAlpha, PlantWeight, DeltaSeconds, 12.f);
+    LeftFootGroundOffsetCm = FMath::FInterpTo(
+        LeftFootGroundOffsetCm, bLeftGrounded ? LeftDesired : 0.f, DeltaSeconds, 13.f);
+    RightFootGroundOffsetCm = FMath::FInterpTo(
+        RightFootGroundOffsetCm, bRightGrounded ? RightDesired : 0.f, DeltaSeconds, 13.f);
+    PelvisGroundOffsetCm = FMath::FInterpTo(
+        PelvisGroundOffsetCm, bValidGroundFootProbes
+            ? FMath::Clamp(FMath::Min(LeftDesired, RightDesired), -12.f, 0.f) : 0.f,
+        DeltaSeconds, 11.f);
+
+    bValidSurfaceHandTarget = false;
+    FVector DesiredSurfaceTarget = FVector::ZeroVector;
+    // Character actors with no compatible left hand should not be advertised
+    // to the AnimBP as having valid environmental hand contact.
+    const bool bCanReachWithLeftHand = SkeletalBody &&
+        SkeletalBody->GetSkeletalMeshAsset() &&
+        SkeletalBody->DoesSocketExist(TEXT("hand_l"));
+    if (bCanReachWithLeftHand)
+    {
+        if (const AMGPlayerCharacter* Snake = Cast<AMGPlayerCharacter>(Owner))
+        {
+            if (Snake->HasPhysicalInteractionContact())
+            {
+                DesiredSurfaceTarget = Snake->GetPhysicalInteractionWorldTarget();
+                bValidSurfaceHandTarget = true;
+            }
+            else if (Snake->IsInCover() && !Snake->IsAiming() && GroundWorld)
+            {
+                const FVector Normal = Snake->GetCoverSurfaceNormal();
+                if (!Normal.IsNearlyZero())
+                {
+                    const FVector Chest = Snake->GetActorLocation() +
+                        FVector(0.f, 0.f, bCrouched ? 38.f : 70.f);
+                    FCollisionQueryParams Params(
+                        SCENE_QUERY_STAT(MGPhysicalWallHandContact), false, Owner);
+                    FHitResult Wall;
+                    if (GroundWorld->LineTraceSingleByChannel(
+                            Wall, Chest, Chest - Normal * 110.f,
+                            ECC_Visibility, Params) &&
+                        FVector::DotProduct(Wall.ImpactNormal.GetSafeNormal2D(),
+                            Normal.GetSafeNormal2D()) > .60f)
+                    {
+                        DesiredSurfaceTarget = Wall.ImpactPoint + Normal * 3.f;
+                        bValidSurfaceHandTarget = true;
+                    }
+                }
+            }
+        }
+    }
+    if (bValidSurfaceHandTarget)
+        SurfaceHandTargetWS = DesiredSurfaceTarget;
+    SurfaceHandContactAlpha = FMath::FInterpTo(SurfaceHandContactAlpha,
+        bValidSurfaceHandTarget ? 1.f : 0.f, DeltaSeconds, 12.f);
+
 }
