@@ -12,7 +12,10 @@ class MGREMASTER_API AMGMachinegunKid : public AMGGuardActor
     GENERATED_BODY()
 public:
     AMGMachinegunKid();
+    virtual void BeginPlay() override;
     virtual void Tick(float Dt) override;
+    UFUNCTION(BlueprintImplementableEvent, Category="Boss|Acting")
+    void OnBossFiringPhase(FName Beat, float SecondsUntilChange);
 private:
     UPROPERTY(VisibleAnywhere) class UStaticMeshComponent* Receiver;
     UPROPERTY(VisibleAnywhere) class UPointLightComponent* Flash;
