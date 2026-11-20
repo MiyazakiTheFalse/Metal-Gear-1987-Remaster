@@ -70,6 +70,9 @@ class WholeGameSourceAudit(unittest.TestCase):
         self.assertIn("bool bEarnedHandgun = false", SAVE)
         self.assertIn("int32 HandgunRounds = 0", SAVE)
         self.assertIn("bLoadedHandgunAcquired", MISSION_H)
+        self.assertIn("HasInitializedInventory()", EQUIP_H)
+        self.assertIn("bInventorySlotsInitialized = true;", EQUIP)
+        self.assertIn("!Player->GetEquipment()->HasInitializedInventory()", MISSION)
 
     def test_cctv_counterplay_requires_physical_evidence(self):
         self.assertIn("MGCCTVPhysicalLOS", CAMERA)
