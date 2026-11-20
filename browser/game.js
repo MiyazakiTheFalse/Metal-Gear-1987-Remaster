@@ -1031,8 +1031,10 @@ function load(){
   const rest=validCardPosition(data.bossRest)?data.bossRest:cardDrop;
   boss.x=rest.x;boss.z=rest.z;boss.yaw=Number.isFinite(rest.yaw)?rest.yaw:Math.PI;
  }
- const fallback=stage<0?[-27,0]:stage===0?[-10.6,0]:stage<3?[-.5,0]:stage===3?[5.4,-3.7]:stage===4?[15.7,0]:[26,0];
- const withinStage=stage<0?data.x<-12.6:stage===0?data.x>-12.6&&data.x<-4.1:
+ const fallback=stage===10?(b2.active?[99.2,0]:roof.active?[87.5,0]:[62.5,0]):stage===9?(roof.active?[72.3,0]:[62.5,0]):stage<0?[-27,0]:stage===0?[-10.6,0]:stage<3?[-.5,0]:stage===3?[5.4,-3.7]:stage===4?[15.7,0]:[26,0];
+ const withinStage=stage===10?(b2.active?data.x>=97.0&&data.x<=123.0:roof.active?data.x>=69&&data.x<=90.7:data.x>=-12.6&&data.x<=65.3):
+  stage===9?(roof.active?data.x>=69&&data.x<=90.7:data.x>=-12.6&&data.x<=65.3):
+  stage<0?data.x<-12.6:stage===0?data.x>-12.6&&data.x<-4.1:
   stage<3?data.x>-12.6&&data.x<4.5:stage===3?data.x>-12.6&&data.x<(world.hallOpen?27.3:14.6):
   stage<7?data.x>-12.6&&data.x<27.3:data.x>-12.6&&(service.open||data.x<42.85);
  const safe=withinStage&&Number.isFinite(data.x)&&Number.isFinite(data.z)&&canOccupyBody(data.x,data.z,0,0);
