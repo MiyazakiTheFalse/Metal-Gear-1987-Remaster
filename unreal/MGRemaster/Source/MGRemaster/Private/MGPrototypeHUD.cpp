@@ -65,6 +65,29 @@ void AMGPrototypeHUD::DrawHUD()
     const float Margin = FMath::Clamp(Width * 0.018f, 12.f, 28.f);
     const float UiScale = FMath::Clamp(Height / 900.f, 0.76f, 1.20f);
     const UMGEquipmentComponent* Equip = Player->GetEquipment();
+    const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
+    if (Mission && Mission->IsStoryCinematicPlaying())
+    {
+        // A real live in-world shot, not a still image or a fake film overlay.
+        // Suppress radar, mission arrows and aiming UI while directing the
+        // camera, but retain the actual scene's earned spoken subtitle.
+        const float Bar = FMath::Clamp(Height * .084f, 26.f, 89.f);
+        DrawRect(FLinearColor(0.008f,.014f,.018f,1.f),0.f,0.f,Width,Bar);
+        DrawRect(FLinearColor(0.008f,.014f,.018f,1.f),
+                 0.f,Height-Bar,Width,Bar);
+        DrawText(FString::Printf(TEXT("OUTER HEAVEN / 1995    %s"),
+            *Mission->GetActiveStoryCinematic().ToString().ToUpper()),
+            HudGreen, Margin, Bar*.34f,nullptr,.78f*UiScale,false);
+        const FString Line = Mission->GetRecentDialogue();
+        if (!Line.IsEmpty())
+            DrawText(Line,FLinearColor::White,Margin,Height-Bar*.67f,
+                     nullptr,.87f*UiScale,false);
+        DrawText(TEXT("ESC / B   SKIP"),HudMuted,
+                 Width - Margin - 154.f*UiScale,Height-Bar*.67f,
+                 nullptr,.65f*UiScale,false);
+        return;
+    }
 
     // Authenticated hit feedback, independent of projectile visibility.
     // Edge bars preserve sight of targets, guards and aim reticle. The authored
@@ -98,8 +121,6 @@ void AMGPrototypeHUD::DrawHUD()
              nullptr, 0.78f * UiScale, false);
 
     // Transmitter alert is a real signal, not an invisible normal patrol.
-    const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
-        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
     const EMGFacilitySecurityState Facility = Mission ?
         Mission->GetFacilitySecurityState() : EMGFacilitySecurityState::Normal;
     int32 MaxThreat = Mission && Mission->IsTransmitterActive() ? 3 : 0;
@@ -280,10 +301,20 @@ void AMGPrototypeHUD::DrawHUD()
         const FString Intel = Mission->GetMissionLogText();
         if (Player->IsMissionLogVisible() && !Intel.IsEmpty())
         {
-            DrawRect(HudPanel, Margin, Height - 167.f * UiScale,
-                     Width - 2.f * Margin, 41.f * UiScale);
+            // A two-track dossier: mission plot on the first line, Snake's
+            // actually earned character perspective beneath it. This is a
+            // player-requested record, never a compulsory expository pause.
+            const float LogY = Height - 202.f * UiScale;
+            DrawRect(HudPanel, Margin, LogY,
+                     Width - 2.f * Margin, 77.f * UiScale);
+            DrawText(TEXT("MISSION"), HudAmber,
+                     Margin + 12.f * UiScale, LogY + 6.f * UiScale,
+                     nullptr, .59f * UiScale, false);
             DrawText(Intel, HudGreen, Margin + 12.f * UiScale,
-                     Height - 156.f * UiScale, nullptr, 0.78f * UiScale, false);
+                     LogY + 22.f * UiScale, nullptr, .72f * UiScale, false);
+            DrawText(Mission->GetCharacterStoryText(), HudMuted,
+                     Margin + 12.f * UiScale, LogY + 49.f * UiScale,
+                     nullptr, .67f * UiScale, false);
         }
         const FString Cue = Mission->GetRecentDialogue();
         if (!Cue.IsEmpty())
