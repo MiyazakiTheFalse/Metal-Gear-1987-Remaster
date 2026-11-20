@@ -37,6 +37,16 @@ public:
     bool IsMissionLogVisible() const { return bShowMissionLog; }
     bool IsCodecOpen() const { return bCodecOpen; }
     FString GetCodecStatus() const { return CodecStatus; }
+    // Active speaking actor, sourced from the actual selected radio line:
+    // BIG_BOSS, SCHNEIDER or SNAKE. Portraits must never guess speaker by
+    // channel alone when Snake is answering the command voice.
+    UFUNCTION(BlueprintPure, Category="Radio|Portraits")
+    FName GetActiveCodecSpeakerId() const { return ActiveCodecSpeakerId; }
+    UFUNCTION(BlueprintPure, Category="Radio|Portraits")
+    float GetCodecTalkAlpha() const;
+    UFUNCTION(BlueprintImplementableEvent, Category="Radio|Portraits")
+    void OnCodecPortraitSpeakerStarted(FName SpeakerId, float LineSeconds,
+                                        bool bRecordedVoice);
     int32 GetVisibleRadioLineCount(int32 AvailableLines) const;
     int32 GetTransceiverChannel() const { return TransceiverChannel; }
     float GetEquipmentTimeScale() const { return EquipmentTimeScale; }
@@ -154,6 +164,8 @@ private:
     int32 NextVoiceLine = 0;
     int32 RevealedRadioLines = 0;
     float VoiceLineAdvanceDelay = 0.f;
+    FName ActiveCodecSpeakerId = NAME_None;
+    float CodecSpeechSeconds = 0.f;
     void StopRadioDialogue();
     void UpdateRadioDialogue(float DeltaSeconds);
     float PlayRadioDialogueLine(const FString& SceneKey, int32 Index, const FString& FullLine);
