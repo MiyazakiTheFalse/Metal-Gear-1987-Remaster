@@ -22,7 +22,7 @@ class UnrealSourceAssetDeliveryTests(unittest.TestCase):
         manifest = validate()
         for entry in manifest["characters"]:
             self.assertEqual(entry["joints"], 18)
-            self.assertGreaterEqual(entry["animations"], 14)
+            self.assertGreaterEqual(entry["animations"], 17)
             self.assertGreaterEqual(entry["mesh_primitives"], 1)
             self.assertGreater(entry["bytes"], 100_000)
             self.assertEqual(len(entry["sha256"]), 64)
