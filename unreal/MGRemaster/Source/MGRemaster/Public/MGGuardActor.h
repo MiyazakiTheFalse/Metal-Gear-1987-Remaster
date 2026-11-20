@@ -14,7 +14,7 @@ class USoundBase;
 UENUM(BlueprintType)
 enum class EMGGuardRole : uint8
 {
-    Patrol, Prison, Custody
+    Patrol, Prison, Custody, LogisticsPost
 };
 
 // Acting/animation channel, derived from real observed evidence only.
