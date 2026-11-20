@@ -34,6 +34,8 @@ Start `unreal/MGRemaster/MGRemaster.uproject` in Unreal Editor 5.7. Under Python
 
 `unreal/MGRemaster/Content/Python/import_field_character_glbs.py`
 
+The Unreal checkout now directly includes the four source GLBs under `unreal/MGRemaster/Content/SourceAssets/Characters/`. They are original skinned assets, **not yet native `.uasset` files**. From the repository root, first run `python tools/verify_unreal_source_assets.py` to confirm the copies have not diverged from the browser rigs. After compiling the C++ Editor target, use `scripts/import_unreal_content.ps1 -UnrealRoot "C:\\Program Files\\Epic Games\\UE_5.7"` for command-line generation, or use the Editor script manually.
+
 This imports original source GLBs under the exact C++ character load paths:
 
 | Actor | Expected UE skeletal mesh asset path |
@@ -57,7 +59,7 @@ To produce a **locally built** Windows development package (after passing prefli
 .\scripts\build_windows.ps1 -UnrealRoot "C:\Program Files\Epic Games\UE_5.7"
 ```
 
-This runs local Python+Node contracts, releases the Rust gameplay core, then uses `RunUAT.bat BuildCookRun` for Win64 Development. Default archive is `dist\Windows`, which is ignored by Git. A *committed source project is not a prebuilt exe*. Verify startup, HUD, input and file provenance for any packaged exe before handing it to a nontechnical tester.
+This runs local Python+Node contracts, verifies the GLBs under Unreal `Content/SourceAssets`, releases the Rust gameplay core, and then requires four native SkeletalMesh `.uasset` files before `RunUAT.bat BuildCookRun`. If you have not already imported the character source assets in Unreal, run the import script above first or pass `-ImportCharacterAssets` to the packaging script **after** the Editor target compiles. The script now explicitly refuses to package a purportedly complete character build with missing native meshes. Default archive is `dist\Windows`, which is ignored by Git. A *committed source project is not a prebuilt exe*. Verify startup, HUD, input and file provenance for any packaged exe before handing it to a nontechnical tester.
 
 ## Playtest progression and critical assertions
 
