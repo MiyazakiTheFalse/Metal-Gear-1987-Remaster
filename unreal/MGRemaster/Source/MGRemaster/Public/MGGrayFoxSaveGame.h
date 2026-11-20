@@ -26,7 +26,7 @@ class MGREMASTER_API UMGGrayFoxSaveGame : public USaveGame
     GENERATED_BODY()
 public:
     UPROPERTY(SaveGame)
-    uint32 SchemaVersion = 6;
+    uint32 SchemaVersion = 7;
 
     UPROPERTY(SaveGame)
     uint32 MissionFlags = 0;
@@ -49,6 +49,9 @@ public:
     bool bEarnedTruckRation = false;
     UPROPERTY(SaveGame)
     bool bEarnedBinoculars = false;
+    // V7: finite supply-ration inventory, not recreated on every reload.
+    UPROPERTY(SaveGame)
+    int32 TruckRationsRemaining = 0;
     // Additive fields default to the original state in older V4 saves.
     UPROPERTY(SaveGame)
     bool bPrisonCameraOffline = false;
