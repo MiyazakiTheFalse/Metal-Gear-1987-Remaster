@@ -254,6 +254,9 @@ def main():
     for role in ROLES:
         results[role] = import_prototype(role)
     unreal.log("PROTOTYPE CHARACTER IMPORT RESULT: " + json.dumps(results))
+    if len(results) != len(ROLES):
+        raise RuntimeError("Character import completed fewer roles than expected")
+    unreal.log(f"MG_CHARACTER_IMPORT_PASS roles={len(results)}")
     unreal.log_warning(
         "Import script does not create finished animation Blueprints or "
         "realistic/PBR character art. Open Content Browser, confirm imported "
