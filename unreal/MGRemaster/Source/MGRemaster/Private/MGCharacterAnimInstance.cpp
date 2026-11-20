@@ -3,6 +3,8 @@
 #include "MGGuardActor.h"
 #include "MGPrisonerCharacter.h"
 #include "MGShootGunnerActor.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 
@@ -211,6 +213,37 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
         CoverTransitionAlpha, bInCover ? 1.f : 0.f, DeltaSeconds, 10.f);
     RadioListenOverlayAlpha = FMath::FInterpTo(
         RadioListenOverlayAlpha, bRadioListeningOverlay ? 1.f : 0.f, DeltaSeconds, 8.f);
+    // A hand placement is only approved when the real rig has a weapon_r
+    // joint and the visually-held imported weapon supplies its own
+    // support_hand socket. Never infer IK success from an equipment ID.
+    const UStaticMeshComponent* ActualWeapon = nullptr;
+    const USkeletalMeshComponent* ActualRig = nullptr;
+    if (const AMGPlayerCharacter* Snake = Cast<AMGPlayerCharacter>(Owner))
+    {
+        ActualWeapon = Snake->GetHeldWeaponVisual();
+        ActualRig = Snake->GetMesh();
+    }
+    else if (const AMGGuardActor* Guard = Cast<AMGGuardActor>(Owner))
+    {
+        ActualWeapon = Guard->GetHeldWeaponVisual();
+        ActualRig = Guard->GetRigMesh();
+    }
+    else if (const AMGShootGunnerActor* Gunner = Cast<AMGShootGunnerActor>(Owner))
+    {
+        ActualWeapon = Gunner->GetHeldWeaponVisual();
+        ActualRig = Gunner->GetRigMesh();
+    }
+    bHasValidRightWeaponSocket = ActualRig && ActualRig->GetSkeletalMeshAsset()
+        && ActualRig->DoesSocketExist(TEXT("weapon_r"))
+        && ActualWeapon && ActualWeapon->IsVisible()
+        && ActualWeapon->GetStaticMesh() != nullptr;
+    bHasValidSupportHandSocket = bHasValidRightWeaponSocket
+        && ActualWeapon->DoesSocketExist(TEXT("support_hand"));
+    if (bHasValidSupportHandSocket)
+        SupportHandTargetWS = ActualWeapon->GetSocketTransform(
+            TEXT("support_hand"), RTS_World);
+    TargetRightGrip = bHasValidRightWeaponSocket ? TargetRightGrip : 0.f;
+    TargetLeftGrip = bHasValidSupportHandSocket ? TargetLeftGrip : 0.f;
     WeaponReloadBlendAlpha = FMath::FInterpTo(WeaponReloadBlendAlpha,
         bWeaponReloading ? 1.f : 0.f, DeltaSeconds, 9.f);
     RightHandGripAlpha = FMath::FInterpTo(RightHandGripAlpha,
