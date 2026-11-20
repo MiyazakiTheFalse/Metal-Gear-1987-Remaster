@@ -2,10 +2,10 @@ const assert=require('node:assert/strict');
 const {FieldRigs:rig}=require('../assets/field_rigs.js');
 assert.equal(rig.bones.length,18);
 for(const [i,[name,parent]] of rig.bones.entries())assert.ok(parent<i,name);
-for(const role of ['snake','fox','guard','shoot_gunner']){
+for(const role of rig.castRoles){
  const [body,gear]=rig.model(role);
  assert.ok(body.length>3000 && body.length%3===0);
- assert.equal(gear.length>0,role==='snake');
+ assert.equal(gear.length>0,['snake','real_big_boss','venom_snake'].includes(role));
  assert.equal(rig.skeleton(role).length,18,'all cast members have facial joints');
  for(const v of [...body,...gear]){
   assert.ok(v.every(Number.isFinite));
