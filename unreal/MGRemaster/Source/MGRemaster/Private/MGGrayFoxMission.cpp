@@ -21,6 +21,7 @@
 #include "Engine/World.h"
 #include "Sound/SoundBase.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/DamageType.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -514,6 +515,11 @@ void AMGGrayFoxMission::CreateBuilding2TankApproach()
     for (float Y : {-500.f,500.f})
         SpawnBlock(TEXT("Building2RoadBoundary"),FVector(13000.f,Y,90.f),
                    FVector(28.f,.4f,3.8f),true);
+    // Bounded playable road. Checkpoint validation must agree with collision;
+    // without endwalls a tester could walk off the map and lose their save.
+    for (float X : {11600.f,14400.f})
+        SpawnBlock(TEXT("Building2RoadEndWall"), FVector(X,0.f,90.f),
+                   FVector(.4f,10.f,3.8f),true);
     for (const FVector& Shelter : {FVector(11800.f,-340.f,-40.f),
                                   FVector(12600.f,340.f,-40.f),
                                   FVector(13400.f,-340.f,-40.f),
