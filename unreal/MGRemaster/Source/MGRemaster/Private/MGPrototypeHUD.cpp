@@ -7,6 +7,7 @@
 #include "MGSurveillanceCameraActor.h"
 #include "MGPlayerCharacter.h"
 #include "Engine/Canvas.h"
+#include "Engine/Texture2D.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
@@ -31,6 +32,25 @@ namespace
         if (!Entries.IsValidIndex(Index)) return TEXT("NONE");
         return Entries[Index].Label;
     }
+}
+
+UTexture2D* AMGPrototypeHUD::FindPortraitTexture(
+    const FString& CharacterId, const FString& Expression)
+{
+    const FString Filename = FString::Printf(TEXT("T_Codec_%s_%s"),
+        *CharacterId, *Expression);
+    if (const TObjectPtr<UTexture2D>* Cached = CachedCodecPortraits.Find(Filename))
+        return Cached->Get();
+    if (MissingCodecPortraits.Contains(Filename)) return nullptr;
+    const FString AssetPath = FString::Printf(TEXT("/Game/UI/Codec/%s.%s"),
+        *Filename, *Filename);
+    if (UTexture2D* Texture = LoadObject<UTexture2D>(nullptr, *AssetPath))
+    {
+        CachedCodecPortraits.Add(Filename, Texture);
+        return Texture;
+    }
+    MissingCodecPortraits.Add(Filename);
+    return nullptr;
 }
 
 void AMGPrototypeHUD::DrawHUD()
@@ -336,34 +356,83 @@ void AMGPrototypeHUD::DrawHUD()
 
     if (Player->IsCodecOpen())
     {
-        // Non-pausing 1995 transceiver: readable at 720p, no camera seizure,
-        // player can keep walking; real VO/spectrum treatment is still missing.
+        // Two real identities, NOT two unrelated decorative pictures.
+        // When Snake answers, his left portrait animates; otherwise the
+        // selected resistance/command contact animates. Every expression
+        // frame comes from the SAME source artwork as the browser's portraits.
         const int32 Channel = Player->GetTransceiverChannel();
+        const FString ContactId = Channel == 0 ? TEXT("schneider") : TEXT("bigBoss");
+        const FString ContactName = Channel == 0 ? TEXT("KYLE SCHNEIDER") : TEXT("BIG BOSS");
+        const FString Frequency = Channel == 0 ? TEXT("120.79") : TEXT("120.85");
+        const FString Speaker = Player->GetActiveCodecSpeakerId().ToString();
+        const float Speech = Player->GetCodecTalkAlpha();
+        const bool bSnakeTalking = Speaker == TEXT("snake") && Speech > .25f;
+        const bool bContactTalking = !bSnakeTalking && Speech > .25f;
+        const float WorldClock = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+        const bool bBlinkSnake = FMath::Fmod(WorldClock, 5.9f) < .12f;
+        const bool bBlinkContact = FMath::Fmod(WorldClock + 2.4f, 5.9f) < .12f;
+        const FString SnakeExpression = bSnakeTalking ? TEXT("Talk") :
+            (bBlinkSnake ? TEXT("Blink") : TEXT("Neutral"));
+        const FString ContactExpression = bContactTalking ? TEXT("Talk") :
+            (bBlinkContact ? TEXT("Blink") : TEXT("Neutral"));
+
         const FString Transcript = Mission ?
             Mission->GetTransceiverDialogue(Channel) :
             TEXT("NO SIGNAL — LOCAL CONTACTS UNAVAILABLE");
         TArray<FString> Lines;
         Transcript.ParseIntoArrayLines(Lines, true);
-        const float PanelWidth = FMath::Min(580.f * UiScale, Width - 2.f * Margin);
+        const float PanelWidth = FMath::Min(600.f * UiScale, Width - 2.f * Margin);
         const float PanelX = Width - Margin - PanelWidth;
-        const float PanelY = Height * 0.31f;
+        const float PanelY = Height * .30f;
         const int32 VisibleLines = FMath::Min(
             Player->GetVisibleRadioLineCount(Lines.Num()), 8);
-        const float PanelHeight = (71.f + 23.f * VisibleLines) * UiScale;
+        const float PanelHeight = (184.f + 22.f * VisibleLines) * UiScale;
         DrawRect(HudPanel, PanelX, PanelY, PanelWidth, PanelHeight);
-        DrawText(Channel == 0 ? TEXT("TRANSCEIVER / 120.79 / KYLE SCHNEIDER")
-                              : TEXT("TRANSCEIVER / 120.85 / BIG BOSS"),
+        DrawText(FString::Printf(TEXT("TRANSCEIVER  /  %s  /  %s"),
+                     *Frequency, *ContactName),
                  HudGreen, PanelX + 12.f * UiScale, PanelY + 8.f * UiScale,
-                 nullptr, 0.82f * UiScale, false);
+                 nullptr, .80f * UiScale, false);
+
+        const float PortraitY = PanelY + 29.f * UiScale;
+        const float PortraitW = 88.f * UiScale;
+        const float PortraitH = 105.f * UiScale;
+        const float SnakeX = PanelX + 12.f * UiScale;
+        const float ContactX = PanelX + PanelWidth - 100.f * UiScale;
+        auto RenderPortrait = [&](const FString& Person, const FString& Expression,
+                                  float AtX, const FString& Caption)
+        {
+            DrawRect(FLinearColor(.025f,.12f,.13f,.96f),
+                     AtX-1.f, PortraitY-1.f, PortraitW+2.f, PortraitH+2.f);
+            UTexture2D* Art = FindPortraitTexture(Person, Expression);
+            if (!Art) Art = FindPortraitTexture(Person, TEXT("Neutral"));
+            if (Art)
+                DrawTexture(Art, AtX, PortraitY, PortraitW, PortraitH,
+                            0.f,0.f,1.f,1.f,FLinearColor::White);
+            else
+                DrawText(TEXT("PORTRAIT ART\nIMPORT PENDING"), HudMuted,
+                         AtX + 5.f, PortraitY + 35.f * UiScale, nullptr,
+                         .65f * UiScale, false);
+            DrawText(Caption, HudGreen, AtX, PortraitY + PortraitH + 5.f * UiScale,
+                     nullptr, .64f * UiScale, false);
+        };
+        RenderPortrait(TEXT("snake"), SnakeExpression, SnakeX, TEXT("SNAKE"));
+        RenderPortrait(ContactId, ContactExpression, ContactX, ContactName);
+        DrawText(TEXT("FOXHOUND / 1995"), HudMuted,
+            PanelX + 124.f * UiScale, PortraitY + 25.f * UiScale,
+            nullptr, .74f * UiScale, false);
+        DrawText(bSnakeTalking ? TEXT("TX  SNAKE") :
+                 bContactTalking ? TEXT("RX  SPEAKING") : TEXT("RX  CONNECTED"),
+            HudAmber, PanelX + 124.f * UiScale,
+            PortraitY + 65.f * UiScale, nullptr, .69f * UiScale, false);
         for (int32 Index = 0; Index < VisibleLines; ++Index)
             DrawText(Lines[Index], FLinearColor::White,
-                     PanelX + 12.f * UiScale,
-                     PanelY + (34.f + 23.f * Index) * UiScale,
-                     nullptr, 0.74f * UiScale, false);
-        DrawText(TEXT("Q / RS: TUNE     C / START: CLOSE     MOVE: CONTINUE"),
-                 HudMuted, PanelX + 12.f * UiScale,
-                 PanelY + (49.f + 23.f * VisibleLines) * UiScale,
-                 nullptr, 0.66f * UiScale, false);
+                PanelX + 12.f * UiScale,
+                PanelY + (154.f + 22.f * Index) * UiScale,
+                nullptr, .72f * UiScale, false);
+        DrawText(TEXT("Q / RS: TUNE    C / START: CLOSE    MOVE: CONTINUE"),
+            HudMuted, PanelX + 12.f * UiScale,
+            PanelY + (166.f + 22.f * VisibleLines) * UiScale,
+            nullptr, .65f * UiScale, false);
     }
 
     if (Player->IsAiming())
