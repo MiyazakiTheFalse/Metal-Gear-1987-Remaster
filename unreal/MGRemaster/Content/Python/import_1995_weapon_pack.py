@@ -23,6 +23,8 @@ ENTRY = [
     ("mine_1995_lod0.obj", "/Game/Weapons/Snake", "SM_LandMine_1995"),
     ("plastic_explosive_1995_lod0.obj", "/Game/Weapons/Snake", "SM_PlasticExplosive_1995"),
     ("stun_test_1995_lod0.obj", "/Game/Weapons/Testing", "SM_StunPistol_Test"),
+    ("handgun_spent_casing_1995.obj", "/Game/Weapons/Shared", "SM_HandgunCasing_1995"),
+    ("riotgun_spent_hull_1995.obj", "/Game/Weapons/Shared", "SM_RiotHull_1995"),
 ]
 
 def main():
