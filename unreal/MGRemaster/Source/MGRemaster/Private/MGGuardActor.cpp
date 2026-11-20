@@ -781,7 +781,11 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         && StaggerSeconds <= 0.f && !bPendingRadioReport
         && (Role != EMGGuardRole::Custody ||
             Player->IsAiming() || Player->IsSprinting());
-    if (bLegitimateRangedTarget && !bSidearmReloading
+    // Once empty, use a quiet or searching interval to change magazines
+    // rather than carrying an empty pistol until the exact instant an enemy
+    // appears. No reload during custody compliance, stagger or radio traffic.
+    if (!bSidearmReloading && !bCustodyChallenge
+        && StaggerSeconds <= 0.f && !bPendingRadioReport
         && SidearmRounds <= 0 && SpareSidearmMagazines > 0)
     {
         --SpareSidearmMagazines; // Reserve magazine committed, no free resupply.
