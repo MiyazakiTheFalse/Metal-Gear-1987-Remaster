@@ -46,6 +46,20 @@ void AMGPrototypeHUD::DrawHUD()
     const float UiScale = FMath::Clamp(Height / 900.f, 0.76f, 1.20f);
     const UMGEquipmentComponent* Equip = Player->GetEquipment();
 
+    // Authenticated hit feedback, independent of projectile visibility.
+    // Edge bars preserve sight of targets, guards and aim reticle. The authored
+    // skeletal rig can also consume GetHitReactionAlpha for a local flinch.
+    const float Hit = Player->GetHitReactionAlpha();
+    if (Hit > 0.f)
+    {
+        const FLinearColor Edge(0.72f, 0.13f, 0.09f, .43f * Hit);
+        const float Rim = FMath::Clamp(Height * .035f, 11.f, 36.f);
+        DrawRect(Edge, 0.f, 0.f, Width, Rim);
+        DrawRect(Edge, 0.f, Height - Rim, Width, Rim);
+        DrawRect(Edge, 0.f, Rim, Rim, Height - 2.f * Rim);
+        DrawRect(Edge, Width - Rim, Rim, Rim, Height - 2.f * Rim);
+    }
+
     // Safe margins and relative placement matter on 720p and widescreen.
     DrawRect(HudPanel, Margin, Margin, 310.f * UiScale, 98.f * UiScale);
     DrawText(TEXT("SOLID SNAKE / FOXHOUND"), HudGreen,
