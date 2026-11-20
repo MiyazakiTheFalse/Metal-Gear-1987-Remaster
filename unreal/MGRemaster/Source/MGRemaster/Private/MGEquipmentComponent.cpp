@@ -30,8 +30,9 @@ void UMGEquipmentComponent::BeginPlay()
 #endif
     Items = {
         {FName(TEXT("NONE")), TEXT("NO ITEM"), 0, true, false},
-        {FName(TEXT("RATION")), TEXT("RATION [TEST]"), 1, true, true},
-        {FName(TEXT("CARD1")), TEXT("KEYCARD 1 [TEST]"), 0, false, false},
+        {FName(TEXT("RATION")), TEXT("RATION"), 0, false, true},
+        {FName(TEXT("CARD1")), TEXT("KEYCARD 1"), 0, false, false},
+        {FName(TEXT("BINOCULARS")), TEXT("BINOCULARS"), 0, false, false},
         // Carryover from the earlier infiltration, not a claimed playable acquisition.
         {FName(TEXT("CARD2")), TEXT("KEYCARD 2 [CARRYOVER]"), 0, true, false},
         {FName(TEXT("CARD3")), TEXT("KEYCARD 3 [SLICE]"), 0, false, false},
@@ -219,6 +220,13 @@ bool UMGEquipmentComponent::DiscardPlantedTransmitter()
             return true;
         }
     return false;
+}
+
+int32 UMGEquipmentComponent::GetItemQuantity(FName ItemId) const
+{
+    for (const FMGEquipmentEntry& E : Items)
+        if (E.Id == ItemId && E.bOwned) return E.Quantity;
+    return 0;
 }
 
 bool UMGEquipmentComponent::ConsumeRation()
