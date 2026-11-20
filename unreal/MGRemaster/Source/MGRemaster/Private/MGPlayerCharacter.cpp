@@ -2,6 +2,7 @@
 #include "MGGrayFoxMission.h"
 #include "Sound/SoundBase.h"
 #include "Components/AudioComponent.h"
+#include "Components/PointLightComponent.h"
 #include "MGGuardActor.h"
 #include "MGSurveillanceCameraActor.h"
 #include "MGShootGunnerActor.h"
@@ -46,6 +47,15 @@ AMGPlayerCharacter::AMGPlayerCharacter()
     WeaponGripVisual->SetupAttachment(WeaponBodyVisual);
     WeaponGripVisual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     WeaponGripVisual->SetVisibility(false);
+    PlayerMuzzleFlashLight = CreateDefaultSubobject<UPointLightComponent>(
+        TEXT("SnakeHandgunMuzzleFlash"));
+    PlayerMuzzleFlashLight->SetupAttachment(WeaponBodyVisual);
+    PlayerMuzzleFlashLight->SetRelativeLocation(FVector(20.f, 0.f, 1.f));
+    PlayerMuzzleFlashLight->SetIntensity(5800.f);
+    PlayerMuzzleFlashLight->SetAttenuationRadius(180.f);
+    PlayerMuzzleFlashLight->SetCastShadows(false);
+    PlayerMuzzleFlashLight->SetLightColor(FLinearColor(1.f, .72f, .40f));
+    PlayerMuzzleFlashLight->SetVisibility(false);
     HairVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SnakeHair1995"));
     HairVisual->SetupAttachment(GetMesh(), TEXT("head"));
     HairVisual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -265,6 +275,10 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     }
     CombatNoiseTimer = FMath::Max(0.f, CombatNoiseTimer - DeltaSeconds);
     WeaponRecoilTimer = FMath::Max(0.f, WeaponRecoilTimer - DeltaSeconds);
+    HitReactionSeconds = FMath::Max(0.f, HitReactionSeconds - DeltaSeconds);
+    if (PlayerMuzzleFlashLight)
+        PlayerMuzzleFlashLight->SetVisibility(HasReadyWeapon() &&
+            WeaponRecoilTimer > .115f);
     MeleeVisualTimer = FMath::Max(0.f, MeleeVisualTimer - DeltaSeconds);
     WallKnockVisualTimer = FMath::Max(0.f, WallKnockVisualTimer - DeltaSeconds);
     PhysicalInteractionRemaining = FMath::Max(0.f,
@@ -870,6 +884,10 @@ void AMGPlayerCharacter::FireStun()
     NotifyFeedback(bStun ? TEXT("STUN ROUND FIRED") : TEXT("HANDGUN FIRED"),
                    bStun ? TEXT("stun") : TEXT("shoot"));
     WeaponRecoilTimer = 0.18f;
+    // Muzzle flash is a light and future Niagara/mesh event, not a
+    // mandatory rendered projectile: authoritative line trace remains below.
+    if (PlayerMuzzleFlashLight && bHandgun)
+        PlayerMuzzleFlashLight->SetVisibility(true);
     CombatNoiseTimer = 0.55f;
     if (bHandgun)
         PendingHandgunCasingSeconds = .065f; // Slide extraction follows ignition.
@@ -1104,6 +1122,13 @@ float AMGPlayerCharacter::TakeDamage(float Amount, const FDamageEvent& Event,
     const float Accepted = Super::TakeDamage(Amount, Event, Instigator, Causer);
     if (Amount <= 0.f || Health <= 0.f) return Accepted;
     Health = FMath::Max(0.f, Health - Amount);
+    // The impact is committed BEFORE notifying art/HUD. The hit event
+    // never deals a second hit and must not drive AI or mission flags.
+    HitReactionSeconds = .48f;
+    LastDamageDirection = Causer
+        ? (Causer->GetActorLocation() - GetActorLocation()).GetSafeNormal2D()
+        : -GetActorForwardVector().GetSafeNormal2D();
+    OnSnakeDamaged(Amount, LastDamageDirection);
     NotifyFeedback(Health <= 0.f ? TEXT("SNAKE DOWN — RELOADING CHECKPOINT")
                                   : TEXT("INJURED — TAKE COVER"), TEXT("hurt"));
     if (Health <= 0.f && GetWorld())
