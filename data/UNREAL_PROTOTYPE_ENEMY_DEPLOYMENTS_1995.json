@@ -1,0 +1,331 @@
+{
+  "schemaVersion": 1,
+  "lastReviewed": "2026-11-20",
+  "note": "ACTUAL authored coordinates copied from Unreal MGGrayFoxMission.cpp; these are remake prototype positions, NOT the original canonical MSX2 room coordinates or verified NavMesh positions.",
+  "units": "Unreal centimeters, Z actor root (floor collision placement needs PIE verification)",
+  "source": "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp",
+  "actors": [
+    {
+      "id": "P01-yard-patrol-north",
+      "area": "B1.1F.TRUCKS",
+      "actorClass": "AMGGuardActor",
+      "positionCm": [
+        -3060,
+        280,
+        -11
+      ],
+      "yawDegrees": -90,
+      "role": "Patrol",
+      "duty": {
+        "axis": [
+          0,
+          1,
+          0
+        ],
+        "halfLengthCm": 130,
+        "speedCmPerSec": 82
+      },
+      "physicalPositionAuthored": true,
+      "canonicalPlacementVerified": false,
+      "engineCollisionPlaytested": false,
+      "hideCoverSightlinesMapped": false,
+      "revisitPlacementPersisted": false
+    },
+    {
+      "id": "P01-yard-patrol-south",
+      "area": "B1.1F.TRUCKS",
+      "actorClass": "AMGGuardActor",
+      "positionCm": [
+        -2100,
+        -285,
+        -11
+      ],
+      "yawDegrees": 135,
+      "role": "Patrol",
+      "duty": {
+        "axis": [
+          1,
+          0,
+          0
+        ],
+        "halfLengthCm": 145,
+        "speedCmPerSec": 92
+      },
+      "physicalPositionAuthored": true,
+      "canonicalPlacementVerified": false,
+      "engineCollisionPlaytested": false,
+      "hideCoverSightlinesMapped": false,
+      "revisitPlacementPersisted": false
+    },
+    {
+      "id": "P01-receiving-logistics",
+      "area": "B1.1F.TRUCKS",
+      "actorClass": "AMGGuardActor",
+      "positionCm": [
+        -2410,
+        295,
+        -11
+      ],
+      "yawDegrees": -95,
+      "role": "LogisticsPost",
+      "duty": {
+        "stationary": true,
+        "scanArcDegrees": "source authored runtime"
+      },
+      "physicalPositionAuthored": true,
+      "canonicalPlacementVerified": false,
+      "engineCollisionPlaytested": false,
+      "hideCoverSightlinesMapped": false,
+      "revisitPlacementPersisted": false
+    },
+    {
+      "id": "P01-custody-A",
+      "area": "B1.1F.TRUCKS",
+      "actorClass": "AMGGuardActor",
+      "positionCm": [
+        -1570,
+        315,
+        -11
+      ],
+      "yawDegrees": -90,
+      "role": "Custody",
+      "duty": {
+        "stationary": true,
+        "challengeObserved": true
+      },
+      "physicalPositionAuthored": true,
+      "canonicalPlacementVerified": false,
+      "engineCollisionPlaytested": false,
+      "hideCoverSightlinesMapped": false,
+      "revisitPlacementPersisted": false
+    },
+    {
+      "id": "P01-custody-B",
+      "area": "B1.1F.TRUCKS",
+      "actorClass": "AMGGuardActor",
+      "positionCm": [
+        -1470,
+        170,
+        -11
+      ],
+      "yawDegrees": -90,
+      "role": "Custody",
+      "duty": {
+        "stationary": true,
+        "challengeObserved": true
+      },
+      "physicalPositionAuthored": true,
+      "canonicalPlacementVerified": false,
+      "engineCollisionPlaytested": false,
+      "hideCoverSightlinesMapped": false,
+      "revisitPlacementPersisted": false
+    },
+    {
+      "id": "P01-dispatch-CCTV",
+      "area": "B1.1F.TRUCKS",
+      "actorClass": "AMGSurveillanceCameraActor",
+      "positionCm": [
+        -2120,
+        -435,
+        180
+      ],
+      "yawDegrees": 148,
+      "role": "PanOptic",
+      "duty": {
+        "arcDegrees": 38,
+        "rangeCm": 700
+      },
+      "physicalPositionAuthored": true,
+      "canonicalPlacementVerified": false,
+      "engineCollisionPlaytested": false,
+      "hideCoverSightlinesMapped": false,
+      "revisitPlacementPersisted": false
+    },
+    {
+      "id": "P03-prison-patrol-A",
+      "area": "B1.B1.PRISON",
+      "actorClass": "AMGGuardActor",
+      "positionCm": [
+        840,
+        360,
+        -11
+      ],
+      "yawDegrees": 180,
+      "role": "Prison",
+      "duty": {
+        "axis": [
+          0,
+          -1,
+          0
+        ],
+        "halfLengthCm": 180,
+        "speedCmPerSec": 76
+      },
+      "physicalPositionAuthored": true,
+      "canonicalPlacementVerified": false,
+      "engineCollisionPlaytested": false,
+      "hideCoverSightlinesMapped": false,
+      "revisitPlacementPersisted": false
+    },
+    {
+      "id": "P03-prison-patrol-B",
+      "area": "B1.B1.PRISON",
+      "actorClass": "AMGGuardActor",
+      "positionCm": [
+        1120,
+        -340,
+        -11
+      ],
+      "yawDegrees": 180,
+      "role": "Prison",
+      "duty": {
+        "axis": [
+          0,
+          1,
+          0
+        ],
+        "halfLengthCm": 170,
+        "speedCmPerSec": 70
+      },
+      "physicalPositionAuthored": true,
+      "canonicalPlacementVerified": false,
+      "engineCollisionPlaytested": false,
+      "hideCoverSightlinesMapped": false,
+      "revisitPlacementPersisted": false
+    },
+    {
+      "id": "P03-prison-CCTV",
+      "area": "B1.B1.PRISON",
+      "actorClass": "AMGSurveillanceCameraActor",
+      "positionCm": [
+        1180,
+        424,
+        235
+      ],
+      "yawDegrees": 180,
+      "role": "PanOptic",
+      "duty": {
+        "arcDegrees": 38,
+        "rangeCm": 710
+      },
+      "physicalPositionAuthored": true,
+      "canonicalPlacementVerified": false,
+      "engineCollisionPlaytested": false,
+      "hideCoverSightlinesMapped": false,
+      "revisitPlacementPersisted": false
+    },
+    {
+      "id": "P04-shotmaker",
+      "area": "B1.B1.SHOT",
+      "actorClass": "AMGShootGunnerActor",
+      "positionCm": [
+        3100,
+        55,
+        -11
+      ],
+      "yawDegrees": 180,
+      "role": "Boss",
+      "duty": {
+        "threeBlastVolley": true,
+        "sourceProven": false
+      },
+      "physicalPositionAuthored": true,
+      "canonicalPlacementVerified": false,
+      "engineCollisionPlaytested": false,
+      "hideCoverSightlinesMapped": false,
+      "revisitPlacementPersisted": false
+    },
+    {
+      "id": "P05-dog-A",
+      "area": "B1.B1.DOGS",
+      "actorClass": "AMGSentryDogActor",
+      "positionCm": [
+        4090,
+        180,
+        -53
+      ],
+      "yawDegrees": 180,
+      "role": "Dog",
+      "duty": {
+        "axis": [
+          1,
+          0,
+          0
+        ],
+        "halfLengthCm": 130
+      },
+      "physicalPositionAuthored": true,
+      "canonicalPlacementVerified": false,
+      "engineCollisionPlaytested": false,
+      "hideCoverSightlinesMapped": false,
+      "revisitPlacementPersisted": false
+    },
+    {
+      "id": "P05-dog-B",
+      "area": "B1.B1.DOGS",
+      "actorClass": "AMGSentryDogActor",
+      "positionCm": [
+        4900,
+        190,
+        -53
+      ],
+      "yawDegrees": 180,
+      "role": "Dog",
+      "duty": {
+        "axis": [
+          0,
+          1,
+          0
+        ],
+        "halfLengthCm": 115
+      },
+      "physicalPositionAuthored": true,
+      "canonicalPlacementVerified": false,
+      "engineCollisionPlaytested": false,
+      "hideCoverSightlinesMapped": false,
+      "revisitPlacementPersisted": false
+    },
+    {
+      "id": "P05-kennel-CCTV",
+      "area": "B1.B1.DOGS",
+      "actorClass": "AMGSurveillanceCameraActor",
+      "positionCm": [
+        5170,
+        427,
+        235
+      ],
+      "yawDegrees": 180,
+      "role": "PanOptic",
+      "duty": {
+        "arcDegrees": 33,
+        "rangeCm": 760
+      },
+      "physicalPositionAuthored": true,
+      "canonicalPlacementVerified": false,
+      "engineCollisionPlaytested": false,
+      "hideCoverSightlinesMapped": false,
+      "revisitPlacementPersisted": false
+    },
+    {
+      "id": "P05-machinegun-kid",
+      "area": "B1.B2.KID",
+      "actorClass": "AMGMachinegunKid",
+      "positionCm": [
+        7560,
+        80,
+        -11
+      ],
+      "yawDegrees": 180,
+      "role": "Boss",
+      "duty": {
+        "sourceProven": false,
+        "location": "remake continuous service wing, NOT original B2 floor"
+      },
+      "physicalPositionAuthored": true,
+      "canonicalPlacementVerified": false,
+      "engineCollisionPlaytested": false,
+      "hideCoverSightlinesMapped": false,
+      "revisitPlacementPersisted": false
+    }
+  ]
+}
