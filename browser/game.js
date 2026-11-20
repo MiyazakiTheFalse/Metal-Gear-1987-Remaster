@@ -449,7 +449,7 @@ function syncService(){
  serviceParcel.active=!service.charge;
 }
 function useService(action){
- if(action==='TAKE LIFT TO BUILDING 1 ROOF'||action==='RETURN TO WEST LIFT'||action==='FIRE ROOFTOP GRENADE'||action==='LAUNCHER EMPTY'){roofInteract(action);return;}
+ if(['TAKE LIFT TO BUILDING 1 ROOF','RETURN TO WEST LIFT','FIRE ROOFTOP GRENADE','LAUNCHER EMPTY','DESCEND TO BUILDING 2','RETURN TO ROOF','PLANT MINE','NO MINES'].includes(action)){roofInteract(action);return;}
  if(action==='TAKE PLASTIC EXPLOSIVE'){service.charge=true;playCue('card');popup('Plastic explosive recovered. One charge.');}
  if(action==='INSPECT MASONRY')popup('A patched joint. A fist will do nothing here.');
  if(action==='PLACE CHARGE'&&service.fuse<0){service.fuse=2.4;playCue('select');popup('Charge ticking.');}
