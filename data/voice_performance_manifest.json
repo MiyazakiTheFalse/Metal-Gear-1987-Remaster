@@ -1,0 +1,393 @@
+{
+  "schema_version": 1,
+  "updated": "2026-11-20",
+  "status": "all_voice_recordings_pending",
+  "source_class": "remake-original dialogue, not extracted original game text",
+  "policy": "New voices must be performed and lawfully recorded/commissioned; do not voice-clone or impersonate prior performers. No copyrighted franchise recordings.",
+  "audio_master": "48 kHz or 96 kHz / 24-bit or 32-bit float WAV recorded dry, no clipping; source files are not committed unless cleared.",
+  "delivery": "48 kHz mono PCM 24-bit processed WAV, -18 LUFS radio/-19 LUFS world, -1.5 dBTP upper bound, conservative dynamics and readable subtitles.",
+  "processing": "Light high-pass, restrained high-end rolloff, gentle compression, 2-pass loudness matching. Do not bake music, heavy static, spatial reverb or severe phone-band distortion into masters.",
+  "profiles": {
+    "snake": {
+      "name": "Solid Snake",
+      "era": "young FOXHOUND operative 1995",
+      "performance": "Measured, precise, alert, curious. Concrete question inflections, often echoing a key term; younger and less battle-worn than later portrayals.",
+      "avoid": "No heroic shouting as a default, no celebrity or prior-actor voice cloning, no artificially aged rasp.",
+      "presence": "radio",
+      "radio_highpass_hz": 170,
+      "radio_lowpass_hz": 6200,
+      "target_lufs": -18
+    },
+    "big_boss": {
+      "name": "Real Big Boss (radio)",
+      "era": "FOXHOUND command 1995",
+      "performance": "Grounded, confident low-mid presence, moderate tempo, protective command clarity. A subtle thought-beat before sensitive orders, not obvious villainy.",
+      "avoid": "No theatrical evil voice and no imitation of any named actor.",
+      "presence": "radio",
+      "radio_highpass_hz": 150,
+      "radio_lowpass_hz": 6500,
+      "target_lufs": -18
+    },
+    "schneider": {
+      "name": "Kyle Schneider",
+      "era": "Outer Heaven resistance contact 1995",
+      "performance": "Slightly hurried but intelligible. Practical, vulnerable, frustrated by gaps in his knowledge; controlled breath.",
+      "avoid": "No false omniscience, excessive radio static or generic nasal robot voice.",
+      "presence": "radio",
+      "radio_highpass_hz": 180,
+      "radio_lowpass_hz": 6700,
+      "target_lufs": -18
+    },
+    "gray_fox": {
+      "name": "Human Gray Fox",
+      "era": "exhausted captive 1995",
+      "performance": "Dry, contained, fatigued breathing with intact elite-soldier precision. Strength rises briefly to communicate Metal Gear intelligence.",
+      "avoid": "No cyborg filters, ninja voice effects or exaggerated pain.",
+      "presence": "world",
+      "radio_highpass_hz": 75,
+      "radio_lowpass_hz": 16500,
+      "target_lufs": -19
+    },
+    "shotmaker": {
+      "name": "Shoot Gunner / Shotmaker",
+      "era": "prison enforcer 1995",
+      "performance": "Confident and territorial, clipped and chest-resonant; pride slips as repeated attacks fail. Keep words readable across gunfire.",
+      "avoid": "No cartoon roar, no unverified accent imitation, no endlessly repeated taunts.",
+      "presence": "world",
+      "radio_highpass_hz": 75,
+      "radio_lowpass_hz": 16500,
+      "target_lufs": -19
+    },
+    "guard": {
+      "name": "Outer Heaven guard",
+      "era": "practical duty-bound security 1995",
+      "performance": "Procedural, short calls; escalate intensity according to firsthand evidence. Real breaths before contact reports and challenge.",
+      "avoid": "No psychic callouts, constant barking or voice that remains stable when interrupted.",
+      "presence": "world",
+      "radio_highpass_hz": 85,
+      "radio_lowpass_hz": 16000,
+      "target_lufs": -19
+    }
+  },
+  "scenes": [
+    {
+      "scene_id": "boss_n313_opening",
+      "context": "1995-radio",
+      "lines": [
+        {
+          "speaker": "big_boss",
+          "text": "Operation Intrude N313.",
+          "clip": "VO_boss_n313_opening_01",
+          "recorded": false
+        },
+        {
+          "speaker": "big_boss",
+          "text": "Gray Fox disappeared inside Outer Heaven.",
+          "clip": "VO_boss_n313_opening_02",
+          "recorded": false
+        },
+        {
+          "speaker": "big_boss",
+          "text": "Establish contact. Verify the weapon report.",
+          "clip": "VO_boss_n313_opening_03",
+          "recorded": false
+        },
+        {
+          "speaker": "snake",
+          "text": "Metal Gear?",
+          "clip": "VO_boss_n313_opening_04",
+          "recorded": false
+        },
+        {
+          "speaker": "big_boss",
+          "text": "Intelligence is incomplete. Find evidence.",
+          "clip": "VO_boss_n313_opening_05",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "boss_prelude_intel",
+      "context": "1995-radio",
+      "lines": [
+        {
+          "speaker": "big_boss",
+          "text": "Gray Fox is inside. Use what you learned.",
+          "clip": "VO_boss_prelude_intel_01",
+          "recorded": false
+        },
+        {
+          "speaker": "big_boss",
+          "text": "Do not turn this into a firefight.",
+          "clip": "VO_boss_prelude_intel_02",
+          "recorded": false
+        },
+        {
+          "speaker": "snake",
+          "text": "Understood.",
+          "clip": "VO_boss_prelude_intel_03",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "schneider_prelude",
+      "context": "1995-radio",
+      "lines": [
+        {
+          "speaker": "schneider",
+          "text": "Prisoners are being moved through this sector.",
+          "clip": "VO_schneider_prelude_01",
+          "recorded": false
+        },
+        {
+          "speaker": "schneider",
+          "text": "I don't have the inner-cell plans.",
+          "clip": "VO_schneider_prelude_02",
+          "recorded": false
+        },
+        {
+          "speaker": "snake",
+          "text": "I'll investigate.",
+          "clip": "VO_schneider_prelude_03",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "schneider_cell",
+      "context": "1995-radio",
+      "lines": [
+        {
+          "speaker": "schneider",
+          "text": "I helped design parts of Outer Heaven.",
+          "clip": "VO_schneider_cell_01",
+          "recorded": false
+        },
+        {
+          "speaker": "schneider",
+          "text": "Before they altered the plans.",
+          "clip": "VO_schneider_cell_02",
+          "recorded": false
+        },
+        {
+          "speaker": "snake",
+          "text": "Altered how?",
+          "clip": "VO_schneider_cell_03",
+          "recorded": false
+        },
+        {
+          "speaker": "schneider",
+          "text": "They sealed old passages with new work.",
+          "clip": "VO_schneider_cell_04",
+          "recorded": false
+        },
+        {
+          "speaker": "schneider",
+          "text": "Some of it was rushed. I never saw",
+          "clip": "VO_schneider_cell_05",
+          "recorded": false
+        },
+        {
+          "speaker": "schneider",
+          "text": "the prison plans, Snake.",
+          "clip": "VO_schneider_cell_06",
+          "recorded": false
+        },
+        {
+          "speaker": "snake",
+          "text": "Understood.",
+          "clip": "VO_schneider_cell_07",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "schneider_fox",
+      "context": "1995-radio",
+      "lines": [
+        {
+          "speaker": "schneider",
+          "text": "You found a way through?",
+          "clip": "VO_schneider_fox_01",
+          "recorded": false
+        },
+        {
+          "speaker": "schneider",
+          "text": "Keep your bearings. I never saw the",
+          "clip": "VO_schneider_fox_02",
+          "recorded": false
+        },
+        {
+          "speaker": "schneider",
+          "text": "prison plans. I can't map your route.",
+          "clip": "VO_schneider_fox_03",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "schneider_escape",
+      "context": "1995-radio",
+      "lines": [
+        {
+          "speaker": "schneider",
+          "text": "If they've modified this area,",
+          "clip": "VO_schneider_escape_01",
+          "recorded": false
+        },
+        {
+          "speaker": "schneider",
+          "text": "the original structure might show it.",
+          "clip": "VO_schneider_escape_02",
+          "recorded": false
+        },
+        {
+          "speaker": "schneider",
+          "text": "I can't tell you where.",
+          "clip": "VO_schneider_escape_03",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "schneider_unknown",
+      "context": "1995-radio",
+      "lines": [
+        {
+          "speaker": "schneider",
+          "text": "Stay alert. I don't know this area.",
+          "clip": "VO_schneider_unknown_01",
+          "recorded": false
+        },
+        {
+          "speaker": "schneider",
+          "text": "Use what the building tells you.",
+          "clip": "VO_schneider_unknown_02",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "boss_cell",
+      "context": "1995-radio",
+      "lines": [
+        {
+          "speaker": "big_boss",
+          "text": "Snake, you're in a tight spot.",
+          "clip": "VO_boss_cell_01",
+          "recorded": false
+        },
+        {
+          "speaker": "big_boss",
+          "text": "Check the wall. There may be a way through.",
+          "clip": "VO_boss_cell_02",
+          "recorded": false
+        },
+        {
+          "speaker": "snake",
+          "text": "How do you know?",
+          "clip": "VO_boss_cell_03",
+          "recorded": false
+        },
+        {
+          "speaker": "big_boss",
+          "text": "You're on site. See what you can find.",
+          "clip": "VO_boss_cell_04",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "boss_fox",
+      "context": "1995-radio",
+      "lines": [
+        {
+          "speaker": "big_boss",
+          "text": "Find Gray Fox. Don't lose sight of",
+          "clip": "VO_boss_fox_01",
+          "recorded": false
+        },
+        {
+          "speaker": "big_boss",
+          "text": "the objective.",
+          "clip": "VO_boss_fox_02",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "boss_equipment",
+      "context": "1995-radio",
+      "lines": [
+        {
+          "speaker": "big_boss",
+          "text": "Recover the equipment they took.",
+          "clip": "VO_boss_equipment_01",
+          "recorded": false
+        },
+        {
+          "speaker": "big_boss",
+          "text": "Search the nearby storage doors.",
+          "clip": "VO_boss_equipment_02",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "boss_transmitter",
+      "context": "1995-radio",
+      "lines": [
+        {
+          "speaker": "big_boss",
+          "text": "Inspect the gear you recovered.",
+          "clip": "VO_boss_transmitter_01",
+          "recorded": false
+        },
+        {
+          "speaker": "big_boss",
+          "text": "They may have planted a transmitter.",
+          "clip": "VO_boss_transmitter_02",
+          "recorded": false
+        },
+        {
+          "speaker": "snake",
+          "text": "A transmitter?",
+          "clip": "VO_boss_transmitter_03",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "boss_continue",
+      "context": "1995-radio",
+      "lines": [
+        {
+          "speaker": "big_boss",
+          "text": "Continue the mission, Snake.",
+          "clip": "VO_boss_continue_01",
+          "recorded": false
+        },
+        {
+          "speaker": "big_boss",
+          "text": "Stay alert.",
+          "clip": "VO_boss_continue_02",
+          "recorded": false
+        }
+      ]
+    },
+    {
+      "scene_id": "fox_rescue",
+      "context": "world",
+      "lines": [
+        {
+          "speaker": "gray_fox",
+          "text": "Metal Gear is real. Find the scientist behind it.",
+          "clip": "VO_fox_rescue_01",
+          "recorded": false
+        }
+      ]
+    }
+  ],
+  "unmet": "No voice samples, masters, processed exports, approval sessions, lip-sync, spatial mix or UE sound assets currently present."
+}
