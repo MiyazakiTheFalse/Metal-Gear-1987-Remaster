@@ -7,6 +7,8 @@
 #include "Components/AudioComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Engine/StaticMesh.h"
 #include "Sound/SoundWaveProcedural.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -56,6 +58,35 @@ AMGMachinegunKid::AMGMachinegunKid()
     Flash->SetIntensity(0.f);
 }
 
+void AMGMachinegunKid::BeginPlay()
+{
+    Super::BeginPlay();
+    // This boss must have a UNIQUE identity and weapons rig. If the approved
+    // 1995 model has not been assembled/imported, prototype gameplay remains
+    // visible but cannot count as production-ready character art.
+    const bool bLoaded = TryUseBespokeSkeletalArt(
+        TEXT("/Game/Characters/Bosses/MachinegunKid/SK_MachinegunKid_1995.SK_MachinegunKid_1995"),
+        TEXT("/Game/Characters/Bosses/MachinegunKid/ABP_MachinegunKid_1995.ABP_MachinegunKid_1995_C"));
+    if (UStaticMeshComponent* GuardPistol = GetHeldWeaponVisual())
+        GuardPistol->SetVisibility(false);
+    if (UStaticMesh* AuthoredWeapon = LoadObject<UStaticMesh>(nullptr,
+        TEXT("/Game/Weapons/MachinegunKid/SM_SupportMachinegun_1995.SM_SupportMachinegun_1995")))
+    {
+        Receiver->SetStaticMesh(AuthoredWeapon);
+        Receiver->SetRelativeScale3D(FVector::OneVector);
+    }
+    if (bLoaded && GetRigMesh() &&
+        GetRigMesh()->DoesSocketExist(TEXT("weapon_r")))
+    {
+        Receiver->AttachToComponent(GetRigMesh(),
+            FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("weapon_r"));
+        Receiver->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+        Flash->AttachToComponent(Receiver,
+            FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+        Flash->SetRelativeLocation(FVector(80.f, 0.f, 0.f));
+    }
+}
+
 void AMGMachinegunKid::Tick(float Dt)
 {
     // This actor uses its own encounter controller. Patrol logic would run a second weapon.
@@ -81,11 +112,13 @@ void AMGMachinegunKid::Tick(float Dt)
         Player->NotifyFeedback(TEXT("MACHINEGUN KID — weapon rising"),TEXT("select"));
         Remaining = 1.f;
         Beat = EBeat::Sight;
+        OnBossFiringPhase(TEXT("RaiseWeapon"),Remaining);
     }
     else if (Beat == EBeat::Sight && Remaining <= 0.f)
     {
         Beat = EBeat::Burst;
         Remaining = 1.15f;
+        OnBossFiringPhase(TEXT("Burst"),Remaining);
         ShotInterval = 0.f;
     }
     else if (Beat == EBeat::Burst)
@@ -95,6 +128,7 @@ void AMGMachinegunKid::Tick(float Dt)
         {
             Beat = EBeat::Reload;
             Remaining = 1.8f;
+            OnBossFiringPhase(TEXT("Reload"),Remaining);
             PlayFeedCue(this,false);
             if (bInRoom) Player->NotifyFeedback(TEXT("Feed cover open"),TEXT("select"));
         }
@@ -107,5 +141,9 @@ void AMGMachinegunKid::Tick(float Dt)
                 UGameplayStatics::ApplyDamage(Player,8.f,nullptr,this,UDamageType::StaticClass());
         }
     }
-    else if (Beat == EBeat::Reload && Remaining <= 0.f) Beat = EBeat::Waiting;
+    else if (Beat == EBeat::Reload && Remaining <= 0.f)
+    {
+        Beat = EBeat::Waiting;
+        OnBossFiringPhase(TEXT("Waiting"),0.f);
+    }
 }
