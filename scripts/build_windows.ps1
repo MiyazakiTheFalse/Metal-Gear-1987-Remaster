@@ -31,6 +31,8 @@ Write-Host 'Checking browser campaign and actual rig binaries...'
 if ($LASTEXITCODE -ne 0) { throw "Browser campaign tests failed: $LASTEXITCODE" }
 & node (Join-Path $Repo 'browser\\tests\\test_field_rigs.cjs')
 if ($LASTEXITCODE -ne 0) { throw "Rig geometry tests failed: $LASTEXITCODE" }
+& node (Join-Path $Repo 'browser\\tests\\test_animation_intent.cjs')
+if ($LASTEXITCODE -ne 0) { throw "Cast animation intent tests failed: $LASTEXITCODE" }
 & node (Join-Path $Repo 'browser\\tools\\audit_field_glbs.cjs')
 if ($LASTEXITCODE -ne 0) { throw "Committed GLB binary audit failed: $LASTEXITCODE" }
 Write-Host 'Verifying embedded Unreal Content GLB source assets...'
