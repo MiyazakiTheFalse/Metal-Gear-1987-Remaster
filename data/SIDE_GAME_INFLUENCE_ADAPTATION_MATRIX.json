@@ -118,7 +118,7 @@
     {
       "id": "CARDBOARD_CONCEALED_BOX",
       "source_pattern": "Ghost Babel / original MG",
-      "source_canon": "Original cardboard box acquired after Card 2 on Building 1 third floor",
+      "source_canon": "Original B1-F3 Card 2 door gives the permanent box, which remains reusable afterward across later floors/areas. Later MSX2 walkthroughs rely on it against cameras/guards, with some specialist rocket troops who can recognize the disguise.",
       "implemented_browser": "Browser freight carton and stationary-cover plus close-range guard inspection in current source",
       "implemented_unreal": "Dispatch freight carton and physical guard inspection code in current source",
       "status": "source_prototype_unverified",
@@ -127,9 +127,11 @@
         "unmanifested close frontal crate gradually raises suspicion",
         "marked freight line protected against arbitrary suspicion",
         "box is confiscated on capture",
-        "no perfect invisible box in a guard's face"
+        "no perfect invisible box in a guard's face",
+        "Original box persists across later maps and checkpoints after earned acquisition; not consumed on use and not one-floor restricted.",
+        "Occasional authored box transit should move Snake closer to a meaningful objective and offer a controllable pacing breather."
       ],
-      "followup": "Separate prelude-only freight disguise from actual canonical third-floor permanent box acquisition in both save systems, then test inventory parity."
+      "followup": "Implement true B1 third-floor Card 2 box pickup with mission-wide persistence; treat current early borrowed freight disguise only as a local optional introduction, not the canonical item."
     },
     {
       "id": "CIGARETTES_REVEAL_HIDDEN_BEAM",
@@ -196,6 +198,23 @@
         "unique readable counterplay rather than damage sponge",
         "enemy cannot instantly know where Snake went when LOS lost"
       ]
+    },
+    {
+      "id": "BOX_TRANSIT_TENSION_RELEASE",
+      "source_pattern": "Ghost Babel logistics + original Metal Gear reusable cardboard box",
+      "source_canon": "Original 1987 cardboard box stays available after earning it; specific Ghost Babel coloured freight systems are not part of the 1987 story.",
+      "implemented_browser": "One short forward dispatch belt using temporary borrowed prelude freight carton",
+      "implemented_unreal": "One source-authored physically advancing freight belt and temporary opening disguise",
+      "status": "one_source_prototype_more_encounters_design_only",
+      "verification": [
+        "Must be preceded by consequential stealth/combat tension, then give voluntary respite and physical forward progression",
+        "Allow continued look/camera agency and early exit when physically possible",
+        "Give at least one meaningful route other than hiding in the cargo",
+        "Expected labelled freight is not always inspected; authentic box remains a reusable tool later",
+        "New transit zones must share true doors/corridor adjacency with original areas",
+        "Never require multiple colour permutations and long repeated backtracking"
+      ],
+      "followup": "After authentic B1-F3 acquisition, let the player reuse the same persistent box in a later logistical shortcut and ordinary stealth, without resetting it on level transition."
     }
   ],
   "global_safeguards": [
@@ -204,5 +223,6 @@
     "Document why players would choose a tactic and what they can see/hear as feedback",
     "Each inspiration has a non-canonical/story status and no-early-spoiler gate",
     "Browser/Unreal parity required before an inspired system graduates from source_prototype"
-  ]
+  ],
+  "production_guidance": "The earned cardboard box is campaign-wide equipment. Freight transportation is an occasional, context-driven reward after pressure rather than a single-use stage gimmick or frequent mandatory maze."
 }
