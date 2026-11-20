@@ -7444,7 +7444,7 @@
     {
       "id": "SYS.QA",
       "name": "Full regression, UE5.7 actual compile and PIE, 720p/4K motion/collision and human testers",
-      "status": "not_started",
+      "status": "partial_source",
       "acceptance": [
         "source implemented",
         "authored assets imported",
@@ -7452,6 +7452,24 @@
         "saved and revisited",
         "input, caption and performance tested",
         "professional art and audio approved"
+      ],
+      "sourceEvidence": [
+        "scripts/unreal_tester_preflight.ps1",
+        "scripts/import_unreal_content.ps1",
+        "scripts/verify_unreal_content.ps1",
+        "scripts/build_windows.ps1",
+        "unreal/MGRemaster/Content/Python/audit_native_character_assets.py",
+        "tools/test_unreal_character_import_recovery.py",
+        "tools/test_unreal_native_character_audit_source.py",
+        "tools/test_unreal_packaging_cook_audit_contracts.py",
+        "tools/test_unreal_muzzle_and_fallback_source.py"
+      ],
+      "unverifiedGates": [
+        "Unreal 5.7 C++ UBT successful compile",
+        "Python native importer actually run in UE Editor and 22 assets audited",
+        "Real PIE gameplay and correct pistol/guard/boss muzzle alignment",
+        "Packaged Windows build launched and smoke-tested from clean machine",
+        "Browser and Unreal runtime parity with novice/veteran playtests"
       ]
     }
   ],
@@ -7462,7 +7480,7 @@
     "sourcePrototypes": 27,
     "actualUnrealVerified": 0,
     "productionReady": 0,
-    "mandatoryNextAction": "Have Unreal 5.7 tester import 22 prototype GLBs, compile/PIE and capture animation/rig/body/fov test evidence; production PBR cast, authored AnimBPs/IK and complete first-floor source topology/Card 1 gates remain unfunded/unverified.",
+    "mandatoryNextAction": "Run preflight and UE5.7 native character import/audit on tester's Windows machine; compile and PIE with six character/weapon/KO clips and visible muzzle origins; test packaged cook roots before claiming usable Unreal build. Complete original floor atlas and MGS4-grade cast later.",
     "unmappedCoordinates": 52,
     "prototypeEnemyActorsMapped": 14,
     "prototypeEnemyAreasMapped": 5,
