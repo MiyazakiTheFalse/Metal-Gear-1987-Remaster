@@ -49,6 +49,10 @@ AMGShootGunnerActor::AMGShootGunnerActor()
     WeaponBarrel->SetRelativeLocation(FVector(83.f, 25.f, 34.f));
     WeaponBarrel->SetRelativeScale3D(FVector(.7f, .055f, .065f));
     if (Cube.Succeeded()) WeaponBarrel->SetStaticMesh(Cube.Object);
+    WeaponPump = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShotmakerIndependentPump"));
+    WeaponPump->SetupAttachment(WeaponBody);
+    WeaponPump->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    WeaponPump->SetVisibility(false);
 
     // Physical muzzle-origin visual tell. Final VFX/materials need UE test.
     MuzzleFlash = CreateDefaultSubobject<UPointLightComponent>(TEXT("ShotmakerMuzzleFlash"));
@@ -80,6 +84,28 @@ void AMGShootGunnerActor::BeginPlay()
         WeaponBody->SetStaticMesh(Gun);
         WeaponBody->SetRelativeScale3D(FVector::OneVector);
         WeaponBarrel->SetVisibility(false);
+        bImportedWeaponGeometry = true;
+        // The new source mesh deliberately keeps an independent moving fore-end.
+        if (UStaticMesh* Pump = LoadObject<UStaticMesh>(nullptr,
+                TEXT("/Game/Weapons/Shotmaker/SM_RiotShotgunPump_1995.SM_RiotShotgunPump_1995")))
+        {
+            WeaponPump->SetStaticMesh(Pump);
+            WeaponPump->SetVisibility(true);
+        }
+        // When a proper weapon grip socket exists, parent weapon presentation
+        // to the hand. Source-offset is provisional and must be fitted in UE.
+        // With no authored rig the weapon continues following the actor, not
+        // pretending a primitive body has articulated hands.
+        if (CharacterMesh->GetSkeletalMeshAsset()
+            && CharacterMesh->DoesSocketExist(TEXT("weapon_r")))
+        {
+            WeaponBody->AttachToComponent(CharacterMesh,
+                FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("weapon_r"));
+            WeaponBody->SetRelativeLocation(FVector(-4.f, 0.f, 9.f));
+        }
+        MuzzleFlash->AttachToComponent(WeaponBody,
+            FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+        MuzzleFlash->SetRelativeLocation(FVector(84.f, 0.f, 0.f));
     }
     // Authored original source audio files can be imported by
     // Content/Python/import_shotmaker_source_assets.py. These are optional
@@ -103,6 +129,8 @@ void AMGShootGunnerActor::SetEncounterActive(bool bEnabled)
     ShotsFired = 0;
     PumpCueRemaining = -1.f;
     PendingPumpShotIndex = INDEX_NONE;
+    PumpVisualRemainingSeconds = 0.f;
+    if (WeaponPump) WeaponPump->SetRelativeLocation(FVector::ZeroVector);
 }
 
 void AMGShootGunnerActor::ReceiveTrackerPing(const FVector& ApproximateLocation)
@@ -135,6 +163,18 @@ void AMGShootGunnerActor::Tick(float Dt)
     AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     StateClock += FMath::Max(0.f, Dt);
     TrackerPingAge += FMath::Max(0.f, Dt);
+    PumpVisualRemainingSeconds = FMath::Max(
+        0.f, PumpVisualRemainingSeconds - FMath::Max(0.f, Dt));
+    if (WeaponPump && WeaponPump->IsVisible())
+    {
+        // Actual transform changes only on the moving fore-end mesh. Native
+        // health, shot rays, magazine counts and actor/hand grip never move.
+        const float Phase = 1.f - PumpVisualRemainingSeconds / .24f;
+        const float Pull = (Phase < .42f)
+            ? FMath::Clamp(Phase / .42f, 0.f, 1.f)
+            : FMath::Clamp((1.f - Phase) / .58f, 0.f, 1.f);
+        WeaponPump->SetRelativeLocation(FVector(-9.f * Pull, 0.f, 0.f));
+    }
     if (PendingPumpShotIndex != INDEX_NONE)
     {
         PumpCueRemaining -= FMath::Max(0.f, Dt);
@@ -143,7 +183,9 @@ void AMGShootGunnerActor::Tick(float Dt)
             const int32 PumpedShot = PendingPumpShotIndex;
             PendingPumpShotIndex = INDEX_NONE;
             PumpCueRemaining = -1.f;
+            PumpVisualRemainingSeconds = .24f;
             OnPumpAction(PumpedShot);
+            OnSpentShellEjected(PumpedShot);
             if (ShotCycleCue)
                 UGameplayStatics::PlaySoundAtLocation(this, ShotCycleCue,
                     GetActorLocation() + FVector(0.f, 0.f, 55.f), .64f);
@@ -221,6 +263,15 @@ void AMGShootGunnerActor::Tick(float Dt)
     }
 }
 
+FVector AMGShootGunnerActor::GetActualMuzzleLocation() const
+{
+    // Keep the authoritative projectile origin on the physical imported
+    // weapon, even if its hand moves during a real animation.
+    return bImportedWeaponGeometry && IsValid(WeaponBody)
+        ? WeaponBody->GetComponentTransform().TransformPosition(FVector(84.f, 0.f, 0.f))
+        : GetActorLocation() + GetActorRotation().RotateVector(FVector(112.f, 23.f, 32.f));
+}
+
 void AMGShootGunnerActor::FireShot(AMGPlayerCharacter* Player)
 {
     if (State != EAttackState::Volley || ShotsFired >= 3 || !GetWorld())
@@ -228,8 +279,7 @@ void AMGShootGunnerActor::FireShot(AMGPlayerCharacter* Player)
     // Authored 3D spread, with a bounded angular cone. Original MSX2
     // documents three broad blasts, NOT a canonical pellet count or timing.
     // Never use camera-space traces through a different physical obstruction.
-    const FVector Muzzle = GetActorLocation() +
-        GetActorRotation().RotateVector(FVector(112.f, 23.f, 32.f));
+    const FVector Muzzle = GetActualMuzzleLocation();
     MuzzleFlashRemaining = .085f;
     if (MuzzleFlash) MuzzleFlash->SetVisibility(true);
     if (ShotBlastCue)
@@ -298,6 +348,8 @@ void AMGShootGunnerActor::EnterDefeatedState()
     bActive = false;
     PendingPumpShotIndex = INDEX_NONE;
     PumpCueRemaining = -1.f;
+    PumpVisualRemainingSeconds = 0.f;
+    if (WeaponPump) WeaponPump->SetRelativeLocation(FVector::ZeroVector);
     MuzzleFlashRemaining = 0.f;
     if (MuzzleFlash) MuzzleFlash->SetVisibility(false);
     State = EAttackState::Defeated;
