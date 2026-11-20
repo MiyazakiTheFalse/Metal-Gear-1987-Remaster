@@ -12,8 +12,10 @@ from pathlib import Path
 
 import unreal
 
-ROOT = Path(__file__).resolve().parents[4]
-SOURCES = ROOT / "browser" / "assets" / "models"
+# Source assets are checked into the Unreal project itself, so a tester can
+# archive/copy just unreal/MGRemaster without losing the source character rigs.
+PROJECT = Path(__file__).resolve().parents[2]
+SOURCES = PROJECT / "Content" / "SourceAssets" / "Characters"
 ROLES = {
     "snake": ("/Game/Characters/Snake", "SK_Snake_1995_Infiltration"),
     "fox": ("/Game/Characters/GrayFox", "SK_GrayFox_1995_Prisoner"),
@@ -80,6 +82,11 @@ def import_prototype(role: str):
     # rather than assuming a GLB is imported as a SkeletalMesh.
     unreal.AssetToolsHelpers.get_asset_tools().import_asset_tasks([task])
     imported = list(task.get_editor_property("imported_object_paths") or [])
+    if not imported:
+        raise RuntimeError(
+            f"{role}: importer produced no assets. Verify UE 5.7 Interchange "
+            f"skeletal glTF plugin is enabled; source={source}"
+        )
     skeletal = [p for p in imported
                 if isinstance(unreal.EditorAssetLibrary.load_asset(p), unreal.SkeletalMesh)]
     if len(skeletal) != 1:
@@ -110,16 +117,35 @@ def import_prototype(role: str):
         "Retarget orientation, verify all AnimationSequences, AnimBP, PBR and "
         "720p appearance separately. NOT production art."
     )
-    # Do not rename importer output: callers must validate the exact loaded
-    # path. No blueprints are auto-assigned from a mismatching generated name.
-    return target
+    # UE GLB import can produce separate AnimationSequences. They are not a
+    # finished runtime graph; we report what actually exists instead of
+    # pretending source clips guarantee playable full-body animation.
+    sequences = [p for p in imported
+                 if isinstance(unreal.EditorAssetLibrary.load_asset(p),
+                               unreal.AnimSequence)]
+    if not sequences:
+        unreal.log_warning(
+            f"{role}: 18-joint skeletal mesh imported, but NO Unreal "
+            "AnimationSequence assets were reported. Enable/import skeletal "
+            "animations and create runtime ABP before accepting animation QA."
+        )
+    unreal.log(
+        f"{role}: Unreal imported {len(sequences)} AnimationSequence "
+        f"asset(s): {sequences}"
+    )
+    return {"mesh": target, "animations": sequences}
 
 
 def main():
     results = {}
     for role in ROLES:
         results[role] = import_prototype(role)
-    unreal.log("PROTO RIG IMPORT RESULT (not engine playtested): " + json.dumps(results))
+    unreal.log("PROTOTYPE CHARACTER IMPORT RESULT: " + json.dumps(results))
+    unreal.log_warning(
+        "Import script does not create finished animation Blueprints or "
+        "realistic/PBR character art. Open Content Browser, confirm imported "
+        "skeletons, assign animation graphs and verify movement in PIE."
+    )
 
 
 if __name__ == "__main__":
