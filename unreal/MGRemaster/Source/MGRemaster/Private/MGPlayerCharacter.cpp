@@ -398,6 +398,7 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
     Input->BindAction("GraphicsPreset", IE_Pressed, this, &AMGPlayerCharacter::CycleGraphicsQuality);
     Input->BindAction("Interact", IE_Pressed, this, &AMGPlayerCharacter::Interact);
     Input->BindAction("RestartRescue", IE_Pressed, this, &AMGPlayerCharacter::RestartRescue);
+    Input->BindAction("SkipCinematic", IE_Pressed, this, &AMGPlayerCharacter::SkipStoryCinematic);
     Input->BindAction("MissionLog", IE_Pressed, this, &AMGPlayerCharacter::ToggleMissionLog);
     Input->BindAction("WeaponWindow", IE_Pressed, this, &AMGPlayerCharacter::WeaponWindowStart);
     Input->BindAction("WeaponWindow", IE_Released, this, &AMGPlayerCharacter::WeaponWindowStop);
@@ -580,6 +581,9 @@ void AMGPlayerCharacter::StopDraggingBody()
     DraggedBody.Reset();
     UpdateMovementState();
     OnBodyDragChanged(false, Body);
+    if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+        Mission->NotifyBodyRelocated(this);
     NotifyFeedback(TEXT("BODY RELEASED"), TEXT("select"));
 }
 
@@ -702,6 +706,13 @@ void AMGPlayerCharacter::Interact()
 void AMGPlayerCharacter::ToggleMissionLog()
 {
     if (!bCodecOpen) bShowMissionLog = !bShowMissionLog;
+}
+
+void AMGPlayerCharacter::SkipStoryCinematic()
+{
+    if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+        Mission->SkipStoryCinematic();
 }
 
 void AMGPlayerCharacter::RestartRescue()
