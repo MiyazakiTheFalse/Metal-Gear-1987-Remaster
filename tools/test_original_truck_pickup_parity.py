@@ -56,6 +56,17 @@ class OriginalTruckPickupParity(unittest.TestCase):
         self.assertIn("fov:Math.PI/(world.scouting?5.6:player.aim?3.6:3.1)", BROWSER)
         self.assertIn("world.scouting=false; // Optical view is input state", BROWSER)
 
+    def test_missable_source_loot_has_physical_after_recovery_return(self):
+        self.assertIn('FreightReturnGate = SpawnBlock(TEXT("WestReturnFreightGate")', CPP)
+        self.assertIn('if ((Flags & MG_FOX_GEAR_RECOVERED) && IsValid(FreightReturnGate))', CPP)
+        self.assertIn('if (IsValid(FreightReturnGate)) FreightReturnGate->Destroy();', CPP)
+        self.assertIn('&& TryCollectTruckSupply(Player)) return true;', CPP)
+        self.assertIn('&& !(F & MG_FOX_GEAR_RECOVERED)', CPP)
+        self.assertIn('westReturnGate.active=stage<4;', BROWSER)
+        self.assertIn('if((stage<0||stage>=4)&&!firstCardEarned', BROWSER)
+        self.assertIn('if((stage<0||stage>=4)&&!rationEarned', BROWSER)
+        self.assertIn('if((stage<0||stage>=4)&&!binocularsEarned', BROWSER)
+
     def test_browser_three_rewards_are_earned_and_not_respawned(self):
         for name in ("Ration", "Binoculars", "Card1"):
             self.assertIn("const original" + name + "Target=", BROWSER)
