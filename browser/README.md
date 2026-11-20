@@ -13,7 +13,7 @@ Editable GLBs are included in assets/models in the playtest ZIP. Rebuild them fr
 
 Choose **Rehearse Shoot Gunner** on the opening menu to enter the property hall with recovered gear and a separate checkpoint. Its low cart and tall freight trunks offer different sightlines.
 
-The dispatch yard contains a handgun, a folding carton and a marked freight belt. Hold Tab or LB, select a usable item, then release to equip. Cigarettes briefly reveal the nearby optical beam. Capture confiscates your kit until you reclaim it inside the property hall.
+The dispatch yard contains a handgun, a *borrowed* folding freight carton and a marked belt. Hiding in the carton briefly allows an uninterrupted supply-line ride with ordinary staff chatter; this is an optional original remake scene, not the canonical cardboard-box pickup. The original MSX2 cardboard box remains a later, reusable item earned through Card 2 on Building 1's third floor, which is not yet built in this browser prototype. Hold Tab or LB, select a usable item, then release to equip. Cigarettes briefly reveal the nearby optical beam. Capture confiscates your kit until you reclaim it inside the property hall.
 
 After Shoot Gunner falls, use the recovered Card 2 at records stores. Take Card 3, open the east shutter and enter the kennels. The floor passage has a low side duct. Collect the service charge, use it on the patched joint and explore the relay room. The next fight ends at the west-lift parachute. Cleared older saves retain their unlocked exits. An older in-progress loose-card save retains the old pickup.
 
