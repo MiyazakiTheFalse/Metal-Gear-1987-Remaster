@@ -64,6 +64,12 @@ public:
     FString GetTransceiverVoiceSceneKey(int32 Channel) const;
     bool HasIncomingTransceiverPrompt() const;
     FString GetMissionLogText() const;
+    // Progression of the 1995 rookie's perspective and relationships. Derived
+    // from ACTUAL mission flags, never from a cinematic or a secret timer.
+    UFUNCTION(BlueprintPure, Category="Mission|Story")
+    FString GetCharacterStoryText() const;
+    UFUNCTION(BlueprintPure, Category="Mission|Story")
+    FName GetSnakeStoryPhase() const;
     FString GetPhaseText() const;
     UFUNCTION(BlueprintPure, Category="Mission|Pacing")
     float GetSuggestedBeatIntensity() const;
