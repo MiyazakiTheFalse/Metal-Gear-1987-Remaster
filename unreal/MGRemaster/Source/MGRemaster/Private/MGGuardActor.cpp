@@ -591,23 +591,40 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         && Distance < 165.f
         && FVector::DotProduct(GuardForward,
             ToPlayer.GetSafeNormal2D()) > 0.50f;
-    const bool bHasLineOfSight = bRealSightline
-        && (AwarenessState >= 3 || !Player->IsStillInCarton()
-            || bCloseUnusualCarton);
+    // Seeing a box is NOT seeing Snake. Only a continuous 1.3s deliberate
+    // inspection upgrades visible-object evidence into a confirmed identity.
+    // Losing sight/turning away resets the timer; guarding through walls fails.
     if (bCloseUnusualCarton && AwarenessState < 3)
     {
-        // Evidence is the *visible object*, not an omniscient identification
-        // of Snake. The solver still needs time to confirm the intruder.
+        CartonInspectionSeconds = FMath::Min(
+            CartonInspectionSeconds + FMath::Max(0.f, DeltaSeconds), 1.35f);
         if (!bCartonInspectionAnnounced)
         {
             EmitGuardCallout(TEXT("ContainerInspection"),
                 TEXT("GUARD: WHO LEFT THIS CARTON HERE?"));
             bCartonInspectionAnnounced = true;
         }
-        Suspicion = FMath::Max(Suspicion, .25f);
+        if (CartonInspectionSeconds < 1.30f)
+            Suspicion = FMath::Max(Suspicion, .25f);
     }
-    else if (!bCloseUnusualCarton)
+    else
+    {
+        CartonInspectionSeconds = 0.f;
         bCartonInspectionAnnounced = false;
+    }
+    const bool bCartonIdentityConfirmed = bCloseUnusualCarton
+        && CartonInspectionSeconds >= 1.30f;
+    if (bCartonIdentityConfirmed && !bCartonIdentitySpoken)
+    {
+        EmitGuardCallout(TEXT("ContainerOpened"),
+            TEXT("GUARD: WAIT! THERE'S SOMEONE IN THERE!"));
+        bCartonIdentitySpoken = true;
+        OnCartonInspectionConfirmed(); // presentation only; no free damage
+    }
+    if (!bCloseUnusualCarton) bCartonIdentitySpoken = false;
+    const bool bHasLineOfSight = bRealSightline
+        && (AwarenessState >= 3 || !Player->IsStillInCarton()
+            || bCartonIdentityConfirmed);
     const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
     const EMGFacilitySecurityState BaseState = Mission
