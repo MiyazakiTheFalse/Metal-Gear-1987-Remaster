@@ -27,12 +27,13 @@ class ExtendedTransactionSourceTests(unittest.TestCase):
         self.assertIn('flags | CARD3_RECOVERED',RUST)
     def test_save_migration_remains_explicit(self):
         self.assertIn('const bool bLegacy = Save->SchemaVersion == 1',MISSION)
-        self.assertIn('Save->SchemaVersion = 6;',MISSION)
+        self.assertIn('Save->SchemaVersion = 7;',MISSION)
         self.assertIn('Save->bEarnedHandgun = bEarlyHandgunAcquired;',MISSION)
-        self.assertIn('uint32 SchemaVersion = 6;',SAVE)
+        self.assertIn('uint32 SchemaVersion = 7;',SAVE)
         self.assertIn('bool bEarnedHandgun = false;',SAVE)
         self.assertIn('Save->SchemaVersion == 2',MISSION)
-        self.assertIn('Save->SchemaVersion == 3 || Save->SchemaVersion == 4 || Save->SchemaVersion == 5 || Save->SchemaVersion == 6',MISSION)
+        self.assertIn('Save->SchemaVersion == 3 || Save->SchemaVersion == 4 || Save->SchemaVersion == 5',MISSION)
+        self.assertIn('|| Save->SchemaVersion == 6 || Save->SchemaVersion == 7;',MISSION)
         self.assertIn('16383u',MISSION)
     def test_no_card_three_before_boss_defeat(self):
         self.assertIn('ACTION_COLLECT_CARD3 if flags & SHOTMAKER_DEFEATED != 0',RUST)
