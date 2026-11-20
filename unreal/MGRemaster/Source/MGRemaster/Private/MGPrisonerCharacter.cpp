@@ -4,6 +4,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
 #include "Animation/AnimInstance.h"
+#include "Animation/AnimSequence.h"
 #include "UObject/ConstructorHelpers.h"
 
 AMGPrisonerCharacter::AMGPrisonerCharacter()
@@ -40,6 +41,13 @@ void AMGPrisonerCharacter::BeginPlay()
             if (UClass* Class = LoadClass<UAnimInstance>(nullptr,
                     TEXT("/Game/Characters/GrayFox/ABP_GrayFox_1995.ABP_GrayFox_1995_C")))
                 CharacterMesh->SetAnimInstanceClass(Class);
+        // While the production AnimationBlueprint is still missing, use the
+        // checked-in, actually animated breathing Idle source. Never leave a
+        // successful skeletal import frozen in its reference T-pose.
+        if (!CharacterMesh->GetAnimClass())
+            if (UAnimSequence* LivingIdle = LoadObject<UAnimSequence>(nullptr,
+                    TEXT("/Game/Characters/GrayFox/Animations/AS_GrayFox_Idle.AS_GrayFox_Idle")))
+                CharacterMesh->PlayAnimation(LivingIdle, true);
         PlaceholderBody->SetVisibility(false, true);
         PlaceholderBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         CharacterMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
