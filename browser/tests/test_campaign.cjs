@@ -258,6 +258,16 @@ assert.ok(curious.game.state.guards[0].state>=1 ||
  curious.game.state.guards[0].investigateUntil>0 ||
  curious.game.state.guards[0].last.x>-19.1,
  'a guard looking directly at a near stationary unexpected box investigates');
+assert.ok(curious.game.state.guards[0].boxInspectionAge<1.3,
+ 'first glance reveals a suspicious crate, not Snake himself');
+for(let i=0;i<13;i++){
+ curious.game.testSetGuard(0,{x:-19,z:0,yaw:0,knocked:false});
+ curious.game.testStepGuards(.1);
+}
+assert.ok(curious.game.state.guards[0].boxInspectionAge>=1.3,
+ 'steady optical attention completes a deliberate 1.3s inspection');
+assert.equal(curious.game.state.guards[0].boxIdentitySpoken,true,
+ 'the guard identifies the person only after inspecting the box');
 const distant=boot();
 distant.button('start');
 distant.game.teleport(-26.8,-2.3);distant.game.act('interact');
