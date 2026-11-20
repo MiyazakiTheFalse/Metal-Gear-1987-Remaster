@@ -1589,7 +1589,22 @@ function drawKennelDogs(t){
   }
  }
 }
-function updateGuards(dt){kennelTick(dt);kidTick(dt);const pulse=updatePropertyTag();let max=0;const triggered=[];for(const g of guards){if(g.knocked||g.kid)continue;if(g.boss){updateShootGunner(dt,pulse);max=Math.max(max,g.state);continue;}const d=dist(g,player),direction=Math.atan2(player.z-g.z,player.x-g.x),view=Math.abs(Math.atan2(Math.sin(direction-g.yaw),Math.cos(direction-g.yaw)))<.87;const vision=(!world.boxed||world.moved||g.state===3)&&d<10&&(view||d<1.65)&&!lineBlockedSight(g,player);
+function updateGuards(dt){kennelTick(dt);kidTick(dt);const pulse=updatePropertyTag();let max=0;const triggered=[];for(const g of guards){if(g.knocked||g.kid)continue;if(g.boss){updateShootGunner(dt,pulse);max=Math.max(max,g.state);continue;}const d=dist(g,player),direction=Math.atan2(player.z-g.z,player.x-g.x),view=Math.abs(Math.atan2(Math.sin(direction-g.yaw),Math.cos(direction-g.yaw)))<.87;// Ghost Babel-style box logic: credible freight, not perpetual invisibility.
+ // Only a guard with an actual close, forward, unobstructed look may inspect an
+ // unlisted carton. Expected freight on the marked conveyor is not suspicious.
+ const boxInspection=world.boxed&&!world.moved&&!nearBelt()&&d<1.65&&view&&
+  !lineBlockedSight(g,player,1.48,.9);
+ const vision=(!world.boxed||world.moved||g.state===3||boxInspection)&&
+  d<10&&(view||d<1.65)&&!lineBlockedSight(g,player);
+ if(boxInspection&&g.state<3){
+  if(gameTime>=(g.boxInspectCooldown||0)){
+   say('boxInspect');
+   g.boxInspectCooldown=gameTime+8;
+  }
+  // The observed evidence is a crate in an odd place, not a perfect
+  // identification of the operative. Existing suspicion/aim windows apply.
+  g.suspicion=Math.max(g.suspicion,.25);
+ }
  const dFox=escortMode&&stage>=2&&fox.alive?dist(g,fox):Infinity;
  const toFox=Math.atan2(fox.z-g.z,fox.x-g.x);
  const foxFacing=Math.abs(Math.atan2(Math.sin(toFox-g.yaw),Math.cos(toFox-g.yaw)))<.94;
