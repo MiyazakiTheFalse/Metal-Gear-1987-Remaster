@@ -15,7 +15,7 @@ function boot(storage = new Map(),search = '',getGamepads=()=>[]) {
   }});
   function element(id) {
     if (!elements.has(id)) elements.set(id, { style:{}, dataset:{},
-      hidden:id==='menuOptionsPanel',
+      hidden:id==='menuOptionsPanel'||id==='newGameConfirm',
       tagName:id==='rigToggle'||id==='tipsToggle'||id==='voiceToggle'?'INPUT':'BUTTON',
       classList:{add:noop},
       clientWidth:960, clientHeight:540, width:960, height:540,
@@ -59,6 +59,27 @@ title.button('menuOptions');
 assert.equal(title.element('menuOptionsPanel').hidden,true,
  'title Options drawer is dismissible');
 console.log('PASS: title options, keyboard selection, disabled Continue and briefing isolation.');
+const alreadyPlayed=boot();
+alreadyPlayed.button('start');
+const savedOperation=boot(alreadyPlayed.storage);
+assert.equal(savedOperation.element('resume').disabled,false,
+ 'Continue becomes available with a real checkpoint');
+savedOperation.button('start');
+assert.equal(savedOperation.element('newGameConfirm').hidden,false,
+ 'New Game requires explicit consent before deleting an existing checkpoint');
+assert.equal(savedOperation.game.state.started,false,
+ 'checkpoint confirmation interrupts the destructive action');
+assert.equal(savedOperation.element('cancelNewGame').dataset.selected,'true',
+ 'Cancel is default even for keyboard/controller navigation');
+savedOperation.button('cancelNewGame');
+assert.equal(savedOperation.element('newGameConfirm').hidden,true);
+assert.equal(savedOperation.game.state.started,false,
+ 'cancel returns to the title with the old save intact');
+savedOperation.button('start');
+savedOperation.button('confirmNewGame');
+assert.equal(savedOperation.game.state.started,true,
+ 'explicit confirmation starts the new operation');
+console.log('PASS: Save-protecting New Game confirmation and safe cancellation.');
 
 let run=boot();
 run.button('start');
