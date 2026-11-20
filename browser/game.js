@@ -262,6 +262,82 @@ function detailRelay(){
  for(let i=0;i<8;i++)add('switchbank lamp',45.55+i*.18,1.65,1.18,.07,.06,.04,color.stripe,mat.light);
 }
 const service={charge:false,open:false,intel:false,kidDown:false,parachute:false,fuse:-1};
+
+/* Building 1 roof continuation: original authored proxy encounter, not verified
+ * MSX2 topology or finished helicopter art. Combat and checkpoint are real. */
+const roof={active:false,defeated:false,hp:3,grenades:6,phase:'patrol',
+  clock:2.5,exposure:0,shotVisual:0,lap:0,flyX:82,flyZ:0};
+const roofLift={x:63,z:0},roofReturn={x:71.3,z:0},roofLauncher={x:76.6,z:-2.65};
+const roofFlight=add('Hind D authored proxy fuselage',82,3.25,0,3.2,1.20,1.18,color.metal,mat.steel);
+const roofRotor=add('Hind D rotor sweep',82,4.1,0,5.9,.10,.15,color.dark,mat.steel);
+const roofWarning=add('roof warning beacon',76.5,1.45,-4.7,.35,.24,.34,color.stripe,mat.light);
+roofFlight.active=roofRotor.active=roofWarning.active=false;
+add('roof steel deck',80,-.26,0,22,.50,10.4,color.floor,mat.grate);
+for(const z of [-5.15,5.15])wall('roof perimeter',80,z,22,.28);
+wall('roof west parapet',69.0,0,.28,10.4);
+wall('roof east parapet',91.0,0,.28,10.4);
+for(const [x,z,w] of [[74.0,1.8,1.7],[79.1,-1.0,1.3],[85.4,2.0,1.6]])
+ add('roof blast shelter',x,.92,z,w,1.84,1.30,color.metal,mat.steel,true).mesh='bevel';
+add('roof launcher rack',roofLauncher.x,.5,roofLauncher.z,.96,1.0,.65,color.green,mat.steel);
+add('roof lift cab',roofReturn.x,1.12,0,.65,2.24,2.75,color.metal,mat.steel);
+function roofSync(){
+ roofFlight.active=roofRotor.active=roofWarning.active=roof.active;
+ roofFlight.x=roofRotor.x=roof.flyX;roofFlight.z=roofRotor.z=roof.flyZ;
+ roofFlight.color=roof.defeated?[.19,.20,.21]:color.metal;
+}
+function roofAction(){
+ if(!roof.active&&stage===8&&service.parachute&&dist(player,roofLift)<1.55)
+  return 'TAKE LIFT TO BUILDING 1 ROOF';
+ if(!roof.active)return '';
+ if(dist(player,roofReturn)<1.55)return 'RETURN TO WEST LIFT';
+ if(!roof.defeated&&dist(player,roofLauncher)<1.55)
+  return roof.grenades>0?'FIRE ROOFTOP GRENADE':'LAUNCHER EMPTY';
+ return '';
+}
+function roofInteract(action){
+ if(action==='TAKE LIFT TO BUILDING 1 ROOF'){
+  stage=9;roof.active=true;player.x=72.3;player.z=0;roofSync();
+  popup('Building 1 roof · rotor signature approaching',3);playCue('rack',roofLift);save();return;
+ }
+ if(action==='RETURN TO WEST LIFT'){
+  roof.active=false;player.x=62.5;player.z=0;roofSync();save();return;
+ }
+ if(action==='LAUNCHER EMPTY'){popup('No grenades left. Regroup at the west lift.',3);return;}
+ if(action==='FIRE ROOFTOP GRENADE'&&roof.grenades>0){
+  roof.grenades--;playCue('breach',roofLauncher);
+  // Physical roof obstruction and current aircraft position govern the hit.
+  const canHit=roof.phase!=='evasive'&&
+   !lineBlockedSight(roofLauncher,{x:roof.flyX,z:roof.flyZ},1.72,3.25);
+  if(canHit){roof.hp=Math.max(0,roof.hp-1);roof.phase='evasive';roof.clock=2.15;
+   popup('Grenade impact · aircraft breaking off',2.2);}
+  else popup('The helicopter banks out of the firing lane.',2);
+  if(roof.hp===0){roof.defeated=true;roof.phase='disabled';roof.clock=0;
+   popup('Hind D disabled. The roof is secure.',4);playCue('win');}
+  roofSync();save();
+ }
+}
+function roofTick(dt){
+ if(!roof.active||roof.defeated)return;
+ roof.clock-=dt;roof.shotVisual=Math.max(0,roof.shotVisual-dt);
+ roof.lap+=dt;roof.flyX=82+2.4*Math.sin(roof.lap*.38);
+ roof.flyZ=1.8*Math.sin(roof.lap*.53);
+ if(roof.phase==='patrol'&&roof.clock<=0){
+  roof.phase='telegraph';roof.clock=1.25;roof.exposure=0;
+  popup('Hind D turning · seek shelter',1.5);playCue('rack',roofFlight);
+ }else if(roof.phase==='telegraph'&&roof.clock<=0){
+  roof.phase='strafe';roof.clock=1.1;roof.shotVisual=1.1;
+ }else if(roof.phase==='strafe'){
+  const exposed=!lineBlockedSight({x:roof.flyX,z:roof.flyZ},player,3.25,bodyShape().height*.7);
+  if(exposed&&player.x>=70&&player.x<=90){roof.exposure+=dt;
+   if(roof.exposure>.48){roof.exposure=-.28;applyPlayerDamage(10,{x:roof.flyX,z:roof.flyZ});}
+  }else roof.exposure=0;
+  if(roof.clock<=0){roof.phase='evasive';roof.clock=1.8;}
+ }else if(roof.phase==='evasive'&&roof.clock<=0){
+  roof.phase='patrol';roof.clock=1.8;
+ }
+ roofSync();
+}
+
 const canopy=add('folded parachute',63,.65,-2,.70,.54,.48,color.green,mat.fabric);
 const kid={x:62,z:.8,yaw:Math.PI,state:0,hp:180,last:{x:62,z:.8},waypoints:[],kid:true,
  knocked:false,phase:'waiting',clock:0,cadence:0,lane:0,aimTime:0,shotVisual:0,suspicion:0};
@@ -290,6 +366,7 @@ function kidTick(dt){
  }else if(kid.phase==='reload'&&kid.clock<=0){kid.phase='waiting';kid.state=0;}
 }
 function serviceAction(){
+ const rooftop=roofAction();if(rooftop)return rooftop;
  if(stage!==8)return '';
  if(service.kidDown&&!service.parachute&&dist(player,canopy)<1.6)return 'TAKE PARACHUTE';
  if(!service.charge&&dist(player,serviceParcel)<1.65)return 'TAKE PLASTIC EXPLOSIVE';
@@ -305,6 +382,7 @@ function syncService(){
  serviceParcel.active=!service.charge;
 }
 function useService(action){
+ if(action==='TAKE LIFT TO BUILDING 1 ROOF'||action==='RETURN TO WEST LIFT'||action==='FIRE ROOFTOP GRENADE'||action==='LAUNCHER EMPTY'){roofInteract(action);return;}
  if(action==='TAKE PLASTIC EXPLOSIVE'){service.charge=true;playCue('card');popup('Plastic explosive recovered. One charge.');}
  if(action==='INSPECT MASONRY')popup('A patched joint. A fist will do nothing here.');
  if(action==='PLACE CHARGE'&&service.fuse<0){service.fuse=2.4;playCue('select');popup('Charge ticking.');}
@@ -791,7 +869,7 @@ function record(event){
 function save(){
  if(missionFailed||health<=0)return;
  try{
-  localStorage.setItem(STORAGE,JSON.stringify({version:8,service:{charge:service.charge,open:service.open,intel:service.intel,kidDown:service.kidDown,parachute:service.parachute},storesOpen,legacyFloorCard,freight:{handgun:world.handgun,box:world.box,freightAmbientHeard:world.freightAmbientHeard,cameraOff:world.cameraOff,foxFollowup:world.foxFollowup,preview:world.preview,hallOpen:world.hallOpen},propertyTag:{state:tag.state,point:tag.point},stage,cardDrop,x:player.x,z:player.z,
+  localStorage.setItem(STORAGE,JSON.stringify({version:9,roof:{active:roof.active,defeated:roof.defeated,hp:roof.hp,grenades:roof.grenades,phase:roof.phase,clock:roof.clock,lap:roof.lap,flyX:roof.flyX,flyZ:roof.flyZ},service:{charge:service.charge,open:service.open,intel:service.intel,kidDown:service.kidDown,parachute:service.parachute},storesOpen,legacyFloorCard,freight:{handgun:world.handgun,box:world.box,freightAmbientHeard:world.freightAmbientHeard,cameraOff:world.cameraOff,foxFollowup:world.foxFollowup,preview:world.preview,hallOpen:world.hallOpen},propertyTag:{state:tag.state,point:tag.point},stage,cardDrop,x:player.x,z:player.z,
    rounds,equippedWeapon,sealedWeapon,recoveredGear,wallHits,health,
    firstCardEarned,storySeen:window.MGCharacterStory?.heard()||[],
    bossHP:boss.hp,bossRest:stage>=5?{x:boss.x,z:boss.z,yaw:boss.yaw}:null,
@@ -803,12 +881,12 @@ function save(){
 function load(){
  let data;
  try{data=JSON.parse(localStorage.getItem(STORAGE))}catch(e){return false}
- if(!data||![1,2,3,4,5,6,7,8].includes(data.version)||!Number.isInteger(data.stage))return false;
+ if(!data||![1,2,3,4,5,6,7,8,9].includes(data.version)||!Number.isInteger(data.stage))return false;
  window.MGCharacterStory?.restore(data.storySeen);
  for(const key of ['box','cameraOff','foxFollowup','preview','hallOpen','freightAmbientHeard'])world[key]=data.freight?.[key]===true;
  world.handgun=data.version<7||data.freight?.handgun===true;
  const legacy=data.version<4;
- if(data.stage<(legacy?0:-2)||data.stage>(legacy?4:data.version===4?6:8))return false;
+ if(data.stage<(legacy?0:-2)||data.stage>(legacy?4:data.version===4?6:data.version>=9?9:8))return false;
  stage=legacy?Math.min(3,data.stage):data.stage;
  firstCardEarned=data.firstCardEarned===true;
  // Version 4 opened the exit on boss defeat. Preserve that earned access.
@@ -816,6 +894,18 @@ function load(){
  service.charge=stage===8&&data.service?.charge===true;service.open=service.charge&&data.service?.open===true;
  service.intel=service.open&&data.service?.intel===true;service.kidDown=service.open&&data.service?.kidDown===true;
  service.parachute=service.kidDown&&data.service?.parachute===true;syncService();
+ if(data.version===9&&stage===9){
+  const saved=data.roof||{};roof.active=saved.active===true;
+  roof.defeated=saved.defeated===true;
+  roof.hp=roof.defeated?0:clamp(Number.isInteger(saved.hp)?saved.hp:3,1,3);
+  roof.grenades=clamp(Number.isInteger(saved.grenades)?saved.grenades:6,0,6);
+  roof.phase=['patrol','telegraph','strafe','evasive','disabled'].includes(saved.phase)?saved.phase:'patrol';
+  roof.clock=clamp(Number(saved.clock)||1,0,6);
+  roof.lap=clamp(Number(saved.lap)||0,0,100000);
+  roof.flyX=clamp(Number(saved.flyX)||82,79,85);
+  roof.flyZ=clamp(Number(saved.flyZ)||0,-2,2);
+  roofSync();
+ }
  legacyFloorCard=data.version<8&&stage===5||data.legacyFloorCard===true;
  storesOpen=stage>=6||data.storesOpen===true;
  cardRoomDoor.active=!storesOpen;
@@ -1774,7 +1864,7 @@ function applyPlayerDamage(amount,source){
  playCue('hit',source||player);
  return true;
 }
-function updateGuards(dt){kennelTick(dt);kidTick(dt);const pulse=updatePropertyTag();let max=0;const triggered=[];for(const g of guards){if(g.knocked||g.kid)continue;if(g.boss){updateShootGunner(dt,pulse);max=Math.max(max,g.state);continue;}const d=dist(g,player),direction=Math.atan2(player.z-g.z,player.x-g.x),view=Math.abs(Math.atan2(Math.sin(direction-g.yaw),Math.cos(direction-g.yaw)))<.87;// Ghost Babel-style box logic: credible freight, not perpetual invisibility.
+function updateGuards(dt){kennelTick(dt);kidTick(dt);roofTick(dt);const pulse=updatePropertyTag();let max=0;const triggered=[];for(const g of guards){if(g.knocked||g.kid)continue;if(g.boss){updateShootGunner(dt,pulse);max=Math.max(max,g.state);continue;}const d=dist(g,player),direction=Math.atan2(player.z-g.z,player.x-g.x),view=Math.abs(Math.atan2(Math.sin(direction-g.yaw),Math.cos(direction-g.yaw)))<.87;// Ghost Babel-style box logic: credible freight, not perpetual invisibility.
  // Only a guard with an actual close, forward, unobstructed look may inspect an
  // unlisted carton. Expected freight on the marked conveyor is not suspicious.
  const boxInspection=world.boxed&&!world.moved&&!nearBelt()&&d<1.65&&view&&
@@ -2360,10 +2450,11 @@ const chapters=[
  ['AFTERMATH','Open the records stores with the Card 2 in your recovered kit.'],
  ['CARD 3','Use Card 3 at the reader beside the east shutter.'],
  ['EXIT CLEAR','Leave by the east shutter when ready.'],
- ['SERVICE WING','Pass the kennels. Inspect the patched wall at the far end.']
+ ['SERVICE WING','Pass the kennels. Inspect the patched wall at the far end.'],
+ ['BUILDING 1 ROOF','Find shelter, observe the Hind D firing run and use the grenade launcher.']
 ];
 function updateHUD(dt){
- const [phase,objective]=chapters[stage+2];$('phase').textContent=phase;$('obj').textContent=service.parachute?'Parachute secured. Roof lift reached. End of current build.':service.kidDown?'Collect the parachute by the lift.':service.intel?'Follow the relay passage to the west lift.':service.open?'Investigate the relay room beyond the kennels.':objective;
+ const [phase,objective]=chapters[stage+2];$('phase').textContent=phase;$('obj').textContent=stage===9?(roof.defeated?'Hind D disabled · return by the west lift.':roof.active?'Use the roof shelters and the launcher rack · '+roof.grenades+' grenades.':'Return to the roof from the west lift.') :service.parachute?'Take the west lift to the roof.':service.kidDown?'Collect the parachute by the lift.':service.intel?'Follow the relay passage to the west lift.':service.open?'Investigate the relay room beyond the kennels.':objective;
  const sample=[player.x,player.z,cam.yaw,cam.pitch];
  if(!movementSample||sample.some((v,i)=>Math.abs(v-movementSample[i])>(i<2?.05:.025))){
   movementSample=sample;quietSince=gameTime;
@@ -2600,7 +2691,7 @@ function frame(now){requestAnimationFrame(frame);const real=clamp((now-last)/100
  updatePlayer(dt);updateFox(dt);updateGuards(dt);
 }ambience(dt);for(const f of footsteps)f.life-=dt;footsteps=footsteps.filter(f=>f.life>0);shots.forEach(s=>s.life-=dt);shots=shots.filter(s=>s.life>0);for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy-=4.4*dt;p.life-=dt}particles=particles.filter(p=>p.life>0);noiseEvents.forEach(n=>n.life-=dt);noiseEvents=noiseEvents.filter(n=>n.life>0);if(awareness===0&&stage!==4&&Math.floor(gameTime/12)!==Math.floor((gameTime-dt)/12))save();if(awareness!==prevAlert)record('awareness.'+awareness);if(awareness===3&&prevAlert!==3)achievement.push({time:gameTime});prevAlert=awareness;}drawFrame(gameTime,dt);if(started)updateHUD(dt);frameCount++;if(now-frameStart>1000){$('fps').textContent=Math.round(frameCount*1000/(now-frameStart))+' FPS';frameStart=now;frameCount=0}}
 // Console contract for deterministic browser tests, never elevated to source fidelity.
-window.__mgGameDebug={get state(){return {stage,service:{...service},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
+window.__mgGameDebug={get state(){return {stage,service:{...service},roof:{...roof},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
  firstCardEarned,card1World:originalCard1Prop.active?{...originalCard1Target}:null,cinematic:window.MGCinematicDirector?.active||null,cinematicSeen:window.MGCinematicDirector?.seen||[],itemSlots:inventories.items.map(i=>({name:i.name,usable:i.usable})),safeLift:{...safeLift},player:{...player},bodyCollider:{...bodyShape(),orientation:player.stance===2?'horizontal':'vertical',samples:bodySamples(player.x,player.z,player.stance,player.yaw)},awareness,paused,equipOpen,noiseEvents:noiseEvents.map(n=>({...n})),guards:guards.map(g=>({state:g.state,x:g.x,z:g.z,yaw:g.yaw,last:{...g.last},investigateUntil:g.investigateUntil||0,lastKnockId:g.lastKnockId||0,boxInspectionAge:g.boxInspectionAge||0,boxIdentitySpoken:!!g.boxIdentitySpoken,knocked:g.knocked,unconscious:!!g.knockedOut,dragged:!!g.dragged,aimSubject:g.aimSubject,aimTime:g.aimTime,fireCooldown:g.fireCooldown,shotVisual:g.shotVisual})),fox:{x:fox.x,z:fox.z,hp:fox.hp,alive:fox.alive,mode:fox.mode,stance:fox.stance,moveSpeed:fox.moveSpeed},missionFailed,coverAssets:coverAssets.map(c=>({...c})),activeTracers:shots.filter(s=>s.tracer).length,damagePulse,damageDirection,cinematic:window.MGCinematicDirector?.active||null,cinematicBlocking:!!window.MGCinematicDirector?.blocking,foxListeningLearned:world.foxFollowup,storyEvents:window.MGCharacterStory?.heard()||[],originalMapVerified:false,renderedFrames:drawn,visualVersion:'original_humanoid_mk4_escort_armed_guards',meshKinds:Object.keys(meshLibrary),materialAtlas:{...materialAtlas},environmentModelCounts:{bedParts:sceneDetail.filter(o=>o.name.startsWith('cot ')||o.name.startsWith('blanket ')||o.name.startsWith('pillow ')||o.name==='folded wool blanket').length,lockerDetails:sceneDetail.filter(o=>o.name.startsWith('locker ')).length,cabinetDetails:sceneDetail.filter(o=>o.name.includes('front trim')||o.name.includes('bolt head')).length,ceilingsBlockCamera:cameraOnlySolids.some(o=>o.name==='ceiling'&&o.active)},camEye:[...cam.eye],cameraBlocked:cameraPositionPenetrates(cam.eye),cameraBelowFloor:cam.eye[1]<.28,activePadIndex,padPrev:[...padPrev],started}},readPad:()=>readGamepad(),start:()=>start(false),act:action,teleport:(x,z)=>{player.x=x;player.z=z},setCamera:(yaw,pitch=0)=>{cam.yaw=yaw;cam.pitch=pitch},stepCamera:(dt=.016)=>updateCamera(dt),canOccupy:(x,z,stance,yaw=player.yaw)=>canOccupyBody(x,z,stance,yaw),moveBody:(vx,vz,dt)=>movePlayer(vx,vz,dt),step:(dt)=>{gameTime+=dt;updatePlayer(dt);updateFox(dt);updateGuards(dt)},damageFox:(n)=>damageFox(n),stepFox:(dt)=>updateFox(dt),sightBlocked:(a,b,fromY=1.58,toY=1.52)=>lineBlockedSight(a,b,fromY,toY),radarVisionDistance:(index,angle,range=10)=>radarVisionDistance(guards[index],angle,range),findPath:(a,b)=>pathfind(a,b),foxRouteRisk:(p)=>foxRouteRisk(p),guardSeesPosition:(index,pos)=>guardSeesPosition(guards[index],pos),reset};
 // Deterministic development-only combat hook (absent unless tests opt in).
 if(window.__MG_TEST__){
