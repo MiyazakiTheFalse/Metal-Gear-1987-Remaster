@@ -1,266 +1,213 @@
 /*
- * Optional, actual skeletal-mesh character rendering layer.
- * Three.js / GLTFLoader / SkeletonUtils stream via CDN.  No assets are copied
- * from Konami games. A failure returns to the complete offline WebGL game.
- *
- * Source GLB: 3d-fps soldier.glb @ pinned upstream commit (see ASSET_CREDITS).
- * The source file contains a genuine skinned rig with retargeted animation clips.
- * Requires online access; original standalone procedural characters remain offline.
+ * Optional GLB review renderer for the ORIGINAL first-party 1995 cast.
+ * Four source-controlled, separately skinned models are shared with Unreal.
+ * Gameplay, AI, collision, hit resolution and checkpoints stay in game.js.
+ * Only the Three.js renderer/importer is streamed; character data is local.
+ * When a role/animation/renderer is missing, keep the built-in WebGL rigs.
  */
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {clone as cloneSkeleton} from 'three/addons/utils/SkeletonUtils.js';
 
-const CREDITS = 'assets/ASSET_CREDITS.md';
-const MODEL_URL = 'https://raw.githubusercontent.com/cktang88/3d-fps/130ac2a5c856401ec36e7d35afcfefe40c5801f4/public/assets/models/characters/soldier.glb';
-const status = document.getElementById('rigStatus');
-const toggle = document.getElementById('rigToggle');
-const originalCanvas = document.getElementById('gl');
-const label = message => { if (status) status.textContent = message; };
-let enabled = !!toggle?.checked;
-let loaded = false;
-let previousFrameTime = 0;
-const actors = new Map();
-const occluders = new Map();
-const stage = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(61, 1, 0.075, 120);
-const light = new THREE.HemisphereLight(0xcce9d9, 0x23302b, 2.0);
-stage.add(light);
-const keyLight = new THREE.DirectionalLight(0xf4f1ce, 2.15);
-keyLight.position.set(-3.0, 8.5, 4.2);
-stage.add(keyLight);
-const fillLight = new THREE.DirectionalLight(0x63a9a1, 0.52);
-fillLight.position.set(4.5, 3.4, -5.0);
-stage.add(fillLight);
+const ROLE_FILES=Object.freeze({
+ player:'assets/models/snake.glb',
+ fox:'assets/models/fox.glb',
+ guard:'assets/models/guard.glb',
+ shoot_gunner:'assets/models/shoot_gunner.glb'
+});
+const ROLE_HEIGHTS=Object.freeze({
+ player:1.78,fox:1.79,guard:1.76,shoot_gunner:1.83
+}); // Prototype centimetres are reversible, not final character-bible approvals.
+const status=document.getElementById('rigStatus');
+const toggle=document.getElementById('rigToggle');
+const originalCanvas=document.getElementById('gl');
+const label=message=>{if(status)status.textContent=message;};
+const intent=window.MGAnimationIntent;
+if(!intent)throw new Error('Local animation intent script was not loaded.');
+const sources=new Map(),actors=new Map(),occluders=new Map();
+let enabled=!!toggle?.checked,ready=false,renderer=null;
+const stage=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(61,1,.075,120);
+stage.add(new THREE.HemisphereLight(0xcce9d9,0x23302b,1.6));
+const keyLight=new THREE.DirectionalLight(0xf4f1ce,2.1);
+keyLight.position.set(-3,8.5,4.2);stage.add(keyLight);
+const fillLight=new THREE.DirectionalLight(0x63a9a1,.5);
+fillLight.position.set(4.5,3.4,-5);stage.add(fillLight);
+const depthMaterial=new THREE.MeshBasicMaterial({
+ colorWrite:false,depthWrite:true,depthTest:true,side:THREE.DoubleSide
+});
+const boxGeometry=new THREE.BoxGeometry(1,1,1);
 
-let renderer;
 try {
-  renderer = new THREE.WebGLRenderer({alpha:true, antialias:true, powerPreference:'default'});
-  renderer.setClearColor(0x000000,0);
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.18;
-  renderer.domElement.setAttribute('aria-hidden','true');
-  renderer.domElement.id='rigged';
-  Object.assign(renderer.domElement.style,{
-    position:'fixed',top:0,left:0,width:'100%',height:'100%',pointerEvents:'none',
-    zIndex:1,display:'none'
-  });
-  originalCanvas.after(renderer.domElement);
-} catch(err) {
-  label('RIG MODE UNAVAILABLE — ORIGINAL RENDERER ACTIVE');
-  console.warn('Optional model renderer could not initialise',err);
+ renderer=new THREE.WebGLRenderer({alpha:true,antialias:true,powerPreference:'default'});
+ renderer.setClearColor(0,0);
+ renderer.outputColorSpace=THREE.SRGBColorSpace;
+ renderer.toneMapping=THREE.ACESFilmicToneMapping;
+ renderer.toneMappingExposure=1.12;
+ renderer.domElement.id='rigged';
+ renderer.domElement.setAttribute('aria-hidden','true');
+ Object.assign(renderer.domElement.style,{
+  position:'fixed',top:0,left:0,width:'100%',height:'100%',
+  pointerEvents:'none',zIndex:1,display:'none'
+ });
+ originalCanvas.after(renderer.domElement);
+}catch(error){
+ label('GLB REVIEW UNAVAILABLE — LOCAL RIGS ACTIVE');
+ console.warn('GLB review renderer failed',error);
 }
 
-const depthMaterial = new THREE.MeshBasicMaterial({
-  colorWrite:false, depthWrite:true, depthTest:true,
-  side:THREE.DoubleSide
+function buildModel(actor){
+ const source=sources.get(actor.kind);
+ if(!source)throw new Error('Unknown prototype cast role: '+actor.kind);
+ const subject=cloneSkeleton(source.scene);
+ const root=new THREE.Group();root.add(subject);
+ // GLB source and procedural field view both face +X at yaw zero.
+ // Three.js rotates +X toward -Z for positive yaw, hence negative yaw.
+ const bounds=new THREE.Box3().setFromObject(subject);
+ const size=bounds.getSize(new THREE.Vector3());
+ if(!Number.isFinite(size.y)||size.y<.25)
+  throw new Error('Invalid local rig height: '+actor.kind);
+ const scale=ROLE_HEIGHTS[actor.kind]/size.y;
+ subject.scale.setScalar(scale);
+ subject.position.y=-bounds.min.y*scale;
+ subject.traverse(node=>{
+  if(!node.isMesh)return;
+  node.frustumCulled=false;
+  if(Array.isArray(node.material))node.material=node.material.map(m=>m.clone());
+  else if(node.material)node.material=node.material.clone();
+ });
+ const mixer=new THREE.AnimationMixer(subject),actions=new Map();
+ for(const clip of source.animations)actions.set(clip.name,mixer.clipAction(clip));
+ stage.add(root);
+ const findBone=name=>{
+  let result=null;
+  subject.traverse(node=>{
+   if(node.isBone&&node.name.toLowerCase()===name)result=node;
+  });
+  return result;
+ };
+ return {root,subject,mixer,actions,active:null,key:null,previous:null,
+  kind:actor.kind,jaw:findBone('jaw'),brow:findBone('brow')};
+}
+function chooseAction(record,name){
+ const next=record.actions.get(name)||record.actions.get('Idle');
+ if(!next)return;
+ if(record.key===name)return;
+ const previous=record.active;
+ next.enabled=true;
+ next.reset();
+ const looping=intent.looped(name);
+ next.setLoop(looping?THREE.LoopRepeat:THREE.LoopOnce,looping?Infinity:1);
+ next.clampWhenFinished=!looping;
+ next.play();
+ if(previous&&previous!==next)previous.crossFadeTo(next,.16,false);
+ record.active=next;record.key=name;
+}
+function pose(record,actor,dt,time){
+ record.root.position.set(actor.x,0,actor.z);
+ record.root.rotation.y=-(Number.isFinite(actor.yaw)?actor.yaw:0);
+ if(dt<=0)return; // Paused gameplay must not advance an acting loop.
+ const moved=record.previous?
+  Math.hypot(actor.x-record.previous[0],actor.z-record.previous[1]):0;
+ record.previous=[actor.x,actor.z];
+ // Teleports/checkpoint restore are never interpreted as a running stride.
+ const speed=moved>4?0:moved/Math.max(dt,1/90);
+ const name=intent.select(actor,speed,time);
+ chooseAction(record,name);
+ if(record.active){
+  const pace=name==='Run'?4.7:name==='Walk'?2.45:1.0;
+  const rate=name==='Run'||name==='Walk'?
+   THREE.MathUtils.clamp(speed/pace,.65,1.55):1;
+  record.active.setEffectiveTimeScale(rate);
+ }
+ record.mixer.update(Math.min(dt,.055));
+ // Face motion is driven by an ACTUAL speaking actor's current dialogue,
+ // not by source-blind looping expressions or invented voice clips.
+ if(record.jaw&&actor.talking&&!actor.down)
+  record.jaw.rotation.z-=.10*(.5+.5*Math.sin(time*15));
+ if(record.brow&&actor.hit)record.brow.rotation.z-=.08;
+ record.root.visible=actor.visible!==false;
+}
+function syncOccluders(solids){
+ const keep=new Set();
+ for(const o of solids){
+  if(!o.active||(!o.solid&&!o.cameraSolid))continue;
+  keep.add(o.id);
+  let mesh=occluders.get(o.id);
+  if(!mesh){mesh=new THREE.Mesh(boxGeometry,depthMaterial);
+   mesh.renderOrder=-20;stage.add(mesh);occluders.set(o.id,mesh);}
+  mesh.position.set(o.x,o.y,o.z);
+  mesh.scale.set(o.w,o.h,o.d);
+  mesh.rotation.set(0,-(o.yaw||0),0);
+  mesh.visible=true;
+ }
+ for(const [key,mesh] of occluders)if(!keep.has(key))mesh.visible=false;
+}
+function renderFrame(frame){
+ if(!renderer||!ready||!enabled||!frame?.camera)return;
+ const dt=THREE.MathUtils.clamp(frame.dt??1/60,0,.06);
+ const view=frame.camera;
+ camera.fov=view.fov*180/Math.PI;
+ camera.aspect=originalCanvas.clientWidth/Math.max(1,originalCanvas.clientHeight);
+ camera.updateProjectionMatrix();
+ camera.position.set(...view.eye);camera.lookAt(...view.target);
+ renderer.setPixelRatio(Math.min(1.5,window.devicePixelRatio||1));
+ renderer.setSize(originalCanvas.clientWidth,originalCanvas.clientHeight,false);
+ syncOccluders(frame.solids||[]);
+ const keep=new Set();
+ for(const actor of frame.actors||[]){
+  keep.add(actor.id);
+  let record=actors.get(actor.id);
+  if(!record){record=buildModel(actor);actors.set(actor.id,record);}
+  pose(record,actor,dt,frame.time||0);
+ }
+ for(const [id,record] of actors)if(!keep.has(id))record.root.visible=false;
+ renderer.render(stage,camera);
+}
+window.addEventListener('mg:rig-frame',evt=>{
+ try{renderFrame(evt.detail)}
+ catch(error){
+  console.warn('GLB review failed: using original field renderer',error);
+  ready=false;window.__MG_RIG_READY=false;
+  if(renderer)renderer.domElement.style.display='none';
+  label('GLB REVIEW ERROR — LOCAL RIGS ACTIVE');
+ }
 });
-const boxGeometry = new THREE.BoxGeometry(1,1,1);
-let donor = null;
-let sourceClips = [];
-const clipAliases = {
-  idle:['aim_idle','idle','mocap_idle','idle_unarmed','standing_idle'],
-  walk:['mocap_walk_swat','walk','walking','walk_forward','mocap_walk'],
-  run:['mocap_run','run','sprint','jog','mocap_jog'],
-  crouch:['mocap_crouch','crouch_walk','crouch','crouched_walk','sneak'],
-  prone:['crawl','prone','crawling','prone_idle'],
-  hit:['hit','flinch','stagger','get_hit'],
-  down:['death','die','death_front','fall']
-};
-const normalize = s=>s.toLowerCase().replace(/[^a-z0-9]+/g,'_');
-function getClip(tag) {
-  for(const candidate of clipAliases[tag]||[]) {
-    let found = sourceClips.find(c=>normalize(c.name)===candidate);
-    if(found)return found;
-  }
-  for(const candidate of clipAliases[tag]||[]) {
-    let found = sourceClips.find(c=>normalize(c.name).includes(candidate));
-    if(found)return found;
-  }
-  return null;
-}
-const stylePalette = {
-  player: [0x83927e, 0x53695e],
-  guard:  [0x9a9a83, 0x6d7466],
-  fox:    [0xa49c84, 0x7a7167]
-};
-
-function buildModel(kind) {
-  const root = new THREE.Group();
-  const subject = cloneSkeleton(donor.scene);
-  root.add(subject);
-  const box = new THREE.Box3().setFromObject(subject);
-  const size = new THREE.Vector3();box.getSize(size);
-  const uniformScale = 1.76/Math.max(0.25,size.y);
-  subject.scale.setScalar(uniformScale);
-  subject.position.y -= box.min.y * uniformScale;
-  const colors = stylePalette[kind] || stylePalette.guard;
-  subject.traverse(node=> {
-    if(!node.isMesh)return;
-    node.frustumCulled = false;
-    // Cloned materials must not leak colour edits into other characters.
-    if(Array.isArray(node.material)) node.material=node.material.map(m=>m.clone());
-    else node.material=node.material.clone();
-    const decorate = mat => {
-      // Tint is deliberately restrained: respect original PBR textures.
-      const color = mat.color;
-      if(color)color.lerp(new THREE.Color(colors[0]),kind==='fox'?0.28:0.14);
-      if('roughness' in mat) mat.roughness = Math.max(mat.roughness ?? 0.55,0.55);
-    };
-    (Array.isArray(node.material)?node.material:[node.material]).forEach(decorate);
-  });
-  const mixer = new THREE.AnimationMixer(subject);
-  const actions = new Map();
-  for(const [key] of Object.entries(clipAliases)) {
-    const clip=getClip(key);
-    if(clip)actions.set(key,mixer.clipAction(clip));
-  }
-  if(!actions.has('idle') && sourceClips.length)actions.set('idle',mixer.clipAction(sourceClips[0]));
-  root.rotation.y=Math.PI/2; // configurable: face the +X tactical-forward axis.
-  // Optional upper-arm overlay for a low-cost wall bracing / knocking cue.
-  // It is additive to source animation and intentionally avoids changing
-  // locomotion or collision. The final hero rig needs authored montages.
-  let braceArm=null,braceForearm=null;
-  subject.traverse(node=> {
-    if(!node.isBone)return;
-    const name=String(node.name).toLowerCase().replace(/[^a-z]/g,'');
-    if(name.endsWith('rightarm')&&!name.endsWith('forearm'))braceArm=node;
-    if(name.endsWith('rightforearm'))braceForearm=node;
-  });
-  stage.add(root);
-  return {root,subject,mixer,actions,active:null,key:null,position:null,kind,
-    braceArm,braceForearm};
-}
-
-function switchAction(record,name) {
-  if(record.key===name)return;
-  const next=record.actions.get(name) || record.actions.get('walk') || record.actions.get('idle');
-  if(!next) return;
-  if(next===record.active){record.key=name;return;}
-  next.enabled=true;
-  next.setEffectiveWeight(1);
-  next.setEffectiveTimeScale(1);
-  next.reset().play();
-  if(record.active)record.active.crossFadeTo(next,0.18,false);
-  record.active=next;
-  record.key=name;
-}
-function pose(record,world,dt) {
-  record.root.position.set(world.x,0,world.z);
-  record.root.rotation.y=-world.yaw+Math.PI/2;
-  const move=record.position ?
-    Math.hypot(world.x-record.position[0],world.z-record.position[1])/Math.max(dt,1/90):0;
-  record.position=[world.x,world.z];
-  const isDown=world.down;
-  const posture=world.stance || 0;
-  const action=isDown?'down':world.hit?'hit':posture===2?'prone':
-    posture===1?'crouch':move>3.45?'run':move>.15?'walk':'idle';
-  // Never render a standing rig while game mechanics say prone if the
-  // downloaded animation set lacks a proper crawl/prone clip.
-  const supported = !(posture===2 && !record.actions.has('prone')) &&
-    !(posture===1 && !record.actions.has('crouch'));
-  record.root.visible=world.visible && supported;
-  switchAction(record,action);
-  if(record.active)record.active.setEffectiveTimeScale(
-    /walk|run|crouch/.test(action)?Math.max(.65,Math.min(1.35,move/(action==='run'?4.8:action==='walk'?2.6:1.4))):1);
-  record.mixer.update(Math.min(dt,.055));
-  const wallPose=world.kind==='player' && world.cover && posture!==2;
-  // Modest lean reinforces contact without stealing the camera or snapping
-  // the entire animated skeleton into a mechanically impossible pose.
-  record.subject.rotation.z=THREE.MathUtils.damp(
-    record.subject.rotation.z,wallPose?0.055:0,12,Math.min(dt,.055));
-  if(wallPose&&record.braceArm){
-    record.braceArm.rotation.z+=0.16;
-    record.braceArm.rotation.x-=world.knocking?0.44:0.22;
-    if(record.braceForearm)record.braceForearm.rotation.x-=world.knocking?0.22:0.12;
-  }
-  return supported;
-}
-
-function syncOccluders(solids) {
-  const keep = new Set();
-  for(const o of solids) {
-    if(!o.active)continue;
-    // Mirror ONLY genuine solid scene obstacles (and roof). The depth-only
-    // mask prevents the overlay drawing rigged bodies through real walls.
-    if(!o.solid && !o.cameraSolid)continue;
-    const key=o.id;
-    keep.add(key);
-    let mesh=occluders.get(key);
-    if(!mesh) {
-      mesh=new THREE.Mesh(boxGeometry,depthMaterial);
-      mesh.renderOrder=-20;
-      stage.add(mesh);
-      occluders.set(key,mesh);
-    }
-    mesh.position.set(o.x,o.y,o.z);
-    mesh.scale.set(o.w,o.h,o.d);
-    mesh.rotation.set(0,-(o.yaw||0),0);
-    mesh.visible=true;
-  }
-  for(const [key,m] of occluders)if(!keep.has(key))m.visible=false;
-}
-
-function renderFrame(frame) {
-  if(!renderer || !loaded || !enabled || !frame?.camera)return;
-  const dt=Math.min(.06,Math.max(0,frame.dt||1/60));
-  const desired=frame.camera;
-  camera.fov=desired.fov*180/Math.PI;
-  camera.aspect=originalCanvas.clientWidth/Math.max(1,originalCanvas.clientHeight);
-  camera.near=0.075;
-  camera.far=120;
-  camera.updateProjectionMatrix();
-  camera.position.set(...desired.eye);
-  camera.lookAt(...desired.target);
-  const w=originalCanvas.clientWidth,h=originalCanvas.clientHeight;
-  const scale=Math.min(1.5,window.devicePixelRatio || 1);
-  renderer.setPixelRatio(scale);
-  renderer.setSize(w,h,false);
-  syncOccluders(frame.solids||[]);
-  const visibleKeys=new Set();
-  for(const actor of frame.actors||[]) {
-    visibleKeys.add(actor.id);
-    let rig=actors.get(actor.id);
-    if(!rig){rig=buildModel(actor.kind);actors.set(actor.id,rig);}
-    const supported=pose(rig,actor,dt);
-    actor._rigSupported=supported;
-  }
-  for(const [key,rig] of actors)if(!visibleKeys.has(key))rig.root.visible=false;
-  renderer.render(stage,camera);
-}
-
-window.addEventListener('mg:rig-frame',evt=>renderFrame(evt.detail));
-
 toggle?.addEventListener('change',()=>{
-  enabled=toggle.checked;
-  window.__MG_RIG_READY=enabled&&loaded;
-  if(renderer)renderer.domElement.style.display=enabled&&loaded?'block':'none';
-  label(enabled?(loaded?'RIGGED CHARACTERS · ACTIVE':'RIGGED CHARACTERS · LOADING'):
-    'PROCEDURAL CHARACTERS · ACTIVE');
+ enabled=toggle.checked;
+ window.__MG_RIG_READY=enabled&&ready;
+ if(renderer)renderer.domElement.style.display=enabled&&ready?'block':'none';
+ label(enabled?(ready?'22-CAST SOURCE · 4 ACTIVE GLB ROLES':'GLB REVIEW LOADING'):
+  'LOCAL ANIMATED FIELD RIGS ACTIVE');
 });
-
-async function loadRig() {
-  if(!renderer)return;
-  label('RIGGED CHARACTERS · DOWNLOADING MODEL');
-  try {
-    donor=await new GLTFLoader().loadAsync(MODEL_URL);
-    sourceClips=donor.animations || [];
-    const bones=[];
-    donor.scene.traverse(o=> {if(o.isBone)bones.push(o);});
-    if(bones.length<8 || sourceClips.length<2)
-      throw new Error(`Model needs a substantial skeleton and at least two clips: ${bones.length} bones, ${sourceClips.length} clips`);
-    loaded=true;
-    window.__MG_RIG_PRONE=!!getClip('prone');
-    window.__MG_RIG_CROUCH=!!getClip('crouch');
-    window.__MG_RIG_READY=enabled;
-    renderer.domElement.style.display=enabled?'block':'none';
-    label(`RIGGED 3D · ${bones.length} BONES / ${sourceClips.length} CLIPS`);
-    console.info('Rigged model ready:',bones.length,'bones,',sourceClips.map(c=>c.name));
-  } catch(err) {
-    console.warn('Rigged character asset unavailable; using full procedural fallback',err);
-    label('OFFLINE / RIG UNAVAILABLE · ORIGINAL CHARACTERS');
-    window.__MG_RIG_READY=false;
-  }
+async function loadRig(){
+ if(!renderer)return;
+ label('LOADING FOUR LOCAL CAST MODELS');
+ try {
+  const loader=new GLTFLoader();
+  const loaded=await Promise.all(Object.entries(ROLE_FILES).map(async([kind,url])=>{
+   const gltf=await loader.loadAsync(url);
+   const bones=[];gltf.scene.traverse(node=>{if(node.isBone)bones.push(node.name);});
+   if(bones.length!==18)throw new Error(kind+': expected 18 bones, got '+bones.length);
+   const available=new Set((gltf.animations||[]).map(clip=>clip.name));
+   const required=['Idle','Walk','Run','Crouch','Prone','Down','Hit'];
+   if(kind==='fox')required.push('Captive');
+   if(kind==='shoot_gunner')required.push('Address','Shoulder','Recoil','Search');
+   for(const name of required)if(!available.has(name))
+    throw new Error(kind+': missing source animation '+name);
+   return [kind,gltf];
+  }));
+  for(const [kind,gltf] of loaded)sources.set(kind,gltf);
+  ready=true;
+  window.__MG_RIG_PRONE=true;window.__MG_RIG_CROUCH=true;
+  window.__MG_RIG_READY=enabled;
+  renderer.domElement.style.display=enabled?'block':'none';
+  label(enabled?'FOUR CAST-SPECIFIC GLB RIGS · ACTIVE':'LOCAL FIELD RIGS · GLB REVIEW READY');
+ }catch(error){
+  ready=false;window.__MG_RIG_READY=false;
+  if(renderer)renderer.domElement.style.display='none';
+  label('LOCAL RIGS ACTIVE — GLB REVIEW UNAVAILABLE');
+  console.warn('Local cast GLB validation/loader failure',error);
+ }
 }
 loadRig();
