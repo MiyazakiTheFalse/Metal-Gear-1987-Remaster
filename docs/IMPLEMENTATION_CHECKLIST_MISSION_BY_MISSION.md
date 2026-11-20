@@ -282,7 +282,7 @@ Current status: **design only**. Original game does not name these missions as c
 - [ ] **SYS.REVISITS** — State-driven return variants: corpses, disposed bodies, doors, camera power, electric units, reinforcements. Current: not started.
 - [ ] **SYS.STEALTH** — Drag unconscious guards, hide them, release when interrupted, guard discovery/report/recovery. Current: not started.
 - [~] **SYS.STEALTH.2** — Prone/crawl spaces, dark corners, boxes, elevated concealment and alternate routes. Current: partial source.
-- [ ] **SYS.CAST** — All canonical named characters and variant NPCs: realistic costume-correct PBR skinned rigs, facial anatomy, VO and animation. Current: not started.
+- [~] **SYS.CAST** — All canonical named characters and variant NPCs: realistic costume-correct PBR skinned rigs, facial anatomy, VO and animation. Current: **partial source only** (22 original stylised 18-joint GLBs; browser renders six distinct active role models in optional GLB view; Unreal source-only locomotion/acting fallback for five active rig types, and five-mesh/16-clip packaging gate). **Still missing:** UE build/import/PIE evidence, final PBR likeness, authored AnimBPs/IK, acting VO, all future cast scenes and playtests.
 - [~] **SYS.CODEC** — Character-specific animated talking heads with true speaking audio and original VO, optional without pausing. Current: partial source.
 - [~] **SYS.COMBAT** — Realistic muzzle flash and actual player/actor hit reactions; enemy weapon-specific physics and fairness. Current: partial source.
 - [~] **SYS.SAVE** — Entire game persistence/mission re-entry with automatic data migration and no flag bypass. Current: partial source.
