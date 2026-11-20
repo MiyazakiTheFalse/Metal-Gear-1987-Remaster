@@ -283,9 +283,24 @@ void AMGGrayFoxMission::TickDispatch(AMGPlayerCharacter* Player, float Dt)
 {
     const FVector P = Player->GetActorLocation();
     const bool bBox = Player->IsWearingCarton();
-    if (IsPreludeActive() && bBox && P.X >= DispatchBeltStart && P.X < DispatchBeltEnd
-        && FMath::Abs(P.Y - DispatchLaneY) < 52.f)
-        Player->AddActorWorldOffset(FVector(FMath::Min(165.f*Dt, DispatchBeltEnd-P.X), 0.f, 0.f), true);
+    const bool bRidingCarton = IsPreludeActive() && bBox
+        && P.X >= DispatchBeltStart && P.X < DispatchBeltEnd
+        && FMath::Abs(P.Y - DispatchLaneY) < 52.f;
+    if (bRidingCarton)
+    {
+        Player->AddActorWorldOffset(
+            FVector(FMath::Min(165.f*Dt, DispatchBeltEnd - P.X), 0.f, 0.f), true);
+        // Remake-authored incidental life: quiet, optional dialogue while
+        // a REAL moving freight belt carries Snake forward. Zero loss of
+        // player input, no new faction knowledge, enemies or progression gate.
+        if (!bHeardFreightClerk && P.X >= -2570.f)
+        {
+            bHeardFreightClerk = true;
+            Dialogue = TEXT("RECEIVING CLERK (OFF): Another load for the duty desk. Check the seals and keep the line moving.");
+            DialogueTimeRemaining = 4.2f;
+            SaveProgress(Player);
+        }
+    }
     if (IsValid(WornCarton))
     {
         WornCarton->SetActorHiddenInGame(!bBox);
@@ -809,6 +824,7 @@ void AMGGrayFoxMission::BeginPlay()
                 if (IsValid(ChargeMarker)) ChargeMarker->Destroy();
             }
             bOwnsCarton = Save->bOwnsCarton;
+            bHeardFreightClerk = Save->bHeardFreightClerk;
             if (bOwnsCarton && IsValid(CartonPickup)) CartonPickup->SetActorHiddenInGame(true);
             if (Save->bDispatchCameraOffline && DispatchCamera.IsValid())
                 DispatchCamera->RestoreOfflineState();
@@ -944,6 +960,7 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     Save->bKidDefeated = bKidDefeated;
     Save->bParachuteTaken = bParachuteTaken;
     Save->bOwnsCarton = bOwnsCarton;
+    Save->bHeardFreightClerk = bHeardFreightClerk;
     Save->bDispatchCameraOffline = DispatchCamera.IsValid() && !DispatchCamera->IsOperational();
     Save->bHeardFoxFollowup = bHeardFoxFollowup;
     Save->bPrisonCameraOffline = PrisonCamera.IsValid() && !PrisonCamera->IsOperational();
