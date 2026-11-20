@@ -26,7 +26,7 @@ git rev-parse HEAD
 .\scripts\unreal_tester_preflight.ps1 -UnrealRoot "C:\Program Files\Epic Games\UE_5.7"
 ```
 
-**If any preflight check fails, report the first failing command and complete output; do not proceed as if the build is verified.** The script checks Git, engine paths, 15 browser test checkpoints, four GLB binary contracts, Python source contracts and Rust tests. It cannot run the Unreal Editor in this project-authoring session.
+**If any preflight check fails, report the first failing command and complete output; do not proceed as if the build is verified.** The script checks Git, engine paths, 16 browser test checkpoints (simulated harness evidence), four core GLB binary contracts, Python source contracts and Rust tests. It cannot run the Unreal Editor in this project-authoring session.
 
 ## Import visual character rigs before judging character quality
 
@@ -34,7 +34,7 @@ Start `unreal/MGRemaster/MGRemaster.uproject` in Unreal Editor 5.7. Under Python
 
 `unreal/MGRemaster/Content/Python/import_field_character_glbs.py`
 
-The Unreal checkout now directly includes the four source GLBs under `unreal/MGRemaster/Content/SourceAssets/Characters/`. They are original skinned assets, **not yet native `.uasset` files**. From the repository root, first run `python tools/verify_unreal_source_assets.py` to confirm the copies have not diverged from the browser rigs. After compiling the C++ Editor target, use `scripts/import_unreal_content.ps1 -UnrealRoot "C:\\Program Files\\Epic Games\\UE_5.7"` for command-line generation, or use the Editor script manually.
+The Unreal checkout now directly includes 22 source GLBs (four primary gameplay rigs plus 18 supporting humanoid cast prototypes) under `unreal/MGRemaster/Content/SourceAssets/Characters/`. They are original skinned assets, **not yet native `.uasset` files**. From the repository root, first run `python tools/verify_unreal_source_assets.py` to confirm the copies have not diverged from the browser rigs. After compiling the C++ Editor target, use `scripts/import_unreal_content.ps1 -UnrealRoot "C:\\Program Files\\Epic Games\\UE_5.7"` for command-line generation, or use the Editor script manually.
 
 This imports original source GLBs under the exact C++ character load paths:
 
@@ -67,8 +67,12 @@ This runs local Python+Node contracts, verifies the GLBs under Unreal `Content/S
 2. Capture, prison breach, Gray Fox, equipment reclaim, Shoot Gunner, Card 2/3, kennels, service charge, Machinegun Kid. Watch for any dead ends, missing props, ambiguous objective prompt, impossible wall collision, broken cutscene handoff and lost inventory.
 3. Defeat Machinegun Kid and collect parachute. Use the west lift to enter the elevated Building 1 roof. Locate physically solid blast shelter, observe the helicopter's warning and firing cycle, use the provisional grenade rack. Check roof withdrawal and re-entry, finite ammo and boss health/checkpoint persistence.
 4. After Hind D defeat, use the roof approach transition to Building 2. Confirm the tank patrol is protected from ordinary firearm damage. Plant limited mines at **marked physical track sites**, retreat from the warning/shot and wait for an actual tank track crossing. Confirm a mine is consumed on detonation; cover breaks turret sight; depleted mines do not regenerate on save reload. Return to roof then re-enter Building 2 without resetting tank progress.
-5. Restore pre-existing V1–V5 Unreal saves without impossible teleport or inventory fabrication; new V6 checkpoints include tank progress, planted mine sites, roof access and boss completion. The browser V10 checkpoint is a separate save format and is **not** imported into Unreal.
+5. Restore pre-existing V1–V6 Unreal saves without impossible teleport or inventory fabrication; new V7 checkpoints include the original western-truck ration (finite remaining amount), central-truck Card 1, eastern-truck binoculars, tank/mine progress, roof access and boss completion. Test a supply-only checkpoint before handgun acquisition: reload must accept it without granting unearned weapons. Test ration consumption before and after custody/recovery: it must not respawn. The browser V10 checkpoint is a separate save format and is **not** imported into Unreal.
 6. Record cold-start FPS, hitches, shader errors, weapon/character offsets, animation foot sliding, muzzle alignment, subtitle/voice parity, texture quality, build warnings and errors. Compare screenshots in prison, boss hall, roof and Building 2 in both browser and Unreal.
+
+## Updated first-floor 1987 acquisition checks
+
+In each of the **three separately accessible supply trucks**, interact with the physical prop from the rear cargo entrance. The west grants one ration, middle grants Card 1, east grants binoculars. Confirm that the HUD provides local interaction affordance, item ownership survives custody/recovery and reload, consumed rations do not refill, and binoculars change optical FOV without revealing enemies through cover. These are authored mechanics, not yet PIE-tested. Track source changes and test contracts in [the opening implementation record](ORIGINAL_TRUCK_OPENING_IMPLEMENTATION_2026_11_20.md).
 
 ## Pass/fail expectations
 
