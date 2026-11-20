@@ -7,7 +7,7 @@ UENUM(BlueprintType)
 enum class EMGPerformanceAction : uint8
 {
     Idle, Travel, Crouch, Prone, Aim, Fire, Melee, WallKnock,
-    Cover, CoverPeek, RadioIdle,
+    Cover, CoverPeek, RadioIdle, EnvironmentInteract,
     GuardNotice, GuardInvestigate, GuardSearch, GuardChallenge,
     GuardReport, GuardEngage, GuardStrike, Incapacitated,
     GuardSidearmAim, GuardSidearmFire, GuardSidearmReload,
@@ -133,6 +133,28 @@ public:
     // weapon actually contains an artist-placed support_hand socket.
     UPROPERTY(BlueprintReadOnly, Category="MG|Hands")
     FTransform SupportHandTargetWS = FTransform::Identity;
+    // Real geometry traces, not hand/foot positions from guessed capsule height.
+    // AnimBP may use these only with verified skeletal bones and pose assets.
+    UPROPERTY(BlueprintReadOnly, Category="MG|Grounding")
+    bool bValidGroundFootProbes = false;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Grounding")
+    float LeftFootGroundOffsetCm = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Grounding")
+    float RightFootGroundOffsetCm = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Grounding")
+    float PelvisGroundOffsetCm = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Grounding")
+    float FootGroundingAlpha = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Grounding")
+    FVector LeftGroundNormalWS = FVector::UpVector;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Grounding")
+    FVector RightGroundNormalWS = FVector::UpVector;
+    UPROPERTY(BlueprintReadOnly, Category="MG|SurfaceContact")
+    bool bValidSurfaceHandTarget = false;
+    UPROPERTY(BlueprintReadOnly, Category="MG|SurfaceContact")
+    FVector SurfaceHandTargetWS = FVector::ZeroVector;
+    UPROPERTY(BlueprintReadOnly, Category="MG|SurfaceContact")
+    float SurfaceHandContactAlpha = 0.f;
     UFUNCTION(BlueprintImplementableEvent, Category="MG|Transitions")
     void OnPerformanceActionTransition(EMGPerformanceAction From, EMGPerformanceAction To, bool bInterrupted);
 
