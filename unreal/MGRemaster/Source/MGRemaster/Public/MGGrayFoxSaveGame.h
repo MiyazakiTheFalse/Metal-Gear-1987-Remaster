@@ -26,7 +26,7 @@ class MGREMASTER_API UMGGrayFoxSaveGame : public USaveGame
     GENERATED_BODY()
 public:
     UPROPERTY(SaveGame)
-    uint32 SchemaVersion = 5;
+    uint32 SchemaVersion = 6;
 
     UPROPERTY(SaveGame)
     uint32 MissionFlags = 0;
@@ -72,6 +72,15 @@ public:
     bool bKidDefeated = false;
     UPROPERTY(SaveGame)
     bool bParachuteTaken = false;
+    UPROPERTY(SaveGame) bool bBuilding2Active = false;
+    UPROPERTY(SaveGame) bool bTankDefeated = false;
+    UPROPERTY(SaveGame) int32 TankHitsRemaining = 3;
+    UPROPERTY(SaveGame) int32 Building2MinesRemaining = 4;
+    UPROPERTY(SaveGame) TArray<int32> ArmedTankMineSites;
+    UPROPERTY(SaveGame) float TankPatrolX = 12900.f;
+    UPROPERTY(SaveGame) int32 TankDirection = 1;
+    UPROPERTY(SaveGame) int32 TankAttackPhase = 0;
+    UPROPERTY(SaveGame) float TankPhaseRemaining = 1.5f;
     UPROPERTY(SaveGame) bool bRoofActive = false;
     UPROPERTY(SaveGame) bool bHindDefeated = false;
     UPROPERTY(SaveGame) int32 HindHitsRemaining = 3;
