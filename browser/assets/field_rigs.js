@@ -12,8 +12,10 @@ for (const side of [-1,1]) {
   ['thigh',0,0,.90,.115],['shin',base+3,.018,.50,.12],['foot',base+4,-.005,.115,.12]
  ]) bones.push([name+suffix,parent,x,y,z*side]);
 }
-const bossBones=[...bones,['jaw',3,.02,1.631,0],['brow',3,.035,1.70,0]];
-const skeleton=role=>role==='shoot_gunner'?bossBones:bones;
+// The same 18-joint contract now drives every field character, not only the boss.
+// Two independently keyed facial joints permit actual speech/acting deformation.
+const facialBones=[...bones,['jaw',3,.02,1.631,0],['brow',3,.035,1.70,0]];
+const skeleton=role=>facialBones;
 const colors={skin:[.72,.53,.40],lip:[.44,.27,.22],eye:[.78,.74,.62],ink:[.07,.076,.068],
  hair:[.14,.105,.084],ash:[.30,.28,.245],sage:[.25,.34,.27],pine:[.14,.22,.19],
  steel:[.25,.30,.27],sand:[.58,.54,.43],stitch:[.44,.42,.34],boot:[.14,.13,.115],
@@ -79,12 +81,12 @@ function model(role) {
  surface(2,'skin',0,0,[[1.435,.087,.08],[1.52,.079,.076],[1.59,.083,.08]]);
  surface(3,'skin',0,0,[[1.52,.044,.049,.055],[1.55,.086,.079,.026],[1.595,.101,.100,.014],[1.65,.115,.109],[1.71,.12,.111],[1.77,.105,.095],[1.805,.046,.053]],20);
  oval(3,'skin',.118,1.646,0,.035,.046,.024);
- oval(boss?16:3,'lip',.121,1.589,0,.008,.006,.034);
+ oval(16,'lip',.121,1.589,0,.008,.006,.034);
  for(const s of [-1,1]){
   oval(3,'skin',-.016,1.645,s*.110,.027,.044,.017);
   oval(3,'eye',.103,1.677,s*.049,.011,.009,.025);
   oval(3,'ink',.114,1.677,s*.049,.004,.008,.008);
-  oval(boss?17:3,fox?'ash':'hair',.103,1.694,s*.050,.012,.008,.033);
+  oval(17,fox?'ash':'hair',.103,1.694,s*.050,.012,.008,.033);
  }
  if(fox){
   panel(1,'stitch',[.083,1.467,-.079],[.158,1.32,.018],.024);
@@ -194,7 +196,7 @@ function model(role) {
 function pose(state) {
  const {phase=0,stride=0,crouch=0,prone=0,down=0,aim=0,cover=0,hit=0,
         strike=0,time=0,captive=0}=state;
- const rot=new Array(bones.length).fill(0);
+ const rot=new Array(facialBones.length).fill(0);
  const lean=.055+.07*stride+.19*crouch+.12*captive;
  rot[0]=-lean-1.38*prone-1.48*down; rot[1]=-.013*Math.sin(time*2.4)-.08*hit;
  rot[2]=lean*.55+.55*prone+(-.12*captive); rot[3]=.24*prone;
@@ -234,17 +236,24 @@ function pose(state) {
   rot[5]+=.52*state.reach;
   rot[2]+=.09*state.reach;
  }
+ // Speech and expression are additive on the shared head skeleton.
+ // Body movement, cover and weapon aiming remain gameplay-owned.
+ rot[16]=-.30*Math.max(0,Math.min(1,state.mouth||0));
+ rot[17]=-.11*Math.max(-1,Math.min(1,state.brow||0));
+ if(state.radio){rot[2]+=.075*state.radio;rot[3]-=.045*state.radio;}
+ if(state.reload){rot[4]+=.42*state.reload;rot[5]+=.36*state.reload;
+                  rot[10]+=.31*state.reload;rot[11]+=.20*state.reload;}
  if(state.boss){
   const focus=state.focus||0,kick=state.recoil||0,order=state.order||0;
   rot[1]-=.11*focus-.18*kick;rot[3]+=.12*focus-.14*order;
   rot[4]+=.46*order+.45*focus;rot[5]+=.84*order+.36*focus;
   rot[10]+=.43*focus-.20*kick;rot[11]+=.12*focus;
-  rot[16]=-(state.mouth||0)*.30;
-  rot[17]=-.16*focus+.12*order-.11*kick;
+  rot[16]=-.30*Math.max(0,Math.min(1,state.mouth||0));
+  rot[17]+=-.16*focus+.12*order-.11*kick;
  }
  const grounded=.008-Math.min(soleHeight(7),soleHeight(13));
  const offset=[0,grounded*(1-prone)*(1-down)-.74*prone-.685*down,0];
  return {rot,offset};
 }
-root.FieldRigs={bones,skeleton,model,pose};
+root.FieldRigs={bones:facialBones,skeleton,model,pose};
 })(typeof module==='object'?module.exports:window);
