@@ -7350,7 +7350,7 @@
     {
       "id": "SYS.CAST",
       "name": "All canonical named characters and variant NPCs: realistic costume-correct PBR skinned rigs, facial anatomy, VO and animation",
-      "status": "not_started",
+      "status": "partial_source",
       "acceptance": [
         "source implemented",
         "authored assets imported",
@@ -7358,6 +7358,22 @@
         "saved and revisited",
         "input, caption and performance tested",
         "professional art and audio approved"
+      ],
+      "sourceEvidence": [
+        "browser/assets/field_rigs.js",
+        "browser/rigged_characters.js",
+        "browser/animation_intent.js",
+        "unreal/MGRemaster/Source/MGRemaster/Public/MGPrototypeAnimationFallback.h",
+        "unreal/MGRemaster/Content/Python/import_field_character_glbs.py",
+        "tools/test_cast_animation_fallback_source.py"
+      ],
+      "unverifiedGates": [
+        "All 22 GLBs converted and inspected as UE skeletal .uassets",
+        "Actual 1995 costume-specific high-fidelity PBR/faces/hair",
+        "Real AnimBlueprint blending, IK, foot-ground accuracy, motion matching",
+        "Real browser GLB screenshot and WebGL/Three performance",
+        "Unreal 5.7 compiled and Play In Editor tested",
+        "Recorded VO and audience-specific user testing"
       ]
     },
     {
@@ -7446,7 +7462,7 @@
     "sourcePrototypes": 27,
     "actualUnrealVerified": 0,
     "productionReady": 0,
-    "mandatoryNextAction": "Verify original first-floor tile geometry and Card-1 gates, test the physical truck loot and V7 saves in Unreal 5.7 PIE, then implement remaining floor routes, guard-body play and lawful production-quality cast.",
+    "mandatoryNextAction": "Have Unreal 5.7 tester import 22 prototype GLBs, compile/PIE and capture animation/rig/body/fov test evidence; production PBR cast, authored AnimBPs/IK and complete first-floor source topology/Card 1 gates remain unfunded/unverified.",
     "unmappedCoordinates": 52,
     "prototypeEnemyActorsMapped": 14,
     "prototypeEnemyAreasMapped": 5,
