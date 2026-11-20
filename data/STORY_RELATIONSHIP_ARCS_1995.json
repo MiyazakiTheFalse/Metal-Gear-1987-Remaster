@@ -1,0 +1,731 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-11-20",
+  "premise": "Plot: N313's infiltration and destruction of TX-55. Story: the rookie Snake learns to judge authority, protect others, and form earned relationships with veterans and resistance. The game should satisfy both.",
+  "doctrine": "Every story beat is tied to a physical room, mission event, returning encounter, character choice, optional codec or authored film shot. No characters telepathically know an event. No unearned twist/early retcon. Never claim invented lines are authentic 1987 transcription.",
+  "sources": [
+    "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/30618",
+    "https://www.hardcoregaming101.net/metal-gear/",
+    "https://thesnakesoup.org/metal-gear-msx-walkthrough/"
+  ],
+  "characters": [
+    {
+      "id": "snake",
+      "canonical": "FOXHOUND rookie Solid Snake; infiltrates Outer Heaven, rescues Gray Fox, uncovers and defeats Metal Gear and Big Boss.",
+      "wants": "complete N313 and prove he belongs among veterans",
+      "needs": "learn that loyalty requires independently verifying orders and protecting people, not just satisfying command",
+      "wound": "fear of failing his first real assignment; loneliness behind disciplined wit",
+      "performance": "restrained, observant, increasingly willing to ask difficult questions; short lines and expressive pauses, no clairvoyant exposition",
+      "firstPayoff": "Snake chooses to listen to Fox beyond the mandatory nuclear-weapon clue",
+      "finalPayoff": "Snake confronts the commander he once relied on, preserving the 1987 identity reveal timing",
+      "source": "original_structure_new_psychology"
+    },
+    {
+      "id": "bigBoss",
+      "canonical": "Snake's commander, ultimately revealed as Outer Heaven's leader in original story",
+      "wants": "maintain control of Snake's mission and the fortress narrative",
+      "needs": "never telegraph secret identity through inexplicably evil early dialogue; retain believable mentor persona",
+      "wound": "his personal motives are later-series context, not original 1987 in-scene proof",
+      "performance": "capable, concise, sometimes warmly protective, later evasive only when Snake earns contradictory evidence",
+      "firstPayoff": "early tactical help actually works",
+      "finalPayoff": "final betrayal lands as the rupture of an established relationship",
+      "source": "canon_authority_emotional_motivation_adaptation"
+    },
+    {
+      "id": "grayFox",
+      "canonical": "veteran FOXHOUND operative held in Outer Heaven; knows Metal Gear's nature",
+      "wants": "survive detention long enough to put his intel in another soldier's hands",
+      "needs": "be a person whose competence survives captivity, not a key-bearing lore dispenser",
+      "wound": "isolation, exhaustion and the experience of counting unseen guard changes",
+      "performance": "economical, exhausted but sharp and protective; recognition and listening before revelations",
+      "firstPayoff": "optional shift-pattern conversation opens a low-risk player advantage",
+      "finalPayoff": "his warning affects how Snake weighs later orders without granting future secrets",
+      "source": "canon_mission_role_adapted_1995_personhood"
+    },
+    {
+      "id": "schneider",
+      "canonical": "local resistance leader/former Outer Heaven architect; architectural assistance over radio",
+      "wants": "help dismantle a fortress whose architecture was exploited",
+      "needs": "show real limits to his knowledge; changed plans and sealed tunnels require investigation",
+      "wound": "responsibility for a place later turned against civilians",
+      "performance": "precise technical terminology, emotional restraint, confidence limited to corridors he built",
+      "firstPayoff": "describes a real repaired seam or service duct Snake can inspect",
+      "finalPayoff": "revisit commentary turns his remorse into useful work, not guilt monologues",
+      "source": "canon_role_adapted_community_history"
+    },
+    {
+      "id": "diane",
+      "canonical": "resistance intelligence source supplying information on enemies and bosses",
+      "wants": "keep resistance cells alive by being useful without being exposed",
+      "needs": "recognised as an experienced observer, not a button that tells the boss weakness",
+      "wound": "the limitations of secondhand reports and late contact",
+      "performance": "direct, dry, bold; revises assessments after the player reports contradictory evidence",
+      "firstPayoff": "boss analysis only after frequency earned and encounter witnessed",
+      "finalPayoff": "partnership respects Snake's first-hand observations",
+      "source": "canon_role_adapted_tone"
+    },
+    {
+      "id": "jennifer",
+      "canonical": "resistance member embedded in Outer Heaven medical staff, searching for missing brother",
+      "wants": "find brother and keep detainees alive",
+      "needs": "player must earn trust and access rather than buy her as a vendor",
+      "wound": "cannot openly help without risking her cover",
+      "performance": "professional, urgent, personable under low-volume secrecy",
+      "firstPayoff": "medic supply help when Snake meets actual original rank/frequency gate",
+      "finalPayoff": "brother's fate/escape clue matters as a human relationship",
+      "source": "canon_role_new_conversations"
+    },
+    {
+      "id": "madnar",
+      "canonical": "Dr. Pettrovich, engineer coerced to develop TX-55 with daughter held hostage",
+      "wants": "save Ellen without triggering her captors",
+      "needs": "engineer's shame and practical intelligence must be causally connected",
+      "wound": "coercion and complicity",
+      "performance": "precise technical language interrupted by concern for Ellen",
+      "firstPayoff": "will not give unearned final sabotage steps",
+      "finalPayoff": "after Ellen's rescue, technical help becomes an act of repair",
+      "source": "canon_role_adapted_psychology"
+    },
+    {
+      "id": "ellen",
+      "canonical": "daughter held hostage to coerce Dr. Pettrovich",
+      "wants": "get out and have her father survive",
+      "needs": "moment of agency and a life beyond a quest-marker",
+      "wound": "she knows the facility through captivity but not future secret facts",
+      "performance": "subtle, pragmatic, points Snake to a real return route rather than a world map",
+      "firstPayoff": "her safe rescue changes the father's motivation and dialogue",
+      "finalPayoff": "Snake understands which civilians his mission actually protected",
+      "source": "canon_coercion_new_personality"
+    },
+    {
+      "id": "powCollective",
+      "canonical": "hostages/prisoners grant rank and world information in original game",
+      "wants": "survival and hope that the outside world remembers them",
+      "needs": "not anonymous vending machines for frequency/keycards",
+      "wound": "guard brutality and abandonment",
+      "performance": "short individual identities, credible knowledge constrained by where held",
+      "firstPayoff": "Snake's first rescue changes his priorities before rank rewards",
+      "finalPayoff": "last prisoner reveal is earned, not spoiled through early dialogue",
+      "source": "canon_structure_new_minor_roles"
+    }
+  ],
+  "missions": [
+    {
+      "id": "P01",
+      "identityArc": "The obedient novice",
+      "pacingThesis": "Introduce the missing veteran without over-explaining. Let Snake observe worker duty and guard schedules instead of receiving an omniscient briefing.",
+      "plotBeats": [
+        "P01.brief",
+        "P01.entry",
+        "P01.trucks",
+        "P01.freight"
+      ],
+      "events": [
+        {
+          "id": "ST.P01.BRIEF",
+          "triggerBeat": "P01.brief",
+          "initiator": "bigBoss",
+          "respondent": "snake",
+          "interpersonalStakes": "Big Boss gives practical guidance, Snake asks about uncertainties",
+          "form": "codec_optional",
+          "implementation": "source_prototype",
+          "canonicalLineage": "original_1987_event_remake_dialogue",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P01.FREIGHT",
+          "triggerBeat": "P01.freight",
+          "initiator": "snake",
+          "respondent": "schneider",
+          "interpersonalStakes": "Snake quietly observes civilian logistics; resistance knows only partial construction details",
+          "form": "ambient_nonblocking",
+          "implementation": "source_prototype",
+          "canonicalLineage": "original_1987_event_remake_dialogue",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P02",
+      "identityArc": "Learning whom to believe",
+      "pacingThesis": "Snake becomes resourceful in a lived-in building, treating imprisoned people as sources with different vulnerabilities, rather than following an arrow.",
+      "plotBeats": [
+        "P02.pow1",
+        "P02.pow2",
+        "P02.pow3",
+        "P02.merc",
+        "P02.return1"
+      ],
+      "events": [
+        {
+          "id": "ST.P02.POW1",
+          "triggerBeat": "P02.pow1",
+          "initiator": "powCollective",
+          "respondent": "snake",
+          "interpersonalStakes": "Prisoner helps an anonymous junior operative; rescue has emotional costs without extra collectibles",
+          "form": "rescue_dialogue",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P02.DIANE",
+          "triggerBeat": "P02.pow3",
+          "initiator": "diane",
+          "respondent": "snake",
+          "interpersonalStakes": "First frequency learned and specialist analysis can begin; report must not predict unseen boss",
+          "form": "codec_earned",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P02.RETURN",
+          "triggerBeat": "P02.return1",
+          "initiator": "schneider",
+          "respondent": "snake",
+          "interpersonalStakes": "Same passage seen with new access and new awareness of who built it",
+          "form": "revisit_nonblocking",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P03",
+      "identityArc": "A man behind the intelligence",
+      "pacingThesis": "Being captured strips Snake of tools; Gray Fox's exhaustion and retained skill humanise the veteran Snake came to find.",
+      "plotBeats": [
+        "P03.capture",
+        "P03.wall1",
+        "P03.fox",
+        "P03.codec",
+        "P03.bodies"
+      ],
+      "events": [
+        {
+          "id": "ST.P03.CAPTURE",
+          "triggerBeat": "P03.capture",
+          "initiator": "snake",
+          "respondent": "bigBoss",
+          "interpersonalStakes": "Snake surrenders to reach hidden detention; command cannot see inside the wall",
+          "form": "scene",
+          "implementation": "source_prototype",
+          "canonicalLineage": "original_1987_event_remake_dialogue",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P03.FOX",
+          "triggerBeat": "P03.fox",
+          "initiator": "grayFox",
+          "respondent": "snake",
+          "interpersonalStakes": "Snake recognises the survivor before asking about Metal Gear. Fox's intel remains the canonical plot turn.",
+          "form": "scene_and_optional_followup",
+          "implementation": "source_prototype",
+          "canonicalLineage": "original_1987_event_remake_dialogue",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P03.LISTEN",
+          "triggerBeat": "P03.fox",
+          "initiator": "grayFox",
+          "respondent": "snake",
+          "interpersonalStakes": "The veteran's patrol-footstep counting becomes useful guard-timing information only if Snake listens again",
+          "form": "player_selected",
+          "implementation": "source_prototype",
+          "canonicalLineage": "original_1987_event_remake_dialogue",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P04",
+      "identityArc": "Doubt grows inside obedience",
+      "pacingThesis": "Confiscation and a planted transmitter test Snake's faith in institutional equipment, without identifying the betrayer.",
+      "plotBeats": [
+        "P04.introduce",
+        "P04.bag",
+        "P04.tracker",
+        "P04.boss",
+        "P04.card3"
+      ],
+      "events": [
+        {
+          "id": "ST.P04.GEAR",
+          "triggerBeat": "P04.bag",
+          "initiator": "snake",
+          "respondent": "bigBoss",
+          "interpersonalStakes": "Recovered gear feels compromised; Snake makes his own inspection",
+          "form": "environmental_detail",
+          "implementation": "source_prototype",
+          "canonicalLineage": "original_1987_event_remake_dialogue",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P04.TRACKER",
+          "triggerBeat": "P04.tracker",
+          "initiator": "bigBoss",
+          "respondent": "snake",
+          "interpersonalStakes": "Big Boss gives plausible but limited answers; ambiguous evidence rather than premature proof",
+          "form": "codec_optional",
+          "implementation": "source_prototype",
+          "canonicalLineage": "original_1987_event_remake_dialogue",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P04.BOSS",
+          "triggerBeat": "P04.boss",
+          "initiator": "snake",
+          "respondent": "grayFox",
+          "interpersonalStakes": "Victory is quiet: Snake has to keep working after violence, not win a trophy speech",
+          "form": "scene",
+          "implementation": "source_prototype",
+          "canonicalLineage": "original_1987_event_remake_dialogue",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P05",
+      "identityArc": "Competence through shared knowledge",
+      "pacingThesis": "Snake applies what Fox survived and what Schneider actually understands. New bosses test trust in other people and practical preparation.",
+      "plotBeats": [
+        "P05.dog",
+        "P05.weak",
+        "P05.boxB2",
+        "P05.kid",
+        "P05.parachute"
+      ],
+      "events": [
+        {
+          "id": "ST.P05.DOGS",
+          "triggerBeat": "P05.dog",
+          "initiator": "schneider",
+          "respondent": "snake",
+          "interpersonalStakes": "Old service duct becomes a credible option because the architect knows materials, not a magic shortcut",
+          "form": "codec_optional",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P05.KID",
+          "triggerBeat": "P05.kid",
+          "initiator": "diane",
+          "respondent": "snake",
+          "interpersonalStakes": "Diane's bounded analysis helps Snake identify a real reload gap after seeing the gun",
+          "form": "codec_earned",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P05.PARACHUTE",
+          "triggerBeat": "P05.parachute",
+          "initiator": "snake",
+          "respondent": "bigBoss",
+          "interpersonalStakes": "Snake increasingly makes tactical choices without waiting for command confirmation",
+          "form": "environmental_detail",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P06",
+      "identityArc": "A wider world and higher stakes",
+      "pacingThesis": "Physical verticality and a returnable fortress teach Snake that Outer Heaven is a functioning system, not just boss rooms.",
+      "plotBeats": [
+        "P06.roof",
+        "P06.hind",
+        "P06.drop",
+        "P06.returnTruck",
+        "P06.tank"
+      ],
+      "events": [
+        {
+          "id": "ST.P06.HIND",
+          "triggerBeat": "P06.hind",
+          "initiator": "diane",
+          "respondent": "snake",
+          "interpersonalStakes": "Human observation and rooftop cover, not complete boss spoilers",
+          "form": "boss_characterisation",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P06.RETURN",
+          "triggerBeat": "P06.returnTruck",
+          "initiator": "schneider",
+          "respondent": "snake",
+          "interpersonalStakes": "Returning via truck exposes alterations and duty rotations, grounding architect's regret",
+          "form": "revisit",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P07",
+      "identityArc": "The cost of infrastructure",
+      "pacingThesis": "Snake moves through real machinery built by people; Schneider's technical insight and resistance losses give the architecture moral context.",
+      "plotBeats": [
+        "P07.entry",
+        "P07.bulldozer",
+        "P07.fire",
+        "P07.returnElevator"
+      ],
+      "events": [
+        {
+          "id": "ST.P07.FIRE",
+          "triggerBeat": "P07.fire",
+          "initiator": "diane",
+          "respondent": "snake",
+          "interpersonalStakes": "Specific experience and enemy fire behaviour shape a useful exchange",
+          "form": "codec_earned",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P07.LIFT",
+          "triggerBeat": "P07.returnElevator",
+          "initiator": "schneider",
+          "respondent": "snake",
+          "interpersonalStakes": "Old lift geometry proves useful, making remorse a practical contribution",
+          "form": "revisit",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P08",
+      "identityArc": "Professionals protecting family",
+      "pacingThesis": "Jennifer's clandestine work and Pettrovich's coerced decisions complicate Snake's understanding of duty.",
+      "plotBeats": [
+        "P08.jennifer",
+        "P08.madnar",
+        "P08.tx11",
+        "P08.card7"
+      ],
+      "events": [
+        {
+          "id": "ST.P08.JENNIFER",
+          "triggerBeat": "P08.jennifer",
+          "initiator": "jennifer",
+          "respondent": "snake",
+          "interpersonalStakes": "Rescue rank earns fragile trust; her missing brother shapes her risks and aid",
+          "form": "codec_earned",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P08.MADNAR",
+          "triggerBeat": "P08.madnar",
+          "initiator": "madnar",
+          "respondent": "snake",
+          "interpersonalStakes": "Technical guilt matters because Ellen is being used to coerce his work",
+          "form": "scene",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P08.TX11",
+          "triggerBeat": "P08.tx11",
+          "initiator": "snake",
+          "respondent": "diane",
+          "interpersonalStakes": "Snake counters a technical weapon using evidence and comrades' expertise",
+          "form": "combat_playable",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P09",
+      "identityArc": "Saving people changes the mission",
+      "pacingThesis": "Ellen is rescued by acting rather than merely collecting information; her survival changes the father's behaviour on an actual return route.",
+      "plotBeats": [
+        "P09.backB1",
+        "P09.ellen",
+        "P09.madnarReturn",
+        "P09.duck",
+        "P09.backToB3"
+      ],
+      "events": [
+        {
+          "id": "ST.P09.ELLEN",
+          "triggerBeat": "P09.ellen",
+          "initiator": "ellen",
+          "respondent": "snake",
+          "interpersonalStakes": "Give Ellen a pragmatic choice and a true human reaction, not only a reward flag",
+          "form": "scene",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P09.MADNAR",
+          "triggerBeat": "P09.madnarReturn",
+          "initiator": "madnar",
+          "respondent": "snake",
+          "interpersonalStakes": "Same room and body language as first visit but different character state after proof Ellen is alive",
+          "form": "revisit_scene",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P09.DUCK",
+          "triggerBeat": "P09.duck",
+          "initiator": "powCollective",
+          "respondent": "snake",
+          "interpersonalStakes": "Protection of living captives determines safe firing decisions and survivor dialogue",
+          "form": "boss_playable",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "P10",
+      "identityArc": "A soldier chooses his own judgment",
+      "pacingThesis": "The truth about his commander is earned through saved people and evidence. Snake chooses who to protect and how to finish, rather than obeying a false authority.",
+      "plotBeats": [
+        "P10.powTruth",
+        "P10.betrayal",
+        "P10.pattern",
+        "P10.tx55",
+        "P10.finale",
+        "P10.credits"
+      ],
+      "events": [
+        {
+          "id": "ST.P10.TRUTH",
+          "triggerBeat": "P10.powTruth",
+          "initiator": "powCollective",
+          "respondent": "snake",
+          "interpersonalStakes": "Last survivor earns the reveal; no hint of who leads Outer Heaven before this",
+          "form": "scene",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P10.BETRAYAL",
+          "triggerBeat": "P10.betrayal",
+          "initiator": "bigBoss",
+          "respondent": "snake",
+          "interpersonalStakes": "Reframe the opening mentor call; silence and hurt before combat",
+          "form": "scene",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P10.TX55",
+          "triggerBeat": "P10.tx55",
+          "initiator": "madnar",
+          "respondent": "snake",
+          "interpersonalStakes": "Expert sabotage guidance earned by protecting Ellen; exact action carried out by player",
+          "form": "playable",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P10.FINALE",
+          "triggerBeat": "P10.finale",
+          "initiator": "bigBoss",
+          "respondent": "snake",
+          "interpersonalStakes": "Loyalty, agency and the mentor relationship resolve in the canonical confrontation",
+          "form": "scene_and_boss",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        },
+        {
+          "id": "ST.P10.CREDITS",
+          "triggerBeat": "P10.credits",
+          "initiator": "snake",
+          "respondent": "powCollective",
+          "interpersonalStakes": "A rookie has become someone who carries the memory of other people, not only a completed mission",
+          "form": "ending",
+          "implementation": "design_only",
+          "canonicalLineage": "original_1987_beat_new_scene_to_be_approved",
+          "playerConsequence": "player-earned emotional/intelligence context only; gameplay inventory, unlocks and enemy AI owned by canonical beat",
+          "neverAutoReveal": [
+            "bigBoss_OuterHeaven_identity",
+            "future_Snake_relationships",
+            "later_game_Fox_history"
+          ]
+        }
+      ]
+    }
+  ],
+  "arcBeatCount": 29,
+  "sourcePrototypeBeatCount": 8,
+  "developmentStatus": "source-linked plan, no full in-game story or approved performance; only early 1995 rescue-related lines already partially authored",
+  "acceptanceGates": [
+    "scene physically adjacent to real objective",
+    "source-correct person knows what they could know",
+    "new dialogue earned, short, dynamic and emotionally grounded",
+    "optional dialogue never stalls critical stealth in risk zones",
+    "gameplay consequence from information is genuine, not extra collectible points",
+    "unique realistic 1995 model, acted expression and motion for each on-screen participant",
+    "recorded voice, subtitle, mixed in world",
+    "save/skip/revisit checks",
+    "player research checks rapport and pacing",
+    "final reveal not shown in advance"
+  ]
+}
