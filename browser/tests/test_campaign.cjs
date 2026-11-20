@@ -395,3 +395,29 @@ roofReloaded.game.teleport(63,0);roofReloaded.game.act('interact');
 assert.equal(roofReloaded.game.state.roof.active,true,
  'return and re-entry remain possible without resetting the boss');
 console.log('PASS: physical roof lift, persisted grenade count, return route and re-entry.');
+
+
+const tankSlot='mg1987.grayfox.browser.v1';
+const tankStorage=new Map([[tankSlot,JSON.stringify({version:10,stage:9,x:88.5,z:0,
+ health:100,service:{charge:true,open:true,intel:true,kidDown:true,parachute:true},
+ roof:{active:true,defeated:true,hp:0,grenades:3,phase:'disabled',clock:0,lap:0,flyX:82,flyZ:0}})]]);
+const tankRun=boot(tankStorage);tankRun.button('resume');
+assert.equal(tankRun.game.state.roof.defeated,true);
+tankRun.game.act('interact');
+assert.equal(tankRun.game.state.stage,10,'post-Hind rooftop exit enters Building 2');
+assert.equal(tankRun.game.state.b2.active,true);
+tankRun.game.teleport(105,1.1);
+tankRun.game.act('interact');
+assert.equal(tankRun.game.state.b2.mines,3,'a mined track uses an actual mine');
+assert.equal(tankRun.game.state.b2.armed.length,1,'mine persists as track site');
+const tankReload=boot(tankStorage);tankReload.button('resume');
+assert.equal(tankReload.game.state.stage,10);
+assert.equal(tankReload.game.state.b2.mines,3);
+assert.equal(tankReload.game.state.b2.armed.length,1);
+tankReload.game.teleport(98.5,0);tankReload.game.act('interact');
+assert.equal(tankReload.game.state.b2.active,false,'retreat is reversible');
+assert.equal(tankReload.game.state.roof.active,true);
+tankReload.game.teleport(88.5,0);tankReload.game.act('interact');
+assert.equal(tankReload.game.state.b2.active,true,'no tank progress reset after return');
+assert.equal(tankReload.game.state.b2.mines,3);
+console.log('PASS: Building 2 roof descent, physical mine placement, checkpoint, retreat and re-entry.');
