@@ -2,6 +2,7 @@
 #include "MGPlayerCharacter.h"
 #include "MGGuardActor.h"
 #include "MGPrisonerCharacter.h"
+#include "MGShootGunnerActor.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 
@@ -102,6 +103,91 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     {
         bRescued = Fox->IsRescued();
     }
+    // Strict presentation priority: damage/death overrides all; committed
+    // player actions override locomotion; communication is additive during
+    // movement, so an incoming radio call never freezes Snake's legs.
+    EMGPerformanceAction Desired = bMoving
+        ? EMGPerformanceAction::Travel : EMGPerformanceAction::Idle;
+    bRadioListeningOverlay = false;
+    GunnerHealthFraction = 1.f;
+    if (const AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(Owner))
+    {
+        bRadioListeningOverlay = Player->IsCodecOpen();
+        if (Player->IsMeleeVisualActive()) Desired = EMGPerformanceAction::Melee;
+        else if (bKnocking) Desired = EMGPerformanceAction::WallKnock;
+        else if (bIsFiring) Desired = EMGPerformanceAction::Fire;
+        else if (bProne) Desired = EMGPerformanceAction::Prone;
+        else if (bCornerPeeking) Desired = EMGPerformanceAction::CoverPeek;
+        else if (bInCover) Desired = EMGPerformanceAction::Cover;
+        else if (bAiming) Desired = EMGPerformanceAction::Aim;
+        else if (bCrouched) Desired = EMGPerformanceAction::Crouch;
+        else if (bRadioListeningOverlay && !bMoving)
+            Desired = EMGPerformanceAction::RadioIdle;
+    }
+    else if (const AMGGuardActor* Guard = Cast<AMGGuardActor>(Owner))
+    {
+        switch (Guard->GetGuardPosture())
+        {
+        case EMGGuardPosture::Notice: Desired = EMGPerformanceAction::GuardNotice; break;
+        case EMGGuardPosture::Investigate: Desired = EMGPerformanceAction::GuardInvestigate; break;
+        case EMGGuardPosture::Search: Desired = EMGPerformanceAction::GuardSearch; break;
+        case EMGGuardPosture::Challenge: Desired = EMGPerformanceAction::GuardChallenge; break;
+        case EMGGuardPosture::Report: Desired = EMGPerformanceAction::GuardReport; break;
+        case EMGGuardPosture::Engage: Desired = EMGPerformanceAction::GuardEngage; break;
+        case EMGGuardPosture::Strike: Desired = EMGPerformanceAction::GuardStrike; break;
+        case EMGGuardPosture::Incapacitated: Desired = EMGPerformanceAction::Incapacitated; break;
+        default: break; // Existing ground speed still drives locomotion clips.
+        }
+        if (Guard->IsIncapacitated()) Desired = EMGPerformanceAction::Incapacitated;
+    }
+    else if (const AMGPrisonerCharacter* Fox = Cast<AMGPrisonerCharacter>(Owner))
+        Desired = Fox->IsRescued() ? EMGPerformanceAction::FoxRescued
+                                  : EMGPerformanceAction::FoxPrisoner;
+    else if (const AMGShootGunnerActor* Gunner = Cast<AMGShootGunnerActor>(Owner))
+    {
+        GunnerHealthFraction = Gunner->GetHealthFraction();
+        if (Gunner->IsDefeated()) Desired = EMGPerformanceAction::GunnerDefeated;
+        else if (Gunner->IsFiringVolley()) Desired = EMGPerformanceAction::GunnerVolley;
+        else if (Gunner->IsTelegraphing()) Desired = EMGPerformanceAction::GunnerAim;
+        else if (Gunner->IsRecovering()) Desired = EMGPerformanceAction::GunnerRecovery;
+        else Desired = EMGPerformanceAction::GunnerSearch;
+    }
+
+    bPerformanceActionChanged = Desired != PerformanceAction;
+    bPresentationInterrupted = false;
+    if (bPerformanceActionChanged)
+    {
+        const EMGPerformanceAction Old = PerformanceAction;
+        PreviousPerformanceAction = Old;
+        bPresentationInterrupted =
+            (Old == EMGPerformanceAction::GuardStrike &&
+             Desired != EMGPerformanceAction::GuardStrike) ||
+            (Old == EMGPerformanceAction::GunnerAim &&
+             Desired != EMGPerformanceAction::GunnerVolley) ||
+            (Old == EMGPerformanceAction::GunnerVolley &&
+             Desired != EMGPerformanceAction::GunnerRecovery &&
+             Desired != EMGPerformanceAction::GunnerDefeated);
+        PerformanceAction = Desired;
+        PerformanceActionElapsedSeconds = 0.f;
+        OnPerformanceActionTransition(Old, Desired, bPresentationInterrupted);
+    }
+    else PerformanceActionElapsedSeconds += FMath::Max(0.f, DeltaSeconds);
+    // Base transition duration exposes an actual, framerate-independent blend
+    // parameter to the AnimBP. Never delay the authoritative guard/shot state.
+    const float BlendSeconds =
+        (Desired == EMGPerformanceAction::Prone || Desired == EMGPerformanceAction::Cover)
+        ? .26f : ((Desired == EMGPerformanceAction::Fire ||
+                   Desired == EMGPerformanceAction::WallKnock ||
+                   Desired == EMGPerformanceAction::GuardStrike) ? .08f : .17f);
+    PerformanceTransitionAlpha = FMath::Clamp(
+        PerformanceActionElapsedSeconds / BlendSeconds, 0.f, 1.f);
+    RadioListenOverlayAlpha = FMath::FInterpTo(
+        RadioListenOverlayAlpha, bRadioListeningOverlay ? 1.f : 0.f, DeltaSeconds, 8.f);
+    ImpactPoseAlpha = FMath::FInterpTo(
+        ImpactPoseAlpha, (PerformanceAction == EMGPerformanceAction::Melee ||
+                          PerformanceAction == EMGPerformanceAction::GuardStrike)
+                         ? 1.f : 0.f, DeltaSeconds, 13.f);
+
     AimBlendAlpha = FMath::FInterpTo(AimBlendAlpha,
         bAiming ? 1.f : 0.f, DeltaSeconds, 12.f);
     if (!bAiming)
