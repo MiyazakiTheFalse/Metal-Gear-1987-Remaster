@@ -41,6 +41,7 @@ void UMGEquipmentComponent::BeginPlay()
     // A captured Snake cannot use pre-capture weapons or items. Test entries are
     // deliberately marked provisional rather than claims about J2ME inventory.
     SetConfiscated(true);
+    bInventorySlotsInitialized = true;
 }
 
 void UMGEquipmentComponent::TickComponent(
