@@ -888,7 +888,10 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
     if (UMGEquipmentComponent* Inventory = Player->GetEquipment())
     {
         if (bParachuteTaken) Inventory->AwardItem(TEXT("PARACHUTE"),1);
-        if (bOwnsCarton) Inventory->AwardItem(TEXT("BOX"), 1);
+        if (bOwnsCarton && !(Flags & MG_FOX_CAPTURED))
+            Inventory->AwardItem(TEXT("FREIGHT_CARTON"), 1);
+        // Capture removes the borrowed carton. The 1987 permanent box
+        // remains unowned until its original B1-F3 Card-2 gate is authored.
         if (bHasLoadedSave && bLoadedHandgunAcquired)
         {
             // Ownership and remaining rounds are different facts. Older
@@ -979,7 +982,12 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
             // a Sequencer requirement; this commit is an honest functional
             // handoff. Confiscation state commits BEFORE transfer.
             if (Player->GetEquipment())
+            {
+                // The freight carton belongs to receiving, not Snake's
+                // permanent inventory. Do not smuggle it through custody.
+                Player->GetEquipment()->RevokeTemporaryItem(TEXT("FREIGHT_CARTON"));
                 Player->GetEquipment()->SetConfiscated(true);
+            }
             Player->SetActorLocation(CellStart, false, nullptr,
                 ETeleportType::TeleportPhysics);
             // Skip-safe fall-back for the still-unmade custody -> unconscious
@@ -1153,10 +1161,10 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
     {
         if (!bOwnsCarton && CanReach(Player, CartonPickup, 160.f) && Player->GetEquipment())
         {
-            if (!Player->GetEquipment()->AwardItem(TEXT("BOX"), 1)) return false;
+            if (!Player->GetEquipment()->AwardItem(TEXT("FREIGHT_CARTON"), 1)) return false;
             bOwnsCarton = true;
             CartonPickup->SetActorHiddenInGame(true);
-            Dialogue = TEXT("Folded dispatch carton. Equip it from items.");
+            Dialogue = TEXT("BORROWED FREIGHT CARTON. TEMPORARY DISGUISE FOR RECEIVING.");
             DialogueTimeRemaining = 3.f;
             SaveProgress(Player);
             return true;
