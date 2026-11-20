@@ -90,7 +90,11 @@ void AMGMachinegunKid::BeginPlay()
         Receiver->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
         Flash->AttachToComponent(Receiver,
             FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-        Flash->SetRelativeLocation(FVector(80.f, 0.f, 0.f));
+        Flash->SetRelativeLocation(
+            Receiver->GetStaticMesh() &&
+            Receiver->GetRelativeScale3D().Equals(FVector::OneVector, .01f)
+            ? FVector(80.f, 0.f, 0.f)
+            : FVector(50.f, 0.f, 0.f)); // tip of scaled 88cm fallback cube
     }
 }
 
@@ -108,7 +112,12 @@ void AMGMachinegunKid::Tick(float Dt)
     AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (!Player || IsIncapacitated()) return;
     const FVector P = Player->GetActorLocation();
-    const FVector Muzzle = GetActorLocation() + FVector(0.f,0.f,48.f);
+    // The warning flash and the physical shot start at the SAME weapon tip.
+    // The old chest-origin trace could fire through a corner while the visible
+    // machinegun was blocked. The light follows the bespoke hand/receiver.
+    const FVector Muzzle = Flash
+        ? Flash->GetComponentLocation()
+        : GetActorLocation() + FVector(0.f, 0.f, 48.f);
     const FVector Target = P + FVector(0.f,0.f,Player->IsProne() ? 0.f : 30.f);
     FHitResult Hit;
     FCollisionQueryParams Query(SCENE_QUERY_STAT(MGKidLane), false, this);
