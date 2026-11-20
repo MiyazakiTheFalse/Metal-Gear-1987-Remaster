@@ -43,14 +43,14 @@
         "realCharactersImported": false,
         "facialAnimationProduced": false,
         "sequencerAsset": false,
-        "browserCameraPrototype": false,
-        "unrealRuntimeSource": false,
+        "browserCameraPrototype": true,
+        "unrealRuntimeSource": true,
         "unrealPIEVerified": false,
         "voiceRecorded": false,
         "audioMixReviewed": false,
         "regressionPassed": false
       },
-      "status": "design_only",
+      "status": "source_camera_prototype",
       "tests": [
         "trigger once on authoritative completed beat",
         "skip goes to same final state without duplicate mission transaction",
@@ -59,7 +59,22 @@
         "cutscene uses truthful trigger location and actual spatial escape geometry",
         "subtitle and audio mute accessibility",
         "shot frames QA at 720p,1080p, ultrawide"
-      ]
+      ],
+      "sourceRefs": {
+        "browser": [
+          "browser/cinematic_director.js",
+          "browser/game.js"
+        ],
+        "unreal": [
+          "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+          "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+        ],
+        "actualSceneKey": "opening",
+        "additionalSourceShots": [
+          "CS.P01.INSERT"
+        ],
+        "cameraOnlyNotActed": true
+      }
     },
     {
       "id": "CIN.002",
@@ -102,7 +117,8 @@
         "cutscene uses truthful trigger location and actual spatial escape geometry",
         "subtitle and audio mute accessibility",
         "shot frames QA at 720p,1080p, ultrawide"
-      ]
+      ],
+      "implementationCaveat": "Opening camera is handled by CIN.001; the first patrol observation is NOT separately filmed yet."
     },
     {
       "id": "CIN.003",
@@ -344,14 +360,14 @@
         "realCharactersImported": false,
         "facialAnimationProduced": false,
         "sequencerAsset": false,
-        "browserCameraPrototype": false,
-        "unrealRuntimeSource": false,
+        "browserCameraPrototype": true,
+        "unrealRuntimeSource": true,
         "unrealPIEVerified": false,
         "voiceRecorded": false,
         "audioMixReviewed": false,
         "regressionPassed": false
       },
-      "status": "design_only",
+      "status": "source_camera_prototype",
       "tests": [
         "trigger once on authoritative completed beat",
         "skip goes to same final state without duplicate mission transaction",
@@ -360,7 +376,23 @@
         "cutscene uses truthful trigger location and actual spatial escape geometry",
         "subtitle and audio mute accessibility",
         "shot frames QA at 720p,1080p, ultrawide"
-      ]
+      ],
+      "sourceRefs": {
+        "browser": [
+          "browser/cinematic_director.js",
+          "browser/game.js"
+        ],
+        "unreal": [
+          "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+          "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+        ],
+        "actualSceneKey": "capture",
+        "additionalSourceShots": [
+          "CS.P03.CUSTODY",
+          "CS.P03.CELL"
+        ],
+        "cameraOnlyNotActed": true
+      }
     },
     {
       "id": "CIN.009",
@@ -403,7 +435,8 @@
         "cutscene uses truthful trigger location and actual spatial escape geometry",
         "subtitle and audio mute accessibility",
         "shot frames QA at 720p,1080p, ultrawide"
-      ]
+      ],
+      "implementationCaveat": "Cell wake shot follows CIN.008 custody transfer; this wall-breach event has NO actual film trigger and remains design only."
     },
     {
       "id": "CIN.010",
@@ -430,14 +463,14 @@
         "realCharactersImported": false,
         "facialAnimationProduced": false,
         "sequencerAsset": false,
-        "browserCameraPrototype": false,
-        "unrealRuntimeSource": false,
+        "browserCameraPrototype": true,
+        "unrealRuntimeSource": true,
         "unrealPIEVerified": false,
         "voiceRecorded": false,
         "audioMixReviewed": false,
         "regressionPassed": false
       },
-      "status": "design_only",
+      "status": "source_camera_prototype",
       "tests": [
         "trigger once on authoritative completed beat",
         "skip goes to same final state without duplicate mission transaction",
@@ -446,7 +479,22 @@
         "cutscene uses truthful trigger location and actual spatial escape geometry",
         "subtitle and audio mute accessibility",
         "shot frames QA at 720p,1080p, ultrawide"
-      ]
+      ],
+      "sourceRefs": {
+        "browser": [
+          "browser/cinematic_director.js",
+          "browser/game.js"
+        ],
+        "unreal": [
+          "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+          "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+        ],
+        "actualSceneKey": "fox",
+        "additionalSourceShots": [
+          "CS.P03.FOX"
+        ],
+        "cameraOnlyNotActed": true
+      }
     },
     {
       "id": "CIN.011",
@@ -516,14 +564,14 @@
         "realCharactersImported": false,
         "facialAnimationProduced": false,
         "sequencerAsset": false,
-        "browserCameraPrototype": false,
-        "unrealRuntimeSource": false,
+        "browserCameraPrototype": true,
+        "unrealRuntimeSource": true,
         "unrealPIEVerified": false,
         "voiceRecorded": false,
         "audioMixReviewed": false,
         "regressionPassed": false
       },
-      "status": "design_only",
+      "status": "source_camera_prototype",
       "tests": [
         "trigger once on authoritative completed beat",
         "skip goes to same final state without duplicate mission transaction",
@@ -532,7 +580,22 @@
         "cutscene uses truthful trigger location and actual spatial escape geometry",
         "subtitle and audio mute accessibility",
         "shot frames QA at 720p,1080p, ultrawide"
-      ]
+      ],
+      "sourceRefs": {
+        "browser": [
+          "browser/cinematic_director.js",
+          "browser/game.js"
+        ],
+        "unreal": [
+          "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+          "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+        ],
+        "actualSceneKey": "shotmaker",
+        "additionalSourceShots": [
+          "CS.P04.SHOTMAKER"
+        ],
+        "cameraOnlyNotActed": true
+      }
     },
     {
       "id": "CIN.013",
@@ -688,14 +751,14 @@
         "realCharactersImported": false,
         "facialAnimationProduced": false,
         "sequencerAsset": false,
-        "browserCameraPrototype": false,
-        "unrealRuntimeSource": false,
+        "browserCameraPrototype": true,
+        "unrealRuntimeSource": true,
         "unrealPIEVerified": false,
         "voiceRecorded": false,
         "audioMixReviewed": false,
         "regressionPassed": false
       },
-      "status": "design_only",
+      "status": "source_camera_prototype",
       "tests": [
         "trigger once on authoritative completed beat",
         "skip goes to same final state without duplicate mission transaction",
@@ -704,7 +767,22 @@
         "cutscene uses truthful trigger location and actual spatial escape geometry",
         "subtitle and audio mute accessibility",
         "shot frames QA at 720p,1080p, ultrawide"
-      ]
+      ],
+      "sourceRefs": {
+        "browser": [
+          "browser/cinematic_director.js",
+          "browser/game.js"
+        ],
+        "unreal": [
+          "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+          "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+        ],
+        "actualSceneKey": "down",
+        "additionalSourceShots": [
+          "CS.P04.DOWN"
+        ],
+        "cameraOnlyNotActed": true
+      }
     },
     {
       "id": "CIN.017",
@@ -731,14 +809,14 @@
         "realCharactersImported": false,
         "facialAnimationProduced": false,
         "sequencerAsset": false,
-        "browserCameraPrototype": false,
-        "unrealRuntimeSource": false,
+        "browserCameraPrototype": true,
+        "unrealRuntimeSource": true,
         "unrealPIEVerified": false,
         "voiceRecorded": false,
         "audioMixReviewed": false,
         "regressionPassed": false
       },
-      "status": "design_only",
+      "status": "source_camera_prototype",
       "tests": [
         "trigger once on authoritative completed beat",
         "skip goes to same final state without duplicate mission transaction",
@@ -747,7 +825,22 @@
         "cutscene uses truthful trigger location and actual spatial escape geometry",
         "subtitle and audio mute accessibility",
         "shot frames QA at 720p,1080p, ultrawide"
-      ]
+      ],
+      "sourceRefs": {
+        "browser": [
+          "browser/cinematic_director.js",
+          "browser/game.js"
+        ],
+        "unreal": [
+          "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+          "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+        ],
+        "actualSceneKey": "card3",
+        "additionalSourceShots": [
+          "CS.P04.CARD3"
+        ],
+        "cameraOnlyNotActed": true
+      }
     },
     {
       "id": "CIN.018",
@@ -1745,6 +1838,13 @@
     "unlinkedBeats": [],
     "sourceBrowserPlayable": 0,
     "ueSequencerAssetsCreated": 0,
-    "productionReady": 0
-  }
+    "productionReady": 0,
+    "browserSourceCameraPrototypes": 6,
+    "unrealSourceCameraPrototypes": 6,
+    "unrealPIEVerified": 0,
+    "designOnly": 34
+  },
+  "canonicalStatusAuthority": true,
+  "detailShotLedger": "data/FULL_CAMPAIGN_CINEMATIC_SHOT_LEDGER_1995.json",
+  "additionalOptionalCameraBeats": 15
 }
