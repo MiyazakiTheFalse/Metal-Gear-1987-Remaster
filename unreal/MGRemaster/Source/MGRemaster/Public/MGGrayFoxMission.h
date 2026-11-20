@@ -123,6 +123,21 @@ private:
     bool bRelayIntel = false;
     bool bKidDefeated = false;
     bool bParachuteTaken = false;
+    // Building 1 roof: matched browser prototype state, not final aircraft art.
+    bool bRoofActive = false;
+    bool bHindDefeated = false;
+    int32 HindHitsRemaining = 3;
+    int32 RoofGrenadesRemaining = 6;
+    int32 HindPhase = 0; // patrol, warning, fire, evade
+    float HindPhaseTime = 2.5f;
+    float HindTravelTime = 0.f;
+    float HindExposureTime = 0.f;
+    UPROPERTY(Transient) AStaticMeshActor* RoofLiftEntry = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* RoofReturnLift = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* RoofLauncher = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* HindProxy = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* HindRotor = nullptr;
+    void TickHindPrototype(AMGPlayerCharacter* Player, float DeltaSeconds);
     UPROPERTY(Transient) AMGMachinegunKid* MachinegunKid = nullptr;
     UPROPERTY(Transient) AStaticMeshActor* ParachutePack = nullptr;
     float BreachRemaining = -1.f;
