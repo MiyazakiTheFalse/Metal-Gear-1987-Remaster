@@ -101,6 +101,8 @@ void AMGShootGunnerActor::SetEncounterActive(bool bEnabled)
     if (MuzzleFlash) MuzzleFlash->SetVisibility(false);
     StateClock = 0.f;
     ShotsFired = 0;
+    PumpCueRemaining = -1.f;
+    PendingPumpShotIndex = INDEX_NONE;
 }
 
 void AMGShootGunnerActor::ReceiveTrackerPing(const FVector& ApproximateLocation)
@@ -133,6 +135,20 @@ void AMGShootGunnerActor::Tick(float Dt)
     AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     StateClock += FMath::Max(0.f, Dt);
     TrackerPingAge += FMath::Max(0.f, Dt);
+    if (PendingPumpShotIndex != INDEX_NONE)
+    {
+        PumpCueRemaining -= FMath::Max(0.f, Dt);
+        if (PumpCueRemaining <= 0.f)
+        {
+            const int32 PumpedShot = PendingPumpShotIndex;
+            PendingPumpShotIndex = INDEX_NONE;
+            PumpCueRemaining = -1.f;
+            OnPumpAction(PumpedShot);
+            if (ShotCycleCue)
+                UGameplayStatics::PlaySoundAtLocation(this, ShotCycleCue,
+                    GetActorLocation() + FVector(0.f, 0.f, 55.f), .64f);
+        }
+    }
 
     if (State == EAttackState::Searching)
     {
@@ -246,9 +262,10 @@ void AMGShootGunnerActor::FireShot(AMGPlayerCharacter* Player)
     }
     const int32 CompletedShotIndex = ShotsFired;
     OnShotFired(CompletedShotIndex);
-    OnPumpAction(CompletedShotIndex);
-    if (ShotCycleCue)
-        UGameplayStatics::PlaySoundAtLocation(this, ShotCycleCue, Muzzle, .64f);
+    PendingPumpShotIndex = CompletedShotIndex;
+    PumpCueRemaining = FMath::Min(
+        FMath::Clamp(PumpOffsetSeconds, .05f, .40f),
+        FMath::Clamp(IntervalSeconds, .25f, 1.5f) * .75f);
     ++ShotsFired;
     if (ShotsFired >= 3)
     {
@@ -279,6 +296,8 @@ void AMGShootGunnerActor::EnterDefeatedState()
     if (bDefeated) return;
     bDefeated = true;
     bActive = false;
+    PendingPumpShotIndex = INDEX_NONE;
+    PumpCueRemaining = -1.f;
     MuzzleFlashRemaining = 0.f;
     if (MuzzleFlash) MuzzleFlash->SetVisibility(false);
     State = EAttackState::Defeated;
