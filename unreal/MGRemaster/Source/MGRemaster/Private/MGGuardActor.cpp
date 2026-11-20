@@ -541,6 +541,10 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
         if (Health <= 0.f)
         {
             bIncapacitated = true;
+            // Current weapon damage is >=50 per handgun bullet while native
+            // CQC combo strikes are 35/35/40. This distinguishes animation
+            // state until typed DamageTypes replace the prototype heuristic.
+            bBodyDead = DamageAmount >= 50.f;
             PendingSidearmCaseSeconds = -1.f;
             if (SidearmMuzzleLight) SidearmMuzzleLight->SetVisibility(false);
             SetGuardPosture(EMGGuardPosture::Incapacitated);
@@ -558,6 +562,37 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
         }
     }
     return Accepted;
+}
+
+void AMGGuardActor::SetBodyBeingDragged(bool bDragged)
+{
+    if (!bIncapacitated || bBodyBeingDragged == bDragged) return;
+    bBodyBeingDragged = bDragged;
+    OnBodyDragChanged(bDragged);
+}
+
+bool AMGGuardActor::TryMoveBodyTo(
+    const FVector& ProposedPosition, const AActor* DraggingActor)
+{
+    if (!bIncapacitated || !bBodyBeingDragged || !IsValid(DraggingActor) ||
+        !GetWorld() || FVector::Dist2D(DraggingActor->GetActorLocation(),
+                                      GetActorLocation()) > 205.f)
+        return false;
+    if (FVector::Dist2D(ProposedPosition, GetActorLocation()) > 72.f)
+        return false; // Reject teleport-sized step and unrealistic snaps.
+    // The dead/KO actor has no Pawn collision so Snake can stand and grab it,
+    // but the body itself still CANNOT be pulled through concrete, doors,
+    // furnaces or the physical boundary of an elevated walkway.
+    FCollisionQueryParams Q(SCENE_QUERY_STAT(MGBodyDragObstacle), false, this);
+    Q.AddIgnoredActor(DraggingActor);
+    FHitResult Obstacle;
+    const FVector Raised = FVector(0.f, 0.f, 35.f);
+    const bool bObstructed = GetWorld()->SweepSingleByChannel(
+        Obstacle, GetActorLocation() + Raised,
+        ProposedPosition + Raised, FQuat::Identity, ECC_Visibility,
+        FCollisionShape::MakeSphere(34.f), Q);
+    if (bObstructed && Obstacle.bBlockingHit) return false;
+    return SetActorLocation(ProposedPosition, false);
 }
 
 void AMGGuardActor::Tick(float DeltaSeconds)
