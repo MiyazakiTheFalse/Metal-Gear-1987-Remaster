@@ -43,6 +43,9 @@ Check-Exit 'browser campaign'
 Write-Host 'Running full-body/face rig geometry checks...'
 & node (Join-Path $Repo 'browser\tests\test_field_rigs.cjs')
 Check-Exit 'rig geometry'
+Write-Host 'Running gameplay-owned character animation-selection checks...'
+& node (Join-Path $Repo 'browser\tests\test_animation_intent.cjs')
+Check-Exit 'cast animation intent'
 Write-Host 'Verifying the actual committed binary GLBs and animation clips...'
 & node (Join-Path $Repo 'browser\tools\audit_field_glbs.cjs')
 Check-Exit 'GLB audit'
