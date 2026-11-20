@@ -106,11 +106,14 @@ void AMGShootGunnerActor::BeginPlay()
         // to the hand. Source-offset is provisional and must be fitted in UE.
         // With no authored rig the weapon continues following the actor, not
         // pretending a primitive body has articulated hands.
-        if (CharacterMesh->GetSkeletalMeshAsset()
-            && CharacterMesh->DoesSocketExist(TEXT("weapon_r")))
+        const FName HandSocket = CharacterMesh->DoesSocketExist(TEXT("weapon_r"))
+            ? FName(TEXT("weapon_r"))
+            : CharacterMesh->GetBoneIndex(TEXT("hand_R")) != INDEX_NONE
+                ? FName(TEXT("hand_R")) : NAME_None;
+        if (CharacterMesh->GetSkeletalMeshAsset() && HandSocket != NAME_None)
         {
             WeaponBody->AttachToComponent(CharacterMesh,
-                FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("weapon_r"));
+                FAttachmentTransformRules::SnapToTargetNotIncludingScale, HandSocket);
             WeaponBody->SetRelativeLocation(FVector(-4.f, 0.f, 9.f));
         }
         MuzzleFlash->AttachToComponent(WeaponBody,
