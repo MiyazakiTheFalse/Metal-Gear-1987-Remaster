@@ -4,6 +4,7 @@
 #include "MGGrayFoxMission.h"
 #include "MGGuardActor.h"
 #include "MGShootGunnerActor.h"
+#include "MGSurveillanceCameraActor.h"
 #include "MGPlayerCharacter.h"
 #include "Engine/Canvas.h"
 #include "EngineUtils.h"
@@ -94,6 +95,22 @@ void AMGPrototypeHUD::DrawHUD()
         MaxSuspicion = FMath::Max(MaxSuspicion, Guard->GetSuspicion());
     }
 
+    // Surveillance exposure is observable feedback from a real CCTV actor,
+    // not a guaranteed alert or invisible global detection oracle.
+    float CCTVLock = 0.f;
+    bool bCCTVWatching = false;
+    for (TActorIterator<AMGSurveillanceCameraActor> CCTV(GetWorld()); CCTV; ++CCTV)
+    {
+        if (!CCTV->IsOperational()) continue;
+        if (CCTV->IsTrackingPlayer())
+        {
+            bCCTVWatching = true;
+            CCTVLock = FMath::Max(CCTVLock, CCTV->GetLockFraction());
+        }
+    }
+    if (bCCTVWatching && MaxThreat < 2)
+        MaxThreat = FMath::Max(MaxThreat, 1); // CAUTION, not ALERT until report.
+
     const float RadarSize = 170.f * UiScale;
     const float RadarX = Width - Margin - RadarSize;
     const float RadarY = Margin;
@@ -126,9 +143,12 @@ void AMGPrototypeHUD::DrawHUD()
         // Three separate physical maps. The earlier projection clamped the
         // entire prelude and its guards onto the left prison-radar edge.
         const bool bPrelude = Player->GetActorLocation().X < -1250.f;
-        const bool bBossWing = Player->GetActorLocation().X > 1350.f;
-        const float MinX = bPrelude ? -3900.f : (bBossWing ? 1350.f : -1250.f);
-        const float SpanX = bPrelude ? 2700.f : (bBossWing ? 2400.f : 2650.f);
+        const bool bPostCard3 = Player->GetActorLocation().X > 3800.f;
+        const bool bBossWing = !bPostCard3 && Player->GetActorLocation().X > 1350.f;
+        const float MinX = bPrelude ? -3900.f :
+            (bPostCard3 ? 3750.f : (bBossWing ? 1350.f : -1250.f));
+        const float SpanX = bPrelude ? 2700.f :
+            (bPostCard3 ? 1850.f : (bBossWing ? 2400.f : 2650.f));
         const float MinY = bBossWing ? -1105.f : -500.f;
         const float SpanY = bBossWing ? 2210.f : 1000.f;
         if (!bBossWing && !bPrelude)
@@ -152,10 +172,27 @@ void AMGPrototypeHUD::DrawHUD()
         for (TActorIterator<AMGGuardActor> Guard(GetWorld()); Guard; ++Guard)
             if (!Guard->IsIncapacitated())
                 MarkPoint(Guard->GetActorLocation(), MaxThreat == 1 ? HudAmber : HudRed, 5.f);
+        for (TActorIterator<AMGSurveillanceCameraActor> CCTV(GetWorld()); CCTV; ++CCTV)
+            if (CCTV->IsOperational())
+                MarkPoint(CCTV->GetActorLocation(),
+                    CCTV->IsTrackingPlayer() ? HudAmber : HudMuted, 5.f);
         if (bBossWing)
             for (TActorIterator<AMGShootGunnerActor> Gunner(GetWorld()); Gunner; ++Gunner)
                 if (Gunner->IsEncounterActive() && !Gunner->IsDefeated())
                     MarkPoint(Gunner->GetActorLocation(), HudRed, 8.f);
+    }
+
+    // At 720p this short line stays away from the mission log and HUD bars.
+    // It is only drawn during a camera's genuine sighting, and disappears
+    // when Snake breaks visual contact or the camera is disabled.
+    if (bCCTVWatching && MaxThreat < 3)
+    {
+        const float AlertX = RadarX - 5.f * UiScale;
+        const float AlertY = RadarY + RadarSize * .86f;
+        DrawText(TEXT("CCTV ACQUIRING"), HudAmber,
+            AlertX, AlertY, nullptr, .73f * UiScale, false);
+        DrawBar(this, AlertX, AlertY + 19.f * UiScale,
+            RadarSize, 5.f * UiScale, CCTVLock, HudAmber);
     }
 
     // A visual/caption fallback for real security speech. Only a nearby
