@@ -3,7 +3,8 @@
 [CmdletBinding()]
 param(
   [Parameter(Mandatory=$true)][string]$UnrealRoot,
-  [string]$ArchiveDirectory = ''
+  [string]$ArchiveDirectory = '',
+  [switch]$ImportCharacterAssets
 )
 $ErrorActionPreference = 'Stop'
 $Repo = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
@@ -32,9 +33,32 @@ if ($LASTEXITCODE -ne 0) { throw "Browser campaign tests failed: $LASTEXITCODE" 
 if ($LASTEXITCODE -ne 0) { throw "Rig geometry tests failed: $LASTEXITCODE" }
 & node (Join-Path $Repo 'browser\\tools\\audit_field_glbs.cjs')
 if ($LASTEXITCODE -ne 0) { throw "Committed GLB binary audit failed: $LASTEXITCODE" }
+Write-Host 'Verifying embedded Unreal Content GLB source assets...'
+& python (Join-Path $Repo 'tools\verify_unreal_source_assets.py')
+if ($LASTEXITCODE -ne 0) { throw 'Unreal source asset validation failed' }
 Write-Host 'Building Rust gameplay core...'
 & cargo build --release --manifest-path $Manifest
 if ($LASTEXITCODE -ne 0) { throw "Rust build failed: $LASTEXITCODE" }
+# Fail closed on missing .uassets. The checked-in GLBs are source materials:
+# they are NOT native Unreal skeletal meshes until Unreal Editor imports them.
+if ($ImportCharacterAssets) {
+  Write-Host 'Importing native skeletal character assets with Unreal Editor...'
+  & (Join-Path $PSScriptRoot 'import_unreal_content.ps1') -UnrealRoot $UnrealRoot
+  if ($LASTEXITCODE -ne 0) { throw 'Unreal character import failed' }
+}
+$RequiredMeshes = @(
+  'Snake\SK_Snake_1995_Infiltration.uasset',
+  'GrayFox\SK_GrayFox_1995_Prisoner.uasset',
+  'Guard\SK_Guard_1995.uasset',
+  'Bosses\Shotmaker\SK_Shotmaker_1995.uasset'
+)
+foreach ($Relative in $RequiredMeshes) {
+  $Native = Join-Path (Join-Path $Repo 'unreal\MGRemaster\Content\Characters') $Relative
+  if (-not (Test-Path $Native)) {
+    throw "Missing native Unreal SkeletalMesh: $Native. Import the committed GLBs in UE5.7 first (scripts\import_unreal_content.ps1), or use -ImportCharacterAssets after compiling the Editor project."
+  }
+}
+
 Write-Host 'Cooking, staging and packaging Unreal...'
 $UatArgs = @('BuildCookRun', "-project=$Project", '-noP4', '-platform=Win64', '-clientconfig=Development', '-build', '-cook', '-stage', '-pak', '-archive', '-prereqs', "-archivedirectory=$ArchiveDirectory")
 & $UAT @UatArgs
