@@ -76,3 +76,11 @@ The local report now snapshots the **last confirmed visual position** when a rad
 ### State-leak fix
 
 The mission's facility state **no longer** polls every individual guard's private Suspicious/Investigating phase to set global Caution. A guard may notice a noise while all other sections remain on their normal schedule. Facility Caution comes from an **actual reported body**, the residue of a previously transmitted hostile contact or the intentionally planted enemy transmitter. The local guard can still pursue its own physical evidence and the nearby HUD can show its caution. This prevents an unreported sound in the western yard from changing security vigilance in a far eastern room.
+
+## 20 November — sensory uncertainty and interruptible guard communication
+
+The C++ implementation now treats a heard footstep as **a coarsely localised sound sector**, not a perfect live coordinate feed. For a clear sound path the provisional estimate rounds the bearing to 20-degree increments and distance to 170cm increments, refreshing at most every 1.2s. Behind obstruction, the estimate broadens to 35-degree and 260cm bins, refreshing at most every 2.2s. These are tuning starting points, **not** simulated acoustic rays, head-related transfer functions or results of a player study.
+
+The independent last-*visually-confirmed* contact timer is reset by actual visual proof only. A muffled sound may sustain an investigation, but cannot repeatedly renew the right to treat Snake as a visually tracked target. Direct sight, a serious body discovery, a reported sighting and a fresh wall impact temporarily outrank routine footsteps. A struck guard abandons an unfinished radio call; a new confirmed sighting can trigger a later retry. This creates a readable opportunity to break sight, move quietly, and let a patrol investigate where sound *might* have originated.
+
+**Evidence:** changes are in the draft branch's Unreal C++ and dependency-free Python *source checks*. There has been no UE5.7 build, no spatial-audio listening session, no animation/VO import, and no novice-player test. Sound location bins and radio interruption timing need real level/occlusion/low-FPS calibration; the source-only checks cannot validate actual moment-to-moment fairness.
