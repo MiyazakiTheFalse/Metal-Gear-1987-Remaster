@@ -9,6 +9,7 @@ class AMGShootGunnerActor;
 class AMGMachinegunKid;
 class AMGSurveillanceCameraActor;
 class AMGGuardActor;
+class AMGStoryCameraDirector;
 class UStaticMesh;
 class APointLight;
 
@@ -78,8 +79,12 @@ public:
     void OnNarrativeVoiceStarted(FName Performer, FName ClipId, float ClipSeconds);
     void RestartMission();
     void ExhaleSmoke(const AMGPlayerCharacter* Player);
+    void SkipStoryCinematic();
+    void NotifyBodyRelocated(AMGPlayerCharacter* Player);
 
 private:
+    UPROPERTY(Transient) AMGStoryCameraDirector* StoryCamera = nullptr;
+    bool StartStoryCinematic(FName Scene, AMGPlayerCharacter* Player, AActor* Focus);
     TWeakObjectPtr<AMGSurveillanceCameraActor> PrisonCamera;
     TWeakObjectPtr<AMGSurveillanceCameraActor> KennelCamera;
     bool bHeardFoxFollowup = false;
