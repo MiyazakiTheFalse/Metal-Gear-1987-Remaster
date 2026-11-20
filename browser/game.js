@@ -1570,7 +1570,7 @@ function bodySamples(x,z,stance,yaw){
 function canOccupyBody(x,z,stance=player.stance,yaw=player.yaw){
  const b=bodyShape(stance);
  for(const sample of bodySamples(x,z,stance,yaw)){
-  if(sample.x-sample.r<-32.2||sample.x+sample.r>65.1||
+  if(sample.x-sample.r<-32.2||sample.x+sample.r>(stage===10&&b2.active?123.5:stage>=9&&roof.active?90.7:65.1)||
      sample.z-sample.r<-4.77||sample.z+sample.r>4.77)return false;
   for(const o of obstacles){
    if(!o.active||o.name==='concrete floor')continue;
@@ -1603,7 +1603,7 @@ function movePlayer(vx,vz,dt){
  }
 }
 // Guards still use upright circular capsules (separate from Snake's prone shape).
-function collides(x,z,rad=.31){if(x<-32.2||x>65.1||z<-4.77||z>4.77)return true;return obstacles.some(o=>o.active&&o.name!=='concrete floor'&&x>o.x-o.w/2-rad&&x<o.x+o.w/2+rad&&z>o.z-o.d/2-rad&&z<o.z+o.d/2+rad)}
+function collides(x,z,rad=.31){if(x<-32.2||x>(stage===10&&b2.active?123.5:stage>=9&&roof.active?90.7:65.1)||z<-4.77||z>4.77)return true;return obstacles.some(o=>o.active&&o.name!=='concrete floor'&&x>o.x-o.w/2-rad&&x<o.x+o.w/2+rad&&z>o.z-o.d/2-rad&&z<o.z+o.d/2+rad)}
 function moveEntity(o,vx,vz,dt,rad=.31){const xx=o.x+vx*dt,zz=o.z+vz*dt;if(!collides(xx,o.z,rad))o.x=xx;if(!collides(o.x,zz,rad))o.z=zz;}
 function coverWall(o){
  // Find an actual vertical surface rather than using a blind collision probe.
