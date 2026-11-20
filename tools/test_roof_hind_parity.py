@@ -16,7 +16,7 @@ RIG = (ROOT / "browser/assets/field_rigs.js").read_text(encoding="utf-8")
 
 class RoofParitySourceTests(unittest.TestCase):
     def test_lift_is_earned_and_reversible(self):
-        self.assertIn("stage===8||stage===9)&&service.parachute", BROWSER)
+        self.assertIn("stage===8||stage===9||stage===10)&&service.parachute", BROWSER)
         self.assertIn("bParachuteTaken && !bRoofActive && CanReach", MISSION)
         self.assertIn("bRoofActive && CanReach(Player, RoofReturnLift", MISSION)
         self.assertIn("roof.active=false;player.x=62.5", BROWSER)
@@ -34,12 +34,12 @@ class RoofParitySourceTests(unittest.TestCase):
         self.assertIn("--RoofGrenadesRemaining", MISSION)
         self.assertIn("HindHitsRemaining = 3", HEADER)
         self.assertIn("RoofGrenadesRemaining = 6", HEADER)
-        self.assertIn("Save->SchemaVersion = 5;", MISSION)
-        self.assertIn("uint32 SchemaVersion = 5;", SAVE)
-        self.assertIn("version:9,roof:", BROWSER)
+        self.assertIn("Save->SchemaVersion = 6;", MISSION)
+        self.assertIn("uint32 SchemaVersion = 6;", SAVE)
+        self.assertIn("version:10,b2:", BROWSER)
         self.assertIn("bRoofCheckpoint", MISSION)
         self.assertIn("Save->bParachuteTaken && Save->bKidDefeated", MISSION)
-        self.assertIn("if(data.version===9&&stage===9)", BROWSER)
+        self.assertIn("if(data.version>=9&&stage>=9)", BROWSER)
 
     def test_cross_cast_facial_and_full_body_motion(self):
         self.assertIn("const facialBones=[...bones", RIG)
