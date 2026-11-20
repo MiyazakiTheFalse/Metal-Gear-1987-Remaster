@@ -86,6 +86,10 @@ public:
     void RestartMission();
     void ExhaleSmoke(const AMGPlayerCharacter* Player);
     void SkipStoryCinematic();
+    UFUNCTION(BlueprintPure, Category="Mission|Story")
+    bool IsStoryCinematicPlaying() const;
+    UFUNCTION(BlueprintPure, Category="Mission|Story")
+    FName GetActiveStoryCinematic() const;
     void NotifyBodyRelocated(AMGPlayerCharacter* Player);
 
 private:
