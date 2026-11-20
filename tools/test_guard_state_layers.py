@@ -73,6 +73,29 @@ class GuardStateLayerSourceTests(unittest.TestCase):
         self.assertIn("GetActiveGuardCallout()",HUD)
         self.assertIn("Distance < NearestCalloutCm",HUD)
 
+    def test_muffled_footsteps_do_not_stream_precise_player_position(self):
+        self.assertIn("void AMGGuardActor::ObserveApproximateFootstep", GUARD)
+        self.assertIn("FootstepLocalizationRefreshSeconds", HEADER)
+        self.assertIn("FootstepLocalizationRefreshSeconds - FMath::Max", GUARD)
+        self.assertIn("bOccluded ? 35.f : 20.f", GUARD)
+        self.assertIn("bOccluded ? 260.f : 170.f", GUARD)
+        self.assertIn("bOccluded ? 2.2f : 1.2f", GUARD)
+        self.assertEqual(GUARD.count(
+            "ObserveApproximateFootstep(Player->GetActorLocation(), !bHasLineOfSight)"), 2)
+        self.assertNotIn(
+            "EMGGuardEvidenceKind::HeardMovement, Player->GetActorLocation()", GUARD)
+        self.assertIn("EvidenceKind == EMGGuardEvidenceKind::DiscoveredBody", GUARD)
+        self.assertIn("EvidenceKind == EMGGuardEvidenceKind::SquadSighting", GUARD)
+
+    def test_visual_memory_and_radio_interruption_are_independent_of_sound(self):
+        self.assertEqual(GUARD.count("ContactEvidenceAge = 0.f;"), 2)
+        self.assertIn("if (AwarenessState == 3 && !bConfirmedVisualNow "
+                      "&& ContactEvidenceAge > 4.5f)", GUARD)
+        self.assertIn("if (bPendingRadioReport)\n        {\n"
+                      "            bPendingRadioReport = false;", GUARD)
+        self.assertIn("SquadBroadcastCooldown = FMath::Min(SquadBroadcastCooldown, 1.5f)", GUARD)
+        self.assertIn("PendingConfirmedRadioSighting = Player->GetActorLocation()", GUARD)
+
     def test_not_falsely_marked_tested(self):
         self.assertFalse(CONTRACT["approved_in_unreal"])
         self.assertEqual(CONTRACT["status"],"committed_source_uncompiled")
