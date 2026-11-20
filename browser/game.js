@@ -871,7 +871,7 @@ function say(id){const d=window.MGDialogue?.[id];if(!d)return;dialogueQueue.push
 function displayNextDialogue(dt){
  if(message&&gameTime>message.until)message=null;
  const line=dialogueQueue[0];
- if(!line){$('subtitle').style.opacity='0';return}
+ if(!line){$('subtitle').style.opacity='0';window.MGCodecPortraits?.hide();return}
  if(line.remaining===undefined){
   if(line.id.startsWith('boss'))duel.voice=gameTime+Math.min(1.7,line.duration);
   line.remaining=line.duration;
@@ -889,6 +889,7 @@ function displayNextDialogue(dt){
   }
  }
  line.remaining-=dt;
+ window.MGCodecPortraits?.show(line);
  $('subtitle').textContent=line.speaker+' · '+line.text;
  $('subtitle').style.opacity='1';
  if(line.remaining<=0&&(!line.speaking||line.remaining < -12))dialogueQueue.shift();
