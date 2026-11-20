@@ -3,7 +3,7 @@ const {FieldRigs:rig}=require('../assets/field_rigs.js');
 const fs=require('node:fs'), path=require('node:path');
 const out=process.argv[2]||path.join(__dirname,'../assets/models');
 fs.mkdirSync(out,{recursive:true});
-for(const role of ['snake','fox','guard','shoot_gunner']){
+for(const role of rig.castRoles){
  const bones=rig.skeleton(role);
  const chunks=[], views=[], accessors=[], nodes=[], primitives=[], animations=[];
  let size=0;
