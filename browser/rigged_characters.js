@@ -1,6 +1,6 @@
 /*
  * Optional GLB review renderer for the ORIGINAL first-party 1995 cast.
- * Four source-controlled, separately skinned models are shared with Unreal.
+ * Six source-controlled, separately skinned active models are shared with Unreal.
  * Gameplay, AI, collision, hit resolution and checkpoints stay in game.js.
  * Only the Three.js renderer/importer is streamed; character data is local.
  * When a role/animation/renderer is missing, keep the built-in WebGL rigs.
