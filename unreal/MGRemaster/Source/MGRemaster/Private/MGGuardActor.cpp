@@ -2,6 +2,7 @@
 
 #include "MGPlayerCharacter.h"
 #include "MGGrayFoxMission.h"
+#include "Sound/SoundBase.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -105,6 +106,12 @@ void AMGGuardActor::EmitGuardCallout(FName EventId, const FString& Caption)
     // performance, subtitled VO and sound occlusion. Caption remains optional
     // for the player but is never a hidden mission-state trigger.
     OnGuardCallout(EventId);
+    const FString AssetName = FString::Printf(
+        TEXT("VO_guard_%s_01"), *EventId.ToString().ToLower());
+    const FString AssetPath = FString::Printf(
+        TEXT("/Game/Audio/VO/guard/%s.%s"), *AssetName, *AssetName);
+    if (USoundBase* Cue = LoadObject<USoundBase>(nullptr, *AssetPath))
+        UGameplayStatics::PlaySoundAtLocation(this, Cue, GetActorLocation(), .74f);
 }
 
 void AMGGuardActor::SetSecurityPhase(EMGGuardAwarenessPhase NewPhase)
