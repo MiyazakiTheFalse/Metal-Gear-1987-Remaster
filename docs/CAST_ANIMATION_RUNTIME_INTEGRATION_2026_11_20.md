@@ -34,7 +34,7 @@ These are presentation defects with consequences for perceived identity, readabi
 - JavaScript source syntax for changed game, tests, source animation intent and GLB view module (module imports stripped for the syntax-only check): **passed**.
 - `test_animation_intent.cjs` and `test_campaign.cjs` executed through a V8 compatibility harness with stubbed Node filesystem and DOM/WebGL: **both passed**. Campaign logged **17 PASS checkpoints**, animation-intent test logged one additional PASS. This verifies source mechanics/state transitions, not a rendered viewport.
 - Manual cross-engine source contract check: **13/13 assertions passed** for loader/clip paths, actor identity, camera FOV, fallback calls and authored-ABP precedence.
-- The added Python regression file and local PowerShell preflight/packaging calls are committed. **Native Node, full Python unittest discovery, Rust cargo tests, real WebGL/GLB load, GLB appearance review, Unreal 5.7 C++ build, native imported .uassets, PIE, headset/TV/handheld UX and real user testing were NOT executed here.**
+- The added Python regression file and local PowerShell preflight/packaging calls are committed. Windows packaging now refuses to claim a functional character build without five native active skeletal meshes **and sixteen actual native gameplay AnimationSequences**, including Machinegun Kid's distinct model. These guards establish necessary inputs; they are not proof that clips were successfully imported or played. **Native Node, full Python unittest discovery, Rust cargo tests, real WebGL/GLB load, GLB appearance review, Unreal 5.7 C++ build, native imported .uassets, PIE, headset/TV/handheld UX and real user testing were NOT executed here.**
 
 ## Known visual/implementation limitations
 
