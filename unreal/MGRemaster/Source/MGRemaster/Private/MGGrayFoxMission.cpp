@@ -506,6 +506,97 @@ void AMGGrayFoxMission::CreateBossWing()
             FVector(3100.f, 55.f, -11.f), FRotator(0.f, 180.f, 0.f));
 }
 
+
+void AMGGrayFoxMission::CreateBuilding2TankApproach()
+{
+    // Distinct vertically relocated Building 2 arrival. Provisional scale.
+    SpawnBlock(TEXT("Building2TankRoad"),FVector(13000.f,0.f,-150.f),FVector(28.f,10.f,1.f),true);
+    for (float Y : {-500.f,500.f})
+        SpawnBlock(TEXT("Building2RoadBoundary"),FVector(13000.f,Y,90.f),
+                   FVector(28.f,.4f,3.8f),true);
+    for (const FVector& Shelter : {FVector(11800.f,-340.f,-40.f),
+                                  FVector(12600.f,340.f,-40.f),
+                                  FVector(13400.f,-340.f,-40.f),
+                                  FVector(14100.f,340.f,-40.f)})
+        SpawnBlock(TEXT("TankBlastRefuge"), Shelter,FVector(1.6f,1.8f,1.7f),true);
+    Building2Entry=SpawnBlock(TEXT("RoofToBuilding2"),FVector(10850.f,0.f,680.f),
+                               FVector(.4f,.35f,.75f),false);
+    Building2Return=SpawnBlock(TEXT("Building2ReturnToRoof"),FVector(11550.f,0.f,-8.f),
+                               FVector(.4f,.35f,.75f),false);
+    TankProxy=SpawnBlock(TEXT("Building2TankPrototype"),FVector(TankPatrolX,0.f,-5.f),
+                          FVector(3.2f,2.3f,1.5f),false);
+    TankTurretProxy=SpawnBlock(TEXT("Building2TankTurretPrototype"),
+                               FVector(TankPatrolX,0.f,125.f),FVector(1.8f,1.4f,.55f),false);
+    for (int32 I=0;I<3;++I)
+    {
+        const float X=12100.f+800.f*I;
+        AStaticMeshActor* Marker=SpawnBlock(FName(*FString::Printf(TEXT("TankMineStation%d"),I)),
+                                             FVector(X,0.f,-90.f),FVector(.46f,.46f,.07f),false);
+        TankMineMarkers.Add(Marker);
+    }
+    // All source geometry remains visually inspectable, but no off-site
+    // encounter may damage the player until this sector is entered.
+}
+
+void AMGGrayFoxMission::TickBuilding2Tank(AMGPlayerCharacter* Player,float Dt)
+{
+    if (!bBuilding2Active || bTankDefeated || !IsValid(TankProxy) || !Player) return;
+    const float OldX=TankPatrolX;
+    TankPatrolX=FMath::Clamp(TankPatrolX+TankDirection*150.f*Dt,12000.f,13800.f);
+    if (TankPatrolX<=12000.f || TankPatrolX>=13800.f) TankDirection*=-1;
+    TankProxy->SetActorLocation(FVector(TankPatrolX,0.f,-5.f));
+    if (IsValid(TankTurretProxy))
+        TankTurretProxy->SetActorLocation(FVector(TankPatrolX,0.f,125.f));
+    // A mine explodes ONLY when the tank crosses its physical track station.
+    for (int32 I=ArmedTankMineSites.Num()-1;I>=0;--I)
+    {
+        const int32 Index=ArmedTankMineSites[I];
+        if (Index<0 || Index>=3){ArmedTankMineSites.RemoveAt(I);continue;}
+        const float SiteX=12100.f+800.f*Index;
+        if ((OldX-SiteX)*(TankPatrolX-SiteX)>0.f || FMath::IsNearlyEqual(OldX,TankPatrolX))
+            continue;
+        ArmedTankMineSites.RemoveAt(I);
+        --TankHitsRemaining;
+        BroadcastStructuralImpact(FVector(SiteX,0.f,-10.f),900.f,this);
+        Dialogue=TEXT("TRACK MINE DETONATED. ARMOUR DAMAGED.");
+        DialogueTimeRemaining=2.5f;
+        if (TankHitsRemaining<=0)
+        {
+            TankHitsRemaining=0;bTankDefeated=true;
+            TankProxy->SetActorHiddenInGame(true);
+            if (IsValid(TankTurretProxy))TankTurretProxy->SetActorHiddenInGame(true);
+            Dialogue=TEXT("TANK IMMOBILISED. BUILDING 2 ROAD SECURED.");
+        }
+        SaveProgress(Player);
+    }
+    TankPhaseRemaining-=Dt;
+    if (TankAttackPhase==0 && TankPhaseRemaining<=0.f)
+    {
+        TankAttackPhase=1;TankPhaseRemaining=1.1f;
+        Dialogue=TEXT("TANK TURRET TURNING. TAKE COVER.");
+        DialogueTimeRemaining=1.2f;
+    }
+    else if (TankAttackPhase==1 && TankPhaseRemaining<=0.f)
+    {
+        TankAttackPhase=2;TankPhaseRemaining=1.7f;
+        FHitResult Hit;
+        FCollisionQueryParams Query(SCENE_QUERY_STAT(TankTurretTrace),false);
+        Query.AddIgnoredActor(Player);
+        Query.AddIgnoredActor(TankProxy);
+        if(IsValid(TankTurretProxy))Query.AddIgnoredActor(TankTurretProxy);
+        const FVector From=TankProxy->GetActorLocation()+FVector(0.f,0.f,165.f);
+        const FVector To=Player->GetActorLocation()+FVector(0.f,0.f,25.f);
+        const bool bExposed=!GetWorld()->LineTraceSingleByChannel(
+            Hit,From,To,ECC_Visibility,Query);
+        if(bExposed && FVector::Dist2D(From,To)<1800.f)
+            UGameplayStatics::ApplyDamage(Player,20.f,nullptr,TankProxy,UDamageType::StaticClass());
+    }
+    else if (TankAttackPhase==2 && TankPhaseRemaining<=0.f)
+    {
+        TankAttackPhase=0;TankPhaseRemaining=1.5f;
+    }
+}
+
 void AMGGrayFoxMission::CreatePostCard3Service()
 {
     // Adaptation of the original MSX2's Card 3 -> guard-dog -> suspicious
@@ -839,6 +930,7 @@ void AMGGrayFoxMission::BeginPlay()
     CreateGreybox();
     CreateBossWing();
     CreatePostCard3Service();
+    CreateBuilding2TankApproach();
     // Connected vertical continuation after the west lift. Source-authored geometry
     // deliberately does not claim original MSX2 exact dimensions.
     SpawnBlock(TEXT("B1RoofDeck"), FVector(10000.f,0.f,530.f), FVector(22.f,10.f,1.f), true);
@@ -874,7 +966,7 @@ void AMGGrayFoxMission::BeginPlay()
         const uint32 F = Save->MissionFlags;
         const bool bLegacy = Save->SchemaVersion == 1;
         const bool bRecognizedSchema = bLegacy || Save->SchemaVersion == 2
-            || Save->SchemaVersion == 3 || Save->SchemaVersion == 4 || Save->SchemaVersion == 5;
+            || Save->SchemaVersion == 3 || Save->SchemaVersion == 4 || Save->SchemaVersion == 5 || Save->SchemaVersion == 6;
         const bool bValid = bRecognizedSchema
             && (F & ~(bLegacy ? 63u : 16383u)) == 0
             && (!(F & MG_FOX_CAPTURED) || (F & MG_FOX_CONFISCATED))
@@ -890,6 +982,11 @@ void AMGGrayFoxMission::BeginPlay()
             && (!(F & MG_FOX_CARD3_RECOVERED) || (F & MG_FOX_SHOTMAKER_DEFEATED))
             && (!(F & MG_FOX_SLICE_COMPLETED) || (F & MG_FOX_CARD3_RECOVERED));
         const FVector P = Save->CheckpointLocation;
+        const bool bBuilding2Checkpoint = Save->SchemaVersion >= 6
+            && Save->bParachuteTaken && Save->bKidDefeated && Save->bHindDefeated
+            && Save->bBuilding2Active && (F & MG_FOX_SLICE_COMPLETED)
+            && P.X>=11200.f && P.X<=14500.f
+            && FMath::Abs(P.Y)<=450.f && P.Z>=-95.f && P.Z<=180.f;
         const bool bRoofCheckpoint = Save->SchemaVersion >= 5
             && Save->bParachuteTaken && Save->bKidDefeated
             && Save->bServiceWallOpen && Save->bRoofActive
@@ -897,7 +994,7 @@ void AMGGrayFoxMission::BeginPlay()
             && P.X >= 8760.f && P.X <= 10900.f
             && FMath::Abs(P.Y) <= 450.f
             && P.Z >= 590.f && P.Z <= 850.f;
-        const bool bPositionSafe = bRoofCheckpoint || (!P.ContainsNaN()
+        const bool bPositionSafe = !P.ContainsNaN() && (bBuilding2Checkpoint || bRoofCheckpoint || (!P.ContainsNaN()
             && P.X >= ((F & MG_FOX_CAPTURED) ? -1160.f : -3790.f)
             && P.X <= ((F & MG_FOX_CAPTURED)
                 ? ((F & MG_FOX_SLICE_COMPLETED) ? (Save->bServiceWallOpen && Save->bServiceChargeCollected ? 7830.f : 5480.f)
@@ -911,7 +1008,7 @@ void AMGGrayFoxMission::BeginPlay()
             && (!(F & MG_FOX_CAPTURED)
                 || ((F & MG_FOX_EXIT_WALL_BREACHED) || P.X < 420.f))
             // Later boss checkpoints cannot appear before the prison exit.
-            && ((F & MG_FOX_LEFT_PRISON) || P.X < 1300.f));
+            && ((F & MG_FOX_LEFT_PRISON) || P.X < 1300.f)));
         // A forged roof checkpoint must not bypass the original mission flags.
         if (bValid && bPositionSafe
             && ((F & MG_FOX_CAPTURED) || (F & MG_FOX_DETENTION_INTELLIGENCE)
@@ -939,6 +1036,20 @@ void AMGGrayFoxMission::BeginPlay()
                 HindPhase = FMath::Clamp(Save->HindPhase,0,3);
                 HindPhaseTime = FMath::Clamp(Save->HindPhaseTime,.0f,6.f);
                 HindTravelTime = FMath::Clamp(Save->HindTravelTime,0.f,100000.f);
+                if (Save->SchemaVersion>=6 && bHindDefeated)
+                {
+                    bBuilding2Active=Save->bBuilding2Active;
+                    bTankDefeated=Save->bTankDefeated;
+                    TankHitsRemaining=bTankDefeated?0:FMath::Clamp(Save->TankHitsRemaining,1,3);
+                    Building2MinesRemaining=FMath::Clamp(Save->Building2MinesRemaining,0,4);
+                    TankPatrolX=FMath::Clamp(Save->TankPatrolX,12000.f,13800.f);
+                    TankDirection=Save->TankDirection==-1?-1:1;
+                    TankAttackPhase=FMath::Clamp(Save->TankAttackPhase,0,2);
+                    TankPhaseRemaining=FMath::Clamp(Save->TankPhaseRemaining,0.f,5.f);
+                    for(int32 Site:Save->ArmedTankMineSites)
+                        if(Site>=0&&Site<3&&!ArmedTankMineSites.Contains(Site))
+                            ArmedTankMineSites.Add(Site);
+                }
             }
             if (bKidDefeated && IsValid(MachinegunKid)) MachinegunKid->Destroy();
             if (bParachuteTaken && IsValid(ParachutePack)) ParachutePack->SetActorHiddenInGame(true);
@@ -1018,6 +1129,8 @@ void AMGGrayFoxMission::RestoreVisualState()
         PlantedTransmitter->SetActorHiddenInGame(
             !(Flags & MG_FOX_TRANSMITTER_PLANTED)
             || (Flags & MG_FOX_TRANSMITTER_REMOVED));
+    if(IsValid(TankProxy))TankProxy->SetActorHiddenInGame(bTankDefeated);
+    if(IsValid(TankTurretProxy))TankTurretProxy->SetActorHiddenInGame(bTankDefeated);
     if (IsValid(HindProxy)) HindProxy->SetActorHiddenInGame(bHindDefeated);
     if (IsValid(HindRotor)) HindRotor->SetActorHiddenInGame(bHindDefeated);
     if (IsValid(Shotmaker))
@@ -1137,13 +1250,22 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
         UGameplayStatics::CreateSaveGameObject(UMGGrayFoxSaveGame::StaticClass()));
     if (!Save) return;
-    Save->SchemaVersion = 5;
+    Save->SchemaVersion = 6;
     Save->MissionFlags = Flags;
     Save->bServiceChargeCollected = bServiceChargeCollected;
     Save->bServiceWallOpen = bServiceWallOpen;
     Save->bRelayIntel = bRelayIntel;
     Save->bKidDefeated = bKidDefeated;
     Save->bParachuteTaken = bParachuteTaken;
+    Save->bBuilding2Active = bBuilding2Active;
+    Save->bTankDefeated = bTankDefeated;
+    Save->TankHitsRemaining = TankHitsRemaining;
+    Save->Building2MinesRemaining = Building2MinesRemaining;
+    Save->ArmedTankMineSites = ArmedTankMineSites;
+    Save->TankPatrolX = TankPatrolX;
+    Save->TankDirection = TankDirection;
+    Save->TankAttackPhase = TankAttackPhase;
+    Save->TankPhaseRemaining = TankPhaseRemaining;
     Save->bRoofActive = bRoofActive;
     Save->bHindDefeated = bHindDefeated;
     Save->HindHitsRemaining = HindHitsRemaining;
@@ -1353,6 +1475,44 @@ bool AMGGrayFoxMission::CanReach(
 bool AMGGrayFoxMission::TryServiceInteraction(AMGPlayerCharacter* Player)
 {
     if (!(Flags & MG_FOX_SLICE_COMPLETED)) return false;
+    if (bHindDefeated && bRoofActive && CanReach(Player,Building2Entry,180.f))
+    {
+        bRoofActive=false;bBuilding2Active=true;
+        Player->SetActorLocation(FVector(11650.f,0.f,-11.f),false,nullptr,
+                                 ETeleportType::TeleportPhysics);
+        Dialogue=TEXT("BUILDING 2 — TRACKED ARMOUR PATROL.");
+        DialogueTimeRemaining=3.f;SaveProgress(Player);return true;
+    }
+    if (bBuilding2Active && CanReach(Player,Building2Return,180.f))
+    {
+        bBuilding2Active=false;bRoofActive=true;
+        Player->SetActorLocation(FVector(10700.f,0.f,670.f),false,nullptr,
+                                 ETeleportType::TeleportPhysics);
+        Dialogue=TEXT("BUILDING 1 ROOF — RETURN ACCESS OPEN.");
+        DialogueTimeRemaining=2.5f;SaveProgress(Player);return true;
+    }
+    if (bBuilding2Active && !bTankDefeated)
+    {
+        for (int32 I=0;I<TankMineMarkers.Num();++I)
+        {
+            if (!CanReach(Player,TankMineMarkers[I],175.f) || ArmedTankMineSites.Contains(I))
+                continue;
+            if(Building2MinesRemaining<=0)
+            {
+                Dialogue=TEXT("MINE SUPPLY EXHAUSTED. FALL BACK.");
+                DialogueTimeRemaining=2.f;return true;
+            }
+            if(FMath::Abs(TankPatrolX-(12100.f+800.f*I))<200.f)
+            {
+                Dialogue=TEXT("TRACK OCCUPIED. WAIT FOR THE TANK TO PASS.");
+                DialogueTimeRemaining=2.f;return true;
+            }
+            --Building2MinesRemaining;
+            ArmedTankMineSites.Add(I);
+            Dialogue=TEXT("MINE ARMED ON TRACK. RETREAT TO COVER.");
+            DialogueTimeRemaining=2.5f;SaveProgress(Player);return true;
+        }
+    }
     if (bParachuteTaken && !bRoofActive && CanReach(Player, RoofLiftEntry, 185.f))
     {
         bRoofActive = true;
@@ -1913,6 +2073,12 @@ FString AMGGrayFoxMission::GetObjectiveText() const
         return TEXT("Investigate the secured storeroom for a way forward.");
     if (!(Flags & MG_FOX_SLICE_COMPLETED))
         return TEXT("Find the route deeper into Outer Heaven.");
+    if (bBuilding2Active || (bHindDefeated && !bRoofActive && bParachuteTaken && SavedPosition.X>11000.f))
+    {
+        if(bTankDefeated)return TEXT("Tank immobilised. Scout the sealed Building 2 road.");
+        return FString::Printf(TEXT("Lay mines on the tank track. %d mines remain."),
+                               Building2MinesRemaining);
+    }
     if (bParachuteTaken)
     {
         if (bHindDefeated) return TEXT("Hind D disabled. Return by the west lift.");
@@ -2269,6 +2435,7 @@ void AMGGrayFoxMission::Tick(float Dt)
         }
         TickDispatch(Player, Dt);
         TickHindPrototype(Player, Dt);
+        TickBuilding2Tank(Player, Dt);
         const FVector CurrentPosition = Player->GetActorLocation();
         const APlayerController* PC = Cast<APlayerController>(Player->GetController());
         const FRotator View = PC ? PC->GetControlRotation() : Player->GetActorRotation();
