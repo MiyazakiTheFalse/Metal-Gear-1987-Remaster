@@ -67,6 +67,8 @@ void AMGMachinegunKid::BeginPlay()
     const bool bLoaded = TryUseBespokeSkeletalArt(
         TEXT("/Game/Characters/Bosses/MachinegunKid/SK_MachinegunKid_1995.SK_MachinegunKid_1995"),
         TEXT("/Game/Characters/Bosses/MachinegunKid/ABP_MachinegunKid_1995.ABP_MachinegunKid_1995_C"));
+    if (bLoaded) SetPrototypeAnimationSource(
+        TEXT("/Game/Characters/Bosses/MachinegunKid"), TEXT("MachinegunKid"));
     if (UStaticMeshComponent* GuardPistol = GetHeldWeaponVisual())
         GuardPistol->SetVisibility(false);
     if (UStaticMesh* AuthoredWeapon = LoadObject<UStaticMesh>(nullptr,
@@ -91,6 +93,13 @@ void AMGMachinegunKid::Tick(float Dt)
 {
     // This actor uses its own encounter controller. Patrol logic would run a second weapon.
     AActor::Tick(Dt);
+    // This boss deliberately bypasses Guard::Tick AI, but still receives the
+    // same presentation-only rig driver with phase-specific body acting.
+    const FName Acting = IsIncapacitated() ? TEXT("Down") :
+        Beat == EBeat::Reload ? TEXT("Reaching") :
+        Beat == EBeat::Sight || Beat == EBeat::Burst ? TEXT("Aim") :
+        TEXT("IdleWary");
+    PlayPrototypeActing(Acting);
     AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (!Player || IsIncapacitated()) return;
     const FVector P = Player->GetActorLocation();
