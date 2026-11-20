@@ -186,13 +186,15 @@
           "speaker": "schneider",
           "text": "Some of it was rushed. I never saw",
           "clip": "VO_schneider_cell_05",
-          "recorded": false
+          "recorded": false,
+          "performance_text": "Some of it was rushed. I never saw the prison plans, Snake."
         },
         {
           "speaker": "schneider",
           "text": "the prison plans, Snake.",
-          "clip": "VO_schneider_cell_06",
-          "recorded": false
+          "clip": null,
+          "recorded": false,
+          "continuation_of": "VO_schneider_cell_05"
         },
         {
           "speaker": "snake",
@@ -216,13 +218,15 @@
           "speaker": "schneider",
           "text": "Keep your bearings. I never saw the",
           "clip": "VO_schneider_fox_02",
-          "recorded": false
+          "recorded": false,
+          "performance_text": "Keep your bearings. I never saw the prison plans. I can't map your route."
         },
         {
           "speaker": "schneider",
           "text": "prison plans. I can't map your route.",
-          "clip": "VO_schneider_fox_03",
-          "recorded": false
+          "clip": null,
+          "recorded": false,
+          "continuation_of": "VO_schneider_fox_02"
         }
       ]
     },
@@ -234,13 +238,15 @@
           "speaker": "schneider",
           "text": "If they've modified this area,",
           "clip": "VO_schneider_escape_01",
-          "recorded": false
+          "recorded": false,
+          "performance_text": "If they've modified this area, the original structure might show it."
         },
         {
           "speaker": "schneider",
           "text": "the original structure might show it.",
-          "clip": "VO_schneider_escape_02",
-          "recorded": false
+          "clip": null,
+          "recorded": false,
+          "continuation_of": "VO_schneider_escape_01"
         },
         {
           "speaker": "schneider",
@@ -306,13 +312,15 @@
           "speaker": "big_boss",
           "text": "Find Gray Fox. Don't lose sight of",
           "clip": "VO_boss_fox_01",
-          "recorded": false
+          "recorded": false,
+          "performance_text": "Find Gray Fox. Don't lose sight of the objective."
         },
         {
           "speaker": "big_boss",
           "text": "the objective.",
-          "clip": "VO_boss_fox_02",
-          "recorded": false
+          "clip": null,
+          "recorded": false,
+          "continuation_of": "VO_boss_fox_01"
         }
       ]
     },
@@ -389,5 +397,7 @@
       ]
     }
   ],
-  "unmet": "No voice samples, masters, processed exports, approval sessions, lip-sync, spatial mix or UE sound assets currently present."
+  "unmet": "No voice samples, masters, processed exports, approval sessions, lip-sync, spatial mix or UE sound assets currently present.",
+  "audio_clip_count": 36,
+  "subtitle_line_count": 40
 }
