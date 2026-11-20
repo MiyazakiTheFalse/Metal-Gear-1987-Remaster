@@ -27,7 +27,18 @@ const SCENES=Object.freeze({
  shotmaker:{label:'SHOOT GUNNER',duration:1.28,tag:'THREE-SHOT FIRING PATTERN',
   shots:[{to:1.28,subject:'boss',yaw:2.42,radius:3.0,height:1.68,focusY:1.26,orbit:-.15}]},
  card3:{label:'CLEARANCE UPDATED',duration:1.22,tag:'CARD 3  /  RECOVERED',
-  shots:[{to:1.22,subject:'player',yaw:2.44,radius:2.42,height:1.77,focusY:1.0,orbit:.05}]}
+  shots:[{to:1.22,subject:'player',yaw:2.44,radius:2.42,height:1.77,focusY:1.0,orbit:.05}]},
+ wake:{label:'OUTER HEAVEN  /  DETENTION',duration:3.45,tag:'SNAKE  //  PRISON CELL',
+  shots:[
+   {to:1.30,subject:'snake',yaw:2.30,radius:4.1,height:2.8,focusY:1.06,orbit:-.11},
+   {to:2.45,subject:'snake',yaw:1.40,radius:2.35,height:1.83,focusY:1.15,orbit:-.05},
+   {to:3.45,subject:'snake',yaw:2.65,radius:3.0,height:2.0,focusY:1.15,orbit:.10}
+  ]},
+ down:{label:'SECURITY WING  /  SILENCE',duration:2.10,tag:'SHOOT GUNNER  //  DEFEATED',
+  shots:[
+   {to:.93,subject:'boss',yaw:-2.15,radius:3.2,height:1.72,focusY:1.05,orbit:.08},
+   {to:2.10,subject:'snake',yaw:2.35,radius:3.5,height:2.15,focusY:1.15,orbit:.08}
+  ]}
 });
 let scene=null,view=null,seen=new Set();
 function ensure(){
@@ -65,23 +76,29 @@ function start(id,subjects,flags={}){
  if(seen.has(id))return false;
  const presentation=ensure();
  if(!presentation)return false;
- scene={id,definition:SCENES[id],clock:0,subjects,locked:false};
+ scene={id,definition:SCENES[id],clock:0,subjects,
+  locked:flags.blocking===true,onDone:typeof flags.onDone==='function'?flags.onDone:null};
  seen.add(id);
  presentation.querySelector('.filmTag').textContent=SCENES[id].tag;
  presentation.querySelector('.filmName').textContent=SCENES[id].label;
  presentation.classList.add('visible');
  return true;
 }
-function finish(){
+function finish(skipped=false){
+ if(!scene)return false;
+ const old=scene;
+ scene=null; // Clear before callback: may chain to next scene.
  if(view)view.classList.remove('visible');
- scene=null;
+ old.onDone?.(!!skipped);
+ return true;
 }
 function update(dt,flags={}){
  if(!scene)return null;
  if(flags.paused||dt<=0)return null;
  // Any real incoming damage or combat engagement takes priority over framing.
  // A camera can NEVER pull aim away when the player is currently shooting.
- if(flags.playerAiming||flags.playerHit||flags.combatAlert){finish();return null;}
+ if(!scene.locked&&(flags.playerAiming||flags.playerHit||
+     flags.combatAlert||flags.playerMoving)){finish(true);return null;}
  scene.clock+=Math.max(0,dt);
  const d=scene.definition;
  if(scene.clock>=d.duration){finish();return null;}
@@ -91,15 +108,16 @@ function update(dt,flags={}){
   finish();return null;
  }
  const time=scene.clock;
- const theta=shot.yaw+(shot.orbit||0)*time;
+ const theta=shot.yaw+(flags.reducedMotion?0:(shot.orbit||0)*time);
  const focus=[entity.x,shot.focusY,entity.z];
  const eye=[entity.x+Math.cos(theta)*shot.radius,
   shot.height,entity.z+Math.sin(theta)*shot.radius];
  return {id:scene.id,eye,focus,elapsed:time,duration:d.duration};
 }
-function skip(){if(!scene)return false;finish();return true}
+function skip(){if(!scene)return false;return finish(true)}
 root.MGCinematicDirector={start,update,skip,finish,
  get active(){return scene?.id||null},
+ get blocking(){return !!scene?.locked},
  get scenes(){return SCENES},
  get seen(){return [...seen]}};
 })(typeof window==='undefined'?globalThis:window);
