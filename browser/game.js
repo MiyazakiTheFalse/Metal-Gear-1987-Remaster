@@ -225,6 +225,12 @@ for(let i=0;i<sourceTruckCentres.length;i++){
  for(const side of [-1,1])for(const z of [3.12,4.32])
   add(name+' wheel',x+side*.89,.35,z,.26,.65,.49,color.dark,mat.steel).mesh='cylinder';
 }
+const originalRationTarget={x:-30.35,z:3.52};
+const originalRationProp=add('ration inside western original truck',
+ originalRationTarget.x,.39,originalRationTarget.z,.32,.23,.24,color.cloth,mat.fabric);
+const originalBinocularsTarget={x:-24.75,z:3.52};
+const originalBinocularsProp=add('binoculars inside eastern original truck',
+ originalBinocularsTarget.x,.41,originalBinocularsTarget.z,.31,.16,.19,color.dark,mat.steel);
 const originalCard1Target={x:-27.55,z:3.52};
 const originalCard1Prop=add('Card 1 inside central original truck',
  originalCard1Target.x,.40,originalCard1Target.z,.33,.13,.23,
@@ -728,8 +734,10 @@ const smokeSlot={name:'CIGARETTES',usable:false};
 const canonicalBoxSlot={name:'CARDBOARD BOX [F3 / CARD 2]',usable:false};
 inventories.items.push(boxSlot,smokeSlot,canonicalBoxSlot);
 const card1Slot={name:'CARD 1',usable:false};
-inventories.items.push(card1Slot);
-let firstCardEarned=false;
+const rationSlot=inventories.items[1];
+const binocularsSlot={name:'BINOCULARS',usable:false};
+inventories.items.push(card1Slot,binocularsSlot);
+let firstCardEarned=false,rationEarned=false,rationRemaining=0,binocularsEarned=false;
 const bay={x:-26.8,z:-2.3};
 const lens={x:-19.2,z:-4.55};
 const beamX=-21.8;
@@ -739,7 +747,8 @@ for(let x=belt.from;x<=belt.to;x+=.75)
  detail('packing belt cleat',x,.08,belt.z,.04,.035,belt.width,color.metal,mat.steel);
 const nearBelt=()=>stage<0&&Math.abs(player.z-belt.z)<belt.width/2&&player.x>=belt.from&&player.x<belt.to;
 const world={handgun:false,box:false,boxed:false,freightAmbientHeard:false,moved:false,smokeUntil:-10,smokeX:0,smokeZ:0,
- hallOpen:false,cameraOff:false,lock:0,reported:false,foxFollowup:false,preview:false};
+ hallOpen:false,cameraOff:false,lock:0,reported:false,foxFollowup:false,preview:false,
+ scouting:false};
 const parcel=detail('dispatch carton',bay.x,.46,bay.z,1.08,.9,.84,[.60,.43,.25],mat.fabric);
 const sidearm=detail('handgun slide',-28.65,.74,1.8,.33,.085,.058,color.metal,mat.steel);
 detail('issue shelf',-28.65,.66,1.8,.88,.07,.53,color.metal,mat.steel);
@@ -883,6 +892,11 @@ function syncEquipment(){
  boxSlot.usable=stage<0&&world.box;
  card1Slot.usable=firstCardEarned&&kitAvailable();
  originalCard1Prop.active=!firstCardEarned;
+ rationSlot.usable=rationRemaining>0&&kitAvailable();
+ originalRationProp.active=!rationEarned;
+ binocularsSlot.usable=binocularsEarned&&kitAvailable();
+ originalBinocularsProp.active=!binocularsEarned;
+ if(!binocularsSlot.usable)world.scouting=false;
  canonicalBoxSlot.usable=false;
  smokeSlot.usable=kitAvailable();
  parcel.active=tape.active=!world.box;
@@ -938,7 +952,8 @@ function save(){
  try{
   localStorage.setItem(STORAGE,JSON.stringify({version:10,b2:{...b2,armed:[...b2.armed]},roof:{active:roof.active,defeated:roof.defeated,hp:roof.hp,grenades:roof.grenades,phase:roof.phase,clock:roof.clock,lap:roof.lap,flyX:roof.flyX,flyZ:roof.flyZ},service:{charge:service.charge,open:service.open,intel:service.intel,kidDown:service.kidDown,parachute:service.parachute},storesOpen,legacyFloorCard,freight:{handgun:world.handgun,box:world.box,freightAmbientHeard:world.freightAmbientHeard,cameraOff:world.cameraOff,foxFollowup:world.foxFollowup,preview:world.preview,hallOpen:world.hallOpen},propertyTag:{state:tag.state,point:tag.point},stage,cardDrop,x:player.x,z:player.z,
    rounds,equippedWeapon,sealedWeapon,recoveredGear,wallHits,health,
-   firstCardEarned,storySeen:window.MGCharacterStory?.heard()||[],
+   firstCardEarned,rationEarned,rationRemaining,binocularsEarned,
+   storySeen:window.MGCharacterStory?.heard()||[],
    bossHP:boss.hp,bossRest:stage>=5?{x:boss.x,z:boss.z,yaw:boss.yaw}:null,
    guardBodies:guards.map((g,i)=>g.knocked&&!g.boss?{
     i,x:g.x,z:g.z,unconscious:g.knockedOut===true}:null).filter(Boolean),
@@ -956,6 +971,10 @@ function load(){
  if(data.stage<(legacy?0:-2)||data.stage>(legacy?4:data.version===4?6:data.version>=10?10:data.version>=9?9:8))return false;
  stage=legacy?Math.min(3,data.stage):data.stage;
  firstCardEarned=data.firstCardEarned===true;
+ rationEarned=data.rationEarned===true;
+ rationRemaining=rationEarned?clamp(Number.isInteger(data.rationRemaining)?data.rationRemaining:1,0,1):0;
+ binocularsEarned=data.binocularsEarned===true;
+ world.scouting=false; // Optical view is input state, not a checkpoint promise.
  // Version 4 opened the exit on boss defeat. Preserve that earned access.
  if(data.version===4&&stage>=5)stage+=2;
  service.charge=stage>=8&&data.service?.charge===true;service.open=service.charge&&data.service?.open===true;
@@ -1329,6 +1348,20 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
    }
    if(exitAction==='locked'){playCue('denied');popup('Reader requires Card 3.');return;}
 
+   if(stage<0&&!rationEarned&&dist(player,originalRationTarget)<1.5&&
+      !lineBlockedSight(player,originalRationTarget,1.35,.4)){
+     rationEarned=true;rationRemaining=1;
+     syncEquipment();playCue('card');
+     popup('WEST SUPPLY TRUCK — RATION. Use from ITEMS when injured.',3);
+     save();return;
+   }
+   if(stage<0&&!binocularsEarned&&dist(player,originalBinocularsTarget)<1.5&&
+      !lineBlockedSight(player,originalBinocularsTarget,1.35,.4)){
+     binocularsEarned=true;
+     syncEquipment();playCue('card');
+     popup('EAST SUPPLY TRUCK — BINOCULARS. Select in ITEMS to scout.',3);
+     save();return;
+   }
    if(stage<0&&!firstCardEarned&&dist(player,originalCard1Target)<1.5&&
       !lineBlockedSight(player,originalCard1Target,1.35,.4)){
      firstCardEarned=true;
@@ -1449,12 +1482,25 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
    else say(stage<0?'schneider':stage===0?'bigBoss':'continueMission');
  }
  else if(name==='equipitem'||name==='equipweapon'){equipOpen=name==='equipitem'?'items':'weapons';eqIndex=0;discovery.openedEquip=true;drawEquipment();playCue('menu');}
- else if(name==='equipclose'){if(equipOpen){const slot=inventories[equipOpen][eqIndex];if(equipOpen==='items'&&slot.usable){
+ else if(name==='equipclose'){if(equipOpen){const slot=inventories[equipOpen][eqIndex];
+  const ownedOnSelection=slot.usable;let itemFeedback='';
+  if(equipOpen==='items'&&slot.usable){
    world.boxed=slot===boxSlot&&setPlayerStance(1);
    if(world.boxed){player.cover=false;player.coverNormal=null;}
    if(slot===smokeSlot){world.smokeX=player.x;world.smokeZ=player.z;world.smokeUntil=gameTime+3;}
+   if(slot===rationSlot){
+    if(health>=100)itemFeedback='HEALTH FULL — RATION SAVED';
+    else{const gain=Math.min(45,100-health);health+=gain;
+     rationRemaining--;syncEquipment();save();playCue('select');
+     itemFeedback='RATION USED · +'+Math.round(gain)+' HEALTH';}
+   }
+   if(slot===binocularsSlot){world.scouting=!world.scouting;
+    itemFeedback=world.scouting?'BINOCULARS RAISED — SCOUT WITHOUT EXPOSURE':'BINOCULARS LOWERED';}
+   else world.scouting=false;
   }
-  if(slot.usable&&equipOpen==='weapons')equippedWeapon=slot.name;popup(slot.usable?slot.name+' SELECTED':'EQUIPMENT CONFISCATED');playCue(slot.usable?'select':'denied');equipOpen=null;drawEquipment();}}
+  if(ownedOnSelection&&equipOpen==='weapons')equippedWeapon=slot.name;
+  popup(itemFeedback||(ownedOnSelection?slot.name+' SELECTED':'EQUIPMENT CONFISCATED'));
+  playCue(ownedOnSelection?'select':'denied');equipOpen=null;drawEquipment();}}
  else if(name==='next'||name==='previous'){if(equipOpen){const slots=inventories[equipOpen];eqIndex=(eqIndex+(name==='next'?1:-1)+slots.length)%slots.length;drawEquipment();playCue('menu')}}
  else if(name==='tips'){discovery.showTips=!discovery.showTips;tipToggle.checked=discovery.showTips;popup(discovery.showTips?'TRAINING PROMPTS ON':'TRAINING PROMPTS OFF')}
 }
@@ -2429,7 +2475,7 @@ function cameraPlanes(m){
  }
  return planes;
 }
-function drawFrame(t,dt){let w=canvas.clientWidth,h=canvas.clientHeight,scale=window.devicePixelRatio>1?Math.min(1.5,window.devicePixelRatio):1;let ww=Math.max(2,Math.floor(w*scale)),hh=Math.max(2,Math.floor(h*scale));if(canvas.width!==ww||canvas.height!==hh){canvas.width=ww;canvas.height=hh;gl.viewport(0,0,ww,hh)}const target=updateCamera(dt);const pv=m4.mul(m4.persp(Math.PI/(player.aim?3.6:3.1),ww/hh,.075,120),m4.look(cam.eye,target));gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(program);gl.uniformMatrix4fv(loc.pv,false,new Float32Array(pv));gl.uniform3f(loc.eye,...cam.eye);gl.uniform1f(loc.time,t);drawn=0;
+function drawFrame(t,dt){let w=canvas.clientWidth,h=canvas.clientHeight,scale=window.devicePixelRatio>1?Math.min(1.5,window.devicePixelRatio):1;let ww=Math.max(2,Math.floor(w*scale)),hh=Math.max(2,Math.floor(h*scale));if(canvas.width!==ww||canvas.height!==hh){canvas.width=ww;canvas.height=hh;gl.viewport(0,0,ww,hh)}const target=updateCamera(dt);const pv=m4.mul(m4.persp(Math.PI/(world.scouting?5.6:player.aim?3.6:3.1),ww/hh,.075,120),m4.look(cam.eye,target));gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(program);gl.uniformMatrix4fv(loc.pv,false,new Float32Array(pv));gl.uniform3f(loc.eye,...cam.eye);gl.uniform1f(loc.time,t);drawn=0;
  const planes=cameraPlanes(pv);
  for(const o of geometry)if(o.active){
  const radius=o.boundRadius??(o.boundRadius=.5*Math.hypot(o.w,o.h,o.d));
@@ -2780,7 +2826,10 @@ function frame(now){requestAnimationFrame(frame);const real=clamp((now-last)/100
 }ambience(dt);for(const f of footsteps)f.life-=dt;footsteps=footsteps.filter(f=>f.life>0);shots.forEach(s=>s.life-=dt);shots=shots.filter(s=>s.life>0);for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy-=4.4*dt;p.life-=dt}particles=particles.filter(p=>p.life>0);noiseEvents.forEach(n=>n.life-=dt);noiseEvents=noiseEvents.filter(n=>n.life>0);if(awareness===0&&stage!==4&&Math.floor(gameTime/12)!==Math.floor((gameTime-dt)/12))save();if(awareness!==prevAlert)record('awareness.'+awareness);if(awareness===3&&prevAlert!==3)achievement.push({time:gameTime});prevAlert=awareness;}drawFrame(gameTime,dt);if(started)updateHUD(dt);frameCount++;if(now-frameStart>1000){$('fps').textContent=Math.round(frameCount*1000/(now-frameStart))+' FPS';frameStart=now;frameCount=0}}
 // Console contract for deterministic browser tests, never elevated to source fidelity.
 window.__mgGameDebug={get state(){return {stage,service:{...service},roof:{...roof},b2:{...b2,armed:[...b2.armed]},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
- firstCardEarned,card1World:originalCard1Prop.active?{...originalCard1Target}:null,cinematic:window.MGCinematicDirector?.active||null,cinematicSeen:window.MGCinematicDirector?.seen||[],itemSlots:inventories.items.map(i=>({name:i.name,usable:i.usable})),safeLift:{...safeLift},player:{...player},bodyCollider:{...bodyShape(),orientation:player.stance===2?'horizontal':'vertical',samples:bodySamples(player.x,player.z,player.stance,player.yaw)},awareness,paused,equipOpen,noiseEvents:noiseEvents.map(n=>({...n})),guards:guards.map(g=>({state:g.state,x:g.x,z:g.z,yaw:g.yaw,last:{...g.last},investigateUntil:g.investigateUntil||0,lastKnockId:g.lastKnockId||0,boxInspectionAge:g.boxInspectionAge||0,boxIdentitySpoken:!!g.boxIdentitySpoken,knocked:g.knocked,unconscious:!!g.knockedOut,dragged:!!g.dragged,aimSubject:g.aimSubject,aimTime:g.aimTime,fireCooldown:g.fireCooldown,shotVisual:g.shotVisual})),fox:{x:fox.x,z:fox.z,hp:fox.hp,alive:fox.alive,mode:fox.mode,stance:fox.stance,moveSpeed:fox.moveSpeed},missionFailed,coverAssets:coverAssets.map(c=>({...c})),activeTracers:shots.filter(s=>s.tracer).length,damagePulse,damageDirection,cinematic:window.MGCinematicDirector?.active||null,cinematicBlocking:!!window.MGCinematicDirector?.blocking,foxListeningLearned:world.foxFollowup,storyEvents:window.MGCharacterStory?.heard()||[],originalMapVerified:false,renderedFrames:drawn,visualVersion:'original_humanoid_mk4_escort_armed_guards',meshKinds:Object.keys(meshLibrary),materialAtlas:{...materialAtlas},environmentModelCounts:{bedParts:sceneDetail.filter(o=>o.name.startsWith('cot ')||o.name.startsWith('blanket ')||o.name.startsWith('pillow ')||o.name==='folded wool blanket').length,lockerDetails:sceneDetail.filter(o=>o.name.startsWith('locker ')).length,cabinetDetails:sceneDetail.filter(o=>o.name.includes('front trim')||o.name.includes('bolt head')).length,ceilingsBlockCamera:cameraOnlySolids.some(o=>o.name==='ceiling'&&o.active)},camEye:[...cam.eye],cameraBlocked:cameraPositionPenetrates(cam.eye),cameraBelowFloor:cam.eye[1]<.28,activePadIndex,padPrev:[...padPrev],started}},readPad:()=>readGamepad(),start:()=>start(false),act:action,teleport:(x,z)=>{player.x=x;player.z=z},setCamera:(yaw,pitch=0)=>{cam.yaw=yaw;cam.pitch=pitch},stepCamera:(dt=.016)=>updateCamera(dt),canOccupy:(x,z,stance,yaw=player.yaw)=>canOccupyBody(x,z,stance,yaw),moveBody:(vx,vz,dt)=>movePlayer(vx,vz,dt),step:(dt)=>{gameTime+=dt;updatePlayer(dt);updateFox(dt);updateGuards(dt)},damageFox:(n)=>damageFox(n),stepFox:(dt)=>updateFox(dt),sightBlocked:(a,b,fromY=1.58,toY=1.52)=>lineBlockedSight(a,b,fromY,toY),radarVisionDistance:(index,angle,range=10)=>radarVisionDistance(guards[index],angle,range),findPath:(a,b)=>pathfind(a,b),foxRouteRisk:(p)=>foxRouteRisk(p),guardSeesPosition:(index,pos)=>guardSeesPosition(guards[index],pos),reset};
+ firstCardEarned,rationEarned,rationRemaining,binocularsEarned,
+ rationWorld:originalRationProp.active?{...originalRationTarget}:null,
+ binocularsWorld:originalBinocularsProp.active?{...originalBinocularsTarget}:null,
+ card1World:originalCard1Prop.active?{...originalCard1Target}:null,cinematic:window.MGCinematicDirector?.active||null,cinematicSeen:window.MGCinematicDirector?.seen||[],itemSlots:inventories.items.map(i=>({name:i.name,usable:i.usable})),safeLift:{...safeLift},player:{...player},bodyCollider:{...bodyShape(),orientation:player.stance===2?'horizontal':'vertical',samples:bodySamples(player.x,player.z,player.stance,player.yaw)},awareness,paused,equipOpen,noiseEvents:noiseEvents.map(n=>({...n})),guards:guards.map(g=>({state:g.state,x:g.x,z:g.z,yaw:g.yaw,last:{...g.last},investigateUntil:g.investigateUntil||0,lastKnockId:g.lastKnockId||0,boxInspectionAge:g.boxInspectionAge||0,boxIdentitySpoken:!!g.boxIdentitySpoken,knocked:g.knocked,unconscious:!!g.knockedOut,dragged:!!g.dragged,aimSubject:g.aimSubject,aimTime:g.aimTime,fireCooldown:g.fireCooldown,shotVisual:g.shotVisual})),fox:{x:fox.x,z:fox.z,hp:fox.hp,alive:fox.alive,mode:fox.mode,stance:fox.stance,moveSpeed:fox.moveSpeed},missionFailed,coverAssets:coverAssets.map(c=>({...c})),activeTracers:shots.filter(s=>s.tracer).length,damagePulse,damageDirection,cinematic:window.MGCinematicDirector?.active||null,cinematicBlocking:!!window.MGCinematicDirector?.blocking,foxListeningLearned:world.foxFollowup,storyEvents:window.MGCharacterStory?.heard()||[],originalMapVerified:false,renderedFrames:drawn,visualVersion:'original_humanoid_mk4_escort_armed_guards',meshKinds:Object.keys(meshLibrary),materialAtlas:{...materialAtlas},environmentModelCounts:{bedParts:sceneDetail.filter(o=>o.name.startsWith('cot ')||o.name.startsWith('blanket ')||o.name.startsWith('pillow ')||o.name==='folded wool blanket').length,lockerDetails:sceneDetail.filter(o=>o.name.startsWith('locker ')).length,cabinetDetails:sceneDetail.filter(o=>o.name.includes('front trim')||o.name.includes('bolt head')).length,ceilingsBlockCamera:cameraOnlySolids.some(o=>o.name==='ceiling'&&o.active)},camEye:[...cam.eye],cameraBlocked:cameraPositionPenetrates(cam.eye),cameraBelowFloor:cam.eye[1]<.28,activePadIndex,padPrev:[...padPrev],started}},readPad:()=>readGamepad(),start:()=>start(false),act:action,teleport:(x,z)=>{player.x=x;player.z=z},setCamera:(yaw,pitch=0)=>{cam.yaw=yaw;cam.pitch=pitch},stepCamera:(dt=.016)=>updateCamera(dt),canOccupy:(x,z,stance,yaw=player.yaw)=>canOccupyBody(x,z,stance,yaw),moveBody:(vx,vz,dt)=>movePlayer(vx,vz,dt),step:(dt)=>{gameTime+=dt;updatePlayer(dt);updateFox(dt);updateGuards(dt)},damageFox:(n)=>damageFox(n),stepFox:(dt)=>updateFox(dt),sightBlocked:(a,b,fromY=1.58,toY=1.52)=>lineBlockedSight(a,b,fromY,toY),radarVisionDistance:(index,angle,range=10)=>radarVisionDistance(guards[index],angle,range),findPath:(a,b)=>pathfind(a,b),foxRouteRisk:(p)=>foxRouteRisk(p),guardSeesPosition:(index,pos)=>guardSeesPosition(guards[index],pos),reset};
 // Deterministic development-only combat hook (absent unless tests opt in).
 if(window.__MG_TEST__){
  window.__mgGameDebug.testSetGuard=(index,settings)=>{
