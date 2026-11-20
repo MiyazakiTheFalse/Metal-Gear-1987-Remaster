@@ -27,7 +27,7 @@ REQUIRED_JOINTS = {
     "hand_L", "hand_R", "foot_L", "foot_R",
 }
 REQUIRED_ANIMS = {
-    "Idle", "Walk", "Run", "Crouch", "Prone", "Down", "Aim",
+    "Idle", "IdleAlert", "IdleLook", "IdleWary", "Walk", "Run", "Crouch", "Prone", "Down", "Aim",
     "Cover", "Melee", "Reaching", "Hit", "RadioListen",
     "CrouchAim", "ProneAim",
 }
