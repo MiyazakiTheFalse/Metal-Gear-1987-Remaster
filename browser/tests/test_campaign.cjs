@@ -243,6 +243,36 @@ assert.equal(reloaded.game.state.freight.box,true);
 assert.equal(reloaded.game.state.freight.boxed,false);
 console.log('PASS: carton pickup, belt arrival, cigarette use and checkpointed camera power.');
 
+const curious=boot();
+curious.button('start');
+curious.game.teleport(-26.8,-2.3);
+curious.game.act('interact');
+curious.game.act('equipitem');
+for(let i=0;i<3;i++)curious.game.act('next');
+curious.game.act('equipclose');
+assert.equal(curious.game.state.freight.boxed,true,'cardboard disguise equipped');
+curious.game.teleport(-18,0);
+curious.game.testSetGuard(0,{x:-19,z:0,yaw:0,state:0,suspicion:0,knocked:false});
+curious.game.testStepGuards(.1);
+assert.ok(curious.game.state.guards[0].state>=1 ||
+ curious.game.state.guards[0].investigateUntil>0 ||
+ curious.game.state.guards[0].last.x>-19.1,
+ 'a guard looking directly at a near stationary unexpected box investigates');
+const distant=boot();
+distant.button('start');
+distant.game.teleport(-26.8,-2.3);distant.game.act('interact');
+distant.game.act('equipitem');
+for(let i=0;i<3;i++)distant.game.act('next');
+distant.game.act('equipclose');
+distant.game.teleport(-18,0);
+distant.game.testSetGuard(0,{x:-25,z:0,yaw:0,state:0,suspicion:0,knocked:false});
+distant.game.testStepGuards(.1);
+assert.ok(distant.game.state.guards[0].state<2,
+ 'box disguise is not automatically recognized from beyond inspection distance');
+console.log('PASS: stationary box is ordinary distant freight but prompts real close-up curiosity.');
+
+
+
 const late=loadFixture({version:6,stage:8,x:28.4,z:0,health:100}).game;
 late.teleport(42.0,0);late.act('interact');
 assert.equal(late.state.service.open,false);
