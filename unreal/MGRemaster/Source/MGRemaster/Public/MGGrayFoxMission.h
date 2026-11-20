@@ -94,6 +94,11 @@ public:
 
 private:
     UPROPERTY(Transient) AMGStoryCameraDirector* StoryCamera = nullptr;
+    // The true actor remains at the real custody post until the short filmed
+    // surrender completes or is skipped; mission state authority is HERE.
+    bool bCapturePending = false;
+    bool bCaptureSkipped = false;
+    TWeakObjectPtr<AMGPlayerCharacter> PendingCapturePlayer;
     bool StartStoryCinematic(FName Scene, AMGPlayerCharacter* Player, AActor* Focus);
     TWeakObjectPtr<AMGSurveillanceCameraActor> PrisonCamera;
     TWeakObjectPtr<AMGSurveillanceCameraActor> KennelCamera;
