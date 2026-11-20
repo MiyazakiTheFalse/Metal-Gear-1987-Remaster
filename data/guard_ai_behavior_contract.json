@@ -94,7 +94,11 @@
     "occluded_footstep_refresh_seconds": 2.2,
     "clear_footstep_refresh_seconds": 1.2,
     "visual_contact_memory_seconds": 4.5,
-    "interrupted_radio_retry_window_seconds": 1.5
+    "interrupted_radio_retry_window_seconds": 1.5,
+    "audible_footstep_investigation_suspicion_threshold": 0.32,
+    "audible_footstep_investigation_memory_seconds": 2.6,
+    "confirmed_sighting_pursuit_speed_cm_per_s": 185,
+    "sound_or_report_investigation_speed_cm_per_s": 115
   },
   "examples": [
     {
@@ -206,7 +210,8 @@
     "Footsteps use a periodically refreshed coarse sound sector rather than Snake's exact live coordinates as guard search evidence.",
     "Sound evidence cannot reset the age of direct visual confirmation or indefinitely sustain confirmed combat after sight is lost.",
     "A fresh visual sighting, reported body, squad sighting or structural impact temporarily takes priority over routine footsteps.",
-    "An injured guard interrupts its pending radio call; only a later directly confirmed sighting can initiate a fresh call."
+    "An injured guard interrupts its pending radio call; only a later directly confirmed sighting can initiate a fresh call.",
+    "Audible evidence at meaningful suspicion can prompt bounded physical investigation, but guards use slower search gait unless firsthand sight is recent."
   ],
   "known_gaps": [
     "No animation-blueprint implementation of these states or authored guard voice barks.",
