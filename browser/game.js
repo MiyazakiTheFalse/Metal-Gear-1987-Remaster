@@ -2148,7 +2148,15 @@ function queueFieldActor(actor,kind,time,dt){
  fieldActors.push({role:isSnake?'snake':isFox?'fox':actor.boss?'shoot_gunner':'guard',actor,gear:isSnake&&kitAvailable()&&world.handgun,
   state:{...prior,time,strike,reach:isFox&&actor.reachAt!=null?Math.sin(Math.PI*clamp((time-actor.reachAt)/1.1,0,1)):0,boss:!!actor.boss,
    order:actor.boss&&duel.phase==='address'?Math.sin(Math.PI*clamp(duel.age/1.9,0,1)):0,
-   mouth:actor.boss&&duel.voice>time&&!actor.knocked?.45+.45*Math.sin(time*17):0,
+   mouth:actor.boss&&duel.voice>time&&!actor.knocked?.45+.45*Math.sin(time*17):
+    (dialogueQueue[0]&&
+     ((isSnake&&/snake/i.test(dialogueQueue[0].speaker||''))||
+      (isFox&&/fox/i.test(dialogueQueue[0].speaker||''))||
+      (!isSnake&&!isFox&&!actor.boss&&/guard|security/i.test(dialogueQueue[0].speaker||''))))
+      ? .22+.44*(.5+.5*Math.sin(time*16)) : 0,
+   brow:actor.hitTimer>0?1:actor.boss&&duel.phase==='shoulder'?-.8:0,
+   radio:isSnake&&dialogueQueue.some(l=>/snake|big boss|schneider/i.test(l.speaker||''))?.6:0,
+   reload:actor.boss&&duel.phase==='reload'?1:0,
    recoil:actor.boss?duel.recoil:0,hit:actor.hitTimer>0?1:0,
    aim:actor.boss?(prior.focus||0)*.8:actor.aim||actor.state===3?1:0,cover:actor.cover?.54+.46*tap:0}});
  const flat=Math.max(prior.prone,prior.down);
