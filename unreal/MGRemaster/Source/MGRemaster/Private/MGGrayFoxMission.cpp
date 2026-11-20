@@ -4,6 +4,7 @@
 #include "Engine/PointLight.h"
 #include "Components/PointLightComponent.h"
 #include "MGShootGunnerActor.h"
+#include "MGSentryDogActor.h"
 #include "MGGrayFoxSaveGame.h"
 #include "MGPlayerCharacter.h"
 #include "MGEquipmentComponent.h"
@@ -223,7 +224,11 @@ void AMGGrayFoxMission::CreateBossWing()
     // Provisional geometry, NOT J2ME original room dimensions. A connected
     // boss arena plus a physical recovery side room and Card-2 storeroom.
     SpawnBlock(TEXT("BossFloor"), FVector(2550.f, 0.f, -150.f), FVector(24.f, 10.f, 1.f), true);
-    SpawnBlock(TEXT("BossEastBoundary"), FVector(3750.f, 0.f, 90.f), FVector(.4f, 10.f, 3.8f), true);
+    // Physically connect Card 3's eastern passage to the next 1987 beat.
+    // An interactive gate at x=3610 still blocks passage until the slice's
+    // already-authoritative chapter completion transaction commits.
+    SpawnBlock(TEXT("BossEastBoundaryNorth"), FVector(3750.f, 365.f, 90.f), FVector(.4f, 2.7f, 3.8f), true);
+    SpawnBlock(TEXT("BossEastBoundarySouth"), FVector(3750.f, -365.f, 90.f), FVector(.4f, 2.7f, 3.8f), true);
     SpawnBlock(TEXT("BossNorthWallWest"), FVector(1650.f, 500.f, 90.f), FVector(5.f, .4f, 3.8f), true);
     SpawnBlock(TEXT("BossNorthWallEast"), FVector(3025.f, 500.f, 90.f), FVector(14.5f, .4f, 3.8f), true);
     Card2Door = SpawnBlock(TEXT("Card2Door"), FVector(2100.f, 500.f, 90.f), FVector(4.f, .4f, 3.8f), true);
@@ -251,6 +256,63 @@ void AMGGrayFoxMission::CreateBossWing()
     if (GetWorld())
         Shotmaker = GetWorld()->SpawnActor<AMGShootGunnerActor>(
             FVector(3100.f, 55.f, -11.f), FRotator(0.f, 180.f, 0.f));
+}
+
+void AMGGrayFoxMission::CreatePostCard3Service()
+{
+    // Adaptation of the original MSX2's Card 3 -> guard-dog -> suspicious
+    // plastic-explosive wall sequence. Layout/metres are explicitly NEW,
+    // reversible 3D interpretation, not an extracted J2ME or MSX2 map.
+    // The next room ends at an honest, solid build boundary until the
+    // explosive mechanic and further campaign are implemented and tested.
+    SpawnBlock(TEXT("PostCard3Floor"), FVector(4650.f, 0.f, -150.f),
+        FVector(18.f, 10.f, 1.f), true);
+    SpawnBlock(TEXT("PostCard3NorthBoundary"), FVector(4650.f, 500.f, 90.f),
+        FVector(18.f, .4f, 3.8f), true);
+    SpawnBlock(TEXT("PostCard3SouthBoundary"), FVector(4650.f, -500.f, 90.f),
+        FVector(18.f, .4f, 3.8f), true);
+    SpawnBlock(TEXT("PostCard3FutureSectorWall"), FVector(5550.f, 0.f, 90.f),
+        FVector(.4f, 10.f, 3.8f), true);
+
+    // Kennel architecture: evidence of a working security service, not
+    // arbitrarily scattered enemies or an invisible dog spawn trigger.
+    SpawnBlock(TEXT("KennelConcreteNorth"), FVector(4140.f, 362.f, -25.f),
+        FVector(2.9f, 1.1f, 1.5f), true);
+    SpawnBlock(TEXT("KennelGateFrame"), FVector(4210.f, 242.f, 91.f),
+        FVector(.18f, .16f, 3.f), true);
+    SpawnBlock(TEXT("DogCareSupply"), FVector(4720.f, 280.f, -30.f),
+        FVector(1.8f, 1.2f, 1.4f), true);
+    SpawnBlock(TEXT("ServiceJunctionCover"), FVector(4980.f, -105.f, -25.f),
+        FVector(1.6f, 1.0f, 1.5f), true);
+
+    // Physically real crawl route south of the dog's main sightline.
+    // Floor top = -100 cm, overhead underside = -19 cm: ~81 cm gap.
+    // Actual prone capsule height = 76 cm; crouched = 110 cm, so only
+    // a clearance-validated prone body can traverse. The side rails stop
+    // the player from clipping around the low roof once committed to it.
+    // This is an optional 3D stealth route; the main north lane stays open.
+    SpawnBlock(TEXT("ServiceDuctRoof"), FVector(4430.f, -300.f, 10.f),
+        FVector(3.3f, 2.4f, .58f), true);
+    SpawnBlock(TEXT("ServiceDuctSouthRail"), FVector(4430.f, -458.f, -25.f),
+        FVector(3.5f, .46f, 1.5f), true);
+    SpawnBlock(TEXT("ServiceDuctNorthRail"), FVector(4430.f, -142.f, -25.f),
+        FVector(3.5f, .46f, 1.5f), true);
+    // Low exit lip is set below Snake's prone clearance; never hard-lock
+    // the capsule behind an arbitrary "press crouch" prompt.
+    SpawnBlock(TEXT("ServiceDuctExitGrate"), FVector(4770.f, -300.f, -69.f),
+        FVector(.16f, 1.1f, .35f), false);
+    // The next destructible seam is represented as visible evidence but
+    // remains a build boundary until the timer/explosive system exists.
+    SpawnBlock(TEXT("PostCard3DamagedSeam"), FVector(5521.f, 0.f, 30.f),
+        FVector(.06f, .14f, 2.1f), false);
+
+    if (!GetWorld()) return;
+    if (AMGSentryDogActor* DogA = GetWorld()->SpawnActor<AMGSentryDogActor>(
+        FVector(4090.f, 180.f, -53.f), FRotator(0.f, 180.f, 0.f)))
+        DogA->ConfigureBeatPatrol(FVector(1.f, 0.f, 0.f), 130.f);
+    if (AMGSentryDogActor* DogB = GetWorld()->SpawnActor<AMGSentryDogActor>(
+        FVector(4900.f, 190.f, -53.f), FRotator(0.f, 180.f, 0.f)))
+        DogB->ConfigureBeatPatrol(FVector(0.f, 1.f, 0.f), 115.f);
 }
 
 void AMGGrayFoxMission::CreateZoneLighting()
@@ -333,6 +395,7 @@ void AMGGrayFoxMission::BeginPlay()
     CreatePrelude();
     CreateGreybox();
     CreateBossWing();
+    CreatePostCard3Service();
     CreateZoneLighting();
     SpawnPerimeterGuards();
     if (const UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
@@ -360,7 +423,8 @@ void AMGGrayFoxMission::BeginPlay()
         const bool bPositionSafe = !P.ContainsNaN()
             && P.X >= ((F & MG_FOX_CAPTURED) ? -1160.f : -3790.f)
             && P.X <= ((F & MG_FOX_CAPTURED)
-                ? ((F & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 3650.f : 1310.f)
+                ? ((F & MG_FOX_SLICE_COMPLETED) ? 5480.f
+                    : ((F & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 3650.f : 1310.f))
                 : -1300.f)
             && FMath::Abs(P.Y) < ((F & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 1020.f : 410.f)
             && P.Z >= -95.f && P.Z <= 180.f
@@ -436,6 +500,10 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
     if (APlayerController* PC = Cast<APlayerController>(Player->GetController()))
         PC->SetControlRotation(FRotator(-8.f, 0.f, 0.f));
     bPlayerInitialised = true;
+    // Post-Card3 encounter checkpoint is a subsequent physical area, not a
+    // second rescue or repeated boss-introduction flag after reload.
+    bPostCard3ServiceEntered = bHasLoadedSave
+        && (Flags & MG_FOX_SLICE_COMPLETED) && SavedPosition.X > 3850.f;
     // The historic confiscation flag is retained for canon and save fidelity.
     // Gear usability depends on the distinct actual recovery transaction.
     if (UMGEquipmentComponent* Inventory = Player->GetEquipment())
@@ -1064,7 +1132,7 @@ FString AMGGrayFoxMission::GetObjectiveText() const
         return TEXT("Investigate the secured storeroom for a way forward.");
     if (!(Flags & MG_FOX_SLICE_COMPLETED))
         return TEXT("Find the route deeper into Outer Heaven.");
-    return TEXT("Outer Heaven chapter complete.");
+    return TEXT("Continue through the Card 3 service passage. Scout the kennel and damaged masonry.");
 }
 
 FString AMGGrayFoxMission::GetPacingHint() const
@@ -1258,6 +1326,17 @@ void AMGGrayFoxMission::Tick(float Dt)
         LastObservedPlayerLocation = CurrentPosition;
         LastObservedViewRotation = View;
         bHasObservedPlayer = true;
+    }
+    // Crossing from the boss wing into the dog-guarded passage establishes a
+    // new physical checkpoint, without fabricating MSX2 story flags or an
+    // automatic cutscene. After a death, the original boss remains resolved.
+    if (Player && (Flags & MG_FOX_SLICE_COMPLETED) &&
+        !bPostCard3ServiceEntered && Player->GetActorLocation().X > 3850.f)
+    {
+        bPostCard3ServiceEntered = true;
+        Dialogue = TEXT("SECURITY KENNEL AHEAD. COVER OR A LOW SERVICE ROUTE.");
+        DialogueTimeRemaining = 4.2f;
+        SaveProgress(Player);
     }
     if (Player && (Flags & MG_FOX_EXIT_WALL_BREACHED) &&
         !(Flags & MG_FOX_LEFT_PRISON) &&
