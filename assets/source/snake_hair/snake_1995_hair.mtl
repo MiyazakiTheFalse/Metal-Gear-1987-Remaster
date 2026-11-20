@@ -1,0 +1,14 @@
+# Authored original provisional colour constants, not final PBR hair shader
+newmtl hair_dark_brown
+Ka 0.05 0.024 0.010
+Kd 0.115 0.062 0.034
+Ks 0.09 0.06 0.045
+Ns 48
+illum 2
+
+newmtl hair_warm_brown
+Ka 0.05 0.024 0.010
+Kd 0.18 0.10 0.060
+Ks 0.13 0.085 0.06
+Ns 65
+illum 2
