@@ -84,7 +84,7 @@ class PostCard3SourceChecks(unittest.TestCase):
                   "building1.after_card3_explosive_boundary"):
             self.assertIn(a, area_ids)
         future = next(b for b in BEATS["beats"] if b["id"] == "building1.after_card3_explosive_wall")
-        self.assertEqual(future["implementation_status"], "design_only_not_playable")
+        self.assertEqual(future["implementation_status"], "design_only")
         self.assertEqual(future["state"]["transaction"].split(";")[0], "No new mission action yet")
         self.assertTrue(all(b.get("verification_status") == "unverified" for b in BEATS["beats"][-4:]))
 
