@@ -5,6 +5,7 @@
 #include "Components/PointLightComponent.h"
 #include "MGShootGunnerActor.h"
 #include "MGSentryDogActor.h"
+#include "MGSurveillanceCameraActor.h"
 #include "MGGrayFoxSaveGame.h"
 #include "MGPlayerCharacter.h"
 #include "MGEquipmentComponent.h"
@@ -522,6 +523,27 @@ void AMGGrayFoxMission::CreateFirstPassVerticality()
     // Guards never spawn on this unreachable overhead surface.
 }
 
+void AMGGrayFoxMission::CreateSurveillancePosts()
+{
+    // CCTV is a visible, lens-based 1995 security adaptation. These posts
+    // observe specific existing routes, never the original hidden prisoner
+    // cell, and neither post awards a new lore flag or key item.
+    // Their access/isolator panels are mounted at hand height below the optic.
+    if (!GetWorld()) return;
+
+    // Prison escape corridor: watches the original corridor rather than the
+    // cell where the player has no means to counter surveillance.
+    if (AMGSurveillanceCameraActor* CCTV = GetWorld()->SpawnActor<AMGSurveillanceCameraActor>(
+            FVector(1180.f, 424.f, 235.f), FRotator(0.f, 180.f, 0.f)))
+        CCTV->ConfigureSector(38.f, 710.f);
+
+    // Kennel maintenance transfer: visible as the player approaches Card 3's
+    // next guard-dog hazard. It cannot see through the duct walls.
+    if (AMGSurveillanceCameraActor* CCTV = GetWorld()->SpawnActor<AMGSurveillanceCameraActor>(
+            FVector(5170.f, 427.f, 235.f), FRotator(0.f, 180.f, 0.f)))
+        CCTV->ConfigureSector(33.f, 760.f);
+}
+
 void AMGGrayFoxMission::CreateZoneLighting()
 {
     if (!GetWorld()) return;
@@ -605,6 +627,7 @@ void AMGGrayFoxMission::BeginPlay()
     CreatePostCard3Service();
     CreateConnectiveSpaces();
     CreateFirstPassVerticality();
+    CreateSurveillancePosts();
     CreateZoneLighting();
     SpawnPerimeterGuards();
     if (const UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
