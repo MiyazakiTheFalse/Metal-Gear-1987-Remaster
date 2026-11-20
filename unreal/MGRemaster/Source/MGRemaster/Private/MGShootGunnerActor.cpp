@@ -2,6 +2,7 @@
 
 #include "MGPlayerCharacter.h"
 #include "MGEquipmentComponent.h"
+#include "MGSpentCasingActor.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PointLightComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -188,6 +189,10 @@ void AMGShootGunnerActor::Tick(float Dt)
             PumpVisualRemainingSeconds = .24f;
             OnPumpAction(PumpedShot);
             OnSpentShellEjected(PumpedShot);
+            if (bImportedWeaponGeometry && IsValid(WeaponBody))
+                AMGSpentCasingActor::Eject(GetWorld(), EMGCasingType::RiotGunHull,
+                    WeaponBody->GetComponentTransform().TransformPosition(
+                        FVector(9.f, 5.1f, 3.f)), WeaponBody->GetComponentRotation());
             if (ShotCycleCue)
                 UGameplayStatics::PlaySoundAtLocation(this, ShotCycleCue,
                     GetActorLocation() + FVector(0.f, 0.f, 55.f), .64f);
