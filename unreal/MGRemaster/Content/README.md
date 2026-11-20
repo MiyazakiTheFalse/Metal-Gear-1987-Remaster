@@ -12,10 +12,11 @@ unreal/MGRemaster/Content/
         ├── snake.glb
         ├── fox.glb
         ├── guard.glb
-        └── shoot_gunner.glb
+        ├── shoot_gunner.glb
+        └── 18 other cast-specific original humanoid GLBs
 ```
 
-These GLBs contain authored 18-joint body + jaw/brow skeletal skins, vertex colors and 14–18 animation clips. They are copied as **exact Git blobs** from the corresponding browser model files and remain in Git under the Unreal project, so this source package is self-contained. No original/proprietary MGS game assets are stored here.
+These 22 GLBs contain authored 18-joint body + jaw/brow skeletal skins, vertex colors and prototype animation clips. They are copied as **exact Git blobs** from the corresponding browser model files and remain in Git under the Unreal project, so this source package is self-contained. No original/proprietary MGS game assets are stored here.
 
 **This directory does NOT yet contain native `.uasset` files.** Unreal Engine itself must be used to import the GLBs as `USkeletalMesh` / `USkeleton` / `UAnimSequence` assets. Native Unreal asset files cannot be fabricated by adding a file with a `.uasset` suffix, nor does embedding a GLB cause the engine to compile/import it automatically at runtime.
 
