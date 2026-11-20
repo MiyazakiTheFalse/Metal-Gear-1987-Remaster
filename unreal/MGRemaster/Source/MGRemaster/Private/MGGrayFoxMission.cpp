@@ -540,8 +540,8 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
             {
                 UGameplayStatics::PlaySoundAtLocation(this, Cue,
                     FoxProxy->GetActorLocation(), .78f);
-                OnNarrativeVoiceStarted(TEXT("gray_fox"),
-                    TEXT("VO_fox_rescue_01"), Cue->GetDuration());
+                OnNarrativeVoiceStarted(FName(TEXT("gray_fox")),
+                    FName(TEXT("VO_fox_rescue_01")), Cue->GetDuration());
             }
         }
         break;
@@ -564,8 +564,8 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
             {
                 UGameplayStatics::PlaySoundAtLocation(this, Cue,
                     Shotmaker->GetActorLocation(), .76f);
-                OnNarrativeVoiceStarted(TEXT("shotmaker"),
-                    TEXT("VO_shotmaker_intro_01"), Cue->GetDuration());
+                OnNarrativeVoiceStarted(FName(TEXT("shotmaker")),
+                    FName(TEXT("VO_shotmaker_intro_01")), Cue->GetDuration());
             }
         }
         break;
