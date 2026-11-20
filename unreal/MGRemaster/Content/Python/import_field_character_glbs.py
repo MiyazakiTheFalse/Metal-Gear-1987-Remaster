@@ -88,11 +88,16 @@ def import_prototype(role: str):
             f"Imported paths: {imported}. Check glTF/Interchange skeletal importer."
         )
     if not unreal.EditorAssetLibrary.does_asset_exist(target):
-        raise RuntimeError(
-            f"{role}: skeletal import exists at {skeletal[0]}, but the runtime "
-            f"expects {target}. Rename/move the imported asset to that exact "
-            "target in Unreal Editor, then rerun this importer preflight."
-        )
+        # UE5.7 Interchange ignores AssetImportTask.destination_name for glTF;
+        # safely rename only our newly imported SkeletalMesh to the exact path
+        # consumed by the C++ characters. Never replace existing artist assets.
+        if not unreal.EditorAssetLibrary.rename_asset(skeletal[0], target):
+            raise RuntimeError(
+                f"{role}: imported {skeletal[0]} but could not rename to "
+                f"the runtime path {target}. Resolve in Content Browser."
+            )
+    if not unreal.EditorAssetLibrary.does_asset_exist(target):
+        raise RuntimeError(f"{role}: missing runtime target even after import: {target}")
     mesh = unreal.EditorAssetLibrary.load_asset(target)
     if not isinstance(mesh, unreal.SkeletalMesh):
         raise TypeError(f"Target {target} does not resolve to a skeletal mesh.")
