@@ -128,6 +128,7 @@ private:
     float BreachRemaining = -1.f;
     bool TryServiceInteraction(AMGPlayerCharacter* Player);
     void CreateDispatchBay();
+    void CreateFirstFloorSupplyTrucks();
     void TickDispatch(AMGPlayerCharacter* Player, float Dt);
     UPROPERTY(Transient)
     UStaticMesh* BlockMesh = nullptr;
@@ -141,6 +142,12 @@ private:
     AStaticMeshActor* ExitMarker = nullptr;
     UPROPERTY(Transient) AStaticMeshActor* POWInformant = nullptr;
     UPROPERTY(Transient) AStaticMeshActor* EarlyHandgunPickup = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* FirstFloorCard1Pickup = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* FirstFloorRationPickup = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* FirstFloorBinocularsPickup = nullptr;
+    bool bFirstFloorCard1Earned = false;
+    bool bFirstFloorRationEarned = false;
+    bool bFirstFloorBinocularsEarned = false;
     bool bEarlyHandgunAcquired = false;
     UPROPERTY(Transient) AStaticMeshActor* CustodyMarker = nullptr;
     UPROPERTY(Transient) AMGGuardActor* CustodyOfficerA = nullptr;
