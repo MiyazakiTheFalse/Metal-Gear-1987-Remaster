@@ -240,6 +240,29 @@ function pose(state) {
  // Body movement, cover and weapon aiming remain gameplay-owned.
  rot[16]=-.30*Math.max(0,Math.min(1,state.mouth||0));
  rot[17]=-.11*Math.max(-1,Math.min(1,state.brow||0));
+ // All field characters remain visibly alive even without movement or dialogue.
+ // Layer breath, balance shifts and small head/shoulder searches onto real joints,
+ // not a floating root transform. Movement, prone, damage and deliberate actions
+ // progressively suppress idle fidgets to avoid contradictory poses.
+ const still=Math.max(0,1-Math.min(1,stride*2.2))*
+   (1-Math.min(1,crouch*.55+prone*.90+down));
+ const breath=Math.sin(time*2.4);
+ const slow=Math.sin(time*1.2);
+ const glance=Math.sin(time*.64+.35);
+ const alert=Math.max(0,Math.min(1,state.idleAlert||0));
+ const settle=(1-alert*.58)*still;
+ rot[1]+=(.014+.007*alert)*breath*still; // ribcage breathing
+ rot[2]+=.008*slow*still; // neck counterbalance
+ rot[3]+=(.016*glance+.006*breath)*still; // gaze scanning
+ rot[4]+=(.012*breath+.015*slow)*settle;
+ rot[10]+=(.012*breath-.014*slow)*settle; // opposite shoulder
+ rot[7]+=.012*Math.sin(time*.72)*settle; // loaded stance
+ rot[13]-=.012*Math.sin(time*.72)*settle;
+ if(state.idleLook){rot[3]+=.12*Math.max(0,Math.min(1,state.idleLook))*still;
+   rot[2]-=.055*still;}
+ if(state.idleWary){rot[4]+=.11*still;rot[10]+=.09*still;
+   rot[3]-=.055*still;}
+
  if(state.radio){rot[2]+=.075*state.radio;rot[3]-=.045*state.radio;}
  if(state.reload){rot[4]+=.42*state.reload;rot[5]+=.36*state.reload;
                   rot[10]+=.31*state.reload;rot[11]+=.20*state.reload;}
@@ -252,7 +275,7 @@ function pose(state) {
   rot[17]+=-.16*focus+.12*order-.11*kick;
  }
  const grounded=.008-Math.min(soleHeight(7),soleHeight(13));
- const offset=[0,grounded*(1-prone)*(1-down)-.74*prone-.685*down,0];
+ const offset=[0,grounded*(1-prone)*(1-down)-.74*prone-.685*down + .003*Math.sin(time*2.4)*Math.max(0,1-stride)*(1-down)*(1-prone),0];
  return {rot,offset};
 }
 root.FieldRigs={bones:facialBones,skeleton,model,pose};
