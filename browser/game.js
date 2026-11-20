@@ -2306,10 +2306,18 @@ canvas.onclick=()=>{if(started&&!paused&&canvas.requestPointerLock)canvas.reques
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('mousemove',e=>{if(document.pointerLockElement===canvas&&!paused){cam.yaw-=e.movementX*.0023;cam.pitch=clamp(cam.pitch+e.movementY*.002,-.74,.78);discovery.looked=true}});
 document.addEventListener('mousedown',e=>{lastInputIsPad=false;if(!started||paused)return;if(e.button===2)key.mouse2=true;if(e.button===0)action('fire')});document.addEventListener('mouseup',e=>{if(e.button===2)key.mouse2=false});
-document.addEventListener('keydown',e=>{lastInputIsPad=false;const k=e.key.toLowerCase();if(['tab',' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(key[k])return;key[k]=true;if(!started){
+document.addEventListener('keydown',e=>{lastInputIsPad=false;const k=e.key.toLowerCase();if((started&&['tab',' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))||
+ (!started&&['arrowup','arrowdown'].includes(k)&&e.target?.tagName!=='INPUT'))e.preventDefault();if(key[k])return;key[k]=true;if(!started){
+ // Respect keyboard-accessible checkbox controls: Space must toggle them,
+ // not accidentally begin a mission behind the settings drawer.
+ if(e.target?.tagName==='INPUT'){
+  if(k==='escape'){$('menuOptionsPanel').hidden=true;
+   $('menuOptions').setAttribute?.('aria-expanded','false');}
+  return;
+ }
  if(k==='arrowdown'||k==='s'){selectTitleChoice(1);return;}
  if(k==='arrowup'||k==='w'){selectTitleChoice(-1);return;}
- if(k==='enter'||k===' '){activateTitleChoice();return;}
+ if(k==='enter'||k===' '){e.preventDefault();activateTitleChoice();return;}
  if(k==='escape'&&!$('menuOptionsPanel').hidden){
   $('menuOptionsPanel').hidden=true;
   $('menuOptions').setAttribute?.('aria-expanded','false');
