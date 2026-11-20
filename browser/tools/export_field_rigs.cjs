@@ -46,7 +46,7 @@ for(const role of ['snake','fox','guard','shoot_gunner']){
  }
  const keys=Array.from({length:49},(_,i)=>i/48); // 48 samples: improved interpolation of gait / acting at low frame rates
  const times=accessor(keys,'SCALAR',5126,true);
- for(const [name,state] of Object.entries({Idle:{},Walk:{stride:.72},Run:{stride:1},Crouch:{crouch:1},Prone:{prone:1},Down:{down:1},...(role==='shoot_gunner'?{Address:{order:1},Shoulder:{focus:1,aim:.8},Recoil:{focus:.5,recoil:1},Search:{order:.3}}:{}),...(role==='fox'?{Captive:{captive:true}}:{}),Aim:{aim:1},Cover:{cover:1},Melee:{strike:1},Reaching:{reach:1},Hit:{hit:1},RadioListen:{aim:.20},CrouchAim:{crouch:1,aim:1},ProneAim:{prone:1,aim:.35}})){
+ for(const [name,state] of Object.entries({Idle:{},IdleAlert:{idleAlert:1},IdleLook:{idleLook:1},IdleWary:{idleWary:1,idleAlert:.7},Walk:{stride:.72},Run:{stride:1},Crouch:{crouch:1},Prone:{prone:1},Down:{down:1},...(role==='shoot_gunner'?{Address:{order:1},Shoulder:{focus:1,aim:.8},Recoil:{focus:.5,recoil:1},Search:{order:.3}}:{}),...(role==='fox'?{Captive:{captive:true}}:{}),Aim:{aim:1},Cover:{cover:1},Melee:{strike:1},Reaching:{reach:1},Hit:{hit:1},RadioListen:{aim:.20},CrouchAim:{crouch:1,aim:1},ProneAim:{prone:1,aim:.35}})){
   const frames=keys.map(t=>rig.pose({...state,boss:role==='shoot_gunner',mouth:name==='Address'?.5+.5*Math.sin(t*6*Math.PI):0,time:t*2*Math.PI/2.4,phase:t*2*Math.PI}));
   const channels=[],samplers=[];
   function track(bone,key,output){
