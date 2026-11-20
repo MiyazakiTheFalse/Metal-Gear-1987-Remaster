@@ -1495,7 +1495,7 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
      itemFeedback='RATION USED · +'+Math.round(gain)+' HEALTH';}
    }
    if(slot===binocularsSlot){world.scouting=!world.scouting;
-    itemFeedback=world.scouting?'BINOCULARS RAISED — SCOUT WITHOUT EXPOSURE':'BINOCULARS LOWERED';}
+    itemFeedback=world.scouting?'BINOCULARS RAISED — ZOOM ONLY; GUARDS STILL SEE YOU':'BINOCULARS LOWERED';}
    else world.scouting=false;
   }
   if(ownedOnSelection&&equipOpen==='weapons')equippedWeapon=slot.name;
@@ -2566,7 +2566,7 @@ function drawFrame(t,dt){let w=canvas.clientWidth,h=canvas.clientHeight,scale=wi
    const solids=[...obstacles.filter(o=>o.active),
     ...cameraOnlySolids.filter(o=>o.active)];
    window.dispatchEvent(new CustomEvent('mg:rig-frame',{detail:{
-     dt,camera:{eye:[...cam.eye],target:[...target],fov:Math.PI/(player.aim?3.6:3.1)},
+     dt,camera:{eye:[...cam.eye],target:[...target],fov:Math.PI/(world.scouting?5.6:player.aim?3.6:3.1)},
      actors:a,solids:solids.map((o,i)=>({id:o.name+'-'+i,x:o.x,y:o.y,z:o.z,
        w:o.w,h:o.h,d:o.d,solid:obstacles.includes(o),cameraSolid:cameraOnlySolids.includes(o),active:o.active,yaw:o.yaw||0}))
    }}));
@@ -2603,6 +2603,19 @@ function updateHUD(dt){
   audible&&stage===4&&tag.state==='carried'?'Two chirps · inside your kit':
   audible&&stage===4&&tag.state==='placed'&&dist(player,tag.point)<6?'Two chirps · loose tag':'';
  let prompt=serviceAction()||freightAction();if(prompt)prompt='E / A · '+prompt;
+ // Physical loot should teach itself through proximity, not a minimap spoiler.
+ if(stage<0){
+  const caches=[
+   [originalRationTarget,rationEarned,'TAKE RATION'],
+   [originalCard1Target,firstCardEarned,'TAKE CARD 1'],
+   [originalBinocularsTarget,binocularsEarned,'TAKE BINOCULARS']
+  ];
+  for(const [point,taken,caption] of caches)
+   if(!taken&&dist(player,point)<1.5&&
+      !lineBlockedSight(player,point,1.35,.4)){
+     prompt='E / A · '+caption;break;
+   }
+ }
  if(draggedGuard)prompt='E / A · RELEASE BODY';
  else if(!prompt&&guards.some(g=>g.knocked&&!g.boss&&dist(g,player)<1.6&&!lineBlocked(player,g)))prompt='E / A · DRAG GUARD BODY';
  if(stage===-2&&dist(player,informant)<2.2)prompt='E / A · TALK';
