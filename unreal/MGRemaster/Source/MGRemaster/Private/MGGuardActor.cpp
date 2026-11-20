@@ -98,11 +98,15 @@ void AMGGuardActor::BeginPlay()
         CharacterMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
         CharacterMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
         CharacterMesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-        if (CharacterMesh->DoesSocketExist(TEXT("weapon_r")))
+        const FName HandSocket = CharacterMesh->DoesSocketExist(TEXT("weapon_r"))
+            ? FName(TEXT("weapon_r"))
+            : CharacterMesh->GetBoneIndex(TEXT("hand_R")) != INDEX_NONE
+                ? FName(TEXT("hand_R")) : NAME_None;
+        if (HandSocket != NAME_None)
         {
             SecuritySidearm->AttachToComponent(CharacterMesh,
                 FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-                TEXT("weapon_r"));
+                HandSocket);
             SecuritySidearm->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
             SecuritySidearm->SetVisibility(SecuritySidearm->GetStaticMesh() != nullptr);
         }
