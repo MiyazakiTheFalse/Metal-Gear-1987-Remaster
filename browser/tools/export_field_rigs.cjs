@@ -20,6 +20,8 @@ for(const role of ['snake','fox','guard','shoot_gunner']){
   return accessors.push(a)-1;
  }
  const inverses=[];
+ // Keep generated assets valid glTF 2.0: quaternions normalised, joint indices within range.
+ if(bones.length>64)throw new Error('Unexpected skeletal complexity: '+role);
  bones.forEach(([name,parent,x,y,z],i)=>{
   const b=bones[parent]||['',0,0,0,0];
   nodes.push({name,translation:[x-b[2],y-b[3],z-b[4]]});
@@ -42,9 +44,9 @@ for(const role of ['snake','fox','guard','shoot_gunner']){
    COLOR_0:accessor(col,'VEC3'),JOINTS_0:accessor(joints,'VEC4',5123),WEIGHTS_0:accessor(weights,'VEC4')},
    indices:accessor(indices,'SCALAR',5123),material:0,extras:{layer:layer?'field gear':'body'}});
  }
- const keys=Array.from({length:25},(_,i)=>i/24);
+ const keys=Array.from({length:49},(_,i)=>i/48); // 48 samples: improved interpolation of gait / acting at low frame rates
  const times=accessor(keys,'SCALAR',5126,true);
- for(const [name,state] of Object.entries({Idle:{},Walk:{stride:.72},Run:{stride:1},Crouch:{crouch:1},Prone:{prone:1},Down:{down:1},...(role==='shoot_gunner'?{Address:{order:1},Shoulder:{focus:1,aim:.8},Recoil:{focus:.5,recoil:1},Search:{order:.3}}:{}),...(role==='fox'?{Captive:{captive:true}}:{})})){
+ for(const [name,state] of Object.entries({Idle:{},Walk:{stride:.72},Run:{stride:1},Crouch:{crouch:1},Prone:{prone:1},Down:{down:1},...(role==='shoot_gunner'?{Address:{order:1},Shoulder:{focus:1,aim:.8},Recoil:{focus:.5,recoil:1},Search:{order:.3}}:{}),...(role==='fox'?{Captive:{captive:true}}:{}),Aim:{aim:1},Cover:{cover:1},Melee:{strike:1},Reaching:{reach:1},Hit:{hit:1},RadioListen:{aim:.20},CrouchAim:{crouch:1,aim:1},ProneAim:{prone:1,aim:.35}})){
   const frames=keys.map(t=>rig.pose({...state,boss:role==='shoot_gunner',mouth:name==='Address'?.5+.5*Math.sin(t*6*Math.PI):0,time:t*2*Math.PI/2.4,phase:t*2*Math.PI}));
   const channels=[],samplers=[];
   function track(bone,key,output){
@@ -62,6 +64,7 @@ for(const role of ['snake','fox','guard','shoot_gunner']){
   nodes,meshes:[{name:role,primitives}],materials:[{name:'Uniform and skin',doubleSided:true,pbrMetallicRoughness:{metallicFactor:0,roughnessFactor:.86}}],
   skins:[{skeleton:0,joints:bones.map((_,i)=>i),inverseBindMatrices}],animations,
   buffers:[{byteLength:size}],bufferViews:views,accessors};
+ if(!animations.length || !primitives.length)throw new Error('Missing mesh or animation: '+role);
  const json=Buffer.from(JSON.stringify(doc)),pad=Buffer.alloc((4-json.length%4)%4,32),binary=Buffer.concat(chunks);
  const header=Buffer.alloc(20),binHeader=Buffer.alloc(8);
  header.write('glTF');header.writeUInt32LE(2,4);header.writeUInt32LE(28+json.length+pad.length+size,8);
