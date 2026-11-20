@@ -420,7 +420,13 @@ void AMGGrayFoxMission::CreateGreybox()
     SpawnBlock(TEXT("Floor"), FVector(75.f, 0.f, -150.f), FVector(26.5f, 10.f, 1.f), true);
     SpawnBlock(TEXT("NorthBoundary"), FVector(75.f, 500.f, 90.f), FVector(26.5f, 0.4f, 3.8f), true);
     SpawnBlock(TEXT("SouthBoundary"), FVector(75.f, -500.f, 90.f), FVector(26.5f, 0.4f, 3.8f), true);
-    SpawnBlock(TEXT("WestBoundary"), FVector(-1250.f, 0.f, 90.f), FVector(0.4f, 10.f, 3.8f), true);
+    // Physically connected freight return after recovering gear. This optional
+    // remake service access prevents a missed Card 1 in the opening from
+    // becoming an irreversible campaign softlock. Custody remains sealed.
+    SpawnBlock(TEXT("WestBoundary"), FVector(-1250.f, 340.f, 90.f), FVector(0.4f, 3.2f, 3.8f), true);
+    SpawnBlock(TEXT("WestBoundarySouth"), FVector(-1250.f, -340.f, 90.f), FVector(0.4f, 3.2f, 3.8f), true);
+    FreightReturnGate = SpawnBlock(TEXT("WestReturnFreightGate"),
+        FVector(-1250.f, 0.f, 90.f), FVector(.4f, 3.6f, 3.8f), true);
     // Connected opening: 400cm wide. Never teleport to the boss.
     SpawnBlock(TEXT("EastBoundaryNorth"), FVector(1400.f, 375.f, 90.f), FVector(.4f, 2.5f, 3.8f), true);
     SpawnBlock(TEXT("EastBoundarySouth"), FVector(1400.f, -375.f, 90.f), FVector(.4f, 2.5f, 3.8f), true);
@@ -1002,7 +1008,8 @@ void AMGGrayFoxMission::BeginPlay()
             && FMath::Abs(P.Y) <= 450.f
             && P.Z >= 590.f && P.Z <= 850.f;
         const bool bPositionSafe = !P.ContainsNaN() && (bBuilding2Checkpoint || bRoofCheckpoint || (!P.ContainsNaN()
-            && P.X >= ((F & MG_FOX_CAPTURED) ? -1160.f : -3790.f)
+            && P.X >= ((F & MG_FOX_CAPTURED) && !(F & MG_FOX_GEAR_RECOVERED)
+                ? -1160.f : -3790.f)
             && P.X <= ((F & MG_FOX_CAPTURED)
                 ? ((F & MG_FOX_SLICE_COMPLETED) ? (Save->bServiceWallOpen && Save->bServiceChargeCollected ? 7830.f : 5480.f)
                     : ((F & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 3650.f : 1310.f))
@@ -1112,6 +1119,8 @@ void AMGGrayFoxMission::BeginPlay()
 
 void AMGGrayFoxMission::RestoreVisualState()
 {
+    if ((Flags & MG_FOX_GEAR_RECOVERED) && IsValid(FreightReturnGate))
+        FreightReturnGate->Destroy();
     if (bFirstFloorCard1Earned && IsValid(FirstFloorCard1Pickup))
         FirstFloorCard1Pickup->SetActorHiddenInGame(true);
     if (bFirstFloorRationEarned && IsValid(FirstFloorRationPickup))
@@ -1438,6 +1447,7 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         }
         break;
     case MG_FOX_RECOVER_GEAR:
+        if (IsValid(FreightReturnGate)) FreightReturnGate->Destroy();
         if (Player && Player->GetEquipment())
         {
             Player->GetEquipment()->SetConfiscated(false);
@@ -1640,37 +1650,9 @@ bool AMGGrayFoxMission::TryServiceInteraction(AMGPlayerCharacter* Player)
     return true;
 }
 
-bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
+bool AMGGrayFoxMission::TryCollectTruckSupply(AMGPlayerCharacter* Player)
 {
-    if (!bPlayerInitialised || !Player) return false;
-    if (TryServiceInteraction(Player)) return true;
-    if (!(Flags & MG_FOX_CAPTURED))
-    {
-        if (!bOwnsCarton && CanReach(Player, CartonPickup, 160.f) && Player->GetEquipment())
-        {
-            if (!Player->GetEquipment()->AwardItem(TEXT("FREIGHT_CARTON"), 1)) return false;
-            bOwnsCarton = true;
-            CartonPickup->SetActorHiddenInGame(true);
-            Dialogue = TEXT("BORROWED FREIGHT CARTON. TEMPORARY DISGUISE FOR RECEIVING.");
-            DialogueTimeRemaining = 3.f;
-            SaveProgress(Player);
-            return true;
-        }
-        if (!bEarlyHandgunAcquired &&
-            CanReach(Player, EarlyHandgunPickup, 185.f))
-        {
-            if (UMGEquipmentComponent* Inventory = Player->GetEquipment())
-                if (Inventory->AwardWeapon(TEXT("HANDGUN"), 24))
-                {
-                    bEarlyHandgunAcquired = true;
-                    if (IsValid(EarlyHandgunPickup))
-                        EarlyHandgunPickup->SetActorHiddenInGame(true);
-                    Dialogue = TEXT("HANDGUN RECOVERED — EQUIP IT IN WEAPONS.");
-                    DialogueTimeRemaining = 3.2f;
-                    SaveProgress(Player); // Independent V4 earned-gun state.
-                    return true;
-                }
-        }
+    if (!IsValid(Player)) return false;
         // Three original MSX2 supply rewards: physically entered truck,
         // reach + occlusion, independent acquisition and persisted resources.
         if (!bFirstFloorRationEarned && CanReach(Player, FirstFloorRationPickup, 165.f))
@@ -1709,6 +1691,44 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
                     Dialogue = TEXT("EAST TRUCK — BINOCULARS. Equip in ITEMS, then Use Item to scout.");
                     DialogueTimeRemaining = 3.f;
                     SaveProgress(Player);
+                    return true;
+                }
+        }
+    return false;
+}
+
+bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
+{
+    if (!bPlayerInitialised || !Player) return false;
+    if (TryServiceInteraction(Player)) return true;
+    // Once Snake has recovered his gear, the old receiving yard may be
+    // revisited physically. A missed early Card 1 must still be earnable.
+    if ((!(Flags & MG_FOX_CAPTURED) || (Flags & MG_FOX_GEAR_RECOVERED))
+        && TryCollectTruckSupply(Player)) return true;
+    if (!(Flags & MG_FOX_CAPTURED))
+    {
+        if (!bOwnsCarton && CanReach(Player, CartonPickup, 160.f) && Player->GetEquipment())
+        {
+            if (!Player->GetEquipment()->AwardItem(TEXT("FREIGHT_CARTON"), 1)) return false;
+            bOwnsCarton = true;
+            CartonPickup->SetActorHiddenInGame(true);
+            Dialogue = TEXT("BORROWED FREIGHT CARTON. TEMPORARY DISGUISE FOR RECEIVING.");
+            DialogueTimeRemaining = 3.f;
+            SaveProgress(Player);
+            return true;
+        }
+        if (!bEarlyHandgunAcquired &&
+            CanReach(Player, EarlyHandgunPickup, 185.f))
+        {
+            if (UMGEquipmentComponent* Inventory = Player->GetEquipment())
+                if (Inventory->AwardWeapon(TEXT("HANDGUN"), 24))
+                {
+                    bEarlyHandgunAcquired = true;
+                    if (IsValid(EarlyHandgunPickup))
+                        EarlyHandgunPickup->SetActorHiddenInGame(true);
+                    Dialogue = TEXT("HANDGUN RECOVERED — EQUIP IT IN WEAPONS.");
+                    DialogueTimeRemaining = 3.2f;
+                    SaveProgress(Player); // Independent V4 earned-gun state.
                     return true;
                 }
         }
