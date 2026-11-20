@@ -206,12 +206,14 @@ void AMGGrayFoxMission::CreatePrelude()
             FVector(-3060.f, 280.f, -11.f), FRotator(0.f, -90.f, 0.f)))
         {
             PatrolA->SetRole(EMGGuardRole::Patrol);
+            PatrolA->SetBodyPersistenceId(TEXT("P01_YardGuardA"));
             PatrolA->ConfigurePatrol(FVector(0.f, 1.f, 0.f), 130.f, 82.f);
         }
         if (AMGGuardActor* PatrolB = GetWorld()->SpawnActor<AMGGuardActor>(
             FVector(-2100.f, -285.f, -11.f), FRotator(0.f, 135.f, 0.f)))
         {
             PatrolB->SetRole(EMGGuardRole::Patrol);
+            PatrolB->SetBodyPersistenceId(TEXT("P01_YardGuardB"));
             PatrolB->ConfigurePatrol(FVector(1.f, 0.f, 0.f), 145.f, 92.f);
         }
         // Source-informed duty: the receiving station has a posted officer
@@ -220,15 +222,20 @@ void AMGGrayFoxMission::CreatePrelude()
         // direct access to current military facility operations.
         if (AMGGuardActor* Receiver = GetWorld()->SpawnActor<AMGGuardActor>(
                 FVector(-2410.f, 295.f, -11.f), FRotator(0.f, -95.f, 0.f)))
+        {
             Receiver->SetRole(EMGGuardRole::LogisticsPost);
+            Receiver->SetBodyPersistenceId(TEXT("P01_ReceivingOfficer"));
+        }
         CustodyOfficerA = GetWorld()->SpawnActor<AMGGuardActor>(
             FVector(-1570.f, 315.f, -11.f), FRotator(0.f, -90.f, 0.f));
         CustodyOfficerB = GetWorld()->SpawnActor<AMGGuardActor>(
             FVector(-1470.f, 170.f, -11.f), FRotator(0.f, -90.f, 0.f));
         if (IsValid(CustodyOfficerA))
-            CustodyOfficerA->SetRole(EMGGuardRole::Custody);
+            { CustodyOfficerA->SetRole(EMGGuardRole::Custody);
+              CustodyOfficerA->SetBodyPersistenceId(TEXT("P01_CustodyA")); }
         if (IsValid(CustodyOfficerB))
-            CustodyOfficerB->SetRole(EMGGuardRole::Custody);
+            { CustodyOfficerB->SetRole(EMGGuardRole::Custody);
+              CustodyOfficerB->SetBodyPersistenceId(TEXT("P01_CustodyB")); }
     }
 }
 
@@ -755,12 +762,14 @@ void AMGGrayFoxMission::SpawnPerimeterGuards()
     {
         G->SetRole(EMGGuardRole::Prison);
         G->ConfigurePatrol(FVector(0.f, -1.f, 0.f), 180.f, 76.f);
+        G->SetBodyPersistenceId(TEXT("P03_PrisonNorth"));
     }
     if (AMGGuardActor* G = GetWorld()->SpawnActor<AMGGuardActor>(
             FVector(1120.f, -340.f, -11.f), FRotator(0.f, 180.f, 0.f)))
     {
         G->SetRole(EMGGuardRole::Prison);
         G->ConfigurePatrol(FVector(0.f, 1.f, 0.f), 170.f, 70.f);
+        G->SetBodyPersistenceId(TEXT("P03_PrisonSouth"));
     }
 }
 
