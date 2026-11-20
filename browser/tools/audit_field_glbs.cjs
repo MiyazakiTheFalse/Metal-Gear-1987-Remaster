@@ -24,7 +24,7 @@ for(const role of ['snake','fox','guard','shoot_gunner']){
   for(const a of ['POSITION','NORMAL','JOINTS_0','WEIGHTS_0'])
    check(attrs[a]!==undefined,'missing vertex channel '+a);
   const clips=new Map((gltf.animations||[]).map(a=>[a.name,a]));
-  for(const name of ['Idle','Walk','Run','Crouch','Prone','Down','Aim','Cover','Melee','Reaching','Hit','RadioListen','CrouchAim','ProneAim'])
+  for(const name of ['Idle','IdleAlert','IdleLook','IdleWary','Walk','Run','Crouch','Prone','Down','Aim','Cover','Melee','Reaching','Hit','RadioListen','CrouchAim','ProneAim'])
    check(clips.has(name),'missing authored clip '+name);
   check(clips.get('RadioListen').channels.length===19,'facial/body channels not all exported');
   if(role==='fox')check(clips.has('Captive'),'Fox missing captive performance');
