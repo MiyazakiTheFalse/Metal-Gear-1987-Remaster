@@ -564,6 +564,33 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
     return Accepted;
 }
 
+void AMGGuardActor::RestoreIncapacitatedBody(
+    const FVector& Position, bool bUnconscious)
+{
+    if (!GetWorld() || Position.ContainsNaN()) return;
+    // The actor retains its original stable ID and is never sent through a
+    // kill montage a second time on load. There is no resurrection wave.
+    bIncapacitated = true;
+    bBodyDead = !bUnconscious;
+    bBodyBeingDragged = false;
+    Health = 0.f;
+    AwarenessState = 0;
+    Suspicion = 0.f;
+    bPendingRadioReport = false;
+    SidearmWindupSeconds = 0.f;
+    PendingSidearmCaseSeconds = -1.f;
+    SetActorLocation(Position, false, nullptr, ETeleportType::TeleportPhysics);
+    ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    CharacterMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    CollisionCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    (HasAuthoredCharacterArt() ? static_cast<USceneComponent*>(CharacterMesh)
+        : static_cast<USceneComponent*>(ProxyBody))->SetRelativeRotation(
+            FRotator(0.f, 0.f, 80.f));
+    SetGuardPosture(EMGGuardPosture::Incapacitated);
+    SetSecurityPhase(EMGGuardAwarenessPhase::Incapacitated);
+    SetActorTickEnabled(false);
+}
+
 void AMGGuardActor::SetBodyBeingDragged(bool bDragged)
 {
     if (!bIncapacitated || bBodyBeingDragged == bDragged) return;
