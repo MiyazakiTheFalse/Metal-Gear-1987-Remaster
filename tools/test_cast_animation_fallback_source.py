@@ -80,6 +80,15 @@ class CastAnimationSourceTests(unittest.TestCase):
         self.assertIn("PlayPrototypeActing(Acting)", KID)
         self.assertIn("SetPrototypeAnimationSource(", KID)
 
+    def test_shipped_glb_hand_joints_are_valid_weapon_attachment_fallbacks(self):
+        for source in (PLAYER, GUARD, SHOTMAKER, KID):
+            self.assertIn('GetBoneIndex(TEXT("hand_R"))', source)
+            self.assertIn('GetAttachSocketName()', PLAYER)
+            self.assertIn('FName(TEXT("weapon_r"))', source)
+            self.assertIn('FName(TEXT("hand_R"))', source)
+        self.assertIn('GetBoneIndex(TEXT("hand_R")) != INDEX_NONE', PLAYER)
+        self.assertIn('"hand_R"', IMPORTER)
+
     def test_unreal_importer_remains_valid_python_and_not_fake_asset_manifest(self):
         ast.parse(IMPORTER)
         self.assertIn("unreal.SkeletalMesh", IMPORTER)
