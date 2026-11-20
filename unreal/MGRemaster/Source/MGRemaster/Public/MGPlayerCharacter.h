@@ -155,6 +155,7 @@ private:
     UPROPERTY(EditAnywhere, Category="Controls|Time")
     float EquipmentTimeScale = 0.20f; // Engineering default, not a canonical franchise speed.
     bool bCodecOpen = false;
+    bool bBinocularView = false; // optical view only; never reveals hidden enemies
 
     // Small original 1995-style UI cues. References are optional so the
     // gameplay and mandatory intel remain accessible on an audio-less build.
