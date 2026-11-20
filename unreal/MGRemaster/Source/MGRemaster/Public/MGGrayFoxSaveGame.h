@@ -3,7 +3,23 @@
 #include "GameFramework/SaveGame.h"
 #include "MGGrayFoxSaveGame.generated.h"
 
-/** V4 persists first earned firearm; V1–V3 source checkpoints migrate. */
+/** Stable KO/corpse state across old corridor returns and checkpoint loads.
+ * New additive V4 field; historic V4 saves have an empty body list.
+ */
+USTRUCT(BlueprintType)
+struct FMGPersistedGuardBody
+{
+    GENERATED_BODY()
+
+    UPROPERTY(SaveGame)
+    FName Id = NAME_None;
+    UPROPERTY(SaveGame)
+    FVector WorldPosition = FVector::ZeroVector;
+    UPROPERTY(SaveGame)
+    bool bUnconscious = false;
+};
+
+/** V4 persists first earned firearm and additive physical guard-body state. */
 UCLASS()
 class MGREMASTER_API UMGGrayFoxSaveGame : public USaveGame
 {
@@ -48,4 +64,8 @@ public:
     bool bKidDefeated = false;
     UPROPERTY(SaveGame)
     bool bParachuteTaken = false;
+    // Retain original guard positions AFTER the player drags them away from
+    // patrol lanes. IDs map to placed 1995 actors, never array enumeration.
+    UPROPERTY(SaveGame)
+    TArray<FMGPersistedGuardBody> GuardBodies;
 };
