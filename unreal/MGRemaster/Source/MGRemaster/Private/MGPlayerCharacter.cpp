@@ -210,6 +210,12 @@ void AMGPlayerCharacter::UpdateWeaponPresentation()
     bHasAuthoredWeaponMesh = Authored != nullptr;
     WeaponBodyVisual->SetRelativeScale3D(Authored ? FVector::OneVector
         : FVector(0.19f, 0.036f, 0.038f));
+    // Flash offset is in the weapon COMPONENT's local units. On a source
+    // cube scaled to 19cm long, a raw 20cm relative offset shrinks to 3.8cm
+    // and flashes at the grip. Put the light at the physical muzzle tip.
+    if (PlayerMuzzleFlashLight)
+        PlayerMuzzleFlashLight->SetRelativeLocation(
+            Authored ? FVector(20.f, 0.f, 1.f) : FVector(52.f, 0.f, 0.f));
     // Weapon rendering is cosmetic and cannot bypass inventory confiscation.
     WeaponBodyVisual->SetVisibility(bCanHoldProp, true);
     WeaponGripVisual->SetVisibility(bCanHoldProp && !bHasAuthoredWeaponMesh, true);
@@ -1072,9 +1078,14 @@ void AMGPlayerCharacter::FireStun()
     // wall because a camera can see past it is never allowed.
     const bool bHasMuzzleSocket = HasAuthoredCharacterArt()
         && WeaponBodyVisual->IsVisible() && WeaponBodyVisual->DoesSocketExist(TEXT("muzzle"));
+    // Imported weapons use their authored muzzle socket. Otherwise the
+    // actual visible proxy's flash position is the bullet origin, not a
+    // phantom actor-chest gun that can shoot through nearby cover.
     const FVector Muzzle = bHasMuzzleSocket ?
         WeaponBodyVisual->GetSocketLocation(TEXT("muzzle")) :
-        (GetActorLocation() + FVector(0.f, 0.f, 45.f));
+        (WeaponBodyVisual->IsVisible() && PlayerMuzzleFlashLight
+            ? PlayerMuzzleFlashLight->GetComponentLocation()
+            : GetActorLocation() + FVector(0.f, 0.f, 45.f));
     FHitResult MuzzleHit;
     if (GetWorld()->LineTraceSingleByChannel(MuzzleHit, Muzzle, Target, ECC_Visibility, Params) && MuzzleHit.GetActor())
     {
