@@ -10,8 +10,9 @@ enum class EMGPerformanceAction : uint8
     Cover, CoverPeek, RadioIdle,
     GuardNotice, GuardInvestigate, GuardSearch, GuardChallenge,
     GuardReport, GuardEngage, GuardStrike, Incapacitated,
+    GuardSidearmAim, GuardSidearmFire, GuardSidearmReload,
     FoxPrisoner, FoxRescued, GunnerSearch, GunnerAim,
-    GunnerVolley, GunnerRecovery, GunnerDefeated
+    GunnerVolley, GunnerRecovery, GunnerReload, GunnerDefeated
 };
 
 /**
@@ -114,6 +115,16 @@ public:
     float ImpactPoseAlpha = 0.f;
     UPROPERTY(BlueprintReadOnly, Category="MG|Gunner")
     float GunnerHealthFraction = 1.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Weapon")
+    bool bWeaponReloading = false;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Weapon")
+    float WeaponReloadBlendAlpha = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Weapon")
+    int32 RemainingVisibleRounds = -1;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Hands")
+    float LeftHandGripAlpha = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Hands")
+    float RightHandGripAlpha = 0.f;
     UFUNCTION(BlueprintImplementableEvent, Category="MG|Transitions")
     void OnPerformanceActionTransition(EMGPerformanceAction From, EMGPerformanceAction To, bool bInterrupted);
 
