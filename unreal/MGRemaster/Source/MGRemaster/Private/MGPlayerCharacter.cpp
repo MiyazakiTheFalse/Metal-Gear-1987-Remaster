@@ -1141,9 +1141,35 @@ void AMGPlayerCharacter::UpdateRadioDialogue(float DeltaSeconds)
         ActiveRadioDialogue->Stop();
         ActiveRadioDialogue = nullptr;
     }
+    // Some on-screen lines are manual wrapping of ONE performed sentence.
+    // Combine successive same-speaker fragments until terminal punctuation,
+    // so recorded phrasing remains natural and the listener never hears
+    // "I never saw" followed by an artificial new take of "the prison plans".
+    const int32 StartingLine = NextVoiceLine;
+    FString Combined = Lines[StartingLine];
+    FString Speaker, Spoken;
+    Combined.Split(TEXT(":"), &Speaker, &Spoken);
+    Speaker.TrimStartAndEndInline();
+    int32 Consumed = 1;
+    while (StartingLine + Consumed < Lines.Num() && Consumed < 3)
+    {
+        FString Trimmed = Spoken;
+        Trimmed.TrimEndInline();
+        if (Trimmed.EndsWith(TEXT(".")) || Trimmed.EndsWith(TEXT("!"))
+            || Trimmed.EndsWith(TEXT("?"))) break;
+        FString NextSpeaker, NextSpoken;
+        if (!Lines[StartingLine + Consumed].Split(
+                TEXT(":"), &NextSpeaker, &NextSpoken)) break;
+        NextSpeaker.TrimStartAndEndInline();
+        if (NextSpeaker != Speaker) break;
+        NextSpoken.TrimStartAndEndInline();
+        Spoken += TEXT(" ") + NextSpoken;
+        Combined = Speaker + TEXT(": ") + Spoken;
+        ++Consumed;
+    }
     VoiceLineAdvanceDelay = PlayRadioDialogueLine(
-        SceneKey, NextVoiceLine, Lines[NextVoiceLine]);
-    ++NextVoiceLine;
+        SceneKey, StartingLine, Combined);
+    NextVoiceLine += Consumed;
     if (bStagedOpeningCall)
         RevealedRadioLines = FMath::Max(RevealedRadioLines, NextVoiceLine);
 }
