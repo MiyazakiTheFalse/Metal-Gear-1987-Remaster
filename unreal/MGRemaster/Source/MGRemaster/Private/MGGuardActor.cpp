@@ -51,6 +51,13 @@ AMGGuardActor::AMGGuardActor()
     SecuritySidearm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     SecuritySidearm->SetCastShadow(true);
     SecuritySidearm->SetVisibility(false);
+    // Procedural weapon prototype stays visible when the optional imported
+    // weapon does not exist. Guards must never fire from an invisible pistol.
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> PistolProxy(
+        TEXT("/Engine/BasicShapes/Cube.Cube"));
+    if (PistolProxy.Succeeded())
+        SecuritySidearm->SetStaticMesh(PistolProxy.Object);
+    SecuritySidearm->SetRelativeScale3D(FVector(.20f, .036f, .042f));
     SidearmMuzzleLight = CreateDefaultSubobject<UPointLightComponent>(
         TEXT("GuardSidearmMuzzleFlash"));
     SidearmMuzzleLight->SetupAttachment(SecuritySidearm);
@@ -75,7 +82,10 @@ void AMGGuardActor::BeginPlay()
     // until approved, distinct guard-specific service arms are supplied.
     if (UStaticMesh* Sidearm = LoadObject<UStaticMesh>(nullptr,
             TEXT("/Game/Weapons/Snake/SM_Handgun_1995.SM_Handgun_1995")))
+    {
         SecuritySidearm->SetStaticMesh(Sidearm);
+        SecuritySidearm->SetRelativeScale3D(FVector::OneVector);
+    }
     if (!CharacterMesh->GetSkeletalMeshAsset())
         if (USkeletalMesh* Asset = LoadObject<USkeletalMesh>(nullptr,
                 TEXT("/Game/Characters/Guard/SK_Guard_1995.SK_Guard_1995")))
@@ -110,6 +120,12 @@ void AMGGuardActor::BeginPlay()
             SecuritySidearm->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
             SecuritySidearm->SetVisibility(SecuritySidearm->GetStaticMesh() != nullptr);
         }
+    }
+    else
+    {
+        // The fallback unrigged guard keeps a physically readable sidearm
+        // on its actor instead of a silent invisible firing attachment.
+        SecuritySidearm->SetVisibility(SecuritySidearm->GetStaticMesh() != nullptr);
     }
 }
 
