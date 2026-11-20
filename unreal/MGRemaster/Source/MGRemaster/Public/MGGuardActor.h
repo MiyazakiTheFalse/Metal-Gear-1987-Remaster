@@ -189,6 +189,7 @@ private:
     FString PrototypeAnimationPrefix = TEXT("Guard");
     FName PrototypeAnimationRequest = NAME_None;
     void UpdatePrototypeFallbackAnimation();
+    void ApplyIncapacitatedVisual();
     UPROPERTY(VisibleAnywhere, Category="Security|Weapon")
     UStaticMeshComponent* SecuritySidearm;
     UPROPERTY(VisibleAnywhere, Category="Security|Weapon")
