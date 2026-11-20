@@ -124,6 +124,22 @@ private:
     bool bKidDefeated = false;
     bool bParachuteTaken = false;
     // Building 1 roof: matched browser prototype state, not final aircraft art.
+    bool bBuilding2Active = false;
+    bool bTankDefeated = false;
+    int32 TankHitsRemaining = 3;
+    int32 Building2MinesRemaining = 4;
+    TArray<int32> ArmedTankMineSites;
+    float TankPatrolX = 12900.f;
+    int32 TankDirection = 1;
+    int32 TankAttackPhase = 0; // patrol, warning, recovery
+    float TankPhaseRemaining = 1.5f;
+    UPROPERTY(Transient) AStaticMeshActor* Building2Entry = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* Building2Return = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* TankProxy = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* TankTurretProxy = nullptr;
+    TArray<AStaticMeshActor*> TankMineMarkers;
+    void CreateBuilding2TankApproach();
+    void TickBuilding2Tank(AMGPlayerCharacter* Player, float DeltaSeconds);
     bool bRoofActive = false;
     bool bHindDefeated = false;
     int32 HindHitsRemaining = 3;
