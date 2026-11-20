@@ -132,6 +132,11 @@ console.log('PASS: non-missable Card 1 via physical after-recovery yard return.'
 
 let run=boot();
 run.button('start');
+const initialCast=run.game.previewRigActors();
+assert.ok(initialCast.some(a=>a.id==='snake'&&a.kind==='player'));
+assert.ok(initialCast.some(a=>a.id==='fox'&&a.kind==='fox'&&a.captive));
+assert.ok(initialCast.some(a=>a.id==='informant'&&a.kind==='pow_informant'));
+assert.equal(initialCast.filter(a=>a.id==='snake').length,1);
 const stage=()=>run.game.state.stage;
 const act=name=>run.game.act(name);
 const next=()=>run.game.step(.31);
@@ -166,6 +171,10 @@ for(let i=0;i<3;i++){next();act('interact')}
 assert.equal(stage(),3);
 assert.equal(run.game.canOccupy(14.6,0,0,0),false);
 walk(13,0);next();walk(17.4,-3.9);act('interact');assert.equal(stage(),4);
+const bossCast=run.game.previewRigActors();
+assert.equal(bossCast.filter(a=>a.id==='shotmaker').length,1,
+ 'one source-specific Shotmaker rig, not a generic extra guard');
+assert.equal(bossCast.find(a=>a.id==='shotmaker').kind,'shoot_gunner');
 assert.equal(run.game.state.equippedWeapon,'HANDGUN');
 assert.equal(run.game.state.rounds,24);
 resume();assert.equal(stage(),4);
