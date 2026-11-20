@@ -79,6 +79,7 @@ private:
     TWeakObjectPtr<AMGSurveillanceCameraActor> KennelCamera;
     bool bHeardFoxFollowup = false;
     bool bOwnsCarton = false;
+    bool bHeardFreightClerk = false;
     TWeakObjectPtr<AMGSurveillanceCameraActor> DispatchCamera;
     UPROPERTY(Transient) AStaticMeshActor* CartonPickup = nullptr;
     UPROPERTY(Transient) AStaticMeshActor* WornCarton = nullptr;
