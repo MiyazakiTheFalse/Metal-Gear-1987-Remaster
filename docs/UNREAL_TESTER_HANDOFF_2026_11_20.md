@@ -44,6 +44,7 @@ This imports original source GLBs under the exact C++ character load paths:
 | Gray Fox | `/Game/Characters/GrayFox/SK_GrayFox_1995_Prisoner` |
 | Guard | `/Game/Characters/Guard/SK_Guard_1995` |
 | Shoot Gunner | `/Game/Characters/Bosses/Shotmaker/SK_Shotmaker_1995` |
+| Machinegun Kid | `/Game/Characters/Bosses/MachinegunKid/SK_MachinegunKid_1995` |
 
 The script rejects invalid GLB headers, missing source joints, incomplete clip inventories and static-only import results. It renames an Interchange-generated skeletal mesh to the expected target only if the path is empty; **it does not overwrite existing artist work**. If editor import fails, capture Output Log and check glTF/Interchange plugin support. **Do not silently substitute static meshes.**
 
@@ -59,7 +60,7 @@ To produce a **locally built** Windows development package (after passing prefli
 .\scripts\build_windows.ps1 -UnrealRoot "C:\Program Files\Epic Games\UE_5.7"
 ```
 
-This runs local Python+Node contracts, verifies the GLBs under Unreal `Content/SourceAssets`, releases the Rust gameplay core, and then requires four native SkeletalMesh `.uasset` files before `RunUAT.bat BuildCookRun`. If you have not already imported the character source assets in Unreal, run the import script above first or pass `-ImportCharacterAssets` to the packaging script **after** the Editor target compiles. The script now explicitly refuses to package a purportedly complete character build with missing native meshes. Default archive is `dist\Windows`, which is ignored by Git. A *committed source project is not a prebuilt exe*. Verify startup, HUD, input and file provenance for any packaged exe before handing it to a nontechnical tester.
+This runs local Python+Node contracts, verifies the GLBs under Unreal `Content/SourceAssets`, releases the Rust gameplay core, and then requires **five active native SkeletalMesh** `.uasset` files (Snake, Fox, guard, Shoot Gunner, Machinegun Kid) and **16 essential native AnimationSequence** `.uasset` files before `RunUAT.bat BuildCookRun`. The Python source importer targets 22 cast members; supporting characters that have not yet appeared in gameplay still need visual/animation QA. If you have not already imported the character source assets in Unreal, run the import script above first or pass `-ImportCharacterAssets` to the packaging script **after** the Editor target compiles. The script now explicitly refuses to package a purportedly complete character build with missing native meshes. Default archive is `dist\Windows`, which is ignored by Git. A *committed source project is not a prebuilt exe*. Verify startup, HUD, input and file provenance for any packaged exe before handing it to a nontechnical tester.
 
 ## Playtest progression and critical assertions
 
