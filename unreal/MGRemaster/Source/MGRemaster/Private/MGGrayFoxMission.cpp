@@ -1,6 +1,7 @@
 #include "MGGrayFoxMission.h"
 
 #include "MGGuardActor.h"
+#include "MGStoryCameraDirector.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Engine/PointLight.h"
 #include "Components/PointLightComponent.h"
@@ -786,6 +787,8 @@ void AMGGrayFoxMission::BeginPlay()
     CreateSurveillancePosts();
     CreateZoneLighting();
     SpawnPerimeterGuards();
+    StoryCamera = GetWorld()->SpawnActor<AMGStoryCameraDirector>(
+        PreludeStart, FRotator::ZeroRotator);
     if (const UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
         UGameplayStatics::LoadGameFromSlot(SaveSlot, 0)))
     {
@@ -926,6 +929,23 @@ void AMGGrayFoxMission::RestoreVisualState()
     }
 }
 
+bool AMGGrayFoxMission::StartStoryCinematic(
+    FName Scene, AMGPlayerCharacter* Player, AActor* Focus)
+{
+    return IsValid(StoryCamera) && StoryCamera->PlayScene(Scene, Player, Focus);
+}
+
+void AMGGrayFoxMission::SkipStoryCinematic()
+{
+    if (IsValid(StoryCamera)) StoryCamera->SkipScene();
+}
+
+void AMGGrayFoxMission::NotifyBodyRelocated(AMGPlayerCharacter* Player)
+{
+    // Persist the actual placement, not the cinematic performance or E key.
+    if (bPlayerInitialised && IsValid(Player)) SaveProgress(Player);
+}
+
 void AMGGrayFoxMission::InitializePlayerIfReady()
 {
     if (bPlayerInitialised) return;
@@ -977,6 +997,9 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
     NotifyPacingPhaseIfChanged();
     if (!bHasLoadedSave)
     {
+        // Camera reveal and codec are concurrent; no movement freeze or
+        // forced press-to-continue exposition. A reload never replays this.
+        StartStoryCinematic(TEXT("opening"), Player, Player);
         // Open with the authentic transceiver paradigm, without stealing
         // movement. Players can close it immediately or keep walking.
         Player->OpenIncomingMissionBriefing();
@@ -1073,6 +1096,8 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
                         FLinearColor::Black, true, false);
             }
         }
+        if (IsValid(Player))
+            StartStoryCinematic(TEXT("capture"),Player,Player);
         Dialogue = TEXT("DETENTION — WEAPONS CONFISCATED. ASSESS THE CELL.");
         break;
     case MG_FOX_LEARN_DETENTION_ROUTE:
@@ -1088,6 +1113,8 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
             Fox->SetRescued(true);
         // Placeholder original prose, not a published game-script transcription.
         Dialogue = TEXT("GRAY FOX: I saw it walk, Snake. Metal Gear can launch a nuclear missile. Find Dr. Pettrovich.");
+        if (IsValid(Player) && IsValid(FoxProxy))
+            StartStoryCinematic(TEXT("fox"),Player,FoxProxy);
         // Optional dry recorded human voice, positioned at the actual cell.
         // The player receives the rescue + intelligence even with no VO asset.
         if (IsValid(FoxProxy))
@@ -1111,6 +1138,8 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         break;
     case MG_FOX_ENTER_SHOTMAKER:
         if (IsValid(Shotmaker)) Shotmaker->SetEncounterActive(true);
+        if (IsValid(Player) && IsValid(Shotmaker))
+            StartStoryCinematic(TEXT("shotmaker"),Player,Shotmaker);
         // Remake-authored prison-owner threat. It is a performance cue,
         // never a magic boss activation event or an uncaptioned voice.
         Dialogue = TEXT("SHOOT GUNNER: You made it out of your cell. Not out of my prison.");
@@ -1149,6 +1178,8 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
             Player->GetEquipment()->AwardItem(TEXT("CARD3"), 1);
         if (IsValid(Card3Pickup)) Card3Pickup->SetActorHiddenInGame(true);
         Dialogue = TEXT("CARD 3 RECOVERED — ROUTE FORWARD OPEN.");
+        if (IsValid(Player))
+            StartStoryCinematic(TEXT("card3"),Player,Player);
         break;
     case MG_FOX_COMPLETE_SLICE:
         if (IsValid(ChapterExit)) ChapterExit->Destroy();
