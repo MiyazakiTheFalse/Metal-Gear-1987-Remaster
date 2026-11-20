@@ -839,6 +839,27 @@ void AMGGrayFoxMission::BeginPlay()
     CreateGreybox();
     CreateBossWing();
     CreatePostCard3Service();
+    // Connected vertical continuation after the west lift. Source-authored geometry
+    // deliberately does not claim original MSX2 exact dimensions.
+    SpawnBlock(TEXT("B1RoofDeck"), FVector(10000.f,0.f,530.f), FVector(22.f,10.f,1.f), true);
+    for (float Y : {-500.f,500.f})
+        SpawnBlock(TEXT("B1RoofParapet"), FVector(10000.f,Y,780.f), FVector(22.f,.4f,3.8f), true);
+    for (float X : {8900.f,11100.f})
+        SpawnBlock(TEXT("B1RoofEndRail"), FVector(X,0.f,780.f), FVector(.4f,10.f,3.8f), true);
+    for (const FVector& Shelter : {FVector(9400.f,180.f,680.f),
+                                  FVector(9910.f,-100.f,680.f),
+                                  FVector(10540.f,200.f,680.f)})
+        SpawnBlock(TEXT("B1RoofBlastShelter"), Shelter, FVector(1.5f,1.4f,1.9f), true);
+    RoofLiftEntry = SpawnBlock(TEXT("B1RoofLiftCall"), FVector(7700.f,0.f,-12.f),
+                               FVector(.35f,.42f,.75f), false);
+    RoofReturnLift = SpawnBlock(TEXT("B1RoofLiftReturn"), FVector(9110.f,0.f,722.f),
+                               FVector(.35f,.42f,.75f), false);
+    RoofLauncher = SpawnBlock(TEXT("B1RoofGrenadeRack"), FVector(9630.f,-265.f,670.f),
+                              FVector(.9f,.65f,1.f), false);
+    HindProxy = SpawnBlock(TEXT("B1HindDFlightProxy"), FVector(10300.f,0.f,1120.f),
+                           FVector(3.2f,1.3f,1.2f), false);
+    HindRotor = SpawnBlock(TEXT("B1HindDRotorProxy"), FVector(10300.f,0.f,1200.f),
+                           FVector(5.9f,.12f,.12f), false);
     CreateConnectiveSpaces();
     CreateFirstPassVerticality();
     CreateSurveillancePosts();
@@ -853,7 +874,7 @@ void AMGGrayFoxMission::BeginPlay()
         const uint32 F = Save->MissionFlags;
         const bool bLegacy = Save->SchemaVersion == 1;
         const bool bRecognizedSchema = bLegacy || Save->SchemaVersion == 2
-            || Save->SchemaVersion == 3 || Save->SchemaVersion == 4;
+            || Save->SchemaVersion == 3 || Save->SchemaVersion == 4 || Save->SchemaVersion == 5;
         const bool bValid = bRecognizedSchema
             && (F & ~(bLegacy ? 63u : 16383u)) == 0
             && (!(F & MG_FOX_CAPTURED) || (F & MG_FOX_CONFISCATED))
@@ -901,6 +922,16 @@ void AMGGrayFoxMission::BeginPlay()
             bRelayIntel = bServiceWallOpen && Save->bRelayIntel;
             bKidDefeated = bServiceWallOpen && Save->bKidDefeated;
             bParachuteTaken = bKidDefeated && Save->bParachuteTaken;
+            if (Save->SchemaVersion >= 5 && bParachuteTaken)
+            {
+                bRoofActive = Save->bRoofActive;
+                bHindDefeated = Save->bHindDefeated;
+                HindHitsRemaining = bHindDefeated ? 0 : FMath::Clamp(Save->HindHitsRemaining,1,3);
+                RoofGrenadesRemaining = FMath::Clamp(Save->RoofGrenadesRemaining,0,6);
+                HindPhase = FMath::Clamp(Save->HindPhase,0,3);
+                HindPhaseTime = FMath::Clamp(Save->HindPhaseTime,.0f,6.f);
+                HindTravelTime = FMath::Clamp(Save->HindTravelTime,0.f,100000.f);
+            }
             if (bKidDefeated && IsValid(MachinegunKid)) MachinegunKid->Destroy();
             if (bParachuteTaken && IsValid(ParachutePack)) ParachutePack->SetActorHiddenInGame(true);
             if (IsValid(ChargeParcel)) ChargeParcel->SetActorHiddenInGame(bServiceChargeCollected);
@@ -979,6 +1010,8 @@ void AMGGrayFoxMission::RestoreVisualState()
         PlantedTransmitter->SetActorHiddenInGame(
             !(Flags & MG_FOX_TRANSMITTER_PLANTED)
             || (Flags & MG_FOX_TRANSMITTER_REMOVED));
+    if (IsValid(HindProxy)) HindProxy->SetActorHiddenInGame(bHindDefeated);
+    if (IsValid(HindRotor)) HindRotor->SetActorHiddenInGame(bHindDefeated);
     if (IsValid(Shotmaker))
     {
         if (Flags & MG_FOX_SHOTMAKER_DEFEATED) Shotmaker->RestoreDefeated();
@@ -1096,13 +1129,20 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
         UGameplayStatics::CreateSaveGameObject(UMGGrayFoxSaveGame::StaticClass()));
     if (!Save) return;
-    Save->SchemaVersion = 4;
+    Save->SchemaVersion = 5;
     Save->MissionFlags = Flags;
     Save->bServiceChargeCollected = bServiceChargeCollected;
     Save->bServiceWallOpen = bServiceWallOpen;
     Save->bRelayIntel = bRelayIntel;
     Save->bKidDefeated = bKidDefeated;
     Save->bParachuteTaken = bParachuteTaken;
+    Save->bRoofActive = bRoofActive;
+    Save->bHindDefeated = bHindDefeated;
+    Save->HindHitsRemaining = HindHitsRemaining;
+    Save->RoofGrenadesRemaining = RoofGrenadesRemaining;
+    Save->HindPhase = HindPhase;
+    Save->HindPhaseTime = HindPhaseTime;
+    Save->HindTravelTime = HindTravelTime;
     Save->bOwnsCarton = bOwnsCarton;
     Save->bHeardFreightClerk = bHeardFreightClerk;
     Save->bDispatchCameraOffline = DispatchCamera.IsValid() && !DispatchCamera->IsOperational();
@@ -1305,6 +1345,65 @@ bool AMGGrayFoxMission::CanReach(
 bool AMGGrayFoxMission::TryServiceInteraction(AMGPlayerCharacter* Player)
 {
     if (!(Flags & MG_FOX_SLICE_COMPLETED)) return false;
+    if (bParachuteTaken && !bRoofActive && CanReach(Player, RoofLiftEntry, 185.f))
+    {
+        bRoofActive = true;
+        Player->SetActorLocation(FVector(9170.f,0.f,670.f), false, nullptr,
+                                 ETeleportType::TeleportPhysics);
+        Dialogue = TEXT("BUILDING 1 ROOF — ROTOR CONTACT. SEEK COVER.");
+        DialogueTimeRemaining = 3.5f;
+        SaveProgress(Player);
+        return true;
+    }
+    if (bRoofActive && CanReach(Player, RoofReturnLift, 185.f))
+    {
+        bRoofActive = false;
+        Player->SetActorLocation(FVector(7600.f,0.f,-11.f), false, nullptr,
+                                 ETeleportType::TeleportPhysics);
+        Dialogue = TEXT("WEST LIFT — ROOF ACCESS REMAINS OPEN.");
+        DialogueTimeRemaining = 3.f;
+        SaveProgress(Player);
+        return true;
+    }
+    if (bRoofActive && !bHindDefeated && CanReach(Player, RoofLauncher, 185.f))
+    {
+        if (RoofGrenadesRemaining <= 0)
+        {
+            Dialogue = TEXT("GRENADE RACK EMPTY. SEEK COVER OR RETURN TO LIFT.");
+        }
+        else
+        {
+            --RoofGrenadesRemaining;
+            // A shot can only hit during a flight approach and unobstructed
+            // rack-to-aircraft line. It cannot damage the helicopter through walls.
+            FHitResult Hit;
+            FCollisionQueryParams Query(SCENE_QUERY_STAT(RoofHindGrenade), false);
+            Query.AddIgnoredActor(Player);
+            Query.AddIgnoredActor(this);
+            if (IsValid(RoofLauncher)) Query.AddIgnoredActor(RoofLauncher);
+            const FVector From = RoofLauncher->GetActorLocation() + FVector(0.f,0.f,80.f);
+            const FVector To = HindProxy->GetActorLocation();
+            const bool bClear = !GetWorld()->LineTraceSingleByChannel(
+                Hit, From, To, ECC_Visibility, Query);
+            if (bClear && HindPhase != 3 && IsValid(HindProxy))
+            {
+                --HindHitsRemaining;
+                HindPhase = 3; HindPhaseTime = 2.15f;
+                Dialogue = TEXT("GRENADE IMPACT — AIRCRAFT BREAKING OFF.");
+                if (HindHitsRemaining <= 0)
+                {
+                    bHindDefeated = true;
+                    Dialogue = TEXT("HIND D DISABLED. ROOF SECURE.");
+                    if (IsValid(HindProxy)) HindProxy->SetActorHiddenInGame(true);
+                    if (IsValid(HindRotor)) HindRotor->SetActorHiddenInGame(true);
+                }
+            }
+            else Dialogue = TEXT("GRENADE MISSED. AIRCRAFT NOT IN CLEAR FIRING LANE.");
+        }
+        DialogueTimeRemaining = 3.f;
+        SaveProgress(Player);
+        return true;
+    }
     if (!bServiceChargeCollected && CanReach(Player, ChargeParcel, 185.f))
     {
         bServiceChargeCollected = true;
@@ -2063,6 +2162,53 @@ bool AMGGrayFoxMission::HasIncomingTransceiverPrompt() const
 }
 
 
+void AMGGrayFoxMission::TickHindPrototype(AMGPlayerCharacter* Player, float Dt)
+{
+    if (!bRoofActive || bHindDefeated || !IsValid(HindProxy) || !Player) return;
+    HindTravelTime += Dt;
+    const FVector Aircraft(10300.f+240.f*FMath::Sin(HindTravelTime*.38f),
+                           180.f*FMath::Sin(HindTravelTime*.53f),1120.f);
+    HindProxy->SetActorLocation(Aircraft);
+    if (IsValid(HindRotor)) HindRotor->SetActorLocation(Aircraft+FVector(0.f,0.f,80.f));
+    HindPhaseTime -= Dt;
+    if (HindPhase == 0 && HindPhaseTime <= 0.f)
+    {
+        HindPhase = 1; HindPhaseTime = 1.25f;
+        Dialogue = TEXT("HIND D TURNING — TAKE SHELTER.");
+        DialogueTimeRemaining = 1.5f;
+    }
+    else if (HindPhase == 1 && HindPhaseTime <= 0.f)
+    {
+        HindPhase = 2; HindPhaseTime = 1.1f; HindExposureTime = 0.f;
+    }
+    else if (HindPhase == 2)
+    {
+        FHitResult Hit;
+        FCollisionQueryParams Query(SCENE_QUERY_STAT(RoofHindSight), false);
+        Query.AddIgnoredActor(Player);
+        Query.AddIgnoredActor(HindProxy);
+        if (IsValid(HindRotor)) Query.AddIgnoredActor(HindRotor);
+        const FVector Target = Player->GetActorLocation()+FVector(0.f,0.f,30.f);
+        const bool bExposed = !GetWorld()->LineTraceSingleByChannel(
+            Hit,Aircraft,Target,ECC_Visibility,Query);
+        if (bExposed)
+        {
+            HindExposureTime += Dt;
+            if (HindExposureTime > .48f)
+            {
+                HindExposureTime = -.28f;
+                UGameplayStatics::ApplyDamage(Player,10.f,nullptr,HindProxy,UDamageType::StaticClass());
+            }
+        }
+        else HindExposureTime = 0.f;
+        if (HindPhaseTime <= 0.f){HindPhase = 3;HindPhaseTime = 1.8f;}
+    }
+    else if (HindPhase == 3 && HindPhaseTime <= 0.f)
+    {
+        HindPhase = 0; HindPhaseTime = 1.8f;
+    }
+}
+
 void AMGGrayFoxMission::Tick(float Dt)
 {
     Super::Tick(Dt);
@@ -2107,6 +2253,7 @@ void AMGGrayFoxMission::Tick(float Dt)
             SaveProgress(Player);
         }
         TickDispatch(Player, Dt);
+        TickHindPrototype(Player, Dt);
         const FVector CurrentPosition = Player->GetActorLocation();
         const APlayerController* PC = Cast<APlayerController>(Player->GetController());
         const FRotator View = PC ? PC->GetControlRotation() : Player->GetActorRotation();
