@@ -5,6 +5,7 @@
 #include "Engine/SkeletalMesh.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimSequence.h"
+#include "MGPrototypeAnimationFallback.h"
 #include "UObject/ConstructorHelpers.h"
 
 AMGPrisonerCharacter::AMGPrisonerCharacter()
@@ -53,13 +54,24 @@ void AMGPrisonerCharacter::BeginPlay()
         CharacterMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
         CharacterMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
         CharacterMesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+        UpdatePrototypeFallbackAnimation();
     }
+}
+
+void AMGPrisonerCharacter::UpdatePrototypeFallbackAnimation()
+{
+    // Captive Fox visibly recovers into wary idle when the REAL rescue commits.
+    // His material/actor stays identical; no second Fox or story flag is created.
+    MGPrototypeAnimationFallback::Apply(CharacterMesh,
+        TEXT("/Game/Characters/GrayFox"), TEXT("GrayFox"),
+        bRescued ? TEXT("IdleWary") : TEXT("Captive"),
+        PrototypeAnimationRequest);
 }
 
 void AMGPrisonerCharacter::SetRescued(bool bInRescued)
 {
     bRescued = bInRescued;
-    // An animation blueprint reads this state; rescue flags remain in the mission.
+    UpdatePrototypeFallbackAnimation();
 }
 
 bool AMGPrisonerCharacter::HasAuthoredCharacterArt() const
