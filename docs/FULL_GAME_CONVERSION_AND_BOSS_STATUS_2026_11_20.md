@@ -75,3 +75,15 @@ Every production slice must be a start-to-end playable **chain** including entry
 - [Source edition and naming comparison](https://tcrf.net/Metal_Gear_(MSX2)).
 
 **No compile/test guarantee:** GitHub connector edits cannot compile UE5.7, import AnimBlueprints, bake PBR materials, verify navigation or make a download build here. Physical testing and canon-signoff are mandatory before any feature changes from source-prototype to production-ready.
+
+### GitHub execution workstreams
+The scope is divided into milestone issues with explicit in-engine acceptance evidence; the overall game remains unfinished. These are production tracking issues, not completed features.
+
+- [N01 — original Building 1, full equipment and four mercenaries](https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/4).
+- [N02 — custody, Gray Fox, Shoot Gunner, surveillance and rigging](https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/5).
+- [N03 — post-Card-3, Machinegun Kid, parachute and Hind D](https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/6).
+- [N04 — Building 2 vehicles, Fire Trooper, TX-11](https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/7).
+- [N05 — Building 3, Coward Duck, TX-55, Big Boss and escape](https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/8).
+- [N06 — cross-cutting 1995 art, animation/IK, audio, interface and release](https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/9). **This runs from the first mission, not as optional last-minute polish.**
+
+**Current code integration note:** equipment slots are now populated before save-restoration attempts, avoiding dependence on Unreal actor BeginPlay ordering. The authentic handgun is an in-world pickup stored in V4 SaveGame; the original 1987 other six weapons remain locked and cannot be falsely awarded until they have actual gameplay handlers. A non-canonical stun test asset remains in source, but is absent from normal inventory and omitted in shipping builds.
