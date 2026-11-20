@@ -77,11 +77,16 @@ void AMGMachinegunKid::BeginPlay()
         Receiver->SetStaticMesh(AuthoredWeapon);
         Receiver->SetRelativeScale3D(FVector::OneVector);
     }
-    if (bLoaded && GetRigMesh() &&
-        GetRigMesh()->DoesSocketExist(TEXT("weapon_r")))
+    const FName HandSocket = bLoaded && GetRigMesh() &&
+        GetRigMesh()->DoesSocketExist(TEXT("weapon_r"))
+        ? FName(TEXT("weapon_r"))
+        : bLoaded && GetRigMesh() &&
+          GetRigMesh()->GetBoneIndex(TEXT("hand_R")) != INDEX_NONE
+          ? FName(TEXT("hand_R")) : NAME_None;
+    if (bLoaded && GetRigMesh() && HandSocket != NAME_None)
     {
         Receiver->AttachToComponent(GetRigMesh(),
-            FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("weapon_r"));
+            FAttachmentTransformRules::SnapToTargetNotIncludingScale, HandSocket);
         Receiver->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
         Flash->AttachToComponent(Receiver,
             FAttachmentTransformRules::SnapToTargetNotIncludingScale);
