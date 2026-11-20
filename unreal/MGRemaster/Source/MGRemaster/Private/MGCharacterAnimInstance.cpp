@@ -53,6 +53,7 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
         FMath::RadiansToDegrees(FMath::Atan2(Local.Y, Local.X)) : 0.f;
 
     bCrouched = bProne = bAiming = bSprinting = bInCover = false;
+    bDraggingBody = false;
     bWeaponReady = false;
     FireRecoilAlpha = 0.f;
     bIsFiring = false;
@@ -92,6 +93,7 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
         }
         bSprinting = Player->IsSprinting();
         bInCover = Player->IsInCover();
+        bDraggingBody = Player->IsDraggingBody();
         bCornerPeeking = Player->IsCornerPeeking();
         bKnocking = Player->IsWallKnocking();
         CoverShuffleDirection = Player->GetCoverShuffleDirection();
@@ -123,7 +125,8 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
         // Never have the weapon grip on a captured/unarmed Snake.
         TargetRightGrip = bWeaponReady ? 1.f : 0.f;
         TargetLeftGrip = bWeaponReady && bAiming ? .7f : 0.f;
-        if (Player->IsMeleeVisualActive()) Desired = EMGPerformanceAction::Melee;
+        if (bDraggingBody) Desired = EMGPerformanceAction::BodyDrag;
+        else if (Player->IsMeleeVisualActive()) Desired = EMGPerformanceAction::Melee;
         else if (bKnocking) Desired = EMGPerformanceAction::WallKnock;
         else if (bIsFiring) Desired = EMGPerformanceAction::Fire;
         else if (Player->HasPhysicalInteractionContact() &&
@@ -209,6 +212,8 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
         PerformanceActionElapsedSeconds / BlendSeconds, 0.f, 1.f);
     // Secondary channels let authored blend graphs interpolate into stances
     // without ever replacing the movement capsule's real clearance checks.
+    BodyDragAlpha = FMath::FInterpTo(
+        BodyDragAlpha, bDraggingBody ? 1.f : 0.f, DeltaSeconds, 10.f);
     CrouchTransitionAlpha = FMath::FInterpTo(
         CrouchTransitionAlpha, bCrouched ? 1.f : 0.f, DeltaSeconds, 8.f);
     ProneTransitionAlpha = FMath::FInterpTo(
