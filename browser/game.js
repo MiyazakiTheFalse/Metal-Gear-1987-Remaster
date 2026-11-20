@@ -263,6 +263,71 @@ function detailRelay(){
 }
 const service={charge:false,open:false,intel:false,kidDown:false,parachute:false,fuse:-1};
 
+
+/* Prototype Building 2 tank route: the vehicle is immune to pistol shots.
+ * Mines must be planted in advance on a real crossing of its moving track. */
+const b2={active:false,defeated:false,hp:3,mines:4,armed:[],x:111,dir:1,
+ phase:'patrol',clock:2,damageCooldown:0};
+const b2Road=add('building two road',110,-.26,0,28,.5,10.4,color.floor,mat.grate);
+for(const z of [-5.15,5.15])wall('building two perimeter',110,z,28,.28);
+for(const [x,z] of [[102,-3.4],[108,3.4],[117,-3.4],[121,3.4]])
+ add('tank shelter',x,.9,z,1.55,1.8,1.5,color.metal,mat.steel,true).mesh='bevel';
+const b2Tank=add('tank armoured hull',111,1.25,0,3.2,1.5,2.2,color.green,mat.steel);
+const b2Turret=add('tank rotating turret',111,2.1,0,1.9,.5,1.35,color.dark,mat.steel);
+const b2Sites=[105,111,117].map(x=>({x,z:0}));
+const b2Markers=b2Sites.map((v,i)=>add('mine station '+i,v.x,.04,0,.5,.08,.5,color.stripe,mat.light));
+function syncB2(){
+ b2Tank.active=b2Turret.active=b2.active&&!b2.defeated;
+ b2Tank.x=b2Turret.x=b2.x;
+ for(let i=0;i<3;i++)b2Markers[i].color=b2.armed.includes(i)?[.19,.29,.20]:color.stripe;
+}
+function b2Action(){
+ if(roof.active&&roof.defeated&&dist(player,{x:88.5,z:0})<1.6)return 'DESCEND TO BUILDING 2';
+ if(!b2.active)return '';
+ if(dist(player,{x:98.5,z:0})<1.6)return 'RETURN TO ROOF';
+ const i=b2Sites.findIndex((v,j)=>dist(player,v)<1.6&&!b2.armed.includes(j));
+ if(i>=0&&!b2.defeated)return b2.mines?'PLANT MINE':'NO MINES';
+ return '';
+}
+function b2Interact(cmd){
+ if(cmd==='DESCEND TO BUILDING 2'){
+  b2.active=true;roof.active=false;stage=10;player.x=99.2;player.z=0;
+  syncB2();roofSync();popup('Building 2 · tank tracks ahead',3);save();return;
+ }
+ if(cmd==='RETURN TO ROOF'){
+  b2.active=false;roof.active=true;stage=10;player.x=87.5;player.z=0;
+  syncB2();roofSync();save();return;
+ }
+ if(cmd==='NO MINES'){popup('Mines exhausted. Return to the rooftop.',2);return;}
+ if(cmd==='PLANT MINE'&&b2.mines){
+  const i=b2Sites.findIndex((v,j)=>dist(player,v)<1.6&&!b2.armed.includes(j));
+  if(i<0)return;
+  if(Math.abs(b2.x-b2Sites[i].x)<2){popup('Track occupied. Wait for the tank to pass.',2);return;}
+  b2.armed.push(i);b2.mines--;playCue('select',b2Sites[i]);
+  popup('Mine placed on the visible track.',2);syncB2();save();
+ }
+}
+function b2Tick(dt){
+ if(!b2.active||b2.defeated)return;
+ const old=b2.x;
+ b2.x=clamp(old+b2.dir*1.5*dt,102,120);
+ if(b2.x===102||b2.x===120)b2.dir*=-1;
+ for(const i of [...b2.armed])if((old-b2Sites[i].x)*(b2.x-b2Sites[i].x)<=0){
+  b2.armed.splice(b2.armed.indexOf(i),1);b2.hp--;
+  playCue('breach',b2Sites[i]);popup('Track mine detonated',2);save();
+  if(b2.hp<=0){b2.hp=0;b2.defeated=true;popup('Tank immobilised · route secured',4);playCue('win');save();}
+ }
+ b2.clock-=dt;b2.damageCooldown=Math.max(0,b2.damageCooldown-dt);
+ if(b2.phase==='patrol'&&b2.clock<=0){b2.phase='warning';b2.clock=1.1;popup('Turret turning · take cover',1.1);}
+ else if(b2.phase==='warning'&&b2.clock<=0){
+  b2.phase='recover';b2.clock=1.7;playCue('gunshot',b2Tank);
+  if(b2.damageCooldown===0&&!lineBlockedSight(b2Tank,player,2.2,bodyShape().height*.7)){
+   applyPlayerDamage(20,b2Tank);b2.damageCooldown=2.6;
+  }
+ }else if(b2.phase==='recover'&&b2.clock<=0){b2.phase='patrol';b2.clock=1.5;}
+ syncB2();
+}
+
 /* Building 1 roof continuation: original authored proxy encounter, not verified
  * MSX2 topology or finished helicopter art. Combat and checkpoint are real. */
 const roof={active:false,defeated:false,hp:3,grenades:6,phase:'patrol',
@@ -286,7 +351,8 @@ function roofSync(){
  roofFlight.color=roof.defeated?[.19,.20,.21]:color.metal;
 }
 function roofAction(){
- if(!roof.active&&(stage===8||stage===9)&&service.parachute&&dist(player,roofLift)<1.55)
+ const afterRoof=b2Action();if(afterRoof)return afterRoof;
+ if(!roof.active&&(stage===8||stage===9||stage===10)&&service.parachute&&dist(player,roofLift)<1.55)
   return 'TAKE LIFT TO BUILDING 1 ROOF';
  if(!roof.active)return '';
  if(dist(player,roofReturn)<1.55)return 'RETURN TO WEST LIFT';
@@ -295,6 +361,7 @@ function roofAction(){
  return '';
 }
 function roofInteract(action){
+ if(['DESCEND TO BUILDING 2','RETURN TO ROOF','PLANT MINE','NO MINES'].includes(action)){b2Interact(action);return;}
  if(action==='TAKE LIFT TO BUILDING 1 ROOF'){
   stage=9;roof.active=true;player.x=72.3;player.z=0;roofSync();
   popup('Building 1 roof · rotor signature approaching',3);playCue('rack',roofLift);save();return;
@@ -869,7 +936,7 @@ function record(event){
 function save(){
  if(missionFailed||health<=0)return;
  try{
-  localStorage.setItem(STORAGE,JSON.stringify({version:9,roof:{active:roof.active,defeated:roof.defeated,hp:roof.hp,grenades:roof.grenades,phase:roof.phase,clock:roof.clock,lap:roof.lap,flyX:roof.flyX,flyZ:roof.flyZ},service:{charge:service.charge,open:service.open,intel:service.intel,kidDown:service.kidDown,parachute:service.parachute},storesOpen,legacyFloorCard,freight:{handgun:world.handgun,box:world.box,freightAmbientHeard:world.freightAmbientHeard,cameraOff:world.cameraOff,foxFollowup:world.foxFollowup,preview:world.preview,hallOpen:world.hallOpen},propertyTag:{state:tag.state,point:tag.point},stage,cardDrop,x:player.x,z:player.z,
+  localStorage.setItem(STORAGE,JSON.stringify({version:10,b2:{...b2,armed:[...b2.armed]},roof:{active:roof.active,defeated:roof.defeated,hp:roof.hp,grenades:roof.grenades,phase:roof.phase,clock:roof.clock,lap:roof.lap,flyX:roof.flyX,flyZ:roof.flyZ},service:{charge:service.charge,open:service.open,intel:service.intel,kidDown:service.kidDown,parachute:service.parachute},storesOpen,legacyFloorCard,freight:{handgun:world.handgun,box:world.box,freightAmbientHeard:world.freightAmbientHeard,cameraOff:world.cameraOff,foxFollowup:world.foxFollowup,preview:world.preview,hallOpen:world.hallOpen},propertyTag:{state:tag.state,point:tag.point},stage,cardDrop,x:player.x,z:player.z,
    rounds,equippedWeapon,sealedWeapon,recoveredGear,wallHits,health,
    firstCardEarned,storySeen:window.MGCharacterStory?.heard()||[],
    bossHP:boss.hp,bossRest:stage>=5?{x:boss.x,z:boss.z,yaw:boss.yaw}:null,
@@ -881,12 +948,12 @@ function save(){
 function load(){
  let data;
  try{data=JSON.parse(localStorage.getItem(STORAGE))}catch(e){return false}
- if(!data||![1,2,3,4,5,6,7,8,9].includes(data.version)||!Number.isInteger(data.stage))return false;
+ if(!data||![1,2,3,4,5,6,7,8,9,10].includes(data.version)||!Number.isInteger(data.stage))return false;
  window.MGCharacterStory?.restore(data.storySeen);
  for(const key of ['box','cameraOff','foxFollowup','preview','hallOpen','freightAmbientHeard'])world[key]=data.freight?.[key]===true;
  world.handgun=data.version<7||data.freight?.handgun===true;
  const legacy=data.version<4;
- if(data.stage<(legacy?0:-2)||data.stage>(legacy?4:data.version===4?6:data.version>=9?9:8))return false;
+ if(data.stage<(legacy?0:-2)||data.stage>(legacy?4:data.version===4?6:data.version>=10?10:data.version>=9?9:8))return false;
  stage=legacy?Math.min(3,data.stage):data.stage;
  firstCardEarned=data.firstCardEarned===true;
  // Version 4 opened the exit on boss defeat. Preserve that earned access.
@@ -894,7 +961,7 @@ function load(){
  service.charge=stage>=8&&data.service?.charge===true;service.open=service.charge&&data.service?.open===true;
  service.intel=service.open&&data.service?.intel===true;service.kidDown=service.open&&data.service?.kidDown===true;
  service.parachute=service.kidDown&&data.service?.parachute===true;syncService();
- if(data.version===9&&stage===9){
+ if(data.version>=9&&stage>=9){
   const saved=data.roof||{};roof.active=saved.active===true;
   roof.defeated=saved.defeated===true;
   roof.hp=roof.defeated?0:clamp(Number.isInteger(saved.hp)?saved.hp:3,1,3);
@@ -905,6 +972,16 @@ function load(){
   roof.flyX=clamp(Number(saved.flyX)||82,79,85);
   roof.flyZ=clamp(Number(saved.flyZ)||0,-2,2);
   roofSync();
+ }
+ if(data.version>=10&&stage===10&&roof.defeated&&service.parachute){
+  const saved=data.b2||{};
+  b2.active=saved.active===true;b2.defeated=saved.defeated===true;
+  b2.hp=b2.defeated?0:clamp(Number.isInteger(saved.hp)?saved.hp:3,1,3);
+  b2.mines=clamp(Number.isInteger(saved.mines)?saved.mines:4,0,4);
+  b2.armed=Array.isArray(saved.armed)?[...new Set(saved.armed.filter(i=>Number.isInteger(i)&&i>=0&&i<3))]:[];
+  b2.x=clamp(Number(saved.x)||111,102,120);b2.dir=saved.dir===-1?-1:1;
+  b2.phase=['patrol','warning','recover'].includes(saved.phase)?saved.phase:'patrol';
+  b2.clock=clamp(Number(saved.clock)||1,0,5);syncB2();
  }
  legacyFloorCard=data.version<8&&stage===5||data.legacyFloorCard===true;
  storesOpen=stage>=6||data.storesOpen===true;
@@ -1864,7 +1941,7 @@ function applyPlayerDamage(amount,source){
  playCue('hit',source||player);
  return true;
 }
-function updateGuards(dt){kennelTick(dt);kidTick(dt);roofTick(dt);const pulse=updatePropertyTag();let max=0;const triggered=[];for(const g of guards){if(g.knocked||g.kid)continue;if(g.boss){updateShootGunner(dt,pulse);max=Math.max(max,g.state);continue;}const d=dist(g,player),direction=Math.atan2(player.z-g.z,player.x-g.x),view=Math.abs(Math.atan2(Math.sin(direction-g.yaw),Math.cos(direction-g.yaw)))<.87;// Ghost Babel-style box logic: credible freight, not perpetual invisibility.
+function updateGuards(dt){kennelTick(dt);kidTick(dt);roofTick(dt);b2Tick(dt);const pulse=updatePropertyTag();let max=0;const triggered=[];for(const g of guards){if(g.knocked||g.kid)continue;if(g.boss){updateShootGunner(dt,pulse);max=Math.max(max,g.state);continue;}const d=dist(g,player),direction=Math.atan2(player.z-g.z,player.x-g.x),view=Math.abs(Math.atan2(Math.sin(direction-g.yaw),Math.cos(direction-g.yaw)))<.87;// Ghost Babel-style box logic: credible freight, not perpetual invisibility.
  // Only a guard with an actual close, forward, unobstructed look may inspect an
  // unlisted carton. Expected freight on the marked conveyor is not suspicious.
  const boxInspection=world.boxed&&!world.moved&&!nearBelt()&&d<1.65&&view&&
@@ -2459,10 +2536,11 @@ const chapters=[
  ['CARD 3','Use Card 3 at the reader beside the east shutter.'],
  ['EXIT CLEAR','Leave by the east shutter when ready.'],
  ['SERVICE WING','Pass the kennels. Inspect the patched wall at the far end.'],
- ['BUILDING 1 ROOF','Find shelter, observe the Hind D firing run and use the grenade launcher.']
+ ['BUILDING 1 ROOF','Find shelter, observe the Hind D firing run and use the grenade launcher.'],
+ ['BUILDING 2 APPROACH','Scout the armoured road and lay mines on the track.']
 ];
 function updateHUD(dt){
- const [phase,objective]=chapters[stage+2];$('phase').textContent=phase;$('obj').textContent=stage===9?(roof.defeated?'Hind D disabled · return by the west lift.':roof.active?'Use the roof shelters and the launcher rack · '+roof.grenades+' grenades.':'Return to the roof from the west lift.') :service.parachute?'Take the west lift to the roof.':service.kidDown?'Collect the parachute by the lift.':service.intel?'Follow the relay passage to the west lift.':service.open?'Investigate the relay room beyond the kennels.':objective;
+ const [phase,objective]=chapters[stage+2];$('phase').textContent=phase;$('obj').textContent=stage===10?(b2.defeated?'Tank immobilised. Next checkpoint is not yet implemented.':b2.active?'Lay track mines · '+b2.mines+' remain.':'Return to Building 2 from roof.') :stage===9?(roof.defeated?'Hind D disabled · return by the west lift.':roof.active?'Use the roof shelters and the launcher rack · '+roof.grenades+' grenades.':'Return to the roof from the west lift.') :service.parachute?'Take the west lift to the roof.':service.kidDown?'Collect the parachute by the lift.':service.intel?'Follow the relay passage to the west lift.':service.open?'Investigate the relay room beyond the kennels.':objective;
  const sample=[player.x,player.z,cam.yaw,cam.pitch];
  if(!movementSample||sample.some((v,i)=>Math.abs(v-movementSample[i])>(i<2?.05:.025))){
   movementSample=sample;quietSince=gameTime;
@@ -2699,7 +2777,7 @@ function frame(now){requestAnimationFrame(frame);const real=clamp((now-last)/100
  updatePlayer(dt);updateFox(dt);updateGuards(dt);
 }ambience(dt);for(const f of footsteps)f.life-=dt;footsteps=footsteps.filter(f=>f.life>0);shots.forEach(s=>s.life-=dt);shots=shots.filter(s=>s.life>0);for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy-=4.4*dt;p.life-=dt}particles=particles.filter(p=>p.life>0);noiseEvents.forEach(n=>n.life-=dt);noiseEvents=noiseEvents.filter(n=>n.life>0);if(awareness===0&&stage!==4&&Math.floor(gameTime/12)!==Math.floor((gameTime-dt)/12))save();if(awareness!==prevAlert)record('awareness.'+awareness);if(awareness===3&&prevAlert!==3)achievement.push({time:gameTime});prevAlert=awareness;}drawFrame(gameTime,dt);if(started)updateHUD(dt);frameCount++;if(now-frameStart>1000){$('fps').textContent=Math.round(frameCount*1000/(now-frameStart))+' FPS';frameStart=now;frameCount=0}}
 // Console contract for deterministic browser tests, never elevated to source fidelity.
-window.__mgGameDebug={get state(){return {stage,service:{...service},roof:{...roof},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
+window.__mgGameDebug={get state(){return {stage,service:{...service},roof:{...roof},b2:{...b2,armed:[...b2.armed]},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
  firstCardEarned,card1World:originalCard1Prop.active?{...originalCard1Target}:null,cinematic:window.MGCinematicDirector?.active||null,cinematicSeen:window.MGCinematicDirector?.seen||[],itemSlots:inventories.items.map(i=>({name:i.name,usable:i.usable})),safeLift:{...safeLift},player:{...player},bodyCollider:{...bodyShape(),orientation:player.stance===2?'horizontal':'vertical',samples:bodySamples(player.x,player.z,player.stance,player.yaw)},awareness,paused,equipOpen,noiseEvents:noiseEvents.map(n=>({...n})),guards:guards.map(g=>({state:g.state,x:g.x,z:g.z,yaw:g.yaw,last:{...g.last},investigateUntil:g.investigateUntil||0,lastKnockId:g.lastKnockId||0,boxInspectionAge:g.boxInspectionAge||0,boxIdentitySpoken:!!g.boxIdentitySpoken,knocked:g.knocked,unconscious:!!g.knockedOut,dragged:!!g.dragged,aimSubject:g.aimSubject,aimTime:g.aimTime,fireCooldown:g.fireCooldown,shotVisual:g.shotVisual})),fox:{x:fox.x,z:fox.z,hp:fox.hp,alive:fox.alive,mode:fox.mode,stance:fox.stance,moveSpeed:fox.moveSpeed},missionFailed,coverAssets:coverAssets.map(c=>({...c})),activeTracers:shots.filter(s=>s.tracer).length,damagePulse,damageDirection,cinematic:window.MGCinematicDirector?.active||null,cinematicBlocking:!!window.MGCinematicDirector?.blocking,foxListeningLearned:world.foxFollowup,storyEvents:window.MGCharacterStory?.heard()||[],originalMapVerified:false,renderedFrames:drawn,visualVersion:'original_humanoid_mk4_escort_armed_guards',meshKinds:Object.keys(meshLibrary),materialAtlas:{...materialAtlas},environmentModelCounts:{bedParts:sceneDetail.filter(o=>o.name.startsWith('cot ')||o.name.startsWith('blanket ')||o.name.startsWith('pillow ')||o.name==='folded wool blanket').length,lockerDetails:sceneDetail.filter(o=>o.name.startsWith('locker ')).length,cabinetDetails:sceneDetail.filter(o=>o.name.includes('front trim')||o.name.includes('bolt head')).length,ceilingsBlockCamera:cameraOnlySolids.some(o=>o.name==='ceiling'&&o.active)},camEye:[...cam.eye],cameraBlocked:cameraPositionPenetrates(cam.eye),cameraBelowFloor:cam.eye[1]<.28,activePadIndex,padPrev:[...padPrev],started}},readPad:()=>readGamepad(),start:()=>start(false),act:action,teleport:(x,z)=>{player.x=x;player.z=z},setCamera:(yaw,pitch=0)=>{cam.yaw=yaw;cam.pitch=pitch},stepCamera:(dt=.016)=>updateCamera(dt),canOccupy:(x,z,stance,yaw=player.yaw)=>canOccupyBody(x,z,stance,yaw),moveBody:(vx,vz,dt)=>movePlayer(vx,vz,dt),step:(dt)=>{gameTime+=dt;updatePlayer(dt);updateFox(dt);updateGuards(dt)},damageFox:(n)=>damageFox(n),stepFox:(dt)=>updateFox(dt),sightBlocked:(a,b,fromY=1.58,toY=1.52)=>lineBlockedSight(a,b,fromY,toY),radarVisionDistance:(index,angle,range=10)=>radarVisionDistance(guards[index],angle,range),findPath:(a,b)=>pathfind(a,b),foxRouteRisk:(p)=>foxRouteRisk(p),guardSeesPosition:(index,pos)=>guardSeesPosition(guards[index],pos),reset};
 // Deterministic development-only combat hook (absent unless tests opt in).
 if(window.__MG_TEST__){
