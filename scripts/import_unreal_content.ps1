@@ -27,9 +27,17 @@ $EditorArgs = @(
     '-log'
 )
 Write-Host 'Generating native SkeletalMesh and available AnimationSequence assets from committed GLBs...'
-& $Editor @EditorArgs 2>&1 | Tee-Object -FilePath (Join-Path $Logs 'unreal_character_import.log')
+$ImportLog = Join-Path $Logs 'unreal_character_import.log'
+& $Editor @EditorArgs 2>&1 | Tee-Object -FilePath $ImportLog
 if ($LASTEXITCODE -ne 0) {
-    throw "Unreal character import FAILED ($LASTEXITCODE). Inspect the import log."
+    throw "Unreal character import FAILED ($LASTEXITCODE). Inspect $ImportLog"
 }
-Write-Host 'Editor import finished. Inspect imported Skeletons/AnimationSequences and configure runtime AnimBlueprints before gameplay QA.'
+# An Unreal Python exception may be reported in Output Log while the process
+# returns zero. Never confuse that with a successful imported native asset.
+$Passed = Select-String -Path $ImportLog -Pattern 'MG_CHARACTER_IMPORT_PASS roles=22' -SimpleMatch -Quiet
+$Failed = Select-String -Path $ImportLog -Pattern 'Traceback (most recent call last)' -SimpleMatch -Quiet
+if ($Failed -or -not $Passed) {
+    throw "Unreal import did not validate all 22 cast roles. Inspect $ImportLog"
+}
+Write-Host 'PASS: all 22 source-character imports verified. Run verify_unreal_content.ps1 to audit native scale/skeleton/clip compatibility before packaging.'
 Write-Warning 'Native .uasset files are only on this machine until they are independently checked into Git.'
