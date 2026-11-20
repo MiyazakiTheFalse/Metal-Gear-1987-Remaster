@@ -937,12 +937,13 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         if (!ToSearch.IsNearlyZero())
             SetActorRotation(FMath::RInterpTo(GetActorRotation(), ToSearch.Rotation(), DeltaSeconds, 3.f));
     }
-    else if (Role == EMGGuardRole::Custody)
+    else if (Role == EMGGuardRole::Custody || Role == EMGGuardRole::LogisticsPost)
     {
         // The two transport officers hold actual security posts, rather than
         // walking away from the arrest point because a generic patrol tick
         // was reused. Their scan is subtle and visible to the player.
-        const float Scan = (bFacilityCaution ? 31.f : 23.f) *
+        const float Scan = (Role == EMGGuardRole::LogisticsPost ? 17.f :
+             (bFacilityCaution ? 31.f : 23.f)) *
             FMath::Sin(GetWorld()->GetTimeSeconds() *
                 (bFacilityCaution ? 1.1f : .75f));
         SetActorRotation(FMath::RInterpTo(GetActorRotation(),
