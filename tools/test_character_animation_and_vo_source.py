@@ -80,6 +80,11 @@ class AnimationTransitionSourceTests(unittest.TestCase):
         self.assertIn("AMGShootGunnerActor", ANIM)
         self.assertIn("IsRecovering() const", BOSS_H)
         self.assertIn("OnPerformanceActionTransition", ANIM)
+        self.assertIn("CrouchTransitionAlpha", ANIM_H)
+        self.assertIn("ProneTransitionAlpha", ANIM_H)
+        self.assertIn("CoverTransitionAlpha", ANIM_H)
+        self.assertIn("CrouchTransitionAlpha = FMath::FInterpTo", ANIM)
+        self.assertIn("CoverTransitionAlpha = FMath::FInterpTo", ANIM)
 
     def test_interruption_and_additive_radio_are_presentation_only(self):
         self.assertIn("bPresentationInterrupted", ANIM)
@@ -132,9 +137,10 @@ class CharacterVoiceSourceTests(unittest.TestCase):
         ):
             self.assertIn(token, SNAKE)
         self.assertIn('VO_%s_%02d', SNAKE)
-        self.assertIn('OnNarrativeVoiceStarted(TEXT("gray_fox")', MISSION)
-        self.assertIn('OnNarrativeVoiceStarted(TEXT("shotmaker")', MISSION)
+        self.assertIn('OnNarrativeVoiceStarted(FName(TEXT("gray_fox"))', MISSION)
+        self.assertIn('OnNarrativeVoiceStarted(FName(TEXT("shotmaker"))', MISSION)
         self.assertIn('VO_guard_%s_01', GUARD)
+        self.assertIn("StartCameraFade(1.f, 0.f, .82f", MISSION)
         self.assertIn('GetActiveGuardCallout()', (SOURCE / "Private/MGPrototypeHUD.cpp").read_text())
 
     def test_every_radio_context_exposed_in_mission_and_processors_parse(self):
