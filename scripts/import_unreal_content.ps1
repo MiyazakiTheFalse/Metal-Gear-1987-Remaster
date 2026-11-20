@@ -28,9 +28,19 @@ $EditorArgs = @(
 )
 Write-Host 'Generating native SkeletalMesh and available AnimationSequence assets from committed GLBs...'
 $ImportLog = Join-Path $Logs 'unreal_character_import.log'
-& $Editor @EditorArgs 2>&1 | Tee-Object -FilePath $ImportLog
-if ($LASTEXITCODE -ne 0) {
-    throw "Unreal character import FAILED ($LASTEXITCODE). Inspect $ImportLog"
+# Windows PowerShell 5.1 can turn native stderr lines into terminating
+# errors under Stop even when the commandlet is still healthy. Capture the
+# COMPLETE log, then independently check exit code and our success marker.
+$OldPreference = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+try {
+    & $Editor @EditorArgs 2>&1 | Tee-Object -FilePath $ImportLog
+    $EditorExitCode = $LASTEXITCODE
+} finally {
+    $ErrorActionPreference = $OldPreference
+}
+if ($EditorExitCode -ne 0) {
+    throw "Unreal character import FAILED ($EditorExitCode). Inspect $ImportLog"
 }
 # An Unreal Python exception may be reported in Output Log while the process
 # returns zero. Never confuse that with a successful imported native asset.
