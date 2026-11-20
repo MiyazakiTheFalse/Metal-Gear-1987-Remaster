@@ -81,6 +81,28 @@ assert.equal(savedOperation.game.state.started,true,
  'explicit confirmation starts the new operation');
 console.log('PASS: Save-protecting New Game confirmation and safe cancellation.');
 
+// The original 1987 three-truck discovery loop is available before custody.
+// These are physical props with independent pickups, save state and useful items.
+const supplies=boot();supplies.button('start');
+supplies.game.teleport(-30.35,2.9);supplies.game.act('interact');
+assert.equal(supplies.game.state.rationEarned,true,'west truck awards ration');
+assert.equal(supplies.game.state.rationRemaining,1);
+supplies.game.teleport(-27.55,2.9);supplies.game.act('interact');
+assert.equal(supplies.game.state.firstCardEarned,true,'centre truck awards Card 1');
+supplies.game.teleport(-24.75,2.9);supplies.game.act('interact');
+assert.equal(supplies.game.state.binocularsEarned,true,'east truck awards scouting equipment');
+supplies.game.act('equipitem');
+for(let i=0;i<7;i++)supplies.game.act('next'); // Binoculars are the last item slot.
+supplies.game.act('equipclose');
+assert.equal(supplies.game.state.freight.scouting,true,'scout view is player-selected');
+const supplyRestore=boot(supplies.storage);supplyRestore.button('resume');
+assert.equal(supplyRestore.game.state.rationRemaining,1);
+assert.equal(supplyRestore.game.state.rationWorld,null,'ration prop remains collected');
+assert.equal(supplyRestore.game.state.binocularsWorld,null,'binoculars prop remains collected');
+assert.equal(supplyRestore.game.state.card1World,null,'Card 1 prop remains collected');
+assert.equal(supplyRestore.game.state.freight.scouting,false,'camera view resets safely on load');
+console.log('PASS: 1987 truck rewards, inventory, optics, checkpoint persistence and no respawning items.');
+
 let run=boot();
 run.button('start');
 const stage=()=>run.game.state.stage;
