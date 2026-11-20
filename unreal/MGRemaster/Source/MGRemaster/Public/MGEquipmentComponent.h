@@ -67,6 +67,7 @@ public:
     bool HasPlantedTransmitter() const;
     bool DiscardPlantedTransmitter();
     int32 GetStunRounds() const;
+    int32 GetItemQuantity(FName ItemId) const;
 
     // Off by default and not registered at all in shipping builds.
     // This is a *test harness*, never 1987 campaign equipment.
