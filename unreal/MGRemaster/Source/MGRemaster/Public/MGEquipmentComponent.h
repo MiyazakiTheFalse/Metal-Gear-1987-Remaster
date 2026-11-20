@@ -75,6 +75,7 @@ public:
 
     // Designed for eventual room/item pickup and mission SaveGame integration.
     bool AwardItem(FName ItemId, int32 Count);
+    bool RevokeTemporaryItem(FName ItemId); // Only the borrowed dispatch carton.
     bool AwardWeapon(FName WeaponId, int32 Ammo);
     void SetFeedback(const FString& Message);
 
