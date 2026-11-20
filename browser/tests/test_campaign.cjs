@@ -281,6 +281,21 @@ assert.ok(distant.game.state.guards[0].state<2,
  'box disguise is not automatically recognized from beyond inspection distance');
 console.log('PASS: stationary box is ordinary distant freight but prompts real close-up curiosity.');
 
+assert.equal(curious.game.state.itemSlots.some(i=>i.name.startsWith('CARDBOARD BOX')&&i.usable),
+ false,'authentic Card-2/third-floor cardboard box remains unearned');
+const borrowed=boot();
+borrowed.button('start');borrowed.game.teleport(-26.8,-2.3);borrowed.game.act('interact');
+assert.equal(borrowed.game.state.itemSlots.some(i=>i.name.startsWith('FREIGHT CARTON')&&i.usable),
+ true,'the freight disguise is only borrowed during the opening');
+borrowed.game.teleport(-24.2,1.42);borrowed.game.act('interact');
+assert.equal(borrowed.game.state.stage,-1,'POW contact is a real prerequisite');
+borrowed.game.teleport(-14.3,.4);borrowed.game.act('interact');
+assert.equal(borrowed.game.state.stage,0,'custody transaction occurs');
+assert.equal(borrowed.game.state.itemSlots.some(i=>i.name.startsWith('FREIGHT CARTON')&&i.usable),
+ false,'borrowed carton is lost at custody, not recovered as an original 1987 pickup');
+console.log('PASS: borrowed freight carton is distinct from permanently earned MSX2 Card-2 box.');
+
+
 
 
 const late=loadFixture({version:6,stage:8,x:28.4,z:0,health:100}).game;
