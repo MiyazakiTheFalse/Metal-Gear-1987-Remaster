@@ -28,6 +28,10 @@ public:
     UFUNCTION(BlueprintPure, Category="Cinematic")
     bool IsPlaying() const { return bPlaying; }
     UFUNCTION(BlueprintPure, Category="Cinematic")
+    bool IsBlocking() const { return bPlaying && bLocksInput; }
+    UFUNCTION(BlueprintPure, Category="Cinematic")
+    int32 GetCurrentShot() const { return CurrentShot; }
+    UFUNCTION(BlueprintPure, Category="Cinematic")
     FName GetActiveScene() const { return ActiveScene; }
     UFUNCTION(BlueprintPure, Category="Cinematic")
     float GetSceneProgress() const { return MaxSeconds > 0.f
@@ -36,6 +40,9 @@ public:
     void OnStorySceneStarted(FName SceneId);
     UFUNCTION(BlueprintImplementableEvent, Category="Cinematic")
     void OnStorySceneEnded(FName SceneId, bool bSkipped);
+    UFUNCTION(BlueprintImplementableEvent, Category="Cinematic")
+    void OnStoryShotChanged(FName SceneId, int32 ShotIndex,
+                            float DurationSeconds);
 private:
     UPROPERTY(VisibleAnywhere, Category="Cinematic")
     UCameraComponent* Lens = nullptr;
@@ -51,6 +58,23 @@ private:
     float SubjectEyeCm = 100.f;
     float PanDegreesPerSecond = 4.f;
     bool bPlaying = false;
+    bool bLocksInput = false;
+    float InitialSubjectYaw = 0.f;
+    int32 CurrentShot = INDEX_NONE;
+    struct FAuthoredShot
+    {
+        float EndSeconds = 1.f;
+        float Radius = 250.f;
+        float Yaw = 135.f;
+        float Height = 155.f;
+        float Focus = 105.f;
+        float Pan = 0.f;
+        float Fov = 49.f;
+        bool bUseSnake = false;
+    };
+    TArray<FAuthoredShot> ShotPlan;
+    void AddShot(float Duration, float Radius, float Yaw, float Height,
+                 float Focus, float Pan, float Fov, bool bSnake = false);
     bool ConfigureScene(FName SceneId);
     void UpdateShot(float DeltaSeconds, bool bSnap);
     void FinishScene(bool bSkipped);
