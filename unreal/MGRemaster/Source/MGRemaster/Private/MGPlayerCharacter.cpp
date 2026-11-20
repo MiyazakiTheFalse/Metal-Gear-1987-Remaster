@@ -195,11 +195,25 @@ void AMGPlayerCharacter::UpdateWeaponPresentation()
         ? FName(TEXT("weapon_r"))
         : GetMesh()->GetBoneIndex(TEXT("hand_R")) != INDEX_NONE
             ? FName(TEXT("hand_R")) : NAME_None;
-    const bool bCanHoldProp = HasAuthoredCharacterArt() && HasReadyWeapon()
-        && HandSocket != NAME_None;
-    if (bCanHoldProp && WeaponBodyVisual->GetAttachSocketName() != HandSocket)
-        WeaponBodyVisual->AttachToComponent(GetMesh(),
-            FAttachmentTransformRules::SnapToTargetNotIncludingScale, HandSocket);
+    // If the editor has not imported a valid hand bone, still show the
+    // original source handgun on the capsule. A shooter with a missing mesh
+    // must not fire invisible bullets from the player's chest. This placement
+    // is a visible greybox contingency, never accepted as final grip/IK.
+    const bool bCanHoldProp = HasReadyWeapon();
+    if (HandSocket != NAME_None && HasAuthoredCharacterArt())
+    {
+        if (WeaponBodyVisual->GetAttachParent() != GetMesh() ||
+            WeaponBodyVisual->GetAttachSocketName() != HandSocket)
+            WeaponBodyVisual->AttachToComponent(GetMesh(),
+                FAttachmentTransformRules::SnapToTargetNotIncludingScale, HandSocket);
+    }
+    else
+    {
+        if (WeaponBodyVisual->GetAttachParent() != GetCapsuleComponent())
+            WeaponBodyVisual->AttachToComponent(GetCapsuleComponent(),
+                FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+        WeaponBodyVisual->SetRelativeLocation(FVector(23.f, 24.f, 10.f));
+    }
     // Do not show a stun pistol as a period handgun. Only the currently
     // equipped weapon's matching mesh may replace the honest proxy.
     UStaticMesh* Authored = (Equipment && Equipment->IsHandgunEquipped())
