@@ -83,6 +83,8 @@ private:
     UPROPERTY(Transient)
     AStaticMeshActor* ExitMarker = nullptr;
     UPROPERTY(Transient) AStaticMeshActor* POWInformant = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* EarlyHandgunPickup = nullptr;
+    bool bEarlyHandgunAcquired = false;
     UPROPERTY(Transient) AStaticMeshActor* CustodyMarker = nullptr;
     UPROPERTY(Transient) AMGGuardActor* CustodyOfficerA = nullptr;
     UPROPERTY(Transient) AMGGuardActor* CustodyOfficerB = nullptr;
@@ -137,8 +139,9 @@ private:
     float DialogueTimeRemaining = 0.f;
     FVector SavedPosition = FVector::ZeroVector;
     uint32 LoadedSchemaVersion = 0;
-    int32 LoadedHandgunRounds = 24;
-    int32 LoadedStunRounds = 8;
+    int32 LoadedHandgunRounds = 0;
+    bool bLoadedHandgunAcquired = false;
+    int32 LoadedStunRounds = 0;
     float BeaconPulseTimer = 0.f;
     int32 LastPresentedPacingPhase = INDEX_NONE;
     FString Dialogue;
