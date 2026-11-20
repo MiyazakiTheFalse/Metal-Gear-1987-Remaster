@@ -587,57 +587,60 @@
   "nextPlayableMilestones": [
     {
       "id": "N01",
-      "goal": "Replace first-floor carryover inventory with original earned weapons and Card 1/2 pickups",
+      "issue": "https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/4",
+      "goal": "Restore authentic Building 1 infiltration, original equipment acquisitions, POW chain and four-mercenary encounter",
       "dependsOn": [],
-      "evidence": "stable item state and no sequence break"
+      "evidence": "actual connected mission and all enabled weapons earned, save/load, first full PIE review",
+      "status": "partial_source_only"
     },
     {
       "id": "N02",
-      "goal": "Connect 3D building approach into current custody/POW/Gray Fox mission with tested physical wayfinding",
+      "issue": "https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/5",
+      "goal": "Prison custody, Gray Fox and Shoot Gunner become in-engine tested with valid camera, hands, rig, movement, multiple source-backed counterplays",
       "dependsOn": [
         "N01"
       ],
-      "evidence": "controller playtest from entry to cell"
+      "evidence": "real editor input/audio/animation and end-to-end defeat/evasion test captures",
+      "status": "source_mechanics_only"
     },
     {
       "id": "N03",
-      "goal": "Repair first human boss optional tactics, source-faithful three blasts and camera/guard contact, physical animation",
+      "issue": "https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/6",
+      "goal": "Building 1 post-Card3 dog, genuine explosive wall, Machinegun Kid, roof parachute and Hind D",
       "dependsOn": [
         "N02"
       ],
-      "evidence": "multiple authenticated victory routes"
+      "evidence": "full sector traverse, enemy and camera counterplay, rooftop fight in native UE",
+      "status": "partial_source_then_design_only"
     },
     {
       "id": "N04",
-      "goal": "Dog/service and explosive wall to Machinegun Kid with in-game 3D traversal",
+      "issue": "https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/7",
+      "goal": "Building 2 vehicles, flame threat, TX-11, POWs/cards and earned rocket launcher",
       "dependsOn": [
         "N03"
       ],
-      "evidence": "complete reversible checkpoint and no invisible blockers"
+      "evidence": "all original bosses and linked items in playable UE level",
+      "status": "design_only"
     },
     {
       "id": "N05",
-      "goal": "Rooftop / Hind D and exterior vehicle route",
+      "issue": "https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/8",
+      "goal": "Building 3 hostage challenge, Card 8, authentic TX-55, Big Boss and escape ending",
       "dependsOn": [
         "N04"
       ],
-      "evidence": "vehicle boss and parachute level playable"
+      "evidence": "complete 1987 source-faithful first playthrough",
+      "status": "design_only"
     },
     {
       "id": "N06",
-      "goal": "Finish Building 2/3, tank to Big Boss and escape",
-      "dependsOn": [
-        "N05"
-      ],
-      "evidence": "end-to-end first complete playthrough"
-    },
-    {
-      "id": "N07",
-      "goal": "Coherent MGS-level art, dialogue, music, cinematography, performance, release testing across all chapters",
-      "dependsOn": [
-        "N06"
-      ],
-      "evidence": "production signed off with rights, video and novice playtesting"
+      "issue": "https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/9",
+      "goal": "Cross-cutting MGS-standard 1995 character/environment art, animation IK, VO, MGS UI, staging, player research and release gates",
+      "dependsOn": [],
+      "schedule": "continuous, do not defer until campaign is finished",
+      "evidence": "each milestone needs actual rig/asset/rules performance testing, final full-game package",
+      "status": "partial_source_contracts"
     }
   ]
 }
