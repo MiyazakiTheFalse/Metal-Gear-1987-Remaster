@@ -514,9 +514,9 @@ void AMGGrayFoxMission::CreateFirstPassVerticality()
     SpawnBlock(TEXT("BossOverheadMaintenanceGantry"),
         FVector(2415.f, 0.f, 245.f), FVector(1.35f, 9.0f, .40f), true);
     SpawnBlock(TEXT("BossGantryNorthSupport"),
-        FVector(2415.f, 472.f, 80.f), FVector(.32f, .32f, 3.0f), true);
+        FVector(2415.f, 472.f, 62.5f), FVector(.32f, .32f, 3.25f), true);
     SpawnBlock(TEXT("BossGantrySouthSupport"),
-        FVector(2415.f, -472.f, 80.f), FVector(.32f, .32f, 3.0f), true);
+        FVector(2415.f, -472.f, 62.5f), FVector(.32f, .32f, 3.25f), true);
     SpawnBlock(TEXT("BossGantryCableLoop"),
         FVector(2470.f, 0.f, 195.f), FVector(.18f, 8.6f, .18f), false);
     // Guards never spawn on this unreachable overhead surface.
