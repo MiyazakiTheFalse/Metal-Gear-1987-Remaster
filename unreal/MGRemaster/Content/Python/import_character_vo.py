@@ -19,6 +19,8 @@ def main():
     for scene in data["scenes"]:
         for line in scene["lines"]:
             speaker, name = line["speaker"], line["clip"]
+            if name is None:  # Continuation of previous displayed text line
+                continue
             filename = SOURCE / speaker / (name + ".wav")
             destination = f"/Game/Audio/VO/{speaker}"
             target = destination + "/" + name
