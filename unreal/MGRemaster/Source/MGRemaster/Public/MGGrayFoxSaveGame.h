@@ -19,14 +19,14 @@ struct FMGPersistedGuardBody
     bool bUnconscious = false;
 };
 
-/** V4 persists first earned firearm and additive physical guard-body state. */
+/** V5 adds roof encounter progress while preserving all V1–V4 checkpoint fields. */
 UCLASS()
 class MGREMASTER_API UMGGrayFoxSaveGame : public USaveGame
 {
     GENERATED_BODY()
 public:
     UPROPERTY(SaveGame)
-    uint32 SchemaVersion = 4;
+    uint32 SchemaVersion = 5;
 
     UPROPERTY(SaveGame)
     uint32 MissionFlags = 0;
