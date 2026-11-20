@@ -8,7 +8,7 @@ This is a **production work checklist**, **not** a claim that all original tile 
 |---|---:|
 | Production missions | 10 |
 | Individual story/gameplay beats | 114 |
-| Source-prototype beat entries (some compressed/adapted) | 23 |
+| Source-prototype beat entries (some compressed/adapted) | 27 |
 | Areas requiring actual production 3D topology and enemy mapping | 52 |
 | Return-visit change contracts | 10 |
 | Engine-tested / production-ready beats | **0 / 0** |
@@ -21,10 +21,10 @@ Current status: **partial source**. Original game does not name these missions a
 
 - [~] **P01.brief** — Optional opening radio (`B1.1F.ENTRANCE`) · source: `MGPlayerCharacter.cpp`, `game.js`
 - [~] **P01.entry** — Two-guard crate-lined entry (`B1.1F.ENTRANCE`) · source: `MGGrayFoxMission.cpp`, `game.js`
-- [ ] **P01.trucks** — Original three supply trucks (`B1.1F.TRUCKS`)
-- [ ] **P01.ration** — Western ration pickup (`B1.1F.TRUCKS`)
-- [ ] **P01.card1** — Card 1 in centre truck (`B1.1F.TRUCKS`)
-- [ ] **P01.scope** — Binoculars in eastern truck (`B1.1F.TRUCKS`)
+- [~] **P01.trucks** — Original three supply trucks (`B1.1F.TRUCKS`) · source: `MGGrayFoxMission.cpp`, `game.js` (compressed geometry; not UE verified)
+- [~] **P01.ration** — Western ration pickup (`B1.1F.TRUCKS`) · finite healing/save source: `MGGrayFoxMission.cpp`, `MGEquipmentComponent.cpp`, `game.js`
+- [~] **P01.card1** — Card 1 in centre truck (`B1.1F.TRUCKS`) · physical item/source flag in both builds; later original Card-1 door still incomplete
+- [~] **P01.scope** — Binoculars in eastern truck (`B1.1F.TRUCKS`) · item pickup, optical zoom, save source; not UE PIE verified
 - [ ] **P01.mask** — Card 1 and sleeping guard to Gas Mask (`B1.1F.GAS`)
 - [~] **P01.handgun** — Authentic handgun acquisition (`B1.1F.ARMORY`) · source: `MGGrayFoxMission.cpp`, `game.js`
 - [ ] **P01.mines** — Guarded mine-truck pickup (`B1.1F.ARMORY`)
