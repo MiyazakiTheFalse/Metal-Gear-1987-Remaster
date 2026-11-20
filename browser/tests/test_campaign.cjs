@@ -368,3 +368,30 @@ for(let i=0;i<7;i++){late.act('melee');late.step(.31);}
 assert.equal(late.state.service.kidDown,true);
 late.teleport(62.7,-2);late.act('interact');assert.equal(late.state.service.parachute,true);
 console.log('PASS: old exit save through charge, timed breach, relay, Machinegun Kid and parachute.');
+
+
+/* Connected roof continuity is tested with normal gameplay interactions,
+ * not only by setting mission flags. The shot test asserts real ammo usage;
+ * actual projectile collision must still be playtested in a browser. */
+const roofSave=loadFixture({version:9,stage:8,x:63,z:0,health:100,
+ service:{charge:true,open:true,intel:true,kidDown:true,parachute:true}});
+assert.equal(roofSave.game.state.roof.active,false);
+roofSave.game.act('interact');
+assert.equal(roofSave.game.state.stage,9);
+assert.equal(roofSave.game.state.roof.active,true);
+assert.ok(roofSave.game.state.player.x>70,'roof transition is spatial, not a menu-only flag');
+roofSave.game.teleport(76.6,-2.65);
+const roofBefore=roofSave.game.state.roof.grenades;
+roofSave.game.act('interact');
+assert.equal(roofSave.game.state.roof.grenades,roofBefore-1,
+ 'using the exposed launcher consumes a finite grenade');
+const roofReloaded=boot(roofSave.storage);roofReloaded.button('resume');
+assert.equal(roofReloaded.game.state.roof.active,true);
+assert.equal(roofReloaded.game.state.roof.grenades,roofBefore-1);
+roofReloaded.game.teleport(71.3,0);roofReloaded.game.act('interact');
+assert.equal(roofReloaded.game.state.roof.active,false);
+assert.equal(roofReloaded.game.state.stage,9);
+roofReloaded.game.teleport(63,0);roofReloaded.game.act('interact');
+assert.equal(roofReloaded.game.state.roof.active,true,
+ 'return and re-entry remain possible without resetting the boss');
+console.log('PASS: physical roof lift, persisted grenade count, return route and re-entry.');
