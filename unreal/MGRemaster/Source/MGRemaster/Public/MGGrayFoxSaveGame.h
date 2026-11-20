@@ -41,6 +41,14 @@ public:
     int32 StunRounds = 0; // Legacy V3 field; no active campaign stun slot.
     UPROPERTY(SaveGame)
     bool bEarnedHandgun = false;
+    // Additive V4 source-authentic first-floor supply caches. All default
+    // false for older saves; captivity confiscates but never forgets them.
+    UPROPERTY(SaveGame)
+    bool bEarnedCard1 = false;
+    UPROPERTY(SaveGame)
+    bool bEarnedTruckRation = false;
+    UPROPERTY(SaveGame)
+    bool bEarnedBinoculars = false;
     // Additive fields default to the original state in older V4 saves.
     UPROPERTY(SaveGame)
     bool bPrisonCameraOffline = false;
