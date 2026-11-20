@@ -1569,7 +1569,7 @@
     {
       "id": "CIN.037",
       "mission": "P10",
-      "triggerBeat": "P10.detonation",
+      "triggerBeat": "P10.countdown",
       "triggerDescription": "16 valid placed charges have exploded",
       "legacySourceEvidence": "REQUIRES_SOURCE_CONFIRMATION",
       "title": "TX-55 / CHAIN REACTION",
@@ -1741,10 +1741,8 @@
   ],
   "summary": {
     "scenes": 40,
-    "withBeatLink": 39,
-    "unlinkedBeats": [
-      "P10.detonation"
-    ],
+    "withBeatLink": 40,
+    "unlinkedBeats": [],
     "sourceBrowserPlayable": 0,
     "ueSequencerAssetsCreated": 0,
     "productionReady": 0
