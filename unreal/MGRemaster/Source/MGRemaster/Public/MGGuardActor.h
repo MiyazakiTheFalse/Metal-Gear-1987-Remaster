@@ -61,6 +61,14 @@ public:
                              AController* EventInstigator, AActor* DamageCauser) override;
 
     bool IsIncapacitated() const { return bIncapacitated; }
+    UFUNCTION(BlueprintPure, Category="Security|Body")
+    bool IsUnconscious() const { return bIncapacitated && !bBodyDead; }
+    UFUNCTION(BlueprintPure, Category="Security|Body")
+    bool IsBodyBeingDragged() const { return bBodyBeingDragged; }
+    bool TryMoveBodyTo(const FVector& ProposedPosition, const AActor* DraggingActor);
+    void SetBodyBeingDragged(bool bDragged);
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Body")
+    void OnBodyDragChanged(bool bIsDragged);
     void SetRole(EMGGuardRole NewRole) { Role = NewRole; }
     void ConfigurePatrol(const FVector& Axis, float HalfLengthCm, float SpeedCmPerSec);
     bool CanAcceptDetention(const class AMGPlayerCharacter* Suspect) const;
@@ -248,6 +256,8 @@ private:
     FVector LastKnownPlayerPosition = FVector::ZeroVector;
     bool bPatrolForward = true;
     bool bIncapacitated = false;
+    bool bBodyDead = false; // Shot lethality != nonlethal melee unconsciousness.
+    bool bBodyBeingDragged = false;
     float Suspicion = 0.f;
     float Health = 100.f;
     float StaggerSeconds = 0.f;
