@@ -1028,6 +1028,12 @@ void AMGGrayFoxMission::BeginPlay()
             // V1–V3 were prison-slice builds with the handgun pre-owned.
             bLoadedHandgunAcquired = Save->SchemaVersion < 4 || Save->bEarnedHandgun;
             bEarlyHandgunAcquired = bLoadedHandgunAcquired;
+            bFirstFloorCard1Earned = Save->bEarnedCard1;
+            bFirstFloorRationEarned = Save->bEarnedTruckRation;
+            bFirstFloorBinocularsEarned = Save->bEarnedBinoculars;
+            LoadedTruckRationsRemaining = Save->SchemaVersion >= 7
+                ? FMath::Clamp(Save->TruckRationsRemaining, 0, 3)
+                : (bFirstFloorRationEarned ? 1 : 0);
             bServiceChargeCollected = (F & MG_FOX_SLICE_COMPLETED) && Save->bServiceChargeCollected;
             bServiceWallOpen = bServiceChargeCollected && Save->bServiceWallOpen;
             bRelayIntel = bServiceWallOpen && Save->bRelayIntel;
@@ -1103,6 +1109,12 @@ void AMGGrayFoxMission::BeginPlay()
 
 void AMGGrayFoxMission::RestoreVisualState()
 {
+    if (bFirstFloorCard1Earned && IsValid(FirstFloorCard1Pickup))
+        FirstFloorCard1Pickup->SetActorHiddenInGame(true);
+    if (bFirstFloorRationEarned && IsValid(FirstFloorRationPickup))
+        FirstFloorRationPickup->SetActorHiddenInGame(true);
+    if (bFirstFloorBinocularsEarned && IsValid(FirstFloorBinocularsPickup))
+        FirstFloorBinocularsPickup->SetActorHiddenInGame(true);
     if (bEarlyHandgunAcquired && IsValid(EarlyHandgunPickup))
         EarlyHandgunPickup->SetActorHiddenInGame(true);
     if (((Flags & MG_FOX_DETENTION_INTELLIGENCE) || (Flags & MG_FOX_CAPTURED))
@@ -1176,6 +1188,11 @@ void AMGGrayFoxMission::SkipStoryCinematic()
     }
 }
 
+void AMGGrayFoxMission::NotifyItemConsumed(AMGPlayerCharacter* Player)
+{
+    if (bPlayerInitialised && IsValid(Player)) SaveProgress(Player);
+}
+
 void AMGGrayFoxMission::NotifyBodyRelocated(AMGPlayerCharacter* Player)
 {
     // Persist the actual placement, not the cinematic performance or E key.
@@ -1207,6 +1224,10 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
         if (bParachuteTaken) Inventory->AwardItem(TEXT("PARACHUTE"),1);
         if (bOwnsCarton && !(Flags & MG_FOX_CAPTURED))
             Inventory->AwardItem(TEXT("FREIGHT_CARTON"), 1);
+        if (bFirstFloorCard1Earned) Inventory->AwardItem(TEXT("CARD1"), 1);
+        if (bFirstFloorBinocularsEarned) Inventory->AwardItem(TEXT("BINOCULARS"), 1);
+        if (bFirstFloorRationEarned && LoadedTruckRationsRemaining > 0)
+            Inventory->AwardItem(TEXT("RATION"), LoadedTruckRationsRemaining);
         // Capture removes the borrowed carton. The 1987 permanent box
         // remains unowned until its original B1-F3 Card-2 gate is authored.
         if (bHasLoadedSave && bLoadedHandgunAcquired)
@@ -1256,7 +1277,7 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
         UGameplayStatics::CreateSaveGameObject(UMGGrayFoxSaveGame::StaticClass()));
     if (!Save) return;
-    Save->SchemaVersion = 6;
+    Save->SchemaVersion = 7;
     Save->MissionFlags = Flags;
     Save->bServiceChargeCollected = bServiceChargeCollected;
     Save->bServiceWallOpen = bServiceWallOpen;
@@ -1286,6 +1307,11 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     Save->bPrisonCameraOffline = PrisonCamera.IsValid() && !PrisonCamera->IsOperational();
     Save->bKennelCameraOffline = KennelCamera.IsValid() && !KennelCamera->IsOperational();
     Save->bEarnedHandgun = bEarlyHandgunAcquired;
+    Save->bEarnedCard1 = bFirstFloorCard1Earned;
+    Save->bEarnedTruckRation = bFirstFloorRationEarned;
+    Save->bEarnedBinoculars = bFirstFloorBinocularsEarned;
+    Save->TruckRationsRemaining = Player && Player->GetEquipment()
+        ? Player->GetEquipment()->GetItemQuantity(TEXT("RATION")) : 0;
     for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
     {
         if (!It->IsIncapacitated() || It->GetBodyPersistenceId().IsNone())
@@ -1639,6 +1665,47 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
                     Dialogue = TEXT("HANDGUN RECOVERED — EQUIP IT IN WEAPONS.");
                     DialogueTimeRemaining = 3.2f;
                     SaveProgress(Player); // Independent V4 earned-gun state.
+                    return true;
+                }
+        }
+        // Three original MSX2 supply rewards: physically entered truck,
+        // reach + occlusion, independent acquisition and persisted resources.
+        if (!bFirstFloorRationEarned && CanReach(Player, FirstFloorRationPickup, 165.f))
+        {
+            if (UMGEquipmentComponent* Inventory = Player->GetEquipment())
+                if (Inventory->AwardItem(TEXT("RATION"), 1))
+                {
+                    bFirstFloorRationEarned = true;
+                    FirstFloorRationPickup->SetActorHiddenInGame(true);
+                    Dialogue = TEXT("WEST TRUCK — RATION. Use it from ITEMS when injured.");
+                    DialogueTimeRemaining = 3.f;
+                    SaveProgress(Player);
+                    return true;
+                }
+        }
+        if (!bFirstFloorCard1Earned && CanReach(Player, FirstFloorCard1Pickup, 165.f))
+        {
+            if (UMGEquipmentComponent* Inventory = Player->GetEquipment())
+                if (Inventory->AwardItem(TEXT("CARD1"), 1))
+                {
+                    bFirstFloorCard1Earned = true;
+                    FirstFloorCard1Pickup->SetActorHiddenInGame(true);
+                    Dialogue = TEXT("CENTRE TRUCK — CARD 1. Keep it for secured doors.");
+                    DialogueTimeRemaining = 3.f;
+                    SaveProgress(Player);
+                    return true;
+                }
+        }
+        if (!bFirstFloorBinocularsEarned && CanReach(Player, FirstFloorBinocularsPickup, 165.f))
+        {
+            if (UMGEquipmentComponent* Inventory = Player->GetEquipment())
+                if (Inventory->AwardItem(TEXT("BINOCULARS"), 1))
+                {
+                    bFirstFloorBinocularsEarned = true;
+                    FirstFloorBinocularsPickup->SetActorHiddenInGame(true);
+                    Dialogue = TEXT("EAST TRUCK — BINOCULARS. Equip in ITEMS, then Use Item to scout.");
+                    DialogueTimeRemaining = 3.f;
+                    SaveProgress(Player);
                     return true;
                 }
         }
