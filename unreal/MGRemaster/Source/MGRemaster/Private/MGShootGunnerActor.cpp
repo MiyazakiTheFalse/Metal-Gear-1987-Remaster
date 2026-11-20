@@ -10,6 +10,7 @@
 #include "Engine/SkeletalMesh.h"
 #include "Engine/World.h"
 #include "Animation/AnimInstance.h"
+#include "Animation/AnimSequence.h"
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -75,6 +76,13 @@ void AMGShootGunnerActor::BeginPlay()
         if (UClass* Anim = LoadClass<UAnimInstance>(nullptr,
                 TEXT("/Game/Characters/Bosses/Shotmaker/ABP_Shotmaker_1995.ABP_Shotmaker_1995_C")))
             CharacterMesh->SetAnimInstanceClass(Anim);
+        // While the production AnimationBlueprint is still missing, use the
+        // checked-in, actually animated breathing Idle source. Never leave a
+        // successful skeletal import frozen in its reference T-pose.
+        if (!CharacterMesh->GetAnimClass())
+            if (UAnimSequence* LivingIdle = LoadObject<UAnimSequence>(nullptr,
+                    TEXT("/Game/Characters/Bosses/Shotmaker/Animations/AS_Shotmaker_Idle.AS_Shotmaker_Idle")))
+                CharacterMesh->PlayAnimation(LivingIdle, true);
         ProxyTorso->SetVisibility(false);
     }
     // A validated final shotgun mesh will replace these primitive shapes. A
