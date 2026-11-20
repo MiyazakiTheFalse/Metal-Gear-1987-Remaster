@@ -43,6 +43,15 @@ public:
     float GetHealth() const { return Health; }
     bool IsProne() const { return bIsProne; }
     bool IsInCover() const { return bInCover; }
+    FVector GetCoverSurfaceNormal() const { return CoverNormal; }
+    UFUNCTION(BlueprintPure, Category="Character|Interaction")
+    bool HasPhysicalInteractionContact() const { return PhysicalInteractionRemaining > 0.f; }
+    UFUNCTION(BlueprintPure, Category="Character|Interaction")
+    FVector GetPhysicalInteractionWorldTarget() const { return PhysicalInteractionWorldTarget; }
+    UFUNCTION(BlueprintPure, Category="Character|Interaction")
+    FName GetPhysicalInteractionKind() const { return PhysicalInteractionKind; }
+    UFUNCTION(BlueprintImplementableEvent, Category="Character|Interaction")
+    void OnPhysicalInteractionStarted(FName InteractionKind, FVector WorldTarget);
     // Read by animation blueprints once the finished character rig is imported.
     UFUNCTION(BlueprintPure, Category="Stealth|Wall")
     bool IsCornerPeeking() const { return CoverPeekAlpha > 0.35f; }
@@ -145,6 +154,11 @@ private:
     float CoverReattachCooldown = 0.f;
     float NextWallKnockTime = 0.f;
     float WallKnockVisualTimer = 0.f;
+    float PhysicalInteractionRemaining = 0.f;
+    FVector PhysicalInteractionWorldTarget = FVector::ZeroVector;
+    FName PhysicalInteractionKind = NAME_None;
+    void BeginPhysicalInteraction(const FVector& WorldTarget,
+        FName InteractionKind, float DurationSeconds);
     float CoverPeekAlpha = 0.f;
     float CoverShuffleDirection = 0.f;
     float CoverIntent = 0.f;
