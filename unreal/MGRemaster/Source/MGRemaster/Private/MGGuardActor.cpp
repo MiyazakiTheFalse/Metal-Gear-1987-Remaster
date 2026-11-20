@@ -10,6 +10,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
 #include "Animation/AnimInstance.h"
+#include "Animation/AnimSequence.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
@@ -84,6 +85,13 @@ void AMGGuardActor::BeginPlay()
             if (UClass* Class = LoadClass<UAnimInstance>(nullptr,
                     TEXT("/Game/Characters/Guard/ABP_Guard_1995.ABP_Guard_1995_C")))
                 CharacterMesh->SetAnimInstanceClass(Class);
+        // While the production AnimationBlueprint is still missing, use the
+        // checked-in, actually animated breathing Idle source. Never leave a
+        // successful skeletal import frozen in its reference T-pose.
+        if (!CharacterMesh->GetAnimClass())
+            if (UAnimSequence* LivingIdle = LoadObject<UAnimSequence>(nullptr,
+                    TEXT("/Game/Characters/Guard/Animations/AS_Guard_Idle.AS_Guard_Idle")))
+                CharacterMesh->PlayAnimation(LivingIdle, true);
         ProxyBody->SetVisibility(false, true);
         ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         CharacterMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
