@@ -103,6 +103,20 @@ private:
     bool bCardDoorOpen = false;
     bool bPostCard3ServiceEntered = false;
 
+    // Optional physical evidence: no puzzle authority, no secret reveal.
+    struct FOptionalWorldTrace
+    {
+        TWeakObjectPtr<AStaticMeshActor> Prop;
+        FString Observation;
+        uint32 RequiredFlags = 0u;
+        uint32 ForbiddenFlags = 0u;
+    };
+    TArray<FOptionalWorldTrace> OptionalWorldTraces;
+    void AddWorldTrace(FName Tag, const FVector& Place, const FVector& Size,
+        const FString& Observation, uint32 RequiredFlags = 0u,
+        uint32 ForbiddenFlags = 0u);
+    bool TryInspectWorldTrace(AMGPlayerCharacter* Player);
+
     uint32 Flags = 0;
     bool bPlayerInitialised = false;
     bool bHasLoadedSave = false;
