@@ -2,7 +2,13 @@
 
 PC-first, Switch-targeted modern 3D remake of the supplied Connect2Media **J2ME Metal Gear v3.3.0** edition. The direction is free-camera MGS4/MGSV-style movement, stealth and aiming, while faithfully reconstructing the original game's locations and mission progression.
 
-> **Current status: source-only vertical slice.** The UE5 project has **not** been compiled or packaged in the available environment. There is no playable Windows .exe or Switch build yet. A UE-capable build host is needed to produce PC playtest packages; testers will not need the editor.
+> **Current status (20 November 2026): early-campaign source prototype, NOT a completed game.** The browser has an executable-by-source Gray Fox-to-west-lift sequence with provisional models; there is no verified downloadable browser package in this session. The UE5 project has **not** been compiled or packaged in this environment. No playable Windows .exe or Switch build is established. The ten original-game conversion phases are **four partial source prototypes and six design-only**, and only two of eleven major combat set-pieces have source prototypes. A UE-capable build host is needed to produce PC playtest packages.
+
+## Title screen and metagame (browser source, 20 Nov 2026)
+
+The main browser title now uses independently authored MGS-inspired tactical artwork, responsive menu layout and reduced-motion handling. New Game, Continue (real checkpoint-gated), Mission Briefing, VR Shoot Gunner rehearsal and Options have working keyboard/controller routes. Selecting New Game with an existing checkpoint requires an explicit Cancel-default confirmation. The briefing uses original 1987-informed illustrated Snake and Big Boss portraits. The radio portraits are unique source SVGs for eight 1995 identities, currently illustrated rather than realistic facial scans.
+
+Development status and remaining native Unreal front-end/audio/UX tasks: [Metagame Title and Front-end Contract](docs/METAGAME_TITLE_AND_FRONTEND_1995.md). This is **not** a verified in-browser visual/UX playtest, completed Unreal intro movie, final VO, or production character render.
 
 ## Implemented in source
 
