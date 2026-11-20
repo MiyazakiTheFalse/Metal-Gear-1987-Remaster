@@ -41,6 +41,14 @@ enum class EMGGuardEvidenceKind : uint8
     DiscoveredBody, SquadBodyReport, Wounded
 };
 
+// Reuses security suspicion rather than adding a separate 'box alert' AI.
+// Distinguish noticing an object from confirming the operative inside it.
+UENUM(BlueprintType)
+enum class EMGGuardBoxPhase : uint8
+{
+    None, Notice, Approach, Inspect, Confirmed, Search
+};
+
 UCLASS()
 class MGREMASTER_API AMGGuardActor : public AActor
 {
@@ -94,6 +102,16 @@ public:
     UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
     void OnCartonInspectionConfirmed(); // Animation/prop gesture only; source rules own perception.
     UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
+    void OnCartonNotice();
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
+    void OnCartonInspectStarted();
+    UFUNCTION(BlueprintPure, Category="Security|Acting")
+    EMGGuardBoxPhase GetBoxPhase() const { return BoxPhase; }
+    UFUNCTION(BlueprintPure, Category="Security|Acting")
+    float GetBoxInspectionProgress() const { return CartonInspectionRequiredSeconds > 0.f
+        ? FMath::Clamp(CartonInspectionSeconds / CartonInspectionRequiredSeconds, 0.f, 1.f)
+        : 0.f; }
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
     void OnMeleeWarning();
     UFUNCTION(BlueprintImplementableEvent, Category="Security|Acting")
     void OnMeleeImpact();
@@ -139,6 +157,7 @@ private:
     float InvestigationStuckTimer = 0.f;
     int32 ConsecutiveKnocks = 0;
     bool AdvanceNoiseInvestigation(float DeltaSeconds);
+    bool AdvanceBoxInvestigation(float DeltaSeconds);
     void MoveToward(const FVector& Destination, float Speed, float DeltaSeconds);
 
     UPROPERTY(VisibleAnywhere, Category="Prototype")
@@ -175,9 +194,15 @@ private:
     EMGGuardRole Role = EMGGuardRole::Patrol;
     FVector PatrolOrigin = FVector::ZeroVector;
     bool bCustodyChallenge = false;
-    bool bCartonInspectionAnnounced = false; // Resets when box leaves eye-level range.
+    bool bCartonInspectionAnnounced = false;
+    bool bCartonInterestAnnounced = false;
     bool bCartonIdentitySpoken = false;
     float CartonInspectionSeconds = 0.f;
+    float CartonInspectionRequiredSeconds = 1.30f;
+    float BoxInterestRemainingSeconds = 0.f;
+    float BoxApproachStuckSeconds = 0.f;
+    FVector BoxEvidenceWorldPosition = FVector::ZeroVector;
+    EMGGuardBoxPhase BoxPhase = EMGGuardBoxPhase::None;
     bool bPendingRadioReport = false;
     float ChallengeAge = 0.f;
     float CustodyThreatMemorySeconds = 0.f;
