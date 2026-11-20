@@ -200,6 +200,8 @@ private:
     float CartonInspectionSeconds = 0.f;
     float CartonInspectionRequiredSeconds = 1.30f;
     float BoxInterestRemainingSeconds = 0.f;
+    float BoxReactSeconds = 0.f;
+    float BoxSearchSeconds = 0.f;
     float BoxApproachStuckSeconds = 0.f;
     FVector BoxEvidenceWorldPosition = FVector::ZeroVector;
     EMGGuardBoxPhase BoxPhase = EMGGuardBoxPhase::None;
