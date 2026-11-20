@@ -4861,12 +4861,73 @@
       "crawlVolumes": [],
       "coverAndHidingGeometry": [],
       "cameraSightlineMasks": [],
-      "enemySpawnCoordinatesAndFacing": [],
+      "enemySpawnCoordinatesAndFacing": [
+        {
+          "actor": "P01-yard-patrol-north",
+          "positionCm": [
+            -3060,
+            280,
+            -11
+          ],
+          "yawDegrees": -90,
+          "source": "UNREAL_PROTOTYPE_NOT_CANON"
+        },
+        {
+          "actor": "P01-yard-patrol-south",
+          "positionCm": [
+            -2100,
+            -285,
+            -11
+          ],
+          "yawDegrees": 135,
+          "source": "UNREAL_PROTOTYPE_NOT_CANON"
+        },
+        {
+          "actor": "P01-receiving-logistics",
+          "positionCm": [
+            -2410,
+            295,
+            -11
+          ],
+          "yawDegrees": -95,
+          "source": "UNREAL_PROTOTYPE_NOT_CANON"
+        },
+        {
+          "actor": "P01-custody-A",
+          "positionCm": [
+            -1570,
+            315,
+            -11
+          ],
+          "yawDegrees": -90,
+          "source": "UNREAL_PROTOTYPE_NOT_CANON"
+        },
+        {
+          "actor": "P01-custody-B",
+          "positionCm": [
+            -1470,
+            170,
+            -11
+          ],
+          "yawDegrees": -90,
+          "source": "UNREAL_PROTOTYPE_NOT_CANON"
+        },
+        {
+          "actor": "P01-dispatch-CCTV",
+          "positionCm": [
+            -2120,
+            -435,
+            180
+          ],
+          "yawDegrees": 148,
+          "source": "UNREAL_PROTOTYPE_NOT_CANON"
+        }
+      ],
       "enemyCountSourceVerified": false,
       "bodyStashVolumes": [],
       "revisitVariants": [],
       "state": "needs_exact_2d_to_3d_map_and_production_asset_pass",
-      "enemyPlanStatus": "not_mapped",
+      "enemyPlanStatus": "source_placed_in_compressed_remake_greybox_not_original_verified",
       "doctrine": "Do not infer grid positions from prose; physically build and test."
     },
     {
@@ -5216,12 +5277,43 @@
       "crawlVolumes": [],
       "coverAndHidingGeometry": [],
       "cameraSightlineMasks": [],
-      "enemySpawnCoordinatesAndFacing": [],
+      "enemySpawnCoordinatesAndFacing": [
+        {
+          "actor": "P03-prison-patrol-A",
+          "positionCm": [
+            840,
+            360,
+            -11
+          ],
+          "yawDegrees": 180,
+          "source": "UNREAL_PROTOTYPE_NOT_CANON"
+        },
+        {
+          "actor": "P03-prison-patrol-B",
+          "positionCm": [
+            1120,
+            -340,
+            -11
+          ],
+          "yawDegrees": 180,
+          "source": "UNREAL_PROTOTYPE_NOT_CANON"
+        },
+        {
+          "actor": "P03-prison-CCTV",
+          "positionCm": [
+            1180,
+            424,
+            235
+          ],
+          "yawDegrees": 180,
+          "source": "UNREAL_PROTOTYPE_NOT_CANON"
+        }
+      ],
       "enemyCountSourceVerified": false,
       "bodyStashVolumes": [],
       "revisitVariants": [],
       "state": "needs_exact_2d_to_3d_map_and_production_asset_pass",
-      "enemyPlanStatus": "not_mapped",
+      "enemyPlanStatus": "source_placed_in_compressed_remake_greybox_not_original_verified",
       "doctrine": "Do not infer grid positions from prose; physically build and test."
     },
     {
@@ -5239,12 +5331,23 @@
       "crawlVolumes": [],
       "coverAndHidingGeometry": [],
       "cameraSightlineMasks": [],
-      "enemySpawnCoordinatesAndFacing": [],
+      "enemySpawnCoordinatesAndFacing": [
+        {
+          "actor": "P04-shotmaker",
+          "positionCm": [
+            3100,
+            55,
+            -11
+          ],
+          "yawDegrees": 180,
+          "source": "UNREAL_PROTOTYPE_NOT_CANON"
+        }
+      ],
       "enemyCountSourceVerified": false,
       "bodyStashVolumes": [],
       "revisitVariants": [],
       "state": "needs_exact_2d_to_3d_map_and_production_asset_pass",
-      "enemyPlanStatus": "not_mapped",
+      "enemyPlanStatus": "source_placed_in_compressed_remake_greybox_not_original_verified",
       "doctrine": "Do not infer grid positions from prose; physically build and test."
     },
     {
@@ -5309,12 +5412,43 @@
       "crawlVolumes": [],
       "coverAndHidingGeometry": [],
       "cameraSightlineMasks": [],
-      "enemySpawnCoordinatesAndFacing": [],
+      "enemySpawnCoordinatesAndFacing": [
+        {
+          "actor": "P05-dog-A",
+          "positionCm": [
+            4090,
+            180,
+            -53
+          ],
+          "yawDegrees": 180,
+          "source": "UNREAL_PROTOTYPE_NOT_CANON"
+        },
+        {
+          "actor": "P05-dog-B",
+          "positionCm": [
+            4900,
+            190,
+            -53
+          ],
+          "yawDegrees": 180,
+          "source": "UNREAL_PROTOTYPE_NOT_CANON"
+        },
+        {
+          "actor": "P05-kennel-CCTV",
+          "positionCm": [
+            5170,
+            427,
+            235
+          ],
+          "yawDegrees": 180,
+          "source": "UNREAL_PROTOTYPE_NOT_CANON"
+        }
+      ],
       "enemyCountSourceVerified": false,
       "bodyStashVolumes": [],
       "revisitVariants": [],
       "state": "needs_exact_2d_to_3d_map_and_production_asset_pass",
-      "enemyPlanStatus": "not_mapped",
+      "enemyPlanStatus": "source_placed_in_compressed_remake_greybox_not_original_verified",
       "doctrine": "Do not infer grid positions from prose; physically build and test."
     },
     {
@@ -5405,12 +5539,23 @@
       "crawlVolumes": [],
       "coverAndHidingGeometry": [],
       "cameraSightlineMasks": [],
-      "enemySpawnCoordinatesAndFacing": [],
+      "enemySpawnCoordinatesAndFacing": [
+        {
+          "actor": "P05-machinegun-kid",
+          "positionCm": [
+            7560,
+            80,
+            -11
+          ],
+          "yawDegrees": 180,
+          "source": "UNREAL_PROTOTYPE_NOT_CANON"
+        }
+      ],
       "enemyCountSourceVerified": false,
       "bodyStashVolumes": [],
       "revisitVariants": [],
       "state": "needs_exact_2d_to_3d_map_and_production_asset_pass",
-      "enemyPlanStatus": "not_mapped",
+      "enemyPlanStatus": "source_placed_in_compressed_remake_greybox_not_original_verified",
       "doctrine": "Do not infer grid positions from prose; physically build and test."
     },
     {
@@ -6372,6 +6517,10 @@
     "actualUnrealVerified": 0,
     "productionReady": 0,
     "mandatoryNextAction": "Complete original first-floor topology and Card1 pickups; body drag in both engines as practical stealth system; replace generic rigs with real legal character-specific assets.",
-    "unmappedCoordinates": 52
-  }
+    "unmappedCoordinates": 52,
+    "prototypeEnemyActorsMapped": 14,
+    "prototypeEnemyAreasMapped": 5,
+    "canonicalAreaCoordinatesVerified": 0
+  },
+  "sourceImplementationGate": "undefined Source-authored Unreal guard coordinates are separately inventoried in data/UNREAL_PROTOTYPE_ENEMY_DEPLOYMENTS_1995.json and must not be mistaken for original screen coordinates."
 }
