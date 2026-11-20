@@ -120,7 +120,7 @@
         "character-specific foley",
         "recorded voice if actual dialogue, synchronized subtitles"
       ],
-      "implementation": "design_only",
+      "implementation": "source_prototype",
       "unrealPIEVerified": false,
       "browserRuntimeVerified": false,
       "artistApproved": false,
@@ -131,6 +131,21 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
+      ],
+      "unrealSource": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ],
+      "browserSource": [
+        "browser/cinematic_director.js",
+        "browser/game.js"
+      ],
+      "productionBlockers": [
+        "realistic cast mesh and rig",
+        "actor acting and Sequencer retarget",
+        "recorded dialogue/VO and emotion",
+        "shot lighting and lens QA",
+        "Unreal PIE and browser gameplay capture"
       ]
     },
     {
@@ -864,7 +879,7 @@
         "character-specific foley",
         "recorded voice if actual dialogue, synchronized subtitles"
       ],
-      "implementation": "design_only",
+      "implementation": "source_prototype",
       "unrealPIEVerified": false,
       "browserRuntimeVerified": false,
       "artistApproved": false,
@@ -875,6 +890,21 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
+      ],
+      "unrealSource": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ],
+      "browserSource": [
+        "browser/cinematic_director.js",
+        "browser/game.js"
+      ],
+      "productionBlockers": [
+        "realistic cast mesh and rig",
+        "actor acting and Sequencer retarget",
+        "recorded dialogue/VO and emotion",
+        "shot lighting and lens QA",
+        "Unreal PIE and browser gameplay capture"
       ]
     },
     {
@@ -928,7 +958,7 @@
         "character-specific foley",
         "recorded voice if actual dialogue, synchronized subtitles"
       ],
-      "implementation": "design_only",
+      "implementation": "source_prototype",
       "unrealPIEVerified": false,
       "browserRuntimeVerified": false,
       "artistApproved": false,
@@ -939,6 +969,21 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
+      ],
+      "unrealSource": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ],
+      "browserSource": [
+        "browser/cinematic_director.js",
+        "browser/game.js"
+      ],
+      "productionBlockers": [
+        "realistic cast mesh and rig",
+        "actor acting and Sequencer retarget",
+        "recorded dialogue/VO and emotion",
+        "shot lighting and lens QA",
+        "Unreal PIE and browser gameplay capture"
       ]
     },
     {
@@ -999,7 +1044,7 @@
         "character-specific foley",
         "recorded voice if actual dialogue, synchronized subtitles"
       ],
-      "implementation": "design_only",
+      "implementation": "source_prototype",
       "unrealPIEVerified": false,
       "browserRuntimeVerified": false,
       "artistApproved": false,
@@ -1010,6 +1055,21 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
+      ],
+      "unrealSource": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ],
+      "browserSource": [
+        "browser/cinematic_director.js",
+        "browser/game.js"
+      ],
+      "productionBlockers": [
+        "realistic cast mesh and rig",
+        "actor acting and Sequencer retarget",
+        "recorded dialogue/VO and emotion",
+        "shot lighting and lens QA",
+        "Unreal PIE and browser gameplay capture"
       ]
     },
     {
@@ -1188,7 +1248,7 @@
         "character-specific foley",
         "recorded voice if actual dialogue, synchronized subtitles"
       ],
-      "implementation": "design_only",
+      "implementation": "source_prototype",
       "unrealPIEVerified": false,
       "browserRuntimeVerified": false,
       "artistApproved": false,
@@ -1199,6 +1259,21 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
+      ],
+      "unrealSource": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ],
+      "browserSource": [
+        "browser/cinematic_director.js",
+        "browser/game.js"
+      ],
+      "productionBlockers": [
+        "realistic cast mesh and rig",
+        "actor acting and Sequencer retarget",
+        "recorded dialogue/VO and emotion",
+        "shot lighting and lens QA",
+        "Unreal PIE and browser gameplay capture"
       ]
     },
     {
@@ -1376,7 +1451,7 @@
         "character-specific foley",
         "recorded voice if actual dialogue, synchronized subtitles"
       ],
-      "implementation": "design_only",
+      "implementation": "source_prototype",
       "unrealPIEVerified": false,
       "browserRuntimeVerified": false,
       "artistApproved": false,
@@ -1387,6 +1462,21 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
+      ],
+      "unrealSource": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ],
+      "browserSource": [
+        "browser/cinematic_director.js",
+        "browser/game.js"
+      ],
+      "productionBlockers": [
+        "realistic cast mesh and rig",
+        "actor acting and Sequencer retarget",
+        "recorded dialogue/VO and emotion",
+        "shot lighting and lens QA",
+        "Unreal PIE and browser gameplay capture"
       ]
     },
     {
@@ -1440,7 +1530,7 @@
         "character-specific foley",
         "recorded voice if actual dialogue, synchronized subtitles"
       ],
-      "implementation": "design_only",
+      "implementation": "source_prototype",
       "unrealPIEVerified": false,
       "browserRuntimeVerified": false,
       "artistApproved": false,
@@ -1451,6 +1541,21 @@
         "real voices and subtitle timings",
         "frame-to-frame cut continuity and source canon reviewed",
         "skip/reload/controller tested, no state exploit"
+      ],
+      "unrealSource": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ],
+      "browserSource": [
+        "browser/cinematic_director.js",
+        "browser/game.js"
+      ],
+      "productionBlockers": [
+        "realistic cast mesh and rig",
+        "actor acting and Sequencer retarget",
+        "recorded dialogue/VO and emotion",
+        "shot lighting and lens QA",
+        "Unreal PIE and browser gameplay capture"
       ]
     },
     {
@@ -3343,5 +3448,7 @@
     "actual full-body acting and 3D-face visemes",
     "voice casting + original Foley/music stems",
     "real Play-in-Editor compile and capture evidence"
-  ]
+  ],
+  "firstPlayableSceneCount": 7,
+  "firstPlayableSceneStatus": "source-only cinematic shots; no Unreal compile, lip sync, motion capture, production art or runtime proof"
 }
