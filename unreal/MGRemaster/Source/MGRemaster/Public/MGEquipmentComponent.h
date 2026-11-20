@@ -64,6 +64,11 @@ public:
     bool DiscardPlantedTransmitter();
     int32 GetStunRounds() const;
 
+    // Off by default and not registered at all in shipping builds.
+    // This is a *test harness*, never 1987 campaign equipment.
+    UPROPERTY(EditDefaultsOnly, Category="MG|Development")
+    bool bEnableNonCanonicalTestWeapons = false;
+
     // Designed for eventual room/item pickup and mission SaveGame integration.
     bool AwardItem(FName ItemId, int32 Count);
     bool AwardWeapon(FName WeaponId, int32 Ammo);
