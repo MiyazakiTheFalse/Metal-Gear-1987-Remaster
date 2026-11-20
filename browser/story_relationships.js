@@ -36,6 +36,14 @@ const SCENES=Object.freeze({
   evidence:'Snake hears unexplained chirping from a transmitter in recovered gear.',
   lines:[{speaker:'SNAKE',text:'The chirp changes when I move. Someone is tracking the kit, not just the doors.',duration:4.0,
     direction:'Actual audible clue. Affects player suspicion, not an unearned lore flag.'}]},
+ 'P05.kid':{
+  evidence:'Snake stopped the heavy machine-gun emplacement and earned access to the lift.',
+  lines:[{speaker:'SNAKE',text:'That belt could keep firing. The soldier feeding it could not.',duration:3.9,
+    direction:'Reflective after the weapon has stopped, not a celebratory one-liner.'}]},
+ 'P05.log':{
+  evidence:'Snake physically read the supply-duty record after opening the service breach.',
+  lines:[{speaker:'SNAKE',text:'A key sent here and never returned. Someone kept the route closed on purpose.',duration:4.1,
+    direction:'A hypothesis about the real record. No clairvoyant map reveal.'}]},
  'P04.card3':{
   evidence:'Card 3 was physically collected; adjacent service-sector route is now accessible.',
   lines:[{speaker:'SCHNEIDER',text:"Another clearance? My plans showed an ordinary storeroom there. They rebuilt more than I knew.",duration:4.5,
@@ -54,6 +62,9 @@ const RADIO=Object.freeze({
  foxContact:{id:'storyRadioFoxContact',speaker:'GRAY FOX',text:
   'The guard with the heavy boots always came second. The one carrying water came first. I could tell by the sound.',duration:6.0,
   direction:'Optional in-world observation; no enemy coordinates or permanent escort required.'},
+ kennel:{id:'storyRadioKennel',speaker:'SCHNEIDER · 120.79',
+  text:'The old utility channel runs beneath that kennel. The section marked on my plans is narrow. Check the floor before you commit.',duration:5.9,
+  direction:'Only after the player enters the real kennel; does not give unseen enemy coordinates.'},
  card3:{id:'storyRadioCard3',speaker:'SCHNEIDER · 120.79',
   text:"Card 3 changes what you can open, not what I know. I can help with older corridors; you'll have to check the new ones.",duration:5.8,
   direction:'Trust through honest limitations and actionable, earned contextual advice.'}
