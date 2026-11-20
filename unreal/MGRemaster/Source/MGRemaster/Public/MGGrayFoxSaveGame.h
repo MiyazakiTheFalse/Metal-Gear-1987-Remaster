@@ -22,5 +22,5 @@ public:
     UPROPERTY(SaveGame)
     int32 HandgunRounds = 24;
     UPROPERTY(SaveGame)
-    int32 StunRounds = 8;
+    int32 StunRounds = 0; // Legacy V3 field; no active campaign stun slot.
 };
