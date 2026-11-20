@@ -109,6 +109,38 @@ AStaticMeshActor* AMGGrayFoxMission::SpawnBlock(
     return Actor;
 }
 
+void AMGGrayFoxMission::AddWorldTrace(
+    FName Tag, const FVector& Place, const FVector& Size,
+    const FString& Observation, uint32 RequiredFlags, uint32 ForbiddenFlags)
+{
+    // This evidence is read by player choice; it is not a mandatory
+    // lore terminal, hidden mission flag or source-verified 1987 text.
+    AStaticMeshActor* Prop = SpawnBlock(Tag, Place, Size, false);
+    if (!IsValid(Prop)) return;
+    FOptionalWorldTrace& Trace = OptionalWorldTraces.AddDefaulted_GetRef();
+    Trace.Prop = Prop;
+    Trace.Observation = Observation;
+    Trace.RequiredFlags = RequiredFlags;
+    Trace.ForbiddenFlags = ForbiddenFlags;
+}
+
+bool AMGGrayFoxMission::TryInspectWorldTrace(AMGPlayerCharacter* Player)
+{
+    if (!IsValid(Player)) return false;
+    for (const FOptionalWorldTrace& Trace : OptionalWorldTraces)
+    {
+        if ((Flags & Trace.RequiredFlags) != Trace.RequiredFlags ||
+            (Flags & Trace.ForbiddenFlags) != 0u ||
+            !CanReach(Player, Trace.Prop.Get(), 185.f)) continue;
+        Dialogue = Trace.Observation;
+        DialogueTimeRemaining = 4.8f;
+        // No SaveProgress or ApplyAction: these traces cannot award a key,
+        // trigger capture, reveal the phantom or summon omniscient enemies.
+        return true;
+    }
+    return false;
+}
+
 void AMGGrayFoxMission::CreatePrelude()
 {
     // Spatially isolated from the cell by the west prison wall: the actual
@@ -132,8 +164,16 @@ void AMGGrayFoxMission::CreatePrelude()
         FVector(1.8f, 1.5f, 1.5f), true);
     SpawnBlock(TEXT("PreludeCargoB"), FVector(-2340.f, 30.f, -15.f),
         FVector(2.4f, .85f, 1.7f), true);
+    AddWorldTrace(TEXT("CargoTransferManifest"),
+        FVector(-2780.f, -100.f, -50.f), FVector(.55f, .25f, .34f),
+        TEXT("CARGO CHIT: FILTERS, DRESSINGS, FIELD RATIONS. RECEIVED; COUNTERSIGNATURE BLANK."),
+        0u, MG_FOX_CAPTURED);
     SpawnBlock(TEXT("PreludeSecurityBooth"), FVector(-1920.f, 225.f, -15.f),
         FVector(2.6f, 1.8f, 2.1f), true);
+    AddWorldTrace(TEXT("DutyRotationSlate"),
+        FVector(-2110.f, 335.f, -50.f), FVector(.62f, .24f, .46f),
+        TEXT("DUTY SLATE: TRANSPORT ESCORT 02. SHIFT CHANGE DELAYED. NO REASON LISTED."),
+        0u, MG_FOX_CAPTURED);
     // The POW cannot be accidentally mistaken for Fox; bespoke POW human art
     // is a separate import target; this is a non-colliding readable proxy.
     POWInformant = SpawnBlock(TEXT("InformantPOW"),
@@ -202,6 +242,10 @@ void AMGGrayFoxMission::CreateGreybox()
     // The actor contains its own visible fallback and optional imported rig.
     SpawnBlock(TEXT("Bed"), FVector(-900.f, 240.f, -62.f),
                FVector(1.8f, 0.9f, 0.75f), true);
+    AddWorldTrace(TEXT("CellRepairReceipt"),
+        FVector(-865.f, -212.f, -51.f), FVector(.38f, .08f, .52f),
+        TEXT("REPAIR SLIP: LOWER WALL PATCHED. INSPECTION DEFERRED UNTIL NEXT SHIFT."),
+        MG_FOX_CAPTURED, 0u);
     SpawnBlock(TEXT("Bed"), FVector(110.f, 240.f, -62.f),
                FVector(1.8f, 0.9f, 0.75f), true);
     SpawnBlock(TEXT("GuardCover"), FVector(950.f, 215.f, -25.f),
@@ -246,6 +290,10 @@ void AMGGrayFoxMission::CreateBossWing()
     SpawnBlock(TEXT("GearRoomEast"), FVector(3285.f, -785.f, 90.f), FVector(.4f, 5.8f, 3.8f), true);
     SpawnBlock(TEXT("GearRoomSouth"), FVector(2775.f, -1085.f, 90.f), FVector(10.2f, .4f, 3.8f), true);
     GearBag = SpawnBlock(TEXT("GearBag"), FVector(2700.f, -830.f, -68.f), FVector(.65f, .7f, .55f), false);
+    AddWorldTrace(TEXT("PropertyCustodyReceipt"),
+        FVector(2480.f, -970.f, -57.f), FVector(.52f, .13f, .45f),
+        TEXT("PROPERTY REGISTER: ONE SEALED EQUIPMENT BAG. CLAIMANT FIELD UNCOMPLETED."),
+        MG_FOX_CAPTURED, 0u);
     PlantedTransmitter = SpawnBlock(TEXT("PlantedTransmitter"), FVector(2790.f, -833.f, -30.f), FVector(.2f, .2f, .16f), false);
     if (IsValid(PlantedTransmitter)) PlantedTransmitter->SetActorHiddenInGame(true);
 
@@ -285,6 +333,10 @@ void AMGGrayFoxMission::CreatePostCard3Service()
         FVector(.18f, .16f, 3.f), true);
     SpawnBlock(TEXT("DogCareSupply"), FVector(4720.f, 280.f, -30.f),
         FVector(1.8f, 1.2f, 1.4f), true);
+    AddWorldTrace(TEXT("KennelDutyBoard"),
+        FVector(4680.f, 100.f, -51.f), FVector(.55f, .12f, .48f),
+        TEXT("KENNEL ROSTER: FEED / WATER / NIGHT WALK. SECOND HANDLER NOT SIGNED."),
+        MG_FOX_SLICE_COMPLETED, 0u);
     SpawnBlock(TEXT("ServiceJunctionCover"), FVector(4980.f, -105.f, -25.f),
         FVector(1.6f, 1.0f, 1.5f), true);
 
@@ -762,7 +814,7 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
                 return ApplyAction(MG_FOX_CAPTURE, Player);
             }
         }
-        return false;
+        return TryInspectWorldTrace(Player);
     }
     if ((Flags & MG_FOX_FIRST_WALL_BREACHED) == 0
         && CanReach(Player, WeakWall, 240.f))
@@ -781,7 +833,8 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
         DialogueTimeRemaining = 3.f;
         return true;
     }
-    if (!(Flags & MG_FOX_SHOTMAKER_ENCOUNTERED)) return false;
+    if (!(Flags & MG_FOX_SHOTMAKER_ENCOUNTERED))
+        return TryInspectWorldTrace(Player);
 
     if (!(Flags & MG_FOX_GEAR_RECOVERED) && bGearDoorOpen
         && CanReach(Player, GearBag, 200.f))
@@ -818,7 +871,7 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
     if ((Flags & MG_FOX_CARD3_RECOVERED) && !(Flags & MG_FOX_SLICE_COMPLETED)
         && CanReach(Player, ChapterExit, 235.f))
         return ApplyAction(MG_FOX_COMPLETE_SLICE, Player);
-    return false;
+    return TryInspectWorldTrace(Player);
 }
 
 void AMGGrayFoxMission::BroadcastStructuralImpact(const FVector& Location,
