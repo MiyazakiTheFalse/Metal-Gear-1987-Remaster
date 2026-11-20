@@ -972,7 +972,8 @@ void AMGGrayFoxMission::BeginPlay()
         const uint32 F = Save->MissionFlags;
         const bool bLegacy = Save->SchemaVersion == 1;
         const bool bRecognizedSchema = bLegacy || Save->SchemaVersion == 2
-            || Save->SchemaVersion == 3 || Save->SchemaVersion == 4 || Save->SchemaVersion == 5 || Save->SchemaVersion == 6;
+            || Save->SchemaVersion == 3 || Save->SchemaVersion == 4 || Save->SchemaVersion == 5
+            || Save->SchemaVersion == 6 || Save->SchemaVersion == 7;
         const bool bValid = bRecognizedSchema
             && (F & ~(bLegacy ? 63u : 16383u)) == 0
             && (!(F & MG_FOX_CAPTURED) || (F & MG_FOX_CONFISCATED))
