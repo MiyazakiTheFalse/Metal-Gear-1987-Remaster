@@ -89,6 +89,13 @@ foreach ($Relative in $RequiredAnimations) {
     throw "Missing native gameplay AnimationSequence: $Native. Import skeletal GLBs with clips in UE5.7; do not package an idle-only cast."
   }
 }
+# Dynamically loaded meshes and AnimationSequences are now included in
+# DirectoriesToAlwaysCook, but existence alone does not prove a usable rig.
+# Gate on actual native Editor inspection to catch: glTF metre/cm mistakes,
+# mesh-only imports, clips on unrelated skeletons and empty animations.
+Write-Host 'Auditing imported native Unreal character assets before the cook...'
+& (Join-Path $PSScriptRoot 'verify_unreal_content.ps1') -UnrealRoot $UnrealRoot
+
 Write-Host 'Cooking, staging and packaging Unreal...'
 $UatArgs = @('BuildCookRun', "-project=$Project", '-noP4', '-platform=Win64', '-clientconfig=Development', '-build', '-cook', '-stage', '-pak', '-archive', '-prereqs', "-archivedirectory=$ArchiveDirectory")
 & $UAT @UatArgs
