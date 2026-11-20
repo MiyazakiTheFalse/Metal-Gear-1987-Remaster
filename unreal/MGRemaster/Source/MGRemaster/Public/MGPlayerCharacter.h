@@ -87,7 +87,7 @@ private:
     UPROPERTY(VisibleAnywhere, Category="Character|Hair")
     UStaticMeshComponent* HairVisual;
     UPROPERTY(EditAnywhere, Category="Character|Hair")
-    FName HairAttachmentBone = TEXT("head");
+    FName HairAttachmentBone = FName(TEXT("head"));
     UPROPERTY(EditAnywhere, Category="Character|Hair")
     FVector HairOffsetCm = FVector(0.f, 0.f, 9.f);
     UPROPERTY(EditAnywhere, Category="Character|Hair")
