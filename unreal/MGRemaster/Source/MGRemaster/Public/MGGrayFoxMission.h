@@ -68,6 +68,8 @@ public:
     // from ACTUAL mission flags, never from a cinematic or a secret timer.
     UFUNCTION(BlueprintPure, Category="Mission|Story")
     FString GetCharacterStoryText() const;
+    // Veteran knowledge earned by optional listening; uses actual nearby guard movement.
+    FString GetFoxPatrolListeningCue() const;
     UFUNCTION(BlueprintPure, Category="Mission|Story")
     FName GetSnakeStoryPhase() const;
     FString GetPhaseText() const;
