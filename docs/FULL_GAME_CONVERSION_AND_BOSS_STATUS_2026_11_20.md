@@ -3,7 +3,7 @@
 **Updated:** 20 November 2026 · **Canonical anchor:** the original MSX2 game, not NES alterations · **Repository status:** GitHub C++/asset/data source only; *latest branch not UE5.7 compiled or playtested*.
 
 ### The decision
-We are developing **the entire original game** with an MGS-style third-person presentation, not a permanently isolated prison demo. Existing prison content remains the first integration testbed; next production priorities build backwards to the actual infiltration opening and forward to the rest of the campaign. The ten source-linked workstreams and eleven set-pieces are versioned in [full-game campaign contract](../data/MSX2_FULL_CAMPAIGN_CONVERSION_PLAN_1995.json). The 22 local beat contracts and 12 area contracts remain the detailed authored-prison source and are **not** a count of fully completed 1987 levels.
+We are developing **the entire original game** with an MGS-style third-person presentation, not a permanently isolated prison demo. Existing prison content remains the first integration testbed; next production priorities build backwards to the actual infiltration opening and forward to the rest of the campaign. The ten source-linked workstreams and eleven set-pieces are versioned in [full-game campaign contract](../data/MSX2_FULL_CAMPAIGN_CONVERSION_PLAN_1995.json). The 23 local beat contracts (20 source prototypes, 3 design-only) and 12 area contracts remain the detailed authored-prison source and are **not** a count of fully completed 1987 levels.
 
 ### Latest status and significant corrections
 
