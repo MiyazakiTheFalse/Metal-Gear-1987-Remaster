@@ -262,8 +262,8 @@ function kidTick(dt){
   else if(kid.cadence<=0){kid.cadence=.23;kid.shotVisual=.12;playCue('gunshot',kid);
    const target={x:Math.min(kid.x-.1,Math.max(52.5,player.x)),z:kid.lane};
    const limit=Math.min(1,firstSightBlockFraction(kid,target,1.36,1.1));
-   shots.push({x:kid.x,z:kid.z,y:1.36,toX:kid.x+(target.x-kid.x)*limit,toZ:kid.z+(target.z-kid.z)*limit,toY:1.1,life:.13});
-   if(sees&&Math.abs(player.z-kid.lane)<.75)health=Math.max(0,health-8);
+   shots.push({x:kid.x,z:kid.z,y:1.36,toX:kid.x+(target.x-kid.x)*limit,toZ:kid.z+(target.z-kid.z)*limit,toY:1.1,life:.13,tracer:Math.round(gameTime*4)%4===0});
+   if(sees&&Math.abs(player.z-kid.lane)<.75)applyPlayerDamage(8,kid);
   }
  }else if(kid.phase==='reload'&&kid.clock<=0){kid.phase='waiting';kid.state=0;}
 }
@@ -547,8 +547,10 @@ const liftSignal=add('secure passage status lamp',13.52,2.78,-.26,.08,.11,.13,[.
 const gearBeacon=add('recover equipment beacon',17.4,2.42,-2.8,.18,.18,.18,[.85,.59,.31],mat.light);
 const rubble=[];
 const fox={x:.35,z:0,yaw:Math.PI*.5,alive:true,hp:100,stance:0,mode:'captive',waypoints:[],target:null,pathTime:0,moveSpeed:0,hitTimer:0,calloutAt:-100,footstepAt:-100},guards=[{x:8.05,z:3.25,yaw:-Math.PI/2,state:0,suspicion:0,alert:0,search:0,caution:0,last:{x:8.05,z:3.25},patrol:0,target:null,waypoints:[],pathTime:0,knocked:false,hp:100,radioTimer:0,fireCooldown:1.0,aimTime:0,shotVisual:0},{x:11.8,z:-3.1,yaw:Math.PI/2,state:0,suspicion:0,alert:0,search:0,caution:0,last:{x:11.8,z:-3.1},patrol:1,target:null,waypoints:[],pathTime:0,knocked:false,hp:100,radioTimer:0,fireCooldown:1.65,aimTime:0,shotVisual:0}];
-let stage=0,elapsedStage=0,gameTime=0,levelTime=0,health=100,missionFailed=false,lastEscortReminder=-100,player={x:-10.6,z:0,yaw:0,stance:0,aim:false,sprint:false,cover:false,coverNormal:null,knockUntil:0,attackUntil:0,renderCrouch:0,renderStride:0},cam={yaw:0,pitch:.15,dist:4.5,eye:[-14,2.2,3],focusY:1.56,shoulder:1},discovery={moved:false,looked:false,crouched:false,openedEquip:false,showTips:true,finished:false};
+let stage=0,elapsedStage=0,gameTime=0,levelTime=0,health=100,missionFailed=false,lastEscortReminder=-100,player={x:-10.6,z:0,yaw:0,stance:0,aim:false,sprint:false,cover:false,coverNormal:null,hitTimer:0,knockUntil:0,attackUntil:0,renderCrouch:0,renderStride:0},cam={yaw:0,pitch:.15,dist:4.5,eye:[-14,2.2,3],focusY:1.56,shoulder:1},discovery={moved:false,looked:false,crouched:false,openedEquip:false,showTips:true,finished:false};
 let footsteps=[],noiseEvents=[],nextNoiseId=0,particles=[],shots=[],notes=[],message=null,dialogueQueue=[],tipVisible='',lastStep=0,lastSound=0,awareness=0,alertTimer=0,achievement=[],lastRadar=0,frameCount=0,frameStart=performance.now();
+// Visual feedback is driven by COMMITTED gameplay damage, not a tracer graphic.
+let damagePulse=0,damageDirection=0;
 let equipOpen=null,eqIndex=0,activePadIndex=-1,recoveredGear=false,rounds=0,equippedWeapon='BARE HANDS',sectorSecured=false;const inventories={weapons:[{name:'BARE HANDS',usable:true},{name:'HANDGUN',usable:false},{name:'SUPPRESSOR',usable:false}],items:[{name:'NO ITEM',usable:true},{name:'RATION',usable:false},{name:'CARD 3',usable:false}]};
 // This item enters the inventory only when the sealed kit comes back.
 // Optional freight bay in the condensed browser route.
@@ -1509,7 +1511,7 @@ function updateShootGunner(dt,pulse){
    shots.push({x:boss.x+.72*Math.cos(boss.yaw),z:boss.z+.72*Math.sin(boss.yaw),y:1.36,
     toX:player.x,toZ:player.z,toY:y,life:.17});
    boss.shotVisual=.18;duel.recoil=1;playCue('gunshot',boss);
-   health=Math.max(0,health-25);popup('Under fire from the property hall.',1.1);
+   applyPlayerDamage(25,boss);popup('Under fire from the property hall.',1.1);
    bossBeat('recover');
   }
  }else if(phase==='recover'||phase==='stagger'){
@@ -1566,7 +1568,7 @@ function kennelTick(dt){
   if(sees)dog.last={x:player.x,z:player.z};
   if(dog.state==='lunge'){
    if(dog.age<.36)continue;
-   if(sees&&range<1.45){health=Math.max(0,health-15);playCue('hit',dog);}
+   if(sees&&range<1.45)applyPlayerDamage(15,dog);
    dog.state='recover';dog.age=0;continue;
   }
   if(dog.state==='recover'&&dog.age<.85)continue;
@@ -1599,6 +1601,17 @@ function drawKennelDogs(t){
    for(const leg of [-1,1])part(leg*.30+.06*Math.sin(t*8)*leg*side,.30,side*.12,[.13,.52,.12],hide);
   }
  }
+}
+function applyPlayerDamage(amount,source){
+ if(amount<=0||health<=0)return false;
+ const previous=health;
+ health=Math.max(0,health-amount);
+ if(health===previous)return false;
+ player.hitTimer=.50; // Local WebGL+field rig pose and optional skinned hit clip.
+ damagePulse=Math.min(1,damagePulse+.22+.016*amount);
+ damageDirection=source?Math.atan2(source.z-player.z,source.x-player.x)-cam.yaw:0;
+ playCue('hit',source||player);
+ return true;
 }
 function updateGuards(dt){kennelTick(dt);kidTick(dt);const pulse=updatePropertyTag();let max=0;const triggered=[];for(const g of guards){if(g.knocked||g.kid)continue;if(g.boss){updateShootGunner(dt,pulse);max=Math.max(max,g.state);continue;}const d=dist(g,player),direction=Math.atan2(player.z-g.z,player.x-g.x),view=Math.abs(Math.atan2(Math.sin(direction-g.yaw),Math.cos(direction-g.yaw)))<.87;// Ghost Babel-style box logic: credible freight, not perpetual invisibility.
  // Only a guard with an actual close, forward, unobstructed look may inspect an
@@ -1708,7 +1721,7 @@ function updateGuards(dt){kennelTick(dt);kidTick(dt);const pulse=updatePropertyT
     const blocked=lineBlockedSight(g,seenTarget,1.48,spotted?(fox.stance===1?.84:1.28):(player.stance===2?.48:player.stance===1?.84:1.33));
     if(!blocked){
       if(spotted)damageFox(12);
-      else{health=Math.max(0,health-12);popup('UNDER FIRE — BREAK SIGHTLINE',1.3);playCue('hit');}
+      else{applyPlayerDamage(12,g);popup('UNDER FIRE — BREAK SIGHTLINE',1.3);}
     }else popup('ENEMY ROUND STOPPED BY COVER',1.1);
   }
  }else g.aimTime=Math.max(0,g.aimTime-dt*4);
@@ -2117,9 +2130,11 @@ function drawFrame(t,dt){let w=canvas.clientWidth,h=canvas.clientHeight,scale=wi
      [remaining*1.04,.047,.075],remaining<.36?[.94,.35,.28]:[.42,.83,.90],0,3);
  }
  for(const g of guards)if(g.boss||!window.__MG_RIG_READY)human(g,'guard',t,dt);
- // Brief visible tracers communicate the firing direction. Damage logic uses
- // lineBlockedSight, not these visual elements.
+ // Ordinary sidearms use muzzle bursts + character reaction; only a real
+ // tracer-enabled weapon (e.g. suppressive machine gun) draws a trajectory.
+ // Damage and collisions were decided by combat logic, never this artwork.
  for(const shot of shots){
+   if(!shot.tracer)continue;
    const dx=shot.toX-shot.x,dz=shot.toZ-shot.z,dy=shot.toY-shot.y;
    const planar=Math.hypot(dx,dz),length=Math.hypot(planar,dy);
    const yaw=Math.atan2(dz,dx),tilt=Math.atan2(planar,dy);
@@ -2134,7 +2149,7 @@ function drawFrame(t,dt){let w=canvas.clientWidth,h=canvas.clientHeight,scale=wi
  // The original renderer and all gameplay systems remain authoritative.
  if(window.__MG_RIG_READY){
    const a=[{id:'snake',kind:'player',x:player.x,z:player.z,yaw:player.yaw||0,
-     stance:player.stance,cover:player.cover,knocking:player.knockUntil>t,hit:false,down:false,visible:!world.boxed&&Math.hypot(cam.eye[0]-player.x,cam.eye[2]-player.z)>.75},
+     stance:player.stance,cover:player.cover,knocking:player.knockUntil>t,hit:player.hitTimer>0,down:health<=0,visible:!world.boxed&&Math.hypot(cam.eye[0]-player.x,cam.eye[2]-player.z)>.75},
      {id:'fox',kind:'fox',x:fox.x,z:fox.z,yaw:fox.yaw||0,
        stance:fox.stance||0,hit:fox.hitTimer>0,down:!fox.alive,visible:true}];
    for(let i=0;i<guards.length;i++){
@@ -2260,9 +2275,15 @@ document.addEventListener('mousemove',e=>{if(document.pointerLockElement===canva
 document.addEventListener('mousedown',e=>{lastInputIsPad=false;if(!started||paused)return;if(e.button===2)key.mouse2=true;if(e.button===0)action('fire')});document.addEventListener('mouseup',e=>{if(e.button===2)key.mouse2=false});
 document.addEventListener('keydown',e=>{lastInputIsPad=false;const k=e.key.toLowerCase();if(['tab',' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();if(key[k])return;key[k]=true;if(!started){if(k==='enter')start(false);return}if(k==='escape'){action('pause');return}if(paused){if(k==='j'||k==='c')setPaused(false);return}const actions={e:'interact',control:'crouch',z:'prone',v:'cover',f:'melee',n:'knock',j:'intel',c:'codec',t:'tips','[':'previous',']':'next'};if(actions[k])action(actions[k]);if(k==='tab')action('equipitem');if(k==='g')action('equipweapon');if(k==='r')reset();if(k==='q')cam.shoulder*=-1;});document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();key[k]=false;if(k==='tab'||k==='g')action('equipclose')});window.addEventListener('blur',()=>{for(const k of Object.keys(key))key[k]=false;if(equipOpen)action('equipclose')});
 function readGamepad(){const p=pollGamepad();updatePadStatus(p);padUsing=!!p&&(Math.abs(p.axes[0]||0)>.16||Math.abs(p.axes[1]||0)>.16);if(!p){padPrev=[];return;}const now=p.buttons.map(pressed);const previous=padPrev;const down=i=>now[i]&&!previous[i];const up=i=>!now[i]&&previous[i];padPrev=now;if(!started){if(down(0)||down(9))start(false);return;}if(down(9)){action('pause');return}if(paused){if(down(1)||down(0)){setPaused(false)}return}if(down(0))action('interact');if(down(1)){action('crouch');}if(down(2))action('melee');if(down(3))action('prone');if(down(12))action('intel');if(down(8))action('codec');if(down(11))cam.shoulder*=-1;if(down(4))action('equipitem');if(down(5))action('equipweapon');if(up(4)||up(5))action('equipclose');if(down(14))action('previous');if(down(15))action('next');if(down(7)){player.aim=inputDown('mouse2')||pressed(p.buttons[6]);action('fire');}}
-function frame(now){requestAnimationFrame(frame);const real=clamp((now-last)/1000,0,.06);last=now;readGamepad();const dt=started&&!paused?real*(equipOpen?.2:1):0;if(started&&!paused){gameTime+=dt;levelTime+=dt;elapsedStage+=dt;updatePlayer(dt);updateFox(dt);updateGuards(dt);ambience(dt);for(const f of footsteps)f.life-=dt;footsteps=footsteps.filter(f=>f.life>0);shots.forEach(s=>s.life-=dt);shots=shots.filter(s=>s.life>0);for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy-=4.4*dt;p.life-=dt}particles=particles.filter(p=>p.life>0);noiseEvents.forEach(n=>n.life-=dt);noiseEvents=noiseEvents.filter(n=>n.life>0);if(awareness===0&&stage!==4&&Math.floor(gameTime/12)!==Math.floor((gameTime-dt)/12))save();if(awareness!==prevAlert)record('awareness.'+awareness);if(awareness===3&&prevAlert!==3)achievement.push({time:gameTime});prevAlert=awareness;}drawFrame(gameTime,dt);if(started)updateHUD(dt);frameCount++;if(now-frameStart>1000){$('fps').textContent=Math.round(frameCount*1000/(now-frameStart))+' FPS';frameStart=now;frameCount=0}}
+function frame(now){requestAnimationFrame(frame);const real=clamp((now-last)/1000,0,.06);last=now;readGamepad();
+ damagePulse=Math.max(0,damagePulse-real*1.85);
+ player.hitTimer=Math.max(0,(player.hitTimer||0)-real);
+ if($('damageFlash')){
+  $('damageFlash').style.opacity=String(Math.min(.78,damagePulse));
+  $('damageFlash').style.transform=`rotate(${Math.round(damageDirection*180/Math.PI)}deg)`;
+ }const dt=started&&!paused?real*(equipOpen?.2:1):0;if(started&&!paused){gameTime+=dt;levelTime+=dt;elapsedStage+=dt;updatePlayer(dt);updateFox(dt);updateGuards(dt);ambience(dt);for(const f of footsteps)f.life-=dt;footsteps=footsteps.filter(f=>f.life>0);shots.forEach(s=>s.life-=dt);shots=shots.filter(s=>s.life>0);for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy-=4.4*dt;p.life-=dt}particles=particles.filter(p=>p.life>0);noiseEvents.forEach(n=>n.life-=dt);noiseEvents=noiseEvents.filter(n=>n.life>0);if(awareness===0&&stage!==4&&Math.floor(gameTime/12)!==Math.floor((gameTime-dt)/12))save();if(awareness!==prevAlert)record('awareness.'+awareness);if(awareness===3&&prevAlert!==3)achievement.push({time:gameTime});prevAlert=awareness;}drawFrame(gameTime,dt);if(started)updateHUD(dt);frameCount++;if(now-frameStart>1000){$('fps').textContent=Math.round(frameCount*1000/(now-frameStart))+' FPS';frameStart=now;frameCount=0}}
 // Console contract for deterministic browser tests, never elevated to source fidelity.
-window.__mgGameDebug={get state(){return {stage,service:{...service},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,itemSlots:inventories.items.map(i=>({name:i.name,usable:i.usable})),safeLift:{...safeLift},player:{...player},bodyCollider:{...bodyShape(),orientation:player.stance===2?'horizontal':'vertical',samples:bodySamples(player.x,player.z,player.stance,player.yaw)},awareness,paused,equipOpen,noiseEvents:noiseEvents.map(n=>({...n})),guards:guards.map(g=>({state:g.state,x:g.x,z:g.z,yaw:g.yaw,last:{...g.last},investigateUntil:g.investigateUntil||0,lastKnockId:g.lastKnockId||0,boxInspectionAge:g.boxInspectionAge||0,boxIdentitySpoken:!!g.boxIdentitySpoken,knocked:g.knocked,aimSubject:g.aimSubject,aimTime:g.aimTime,fireCooldown:g.fireCooldown,shotVisual:g.shotVisual})),fox:{x:fox.x,z:fox.z,hp:fox.hp,alive:fox.alive,mode:fox.mode,stance:fox.stance,moveSpeed:fox.moveSpeed},missionFailed,coverAssets:coverAssets.map(c=>({...c})),activeTracers:shots.length,originalMapVerified:false,renderedFrames:drawn,visualVersion:'original_humanoid_mk4_escort_armed_guards',meshKinds:Object.keys(meshLibrary),materialAtlas:{...materialAtlas},environmentModelCounts:{bedParts:sceneDetail.filter(o=>o.name.startsWith('cot ')||o.name.startsWith('blanket ')||o.name.startsWith('pillow ')||o.name==='folded wool blanket').length,lockerDetails:sceneDetail.filter(o=>o.name.startsWith('locker ')).length,cabinetDetails:sceneDetail.filter(o=>o.name.includes('front trim')||o.name.includes('bolt head')).length,ceilingsBlockCamera:cameraOnlySolids.some(o=>o.name==='ceiling'&&o.active)},camEye:[...cam.eye],cameraBlocked:cameraPositionPenetrates(cam.eye),cameraBelowFloor:cam.eye[1]<.28,activePadIndex,padPrev:[...padPrev],started}},readPad:()=>readGamepad(),start:()=>start(false),act:action,teleport:(x,z)=>{player.x=x;player.z=z},setCamera:(yaw,pitch=0)=>{cam.yaw=yaw;cam.pitch=pitch},stepCamera:(dt=.016)=>updateCamera(dt),canOccupy:(x,z,stance,yaw=player.yaw)=>canOccupyBody(x,z,stance,yaw),moveBody:(vx,vz,dt)=>movePlayer(vx,vz,dt),step:(dt)=>{gameTime+=dt;updatePlayer(dt);updateFox(dt);updateGuards(dt)},damageFox:(n)=>damageFox(n),stepFox:(dt)=>updateFox(dt),sightBlocked:(a,b,fromY=1.58,toY=1.52)=>lineBlockedSight(a,b,fromY,toY),radarVisionDistance:(index,angle,range=10)=>radarVisionDistance(guards[index],angle,range),findPath:(a,b)=>pathfind(a,b),foxRouteRisk:(p)=>foxRouteRisk(p),guardSeesPosition:(index,pos)=>guardSeesPosition(guards[index],pos),reset};
+window.__mgGameDebug={get state(){return {stage,service:{...service},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,itemSlots:inventories.items.map(i=>({name:i.name,usable:i.usable})),safeLift:{...safeLift},player:{...player},bodyCollider:{...bodyShape(),orientation:player.stance===2?'horizontal':'vertical',samples:bodySamples(player.x,player.z,player.stance,player.yaw)},awareness,paused,equipOpen,noiseEvents:noiseEvents.map(n=>({...n})),guards:guards.map(g=>({state:g.state,x:g.x,z:g.z,yaw:g.yaw,last:{...g.last},investigateUntil:g.investigateUntil||0,lastKnockId:g.lastKnockId||0,boxInspectionAge:g.boxInspectionAge||0,boxIdentitySpoken:!!g.boxIdentitySpoken,knocked:g.knocked,aimSubject:g.aimSubject,aimTime:g.aimTime,fireCooldown:g.fireCooldown,shotVisual:g.shotVisual})),fox:{x:fox.x,z:fox.z,hp:fox.hp,alive:fox.alive,mode:fox.mode,stance:fox.stance,moveSpeed:fox.moveSpeed},missionFailed,coverAssets:coverAssets.map(c=>({...c})),activeTracers:shots.filter(s=>s.tracer).length,damagePulse,damageDirection,originalMapVerified:false,renderedFrames:drawn,visualVersion:'original_humanoid_mk4_escort_armed_guards',meshKinds:Object.keys(meshLibrary),materialAtlas:{...materialAtlas},environmentModelCounts:{bedParts:sceneDetail.filter(o=>o.name.startsWith('cot ')||o.name.startsWith('blanket ')||o.name.startsWith('pillow ')||o.name==='folded wool blanket').length,lockerDetails:sceneDetail.filter(o=>o.name.startsWith('locker ')).length,cabinetDetails:sceneDetail.filter(o=>o.name.includes('front trim')||o.name.includes('bolt head')).length,ceilingsBlockCamera:cameraOnlySolids.some(o=>o.name==='ceiling'&&o.active)},camEye:[...cam.eye],cameraBlocked:cameraPositionPenetrates(cam.eye),cameraBelowFloor:cam.eye[1]<.28,activePadIndex,padPrev:[...padPrev],started}},readPad:()=>readGamepad(),start:()=>start(false),act:action,teleport:(x,z)=>{player.x=x;player.z=z},setCamera:(yaw,pitch=0)=>{cam.yaw=yaw;cam.pitch=pitch},stepCamera:(dt=.016)=>updateCamera(dt),canOccupy:(x,z,stance,yaw=player.yaw)=>canOccupyBody(x,z,stance,yaw),moveBody:(vx,vz,dt)=>movePlayer(vx,vz,dt),step:(dt)=>{gameTime+=dt;updatePlayer(dt);updateFox(dt);updateGuards(dt)},damageFox:(n)=>damageFox(n),stepFox:(dt)=>updateFox(dt),sightBlocked:(a,b,fromY=1.58,toY=1.52)=>lineBlockedSight(a,b,fromY,toY),radarVisionDistance:(index,angle,range=10)=>radarVisionDistance(guards[index],angle,range),findPath:(a,b)=>pathfind(a,b),foxRouteRisk:(p)=>foxRouteRisk(p),guardSeesPosition:(index,pos)=>guardSeesPosition(guards[index],pos),reset};
 // Deterministic development-only combat hook (absent unless tests opt in).
 if(window.__MG_TEST__){
  window.__mgGameDebug.testSetGuard=(index,settings)=>{
@@ -2288,6 +2309,7 @@ if(window.__MG_TEST__){
    guards[1].knocked=true;return true;
  };
  window.__mgGameDebug.testStepGuards=(dt)=>{gameTime+=dt;updateGuards(dt)};
+ window.__mgGameDebug.testApplyPlayerDamage=(amount,source)=>applyPlayerDamage(amount,source);
  window.__mgGameDebug.testResetFoxAfterShot=()=>{fox.hp=100;fox.alive=true;fox.hitTimer=0;for(const g of guards)g.knocked=true;awareness=0;};
 }
 try{$('resume').disabled=!localStorage.getItem(STORAGE)}catch(e){$('resume').disabled=true}drawEquipment();if(location.hash==='#continue'){history.replaceState(null,'',location.pathname+location.search);start(true)}else if(rehearsal)start(false);
