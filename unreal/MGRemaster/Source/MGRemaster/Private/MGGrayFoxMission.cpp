@@ -204,6 +204,13 @@ void AMGGrayFoxMission::CreatePrelude()
             PatrolB->SetRole(EMGGuardRole::Patrol);
             PatrolB->ConfigurePatrol(FVector(1.f, 0.f, 0.f), 145.f, 92.f);
         }
+        // Source-informed duty: the receiving station has a posted officer
+        // watching cargo transfers, not a free-roaming NPC whose duty makes
+        // no sense. Stationary sector-scanning is a GAME abstraction, not
+        // direct access to current military facility operations.
+        if (AMGGuardActor* Receiver = GetWorld()->SpawnActor<AMGGuardActor>(
+                FVector(-2410.f, 295.f, -11.f), FRotator(0.f, -95.f, 0.f)))
+            Receiver->SetRole(EMGGuardRole::LogisticsPost);
         CustodyOfficerA = GetWorld()->SpawnActor<AMGGuardActor>(
             FVector(-1570.f, 315.f, -11.f), FRotator(0.f, -90.f, 0.f));
         CustodyOfficerB = GetWorld()->SpawnActor<AMGGuardActor>(
@@ -455,6 +462,66 @@ void AMGGrayFoxMission::CreateConnectiveSpaces()
     // authored 1995 prefab kit, complete 1987 map or hands-on tested level.
 }
 
+void AMGGrayFoxMission::CreateFirstPassVerticality()
+{
+    // NEW 1995-credible freight/service elevation. No 1987 room map has been
+    // claimed for this optional bypass. 80cm high cart-access maintenance run,
+    // reached with real walkable ramps, no mantle/teleport or mission flag.
+    //
+    // Existing ground top: Z=-100cm; deck top: Z=-20cm. 100cm cube source.
+    // Ascending pitch 16.5 degrees, descending pitch -15.6 degrees. Both
+    // are below Unreal's default walkable floor angle (~44 degrees).
+    // Capsule centre traverses roughly -11 -> +69, still within save bounds.
+    const float DeckY = -405.f;
+    const FVector RampScale(2.75f, 1.5f, .16f);
+    if (AStaticMeshActor* Up = SpawnBlock(
+            TEXT("FreightMaintenanceRampUp"), FVector(-3665.f, DeckY, -68.f),
+            RampScale, true))
+        Up->SetActorRotation(FRotator(16.5f, 0.f, 0.f));
+
+    SpawnBlock(TEXT("FreightElevatedMaintenanceDeck"),
+        FVector(-3390.f, DeckY, -30.f), FVector(3.0f, 1.5f, .20f), true);
+
+    if (AStaticMeshActor* Down = SpawnBlock(
+            TEXT("FreightMaintenanceRampDown"), FVector(-3100.f, DeckY, -68.f),
+            FVector(3.05f, 1.5f, .16f), true))
+        Down->SetActorRotation(FRotator(-15.0f, 0.f, 0.f));
+
+    // Structural beam and accessible observation rail. 80cm elevation is
+    // not an impenetrable sniper nest; guards can still detect an exposed
+    // player from grounded LOS when physically unobstructed.
+    SpawnBlock(TEXT("FreightDeckSouthHandrail"),
+        FVector(-3390.f, -470.f, 15.f), FVector(3.1f, .06f, .72f), true);
+    SpawnBlock(TEXT("FreightDeckNorthVisualRail"),
+        FVector(-3390.f, -330.f, 20.f), FVector(3.0f, .05f, .42f), false);
+    SpawnBlock(TEXT("FreightDeckCrossBraceA"),
+        FVector(-3470.f, DeckY, -72.f), FVector(.17f, 1.48f, .38f), false);
+    SpawnBlock(TEXT("FreightDeckCrossBraceB"),
+        FVector(-3310.f, DeckY, -72.f), FVector(.17f, 1.48f, .38f), false);
+    AddWorldTrace(TEXT("OverlookStructuralRepairSlip"),
+        FVector(-3390.f, -390.f, -14.f), FVector(.40f, .08f, .43f),
+        TEXT("WALKWAY: SUPPORT CORROSION REPAIRED. LOAD LIMIT TO BE RECHECKED."),
+        0u, MG_FOX_CAPTURED);
+
+    // Accessible across BOTH ramps. The 1987 POW/transport intelligence
+    // still has to be earned via the existing ground-floor interactions.
+    // Never place keys, essential ammunition or route gates on the overlook.
+
+    // A non-climbable service gantry above Shoot Gunner's battle area.
+    // This gives the building industrial scale but deliberately avoids a
+    // vantage from which players could defeat the boss with zero counterplay.
+    // Its underside is Z=225, 325cm above the arena floor.
+    SpawnBlock(TEXT("BossOverheadMaintenanceGantry"),
+        FVector(2415.f, 0.f, 245.f), FVector(1.35f, 9.0f, .40f), true);
+    SpawnBlock(TEXT("BossGantryNorthSupport"),
+        FVector(2415.f, 472.f, 80.f), FVector(.32f, .32f, 3.0f), true);
+    SpawnBlock(TEXT("BossGantrySouthSupport"),
+        FVector(2415.f, -472.f, 80.f), FVector(.32f, .32f, 3.0f), true);
+    SpawnBlock(TEXT("BossGantryCableLoop"),
+        FVector(2470.f, 0.f, 195.f), FVector(.18f, 8.6f, .18f), false);
+    // Guards never spawn on this unreachable overhead surface.
+}
+
 void AMGGrayFoxMission::CreateZoneLighting()
 {
     if (!GetWorld()) return;
@@ -537,6 +604,7 @@ void AMGGrayFoxMission::BeginPlay()
     CreateBossWing();
     CreatePostCard3Service();
     CreateConnectiveSpaces();
+    CreateFirstPassVerticality();
     CreateZoneLighting();
     SpawnPerimeterGuards();
     if (const UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
