@@ -110,9 +110,16 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
         ? EMGPerformanceAction::Travel : EMGPerformanceAction::Idle;
     bRadioListeningOverlay = false;
     GunnerHealthFraction = 1.f;
+    bWeaponReloading = false;
+    RemainingVisibleRounds = -1;
+    float TargetLeftGrip = 0.f;
+    float TargetRightGrip = 0.f;
     if (const AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(Owner))
     {
         bRadioListeningOverlay = Player->IsCodecOpen();
+        // Never have the weapon grip on a captured/unarmed Snake.
+        TargetRightGrip = bWeaponReady ? 1.f : 0.f;
+        TargetLeftGrip = bWeaponReady && bAiming ? .7f : 0.f;
         if (Player->IsMeleeVisualActive()) Desired = EMGPerformanceAction::Melee;
         else if (bKnocking) Desired = EMGPerformanceAction::WallKnock;
         else if (bIsFiring) Desired = EMGPerformanceAction::Fire;
@@ -126,8 +133,15 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     }
     else if (const AMGGuardActor* Guard = Cast<AMGGuardActor>(Owner))
     {
+        bWeaponReloading = Guard->IsReloadingSidearm();
+        RemainingVisibleRounds = Guard->GetSidearmRounds();
+        TargetRightGrip = 1.f;
+        TargetLeftGrip = bWeaponReloading ? .8f : 0.f;
         switch (Guard->GetGuardPosture())
         {
+        case EMGGuardPosture::SidearmAim: Desired = EMGPerformanceAction::GuardSidearmAim; break;
+        case EMGGuardPosture::SidearmFire: Desired = EMGPerformanceAction::GuardSidearmFire; break;
+        case EMGGuardPosture::SidearmReload: Desired = EMGPerformanceAction::GuardSidearmReload; break;
         case EMGGuardPosture::Notice: Desired = EMGPerformanceAction::GuardNotice; break;
         case EMGGuardPosture::Investigate: Desired = EMGPerformanceAction::GuardInvestigate; break;
         case EMGGuardPosture::Search: Desired = EMGPerformanceAction::GuardSearch; break;
@@ -146,9 +160,15 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     else if (const AMGShootGunnerActor* Gunner = Cast<AMGShootGunnerActor>(Owner))
     {
         GunnerHealthFraction = Gunner->GetHealthFraction();
+        bWeaponReloading = Gunner->IsReloading();
+        RemainingVisibleRounds = Gunner->GetLoadedShells();
+        TargetRightGrip = Gunner->IsDefeated() ? 0.f : 1.f;
+        TargetLeftGrip = Gunner->IsDefeated() ? 0.f :
+            (Gunner->IsReloading() ? .2f : 1.f);
         if (Gunner->IsDefeated()) Desired = EMGPerformanceAction::GunnerDefeated;
         else if (Gunner->IsFiringVolley()) Desired = EMGPerformanceAction::GunnerVolley;
         else if (Gunner->IsTelegraphing()) Desired = EMGPerformanceAction::GunnerAim;
+        else if (Gunner->IsReloading()) Desired = EMGPerformanceAction::GunnerReload;
         else if (Gunner->IsRecovering()) Desired = EMGPerformanceAction::GunnerRecovery;
         else Desired = EMGPerformanceAction::GunnerSearch;
     }
@@ -191,6 +211,12 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
         CoverTransitionAlpha, bInCover ? 1.f : 0.f, DeltaSeconds, 10.f);
     RadioListenOverlayAlpha = FMath::FInterpTo(
         RadioListenOverlayAlpha, bRadioListeningOverlay ? 1.f : 0.f, DeltaSeconds, 8.f);
+    WeaponReloadBlendAlpha = FMath::FInterpTo(WeaponReloadBlendAlpha,
+        bWeaponReloading ? 1.f : 0.f, DeltaSeconds, 9.f);
+    RightHandGripAlpha = FMath::FInterpTo(RightHandGripAlpha,
+        TargetRightGrip, DeltaSeconds, 13.f);
+    LeftHandGripAlpha = FMath::FInterpTo(LeftHandGripAlpha,
+        TargetLeftGrip, DeltaSeconds, 11.f);
     ImpactPoseAlpha = FMath::FInterpTo(
         ImpactPoseAlpha, (PerformanceAction == EMGPerformanceAction::Melee ||
                           PerformanceAction == EMGPerformanceAction::GuardStrike)
