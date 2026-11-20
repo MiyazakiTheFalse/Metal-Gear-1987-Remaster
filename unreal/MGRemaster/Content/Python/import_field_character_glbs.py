@@ -18,7 +18,7 @@ ROLES = {
     "snake": ("/Game/Characters/Snake", "SK_Snake_1995_Infiltration"),
     "fox": ("/Game/Characters/GrayFox", "SK_GrayFox_1995_Prisoner"),
     "guard": ("/Game/Characters/Guard", "SK_Guard_1995"),
-    "shoot_gunner": ("/Game/Characters/Shotmaker", "SK_Shotmaker_1995"),
+    "shoot_gunner": ("/Game/Characters/Bosses/Shotmaker", "SK_Shotmaker_1995"),
 }
 REQUIRED_JOINTS = {
     "pelvis", "chest", "neck", "head", "jaw", "brow",
