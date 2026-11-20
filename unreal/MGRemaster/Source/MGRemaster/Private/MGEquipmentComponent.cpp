@@ -12,7 +12,13 @@ void UMGEquipmentComponent::BeginPlay()
         {FName(TEXT("NONE")), TEXT("NO WEAPON"), 0, true, false},
         // Existing prison-slice carryover (not yet earned in the expanded
         // first-floor mission). This must later become an actual pickup.
-        {FName(TEXT("HANDGUN")), TEXT("HANDGUN [PRE-PRISON CARRYOVER]"), 24, true, false}
+        {FName(TEXT("HANDGUN")), TEXT("HANDGUN"), 0, false, false},
+        {FName(TEXT("MINE")), TEXT("MINE [NOT INTEGRATED]"), 0, false, false},
+        {FName(TEXT("PLASTIC_EXPLOSIVE")), TEXT("PLASTIC EXPLOSIVE [NOT INTEGRATED]"), 0, false, false},
+        {FName(TEXT("REMOTE_MISSILE")), TEXT("REMOTE MISSILE [NOT INTEGRATED]"), 0, false, false},
+        {FName(TEXT("GRENADE_LAUNCHER")), TEXT("GRENADE LAUNCHER [NOT INTEGRATED]"), 0, false, false},
+        {FName(TEXT("SMG")), TEXT("SUBMACHINE GUN [NOT INTEGRATED]"), 0, false, false},
+        {FName(TEXT("ROCKET_LAUNCHER")), TEXT("ROCKET LAUNCHER [NOT INTEGRATED]"), 0, false, false}
     };
 #if !UE_BUILD_SHIPPING
     // Separate developer sandbox only. The 1987 MSX2 never awards a stun
@@ -227,7 +233,8 @@ bool UMGEquipmentComponent::AwardItem(FName Id, int32 Count)
 }
 bool UMGEquipmentComponent::AwardWeapon(FName Id, int32 Ammo)
 {
-    if (Ammo < 0) return false;
+    // New slots are not playable until their real placement/fire mechanics exist.
+    if (Ammo < 0 || Id != FName(TEXT("HANDGUN"))) return false;
     for (FMGEquipmentEntry& E : Weapons)
         if (E.Id == Id && Id != FName(TEXT("NONE")))
         {
