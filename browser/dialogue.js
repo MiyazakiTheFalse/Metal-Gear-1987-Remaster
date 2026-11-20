@@ -1,6 +1,7 @@
 /* Independently written temporary scene dialogue; not transcribed J2ME text. */
 window.MGDialogue = Object.freeze({
   boxCall:{speaker:'BIG BOSS',text:'A packing box? Moving out already, Snake?',duration:3},
+  freightShift:{speaker:'RECEIVING CLERK (OFF)',text:'Another load for the duty desk. Check the seals and keep the line moving.',duration:4.0,direction:'Mundane work talk glimpsed while the camera remains under player control; not canonical 1987 dialogue.'},
   boxInspect:{speaker:'GUARD',text:'Who left this carton here? I should check.',duration:2.4,direction:'Confused curiosity, then deliberate movement; not an automatic alarm.'},
   boxExposed:{speaker:'GUARD',text:'There is someone hiding in this box!',duration:2.2,direction:'Recognition after sustained close visual inspection; no instant psychic detection.'},
   dispatchCall:{speaker:'SCHNEIDER',text:'Those two posts used to count outgoing freight. The lamps went years ago. The counter still works.',duration:4.3},
