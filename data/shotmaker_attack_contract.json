@@ -33,7 +33,8 @@
       70,
       35
     ],
-    "proposed_character_direction": "proud detention specialist: theatrical initial boast, controlled movement, confidence cracks only as the intruder survives"
+    "proposed_character_direction": "proud detention specialist: theatrical initial boast, controlled movement, confidence cracks only as the intruder survives",
+    "pump_offset_seconds": 0.17
   },
   "limits": {
     "windup_seconds": [
@@ -67,6 +68,10 @@
     "effective_handgun_damage_per_accepted_hit": [
       5,
       25
+    ],
+    "pump_offset_seconds": [
+      0.05,
+      0.4
     ]
   },
   "artifacts": {
@@ -93,7 +98,9 @@
     "Hand grip/pump/stock physically accurate in final rig",
     "Source-faithful standard handgun 10 hits; four remote missiles not playable until separate weapon system exists",
     "NPC pistol damage remains unchanged; no hidden global health or ammo nerf",
-    "Defeat optionality in original MSX2 is reported by TAS community: verify before hard-gating Card 3"
+    "Defeat optionality in original MSX2 is reported by TAS community: verify before hard-gating Card 3",
+    "Blast and pump are separate timed animation/audio cues, not a same-frame effect; the third shot pumps inside recovery.",
+    "Source capture fallback reveals the detention cell from black only after a committed custody transaction."
   ],
   "references": [
     "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/17103",
