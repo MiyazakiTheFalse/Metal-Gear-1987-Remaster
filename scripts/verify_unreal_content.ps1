@@ -14,7 +14,7 @@ if (-not (Test-Path $Editor)) { throw "UnrealEditor-Cmd missing: $Editor" }
 $LogDir = Join-Path $Repo 'dist\unreal-import-logs'
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 $LogPath = Join-Path $LogDir 'unreal_native_character_audit.log'
-$Args = @(
+$EditorArgs = @(
     ('"' + $Project + '"'),
     '-run=pythonscript',
     ('-script="' + $Script + '"'),
@@ -24,7 +24,7 @@ $Args = @(
     '-log'
 )
 Write-Host 'Checking all 22 native character meshes, skeletal compatibility, animation tracks and imported scale...'
-& $Editor @Args 2>&1 | Tee-Object -FilePath $LogPath
+& $Editor @EditorArgs 2>&1 | Tee-Object -FilePath $LogPath
 if ($LASTEXITCODE -ne 0) {
     throw "Unreal native character audit exited $LASTEXITCODE. See $LogPath"
 }
