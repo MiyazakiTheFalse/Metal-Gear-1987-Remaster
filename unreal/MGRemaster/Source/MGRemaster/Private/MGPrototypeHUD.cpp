@@ -293,6 +293,13 @@ void AMGPrototypeHUD::DrawHUD()
         if (!Hint.IsEmpty())
             DrawText(Hint, HudAmber, Margin + 12.f * UiScale,
                      Margin + 187.f * UiScale, nullptr, 0.78f * UiScale, false);
+        // A personal lesson from Gray Fox has a measurable gameplay
+        // benefit only when a real guard's footsteps can be heard nearby.
+        // This cue respects the ordinary guard hearing/occlusion geometry.
+        const FString FoxBoots = Mission->GetFoxPatrolListeningCue();
+        if (!FoxBoots.IsEmpty() && !Player->IsCodecOpen())
+            DrawText(FoxBoots, HudGreen, Margin + 12.f * UiScale,
+                     Margin + 229.f * UiScale, nullptr, .70f * UiScale, false);
         // Never seize the player's camera just to deliver an optional clue.
         if (Mission->HasIncomingTransceiverPrompt() && !Player->IsCodecOpen())
             DrawText(TEXT("OPTIONAL RADIO CONTACT: C / START"), HudGreen,
