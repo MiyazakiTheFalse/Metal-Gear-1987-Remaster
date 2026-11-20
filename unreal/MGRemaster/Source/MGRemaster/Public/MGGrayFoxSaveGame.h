@@ -72,6 +72,13 @@ public:
     bool bKidDefeated = false;
     UPROPERTY(SaveGame)
     bool bParachuteTaken = false;
+    UPROPERTY(SaveGame) bool bRoofActive = false;
+    UPROPERTY(SaveGame) bool bHindDefeated = false;
+    UPROPERTY(SaveGame) int32 HindHitsRemaining = 3;
+    UPROPERTY(SaveGame) int32 RoofGrenadesRemaining = 6;
+    UPROPERTY(SaveGame) int32 HindPhase = 0;
+    UPROPERTY(SaveGame) float HindPhaseTime = 2.5f;
+    UPROPERTY(SaveGame) float HindTravelTime = 0.f;
     // Retain original guard positions AFTER the player drags them away from
     // patrol lanes. IDs map to placed 1995 actors, never array enumeration.
     UPROPERTY(SaveGame)
