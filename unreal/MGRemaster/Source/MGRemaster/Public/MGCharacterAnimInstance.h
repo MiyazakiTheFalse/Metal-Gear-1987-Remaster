@@ -3,6 +3,17 @@
 #include "Animation/AnimInstance.h"
 #include "MGCharacterAnimInstance.generated.h"
 
+UENUM(BlueprintType)
+enum class EMGPerformanceAction : uint8
+{
+    Idle, Travel, Crouch, Prone, Aim, Fire, Melee, WallKnock,
+    Cover, CoverPeek, RadioIdle,
+    GuardNotice, GuardInvestigate, GuardSearch, GuardChallenge,
+    GuardReport, GuardEngage, GuardStrike, Incapacitated,
+    FoxPrisoner, FoxRescued, GunnerSearch, GunnerAim,
+    GunnerVolley, GunnerRecovery, GunnerDefeated
+};
+
 /**
  * Shared data bridge for animation blueprints. Visual state does not modify
  * authoritative AI, health, collision, mission or equipment transactions.
@@ -74,6 +85,31 @@ public:
     bool bIncapacitated = false;
     UPROPERTY(BlueprintReadOnly, Category="MG|Fox")
     bool bRescued = false;
+
+    // Action arbitration is presentation-only. Montages/BlendSpaces may
+    // respond, but never call the native damage/mission transaction from here.
+    UPROPERTY(BlueprintReadOnly, Category="MG|Transitions")
+    EMGPerformanceAction PerformanceAction = EMGPerformanceAction::Idle;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Transitions")
+    EMGPerformanceAction PreviousPerformanceAction = EMGPerformanceAction::Idle;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Transitions")
+    bool bPerformanceActionChanged = false;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Transitions")
+    bool bPresentationInterrupted = false;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Transitions")
+    float PerformanceActionElapsedSeconds = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Transitions")
+    float PerformanceTransitionAlpha = 1.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Transitions")
+    bool bRadioListeningOverlay = false;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Transitions")
+    float RadioListenOverlayAlpha = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Transitions")
+    float ImpactPoseAlpha = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Gunner")
+    float GunnerHealthFraction = 1.f;
+    UFUNCTION(BlueprintImplementableEvent, Category="MG|Transitions")
+    void OnPerformanceActionTransition(EMGPerformanceAction From, EMGPerformanceAction To, bool bInterrupted);
 
 private:
     FVector PreviousLocation = FVector::ZeroVector;
