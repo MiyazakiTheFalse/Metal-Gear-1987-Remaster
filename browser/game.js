@@ -761,6 +761,7 @@ function save(){
  try{
   localStorage.setItem(STORAGE,JSON.stringify({version:8,service:{charge:service.charge,open:service.open,intel:service.intel,kidDown:service.kidDown,parachute:service.parachute},storesOpen,legacyFloorCard,freight:{handgun:world.handgun,box:world.box,freightAmbientHeard:world.freightAmbientHeard,cameraOff:world.cameraOff,foxFollowup:world.foxFollowup,preview:world.preview,hallOpen:world.hallOpen},propertyTag:{state:tag.state,point:tag.point},stage,cardDrop,x:player.x,z:player.z,
    rounds,equippedWeapon,sealedWeapon,recoveredGear,wallHits,health,
+   storySeen:window.MGCharacterStory?.heard()||[],
    bossHP:boss.hp,bossRest:stage>=5?{x:boss.x,z:boss.z,yaw:boss.yaw}:null,
    guardBodies:guards.map((g,i)=>g.knocked&&!g.boss?{
     i,x:g.x,z:g.z,unconscious:g.knockedOut===true}:null).filter(Boolean),
@@ -771,6 +772,7 @@ function load(){
  let data;
  try{data=JSON.parse(localStorage.getItem(STORAGE))}catch(e){return false}
  if(!data||![1,2,3,4,5,6,7,8].includes(data.version)||!Number.isInteger(data.stage))return false;
+ window.MGCharacterStory?.restore(data.storySeen);
  for(const key of ['box','cameraOff','foxFollowup','preview','hallOpen','freightAmbientHeard'])world[key]=data.freight?.[key]===true;
  world.handgun=data.version<7||data.freight?.handgun===true;
  const legacy=data.version<4;
@@ -884,7 +886,23 @@ function activateBreach(wall,crack,scatter=true){
    c:i%4===0?color.rust:color.wall});
 }
 function popup(text,t=2.4){message={text,until:gameTime+t};}
-function say(id){const d=window.MGDialogue?.[id];if(!d)return;dialogueQueue.push({id,...d});}
+function tellCharacterStory(id){
+ const lines=window.MGCharacterStory?.commit(id)||[];
+ if(!lines.length)return;
+ for(const line of lines)dialogueQueue.push({...line});
+ // Story text can be replayed in the archive after restart, but no dialogue
+ // event ever grants equipment or mutates the authoritative mission flags.
+ save();
+}
+function say(id){
+ const d=window.MGDialogue?.[id]||window.MGCharacterStory?.getDialogue(id);
+ if(!d)return;
+ dialogueQueue.push({id,...d});
+ if(id==='capture')tellCharacterStory('P03.capture');
+ else if(id==='breach1')tellCharacterStory('P03.wall1');
+ else if(id==='rescue3')tellCharacterStory('P03.fox');
+ else if(id==='equipment')tellCharacterStory('P04.bag');
+}
 function displayNextDialogue(dt){
  if(message&&gameTime>message.until)message=null;
  const line=dialogueQueue[0];
@@ -1098,7 +1116,7 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
     popup('Card 2 accepted · records stores');return;
    }
    if(exitAction==='take'){
-     progress(6);playCue('card');popup('Card 3 recovered.');return;
+     progress(6);tellCharacterStory('P04.card3');playCue('card');popup('Card 3 recovered.');return;
    }
    if(exitAction==='scan'){
      progress(7);playCue('unlock',exitReader);popup('Card accepted. The shutter is rising.');return;
@@ -1207,11 +1225,15 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
  else if(name==='codec'){
    record('radio');
    if(stage===4&&tag.state==='carried'&&tag.flash>=0&&!dialogueQueue.some(line=>line.id==='tagReply')){
-    say('tagQuestion');say('tagReply');return;
+    say('tagQuestion');say('tagReply');tellCharacterStory('P04.tracker');return;
    }
    if(stage<0&&world.box&&dist(player,bay)<2.8){say('boxCall');return;}
    if(stage<0&&Math.abs(player.x-beamX)<3&&player.z< -1){say('dispatchCall');return;}
-   say(stage<0?'schneider':stage===0?'bigBoss':'continueMission');
+   const mode=stage===0?'cell':stage===2?'rescued':stage>=6?'card3':
+      stage>=4?'gear':null;
+   const personal=mode?window.MGCharacterStory?.radio(mode):null;
+   if(personal)dialogueQueue.push(personal);
+   else say(stage<0?'schneider':stage===0?'bigBoss':'continueMission');
  }
  else if(name==='equipitem'||name==='equipweapon'){equipOpen=name==='equipitem'?'items':'weapons';eqIndex=0;discovery.openedEquip=true;drawEquipment();playCue('menu');}
  else if(name==='equipclose'){if(equipOpen){const slot=inventories[equipOpen][eqIndex];if(equipOpen==='items'&&slot.usable){
@@ -2369,8 +2391,9 @@ function drawEquipment(){const panel=$('equip');panel.style.display=equipOpen?'b
 function setPaused(value,type){paused=!!value;$('pause').style.display='none';$('intel').style.display='none';$('complete').style.display='none';$('missionFail').style.display='none';if(value){if(type==='complete'){$('complete').style.display='flex';paused=true}else if(type==='failed'){$('missionFail').style.display='flex';paused=true}else if(type==='intel'){showIntel()}else{$('pause').style.display='flex'}if(document.pointerLockElement)document.exitPointerLock?.()}else{if(canvas.requestPointerLock)Promise.resolve(canvas.requestPointerLock()).catch(()=>{})}}
 function showIntel(){
  paused=true;$('intel').style.display='flex';$('pause').style.display='none';
- $('intelText').textContent=stage>=2?['rescue3',...(world.foxFollowup?['foxAfter']:[])].map(id=>window.MGDialogue[id].speaker+' — '+window.MGDialogue[id].text).join('  '):
+ const originalIntel=stage>=2?['rescue3',...(world.foxFollowup?['foxAfter']:[])].map(id=>window.MGDialogue[id].speaker+' — '+window.MGDialogue[id].text).join('  '):
  stage>=-1?window.MGDialogue.informant.text:'Find a prisoner who knows where Fox is held.';
+ $('intelText').textContent=originalIntel+'\n\n'+(window.MGCharacterStory?.dossier(stage)||'');
 }
 function start(resume){
  $('intro').style.display='none';showIntro=false;started=true;initAudio();
