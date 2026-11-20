@@ -151,6 +151,7 @@ private:
     void CreatePostCard3Service();
     void CreateConnectiveSpaces();
     void CreateFirstPassVerticality();
+    void CreateSurveillancePosts();
     void CreateZoneLighting();
     void UpdateZoneLighting(float DeltaSeconds);
     void SpawnPerimeterGuards();
