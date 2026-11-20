@@ -2,6 +2,12 @@
 ## Whole-game conversion, boss treatments and current implementation status
 **Updated:** 20 November 2026 · **Canonical anchor:** the original MSX2 game, not NES alterations · **Repository status:** GitHub C++/asset/data source only; *latest branch not UE5.7 compiled or playtested*.
 
+### Whole-game and metagame scope at the current head
+
+The ten major conversion phases are not ten finished missions: **four have partial authored gameplay source and six remain design-only**. Two of eleven significant combat set-pieces have source prototypes (Shoot Gunner and Machinegun Kid). The full original Building 1 is not yet rebuilt; all current maps use compressed prototype topology.
+
+**Title/metagame 20 November pass:** a working browser-source title, selectable New Game/Continue/Briefing/VR/Options, controller and keyboard menu navigation, save-aware confirmation before a new operation, optional 1987-informed character briefing, and eight original animated codec portraits are present in source. These are illustration/prototype quality and do not imply complete PBR character models, shipped music or an Unreal native title. Source + simulated-DOM input checks passed; real browser capture/Unreal engine testing remain mandatory. See [metagame production contract](METAGAME_TITLE_AND_FRONTEND_1995.md).
+
 ### Current paired milestone
 
 Both sources connect the infiltration and prison to the west-lift parachute pickup. Browser regression coverage includes the timed service breach, optional log, Machinegun Kid and reward. The Unreal changes require compilation and a matching PIE run. The prototypes compress the original Building 1 geography. The canonical third-floor box pickup, full roof and Hind D encounter are outstanding. Browser and Unreal Shoot Gunner combat timing, art and checkpoint implementations still differ.
@@ -24,7 +30,7 @@ We are developing **the entire original game** with an MGS-style third-person pr
 | Inventory / transmitter / Card 3 | Confiscation, recovery, planted tracker, Card 2 room and Card 3 | Complete original acquisition progression and all weapon families |
 | Post-Card-3 | Two source-authored sentry dogs, service lane, crawl geometry, optional kennel logs, service charge, relay room, Machinegun Kid prototype and parachute pickup | Dog rig, navigation verification, finished boss rig, production staging and roof traversal |
 | Surveillance CCTV | Two placed, moving analog cameras with physical visibility, acquisition timing, alarm reports, local isolator and gunfire destruction | Camera power now restores at checkpoints. Outstanding work includes polished optical cone/spotlight/audio, monitored camera feed and balance testing |
-| Audio / interface | Source transceiver, state-dependent HUD, optional sounds/voice import contracts | Definitive MGS-quality title sequence, UI motion/style, recorded VO and mix |
+| Audio / interface | Source transceiver, state-dependent HUD, eight original animated identity portraits, browser tactical title, briefing, VR choice, options, save-confirm menu; optional sounds/voice import contracts | Production MGS-quality title cinematics, Unreal-native menu, real character-face rig/render, recorded VO and mix |
 | Later campaign | Entire original item, boss, card and POW sequence is documented | No implemented Hind D/tank/bulldozer/Fire Trooper/TX-11/Coward Duck/TX-55/Big Boss fights yet |
 
 **Meaning of implemented:** authored C++/data and source importers, not a claim of an executable or graphically finished game. The most recent movement/foot/hand IK signals also lack the real AnimBlueprint assets to produce their intended animation.
