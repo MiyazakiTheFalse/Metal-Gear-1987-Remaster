@@ -101,7 +101,16 @@ assert.equal(supplyRestore.game.state.rationWorld,null,'ration prop remains coll
 assert.equal(supplyRestore.game.state.binocularsWorld,null,'binoculars prop remains collected');
 assert.equal(supplyRestore.game.state.card1World,null,'Card 1 prop remains collected');
 assert.equal(supplyRestore.game.state.freight.scouting,false,'camera view resets safely on load');
-console.log('PASS: 1987 truck rewards, inventory, optics, checkpoint persistence and no respawning items.');
+assert.equal(supplyRestore.game.testApplyPlayerDamage(60),true,'test inflicted actual player health loss');
+assert.equal(supplyRestore.game.state.health,40);
+supplyRestore.game.act('equipitem');supplyRestore.game.act('next');supplyRestore.game.act('equipclose');
+assert.equal(supplyRestore.game.state.health,85,'earned ration restores finite health');
+assert.equal(supplyRestore.game.state.rationRemaining,0,'ration is actually consumed');
+const spentRation=boot(supplyRestore.storage);spentRation.button('resume');
+assert.equal(spentRation.game.state.health,85,'healed checkpoint persists');
+assert.equal(spentRation.game.state.rationRemaining,0,'ration is not replenished by loading');
+assert.equal(spentRation.game.state.rationWorld,null,'used ration never respawns');
+console.log('PASS: 1987 truck rewards, optics, finite ration use and checkpoint persistence.');
 
 let run=boot();
 run.button('start');
