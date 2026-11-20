@@ -1804,6 +1804,50 @@ FName AMGGrayFoxMission::GetSnakeStoryPhase() const
     return FName(TEXT("ROOKIE"));
 }
 
+FString AMGGrayFoxMission::GetFoxPatrolListeningCue() const
+{
+    // Optional character conversation provides an honest mechanical payoff.
+    // The lesson is useful only while a real, audible prison patrol is near;
+    // the player never receives guard positions through radar or concrete.
+    if (!bHeardFoxFollowup || !(Flags & MG_FOX_RESCUED) ||
+        (Flags & MG_FOX_LEFT_PRISON) ||
+        FacilitySecurityState == EMGFacilitySecurityState::Alert ||
+        FacilitySecurityState == EMGFacilitySecurityState::Evasion ||
+        !IsValid(FoxProxy) || !GetWorld())
+        return FString();
+    const AMGPlayerCharacter* Player =
+        Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+    if (!IsValid(Player) ||
+        FVector::Dist2D(Player->GetActorLocation(),
+                        FoxProxy->GetActorLocation()) > 1350.f)
+        return FString();
+    for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
+    {
+        const AMGGuardActor* Guard = *It;
+        if (!IsValid(Guard) || Guard->IsIncapacitated() ||
+            Guard->GetAwarenessState() >= 2 ||
+            !Guard->GetBodyPersistenceId().ToString().StartsWith(TEXT("P03_Prison")))
+            continue;
+        const float Range = FVector::Dist2D(
+            Guard->GetActorLocation(), Player->GetActorLocation());
+        if (Range > 660.f) continue;
+        FCollisionQueryParams SoundSight(SCENE_QUERY_STAT(MGFoxBootAudibility),
+            false, Guard);
+        SoundSight.AddIgnoredActor(Player);
+        const bool bWallInWay = GetWorld()->LineTraceTestByChannel(
+            Player->GetActorLocation() + FVector(0.f,0.f,65.f),
+            Guard->GetActorLocation() + FVector(0.f,0.f,48.f),
+            ECC_Visibility, SoundSight);
+        if (bWallInWay && Range > 310.f) continue;
+        // Observe actual per-guard movement speed, not source-scripted
+        // positions or a fabricated universal 12-second patrol timer.
+        if (Guard->GetActualGroundSpeedCmPerSec() < 21.f)
+            return TEXT("FOX'S LISTENING: BOOTS PAUSED — A TURN MAY BE COMING.");
+        return TEXT("FOX'S LISTENING: BOOTS MOVING AT REGULAR PACE.");
+    }
+    return FString();
+}
+
 FString AMGGrayFoxMission::GetCharacterStoryText() const
 {
     // These are short original relationship notes, not a narrated retelling.
