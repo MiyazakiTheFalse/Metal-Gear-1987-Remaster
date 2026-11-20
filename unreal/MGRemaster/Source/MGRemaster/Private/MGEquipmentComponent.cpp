@@ -10,9 +10,18 @@ void UMGEquipmentComponent::BeginPlay()
     Super::BeginPlay();
     Weapons = {
         {FName(TEXT("NONE")), TEXT("NO WEAPON"), 0, true, false},
-        {FName(TEXT("STUN")), TEXT("STUN PISTOL [TEST]"), 8, true, false},
-        {FName(TEXT("HANDGUN")), TEXT("HANDGUN [SLICE PROXY]"), 24, true, false}
+        // Existing prison-slice carryover (not yet earned in the expanded
+        // first-floor mission). This must later become an actual pickup.
+        {FName(TEXT("HANDGUN")), TEXT("HANDGUN [PRE-PRISON CARRYOVER]"), 24, true, false}
     };
+#if !UE_BUILD_SHIPPING
+    // Separate developer sandbox only. The 1987 MSX2 never awards a stun
+    // pistol; a normal playthrough, packaged build and default PIE session
+    // must never display or equip one.
+    if (bEnableNonCanonicalTestWeapons)
+        Weapons.Add({FName(TEXT("STUN")), TEXT("STUN PISTOL [DEV ONLY]"),
+                     8, true, false});
+#endif
     Items = {
         {FName(TEXT("NONE")), TEXT("NO ITEM"), 0, true, false},
         {FName(TEXT("RATION")), TEXT("RATION [TEST]"), 1, true, true},
