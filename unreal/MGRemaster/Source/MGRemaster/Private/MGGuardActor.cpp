@@ -121,6 +121,14 @@ void AMGGuardActor::BeginPlay()
             SecuritySidearm->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
             SecuritySidearm->SetVisibility(SecuritySidearm->GetStaticMesh() != nullptr);
         }
+        else
+        {
+            // A malformed imported Skeleton must not create invisible gun
+            // fire. Keep the source proxy attached at the actor chest until
+            // the rig's hand_R bone or weapon_r socket is repaired in Editor.
+            SecuritySidearm->SetVisibility(SecuritySidearm->GetStaticMesh() != nullptr);
+            UE_LOG(LogTemp, Warning, TEXT("MG guard %s: skinned art lacks hand_R/weapon_r; using actor-mounted weapon proxy"), *GetName());
+        }
     }
     else
     {
