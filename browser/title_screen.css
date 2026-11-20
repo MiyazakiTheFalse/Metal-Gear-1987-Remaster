@@ -125,6 +125,27 @@
  #intro .mg-title__action small{font-size:8px}
  .mg-title__chapter{font-size:10px}
 }
+#intro .mg-title__confirm {
+ position:absolute;inset:0;z-index:10;display:flex;justify-content:center;
+ align-items:center;padding:24px;background:#01080beD;backdrop-filter:blur(6px)
+}
+#intro .mg-title__confirm[hidden]{display:none}
+.mg-title__confirm-panel {
+ width:min(510px,96vw);padding:clamp(20px,4vw,39px);
+ border:1px solid #8db9a8;border-top:3px solid #c9b88a;
+ background:linear-gradient(150deg,#112729,#071215);
+ box-shadow:0 24px 70px #000b;
+}
+.mg-title__confirm-panel h2{font:800 clamp(20px,3vw,28px)/1.16
+ ui-monospace,monospace;letter-spacing:.015em;margin-top:18px}
+.mg-title__confirm-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:25px}
+#intro .mg-title__confirm-actions button:focus-visible{
+ outline:3px solid #a9dbb4;outline-offset:3px
+}
+#intro .mg-title__confirm-actions button[data-selected="true"]{
+ box-shadow:0 0 0 2px #e6e8b1
+}
+
 /* Briefing, pause and records belong to the same tactical UI family. */
 #briefing .mg-briefing-panel {
   width:min(760px,96vw);max-height:90dvh;overflow-y:auto;
