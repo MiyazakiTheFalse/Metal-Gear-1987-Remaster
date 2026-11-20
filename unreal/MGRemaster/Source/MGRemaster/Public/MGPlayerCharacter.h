@@ -120,6 +120,14 @@ private:
     UPROPERTY(Transient) USoundBase* CloseRadioSfx = nullptr;
     UPROPERTY(Transient) USoundBase* SignalRadioSfx = nullptr;
     UPROPERTY(Transient) UAudioComponent* ActiveIncomingRing = nullptr;
+    UPROPERTY(Transient) UAudioComponent* ActiveRadioDialogue = nullptr;
+    FString CurrentVoiceScene;
+    int32 NextVoiceLine = 0;
+    int32 RevealedRadioLines = 0;
+    float VoiceLineAdvanceDelay = 0.f;
+    void StopRadioDialogue();
+    void UpdateRadioDialogue(float DeltaSeconds);
+    float PlayRadioDialogueLine(const FString& SceneKey, int32 Index, const FString& FullLine);
     float IncomingConnectionDelay = -1.f;
     float RadioTranscriptSeconds = 0.f;
     bool bStagedOpeningCall = false;
