@@ -20,7 +20,8 @@ enum class EMGGuardRole : uint8
 UENUM(BlueprintType)
 enum class EMGGuardPosture : uint8
 {
-    Patrol, Notice, Investigate, Search, Challenge, Report, Engage, Strike, Incapacitated
+    Patrol, Notice, Investigate, Search, Challenge, Report, Engage, Strike, Incapacitated,
+    SidearmAim, SidearmFire, SidearmReload
 };
 
 // Local security belief, distinct from the guard's assigned duty and the
@@ -102,6 +103,24 @@ public:
     bool IsInvestigatingNoise() const { return DistractionPhase != EDistractionPhase::None; }
     UFUNCTION(BlueprintPure, Category="Character|Art")
     bool HasAuthoredCharacterArt() const;
+    UFUNCTION(BlueprintPure, Category="Security|Weapon")
+    bool IsReloadingSidearm() const { return bSidearmReloading; }
+    UFUNCTION(BlueprintPure, Category="Security|Weapon")
+    bool IsPreparingSidearmShot() const { return SidearmWindupSeconds > 0.f; }
+    UFUNCTION(BlueprintPure, Category="Security|Weapon")
+    int32 GetSidearmRounds() const { return SidearmRounds; }
+    UFUNCTION(BlueprintPure, Category="Security|Weapon")
+    int32 GetRemainingSidearmMagazines() const { return SpareSidearmMagazines; }
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Weapon")
+    void OnSidearmAimStarted();
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Weapon")
+    void OnSidearmFired(int32 RoundsRemaining, bool bPlayerHit);
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Weapon")
+    void OnSidearmReloadStarted();
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Weapon")
+    void OnSidearmReloadFinished();
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Weapon")
+    void OnSidearmReloadInterrupted();
 
 private:
     enum class EDistractionPhase : uint8 { None, React, Approach, Search, Return };
@@ -122,6 +141,22 @@ private:
 
     UPROPERTY(VisibleAnywhere, Category="Character|Art")
     USkeletalMeshComponent* CharacterMesh;
+    UPROPERTY(VisibleAnywhere, Category="Security|Weapon")
+    UStaticMeshComponent* SecuritySidearm;
+    // 1987 guards shoot, but the 3D weapon model, magazine capacity and reload
+    // interval are reversible art/balance hypotheses, NOT exact MSX2 stats.
+    UPROPERTY(EditAnywhere, Category="Security|Weapon", meta=(ClampMin="4", ClampMax="16"))
+    int32 SidearmMagazineCapacity = 8;
+    UPROPERTY(EditAnywhere, Category="Security|Weapon", meta=(ClampMin="0.8", ClampMax="3.0"))
+    float SidearmReloadDuration = 1.65f;
+    int32 SidearmRounds = 8;
+    int32 SpareSidearmMagazines = 3;
+    bool bSidearmReloading = false;
+    float SidearmReloadSeconds = 0.f;
+    float SidearmWindupSeconds = 0.f;
+    float SidearmShotCooldown = 0.f;
+    bool bSidearmAiming = false;
+    float SidearmMuzzleFlashRemaining = 0.f;
 
     UPROPERTY(EditAnywhere, Category="Security|Doctrine")
     EMGGuardRole Role = EMGGuardRole::Patrol;
