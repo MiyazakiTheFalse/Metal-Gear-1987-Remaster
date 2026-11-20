@@ -38,7 +38,11 @@ void UMGEquipmentComponent::BeginPlay()
         // This is placed in Snake's actual inventory when his gear is returned.
         {FName(TEXT("TRANSMITTER")), TEXT("UNKNOWN TRANSMITTER"), 0, false, false},
         {FName(TEXT("PARACHUTE")), TEXT("PARACHUTE"), 0, false, false},
-        {FName(TEXT("BOX")), TEXT("CARDBOARD BOX"), 0, false, false},
+        // Remake-only *borrowed* freight disguise. Lost at custody.
+        {FName(TEXT("FREIGHT_CARTON")), TEXT("FREIGHT CARTON [TEMPORARY]"), 0, false, false},
+        // Authentic 1987 box is a distinct, still-unearned item behind a
+        // Card 2 door on Building 1 floor 3. Do not place it in this yard.
+        {FName(TEXT("BOX")), TEXT("CARDBOARD BOX [F3 / CARD 2]"), 0, false, false},
         {FName(TEXT("CIGARETTES")), TEXT("CIGARETTES"), 1, true, false}
     };
     // A captured Snake cannot use pre-capture weapons or items. Test entries are
@@ -236,6 +240,24 @@ bool UMGEquipmentComponent::AwardItem(FName Id, int32 Count)
         {
             E.bOwned = true;
             E.Quantity = FMath::Clamp(E.Quantity + Count, 0, 999);
+            return true;
+        }
+    return false;
+}
+bool UMGEquipmentComponent::RevokeTemporaryItem(FName Id)
+{
+    // Not a general inventory wipe: only the borrowed, pre-capture freight
+    // carton is expendable. Authentic Card 2 and BOX stay story-owned.
+    if (Id != FName(TEXT("FREIGHT_CARTON"))) return false;
+    for (FMGEquipmentEntry& E : Items)
+        if (E.Id == Id && E.bOwned)
+        {
+            E.bOwned = false;
+            E.Quantity = 0;
+            if (Items.IsValidIndex(EquippedItem) && Items[EquippedItem].Id == Id)
+                EquippedItem = 0;
+            if (Items.IsValidIndex(ItemSelection) && Items[ItemSelection].Id == Id)
+                ItemSelection = 0;
             return true;
         }
     return false;
