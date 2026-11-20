@@ -1,0 +1,675 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-11-20",
+  "canonAnchor": "1987 Metal Gear MSX2 edition; character roles and beat/event order authority. Creative original dialogue/reactions are openly marked interpretive.",
+  "thesis": "Plot is what Snake must do. Story is how the mission changes him and his human relationships. Neither should progress by background timer or gameplay proximity without earned proof.",
+  "references": [
+    "https://thesnakesoup.org/metal-gear-msx-walkthrough/",
+    "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/65155",
+    "https://www.youtube.com/watch?v=ehlAMTh42Ko"
+  ],
+  "doctrine": [
+    "No unearned privileged knowledge, secrets or dialogue from future timelines",
+    "Every personal moment is anchored to a witnessed gameplay fact or an optional player-initiated radio call",
+    "Source plot flags and player outcomes are authoritative; dialogue/cutscenes never award an item or silently win a boss",
+    "Contradicting a character requires a motivated, observed event, not forced cynicism",
+    "Snake has agency through posture, silence, action and choice of contact; not all development is spoken aloud",
+    "Keep quieter scenes between intense threats; give players time to absorb changing relationships",
+    "Later-written subtext must never turn the original finale into an opening spoiler",
+    "Named cast require recognisable 1995 costume/face, real rigs, matched voice and expressions before production signoff"
+  ],
+  "cast": [
+    {
+      "id": "snake",
+      "name": "Solid Snake",
+      "canonicalPremise": "Young first-operation FOXHOUND field agent; not the scarred veteran of later games",
+      "personalArc": {
+        "start": "Obey the mission and prove he belongs",
+        "pressure": "Stop treating command as a substitute for his own evidence",
+        "payoff": "Makes earned decisions, protects people he can realistically help, faces the final truth"
+      },
+      "actingAndWriting": "Character grows through observation, quiet competence, and choices performed by player; avoid exposition that tells him he is legendary",
+      "realisticHeadAndBodyModel": "not_imported",
+      "authoredVoice": "not_recorded",
+      "facialRig": "not_imported"
+    },
+    {
+      "id": "bigBoss",
+      "name": "Big Boss",
+      "canonicalPremise": "FOXHOUND commander; experienced mentor as he appears to rookie Snake in 1995",
+      "personalArc": {
+        "start": "Bring the new agent home with the objective completed",
+        "pressure": "Control what Snake learns about Outer Heaven",
+        "payoff": "His command relationship changes meaning only after the final earned revelation"
+      },
+      "actingAndWriting": "Never early-reveal mastermind role, Venom identity, nor claim every early clue proves guilt",
+      "realisticHeadAndBodyModel": "not_imported",
+      "authoredVoice": "not_recorded",
+      "facialRig": "not_imported"
+    },
+    {
+      "id": "grayFox",
+      "name": "Gray Fox",
+      "canonicalPremise": "Experienced FOXHOUND operative and early prisoner; wounded and physically exhausted",
+      "personalArc": {
+        "start": "Survive captivity and warn a younger comrade of what he saw",
+        "pressure": "Accept that he cannot finish the mission alone",
+        "payoff": "Snake has gained a human peer, not merely a walking exposition terminal"
+      },
+      "actingAndWriting": "Avoid replacing all later missions with a permanent Gray Fox escort or invoking future cyborg imagery",
+      "realisticHeadAndBodyModel": "not_imported",
+      "authoredVoice": "not_recorded",
+      "facialRig": "not_imported"
+    },
+    {
+      "id": "schneider",
+      "name": "Kyle Schneider",
+      "canonicalPremise": "Resistance operative familiar with some Outer Heaven construction",
+      "personalArc": {
+        "start": "Help Snake navigate changes within the fortress",
+        "pressure": "Know that old plans may now be unreliable; need Snake to validate what is real",
+        "payoff": "Shared evidence becomes mutual trust, not an omniscient architectural satellite"
+      },
+      "actingAndWriting": "No knowledge of unvisited prison secrets; earned later loss handled only when source-valid",
+      "realisticHeadAndBodyModel": "not_imported",
+      "authoredVoice": "not_recorded",
+      "facialRig": "not_imported"
+    },
+    {
+      "id": "diane",
+      "name": "Diane",
+      "canonicalPremise": "Resistance tactical ally and former singer",
+      "personalArc": {
+        "start": "Keep Snake alive using informed combat advice",
+        "pressure": "Build trust after Snake requests help instead of treating her as a boss spoiler dispenser",
+        "payoff": "Technical expertise with human vulnerability and personality, not just tutorial barks"
+      },
+      "actingAndWriting": "Contact only after 120.33 acquired from the correct POW; do not invent unearned private history",
+      "realisticHeadAndBodyModel": "not_imported",
+      "authoredVoice": "not_recorded",
+      "facialRig": "not_imported"
+    },
+    {
+      "id": "jennifer",
+      "name": "Jennifer",
+      "canonicalPremise": "Resistance insider with a personal stake in the hostages",
+      "personalArc": {
+        "start": "Keep her cover while helping Snake get supplies",
+        "pressure": "Personal concern, especially for her brother, pressures the limits of tactical radio",
+        "payoff": "Agent-to-agent relationship becomes reciprocal through demonstrated rescue actions"
+      },
+      "actingAndWriting": "Her brother's fate must rely on genuine POW save and original gated knowledge",
+      "realisticHeadAndBodyModel": "not_imported",
+      "authoredVoice": "not_recorded",
+      "facialRig": "not_imported"
+    },
+    {
+      "id": "madnar",
+      "name": "Dr. Pettrovich Madnar",
+      "canonicalPremise": "Scientist coerced into work on Metal Gear",
+      "personalArc": {
+        "start": "Protect Ellen while disclosing as little as possible",
+        "pressure": "Snake needs the sabotage intelligence that Madnar will not simply volunteer",
+        "payoff": "Ellen's actual rescue changes his trust and willingness to help"
+      },
+      "actingAndWriting": "No false earlier full TX-55 pattern and no invented betrayal arc",
+      "realisticHeadAndBodyModel": "not_imported",
+      "authoredVoice": "not_recorded",
+      "facialRig": "not_imported"
+    },
+    {
+      "id": "ellen",
+      "name": "Ellen Pettrovich",
+      "canonicalPremise": "Captive civilian, not an inventory switch",
+      "personalArc": {
+        "start": "Survive detention and be reunited",
+        "pressure": "Retain an individual perspective rather than merely validating the scientist",
+        "payoff": "Survival matters through observable changed dialogue and ending consequence"
+      },
+      "actingAndWriting": "Only credited after she is physically freed; no false voice communications",
+      "realisticHeadAndBodyModel": "not_imported",
+      "authoredVoice": "not_recorded",
+      "facialRig": "not_imported"
+    },
+    {
+      "id": "resistancePOWs",
+      "name": "Prisoners of war",
+      "canonicalPremise": "Many different captives with source-specific intelligence",
+      "personalArc": {
+        "start": "Survive and provide firsthand local clues",
+        "pressure": "Snake's rescue actions and resources change what they tell him",
+        "payoff": "The human cost of infiltration is visible beyond boss fights"
+      },
+      "actingAndWriting": "One generic voice and model is unacceptable as final art",
+      "realisticHeadAndBodyModel": "not_imported",
+      "authoredVoice": "not_recorded",
+      "facialRig": "not_imported"
+    }
+  ],
+  "relationshipBeats": [
+    {
+      "trigger": "P01.brief",
+      "protagonist": "snake",
+      "partner": "bigBoss",
+      "key": "FORMAL_ORDER",
+      "delivery": "briefing",
+      "purpose": "Big Boss sets a narrow objective; Snake answers precisely but asks one sharp question about uncertainty",
+      "knowledgeTags": [
+        "KNOW_MISSION"
+      ],
+      "relationshipTension": "uncertain rookie / authority",
+      "limit": "No final reveal, no plot change",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P01.freight",
+      "protagonist": "snake",
+      "partner": "schneider",
+      "key": "WORKER_LIFE",
+      "delivery": "optional_world",
+      "purpose": "A mundane logistics detail reminds Snake that Outer Heaven has routines and ordinary workers, not only targets",
+      "knowledgeTags": [
+        "SEEN_WORKERS"
+      ],
+      "relationshipTension": "curiosity",
+      "limit": "Optional no player-control loss",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P02.pow3",
+      "protagonist": "snake",
+      "partner": "diane",
+      "key": "PERSON_NOT_TUTORIAL",
+      "delivery": "optional_codec",
+      "purpose": "After acquiring Diane's frequency, ask what she needs to assess an unfamiliar boss; she refuses to guess without evidence",
+      "knowledgeTags": [
+        "KNOW_DIANE"
+      ],
+      "relationshipTension": "mutual expertise",
+      "limit": "Original frequency earned on-screen",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P02.return1",
+      "protagonist": "snake",
+      "partner": "schneider",
+      "key": "CARTOGRAPHY_TRUST",
+      "delivery": "optional_codec",
+      "purpose": "Snake's firsthand account corrects Schneider's outdated map; he updates only that corridor",
+      "knowledgeTags": [
+        "MAP_REVISED_B1"
+      ],
+      "relationshipTension": "shared evidence",
+      "limit": "No omniscient map reveals",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P03.capture",
+      "protagonist": "snake",
+      "partner": "bigBoss",
+      "key": "COMMAND_OUT_OF_RANGE",
+      "delivery": "cinematic",
+      "purpose": "Sudden isolation makes the comforting command voice an absence, not proof of betrayal",
+      "knowledgeTags": [
+        "CAPTURED"
+      ],
+      "relationshipTension": "distance from command",
+      "limit": "Take equipment transaction before cut",
+      "sourceState": "first_pass_source_candidate",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P03.wall1",
+      "protagonist": "snake",
+      "partner": "schneider",
+      "key": "LISTEN_NOT_TELL",
+      "delivery": "optional_codec",
+      "purpose": "Snake tests Schneider's incomplete architectural knowledge against a hollow wall",
+      "knowledgeTags": [
+        "FOUND_RUSHED_REPAIR"
+      ],
+      "relationshipTension": "mutual uncertainty",
+      "limit": "Guide never gives exact wall coordinate",
+      "sourceState": "first_pass_source_candidate",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P03.fox",
+      "protagonist": "snake",
+      "partner": "grayFox",
+      "key": "RESCUE_FOX_PEER",
+      "delivery": "cinematic",
+      "purpose": "Fox doubts anyone would come; Snake answers by physically reaching him, earning wary professional respect",
+      "knowledgeTags": [
+        "FOX_RESCUED",
+        "KNOW_METAL_GEAR_NUCLEAR"
+      ],
+      "relationshipTension": "shared trauma / respect",
+      "limit": "Only Fox knows what he actually saw",
+      "sourceState": "first_pass_source_candidate",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P03.prison",
+      "protagonist": "snake",
+      "partner": "grayFox",
+      "key": "FOX_CAN_STILL_HELP",
+      "delivery": "optional_world",
+      "purpose": "Fox identifies a guard's work rhythm, not enemy positions through walls",
+      "knowledgeTags": [
+        "FOX_OBSERVATION"
+      ],
+      "relationshipTension": "earned peer trust",
+      "limit": "Never a supernatural radar",
+      "sourceState": "first_pass_source_candidate",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P04.introduce",
+      "protagonist": "snake",
+      "partner": "grayFox",
+      "key": "COMBAT_WITHOUT_THE_WHEEL",
+      "delivery": "short_cinematic",
+      "purpose": "Fox's exhaustion and Snake's observation determine how they face a prison boss",
+      "knowledgeTags": [
+        "KNOW_SHOTMAKER"
+      ],
+      "relationshipTension": "silent teamwork",
+      "limit": "No forced win or boss health cheat",
+      "sourceState": "first_pass_source_candidate",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P04.bag",
+      "protagonist": "snake",
+      "partner": "bigBoss",
+      "key": "PERSONAL_EFFECTS",
+      "delivery": "optional_codec",
+      "purpose": "Recovered gear feels different when Snake realises it has been handled and labelled",
+      "knowledgeTags": [
+        "GEAR_RECOVERED"
+      ],
+      "relationshipTension": "cautious professionalism",
+      "limit": "No unearned certainty about who tampered with it",
+      "sourceState": "first_pass_source_candidate",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P04.tracker",
+      "protagonist": "snake",
+      "partner": "bigBoss",
+      "key": "TRANSMITTER_UNEASE",
+      "delivery": "optional_codec",
+      "purpose": "Snake asks why his gear is transmitting. Command offers a plausible incomplete answer, not a confession",
+      "knowledgeTags": [
+        "TRACKER_DISCOVERED"
+      ],
+      "relationshipTension": "first independent judgment",
+      "limit": "No automatic mastermind knowledge",
+      "sourceState": "first_pass_source_candidate",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P04.card3",
+      "protagonist": "snake",
+      "partner": "schneider",
+      "key": "CLEARANCE_RECONTEXTUALIZED",
+      "delivery": "optional_codec",
+      "purpose": "Different doors mean new choices; Schneider cautions that floor plans and access permissions disagree",
+      "knowledgeTags": [
+        "CARD3"
+      ],
+      "relationshipTension": "confidence in own observation",
+      "limit": "No plan-perfect shortcut",
+      "sourceState": "first_pass_source_candidate",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P05.dog",
+      "protagonist": "snake",
+      "partner": "grayFox",
+      "key": "COST_OF_CONTACT",
+      "delivery": "optional_world",
+      "purpose": "Fox notices guard/dog routine at a distance while Snake controls a route",
+      "knowledgeTags": [
+        "DOG_SECTOR"
+      ],
+      "relationshipTension": "pragmatic solidarity",
+      "limit": "Fox absent after original source departure where appropriate",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P05.kid",
+      "protagonist": "snake",
+      "partner": "diane",
+      "key": "ASK_FOR_WEAKNESS",
+      "delivery": "optional_codec",
+      "purpose": "Diane's advice on suppressive fire is cautious and based on audible reload rhythm",
+      "knowledgeTags": [
+        "KID_ENCOUNTER"
+      ],
+      "relationshipTension": "trusted specialist",
+      "limit": "Only if Diane has been contacted legitimately",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P05.parachute",
+      "protagonist": "snake",
+      "partner": "bigBoss",
+      "key": "ROOF_ON_OWN_TERMS",
+      "delivery": "optional_codec",
+      "purpose": "Command gives a broad instruction; Snake chooses the safe route from earned reconnaissance",
+      "knowledgeTags": [
+        "PARACHUTE"
+      ],
+      "relationshipTension": "initiative",
+      "limit": "Do not hint at future Boss reveal",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P06.hind",
+      "protagonist": "snake",
+      "partner": "diane",
+      "key": "AIR_THREAT",
+      "delivery": "optional_codec",
+      "purpose": "Diane warns about rotor wash/cover without telling Snake to use equipment he cannot own yet",
+      "knowledgeTags": [
+        "HIND_SIGHTED"
+      ],
+      "relationshipTension": "tactical trust",
+      "limit": "Correct original source weakness gate",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P06.returnTruck",
+      "protagonist": "snake",
+      "partner": "schneider",
+      "key": "REVISIT_A_CHANGED_WORLD",
+      "delivery": "optional_codec",
+      "purpose": "Previously learned loading schedules now help Snake choose a return trip",
+      "knowledgeTags": [
+        "REVISITED_B1"
+      ],
+      "relationshipTension": "reciprocal knowledge",
+      "limit": "Prior disabled devices and bodies persist",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P07.fire",
+      "protagonist": "snake",
+      "partner": "diane",
+      "key": "DANGER_HAS_COST",
+      "delivery": "optional_codec",
+      "purpose": "Diane's tactical voice briefly cracks after witnessing the stakes, then recovers",
+      "knowledgeTags": [
+        "FIRE_TROOPER"
+      ],
+      "relationshipTension": "emotion without melodrama",
+      "limit": "No invented intimate romance",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P08.jennifer",
+      "protagonist": "snake",
+      "partner": "jennifer",
+      "key": "INSIDER_RULES",
+      "delivery": "optional_codec",
+      "purpose": "Jennifer tests whether Snake is careful enough to keep her inside position undiscovered",
+      "knowledgeTags": [
+        "JENNIFER_CONTACT"
+      ],
+      "relationshipTension": "earned alliance",
+      "limit": "Only after original POW frequency / rank gate",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P08.madnar",
+      "protagonist": "snake",
+      "partner": "madnar",
+      "key": "DEMAND_EVIDENCE",
+      "delivery": "cinematic",
+      "purpose": "Madnar fears for Ellen; Snake cannot obtain the pattern until he does the work",
+      "knowledgeTags": [
+        "MADNAR_MET",
+        "ELLEN_MISSING"
+      ],
+      "relationshipTension": "ethical friction",
+      "limit": "No invented secret knowledge",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P08.tx11",
+      "protagonist": "snake",
+      "partner": "jennifer",
+      "key": "HELP_WITH_LIMITS",
+      "delivery": "optional_codec",
+      "purpose": "Insider information and robot movement provide alternatives to taking lethal damage",
+      "knowledgeTags": [
+        "TX11_DEFEATED"
+      ],
+      "relationshipTension": "trust in action",
+      "limit": "No free weapon awards",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P09.ellen",
+      "protagonist": "snake",
+      "partner": "ellen",
+      "key": "PERSON_NOT_ACCESS_CARD",
+      "delivery": "cinematic",
+      "purpose": "Ellen reacts as an individual with agency; rescue is emotionally complete before any reward",
+      "knowledgeTags": [
+        "ELLEN_FREED"
+      ],
+      "relationshipTension": "moral responsibility",
+      "limit": "Not a hostage-as-key joke",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P09.madnarReturn",
+      "protagonist": "snake",
+      "partner": "madnar",
+      "key": "EARNED_PATTERN",
+      "delivery": "cinematic",
+      "purpose": "Madnar's resistance yields to direct evidence Ellen is alive; he provides the original sequence",
+      "knowledgeTags": [
+        "TX55_PATTERN_KNOWN"
+      ],
+      "relationshipTension": "reciprocal trust",
+      "limit": "Exact 16-charge order source-verified",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P09.duck",
+      "protagonist": "snake",
+      "partner": "jennifer",
+      "key": "BROTHER_NOT_AN_OBJECTIVE",
+      "delivery": "cinematic",
+      "purpose": "The brother rescue pays off a long-established human fear, not a last-minute fetch quest",
+      "knowledgeTags": [
+        "JENNIFER_BROTHER"
+      ],
+      "relationshipTension": "personal stake",
+      "limit": "Three hostages must be protected",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P10.powTruth",
+      "protagonist": "snake",
+      "partner": "resistancePOWs",
+      "key": "MISSING_CONTEXT",
+      "delivery": "cinematic",
+      "purpose": "A rescued prisoner makes earlier commands newly disturbing, without retconning prior knowledge",
+      "knowledgeTags": [
+        "KNOW_COMMANDER_TRUTH"
+      ],
+      "relationshipTension": "independent evidence",
+      "limit": "Only now begin final revelation",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P10.betrayal",
+      "protagonist": "snake",
+      "partner": "bigBoss",
+      "key": "MENTOR_BECOMES_TARGET",
+      "delivery": "cinematic",
+      "purpose": "The familiar codec timbre becomes personally unsettling, not merely a boss announcement",
+      "knowledgeTags": [
+        "KNOW_BIG_BOSS_BETRAYAL"
+      ],
+      "relationshipTension": "trust broken",
+      "limit": "Must follow truth beat and original narrative",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P10.tx55",
+      "protagonist": "snake",
+      "partner": "madnar",
+      "key": "STAND_BY_EVIDENCE",
+      "delivery": "cinematic",
+      "purpose": "Destroying Metal Gear validates earned science, courage and deliberate preparation",
+      "knowledgeTags": [
+        "TX55_DESTROYED"
+      ],
+      "relationshipTension": "applied knowledge",
+      "limit": "Full original 16-charge mechanics",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P10.finale",
+      "protagonist": "snake",
+      "partner": "bigBoss",
+      "key": "FINAL_ARGUMENT",
+      "delivery": "cinematic",
+      "purpose": "Two actors with shared history clash; Snake's actions carry the answer, not a monologue",
+      "knowledgeTags": [
+        "FINAL_ENGAGEMENT"
+      ],
+      "relationshipTension": "resolve",
+      "limit": "Do not import later game's future events",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    },
+    {
+      "trigger": "P10.credits",
+      "protagonist": "snake",
+      "partner": "grayFox",
+      "key": "WHAT_CAME_HOME",
+      "delivery": "ending",
+      "purpose": "A brief quiet aftermath considers the humans Snake met and helped, without narrating future lore",
+      "knowledgeTags": [
+        "STORY_COMPLETE"
+      ],
+      "relationshipTension": "transformed agency",
+      "limit": "Original ending remains authoritative",
+      "sourceState": "planned",
+      "gatedBy": "authoritative gameplay beat only",
+      "skipDoesNotAffectGameplay": true
+    }
+  ],
+  "phaseStoryQuestion": [
+    {
+      "phase": "P01",
+      "question": "Can Snake make an independent observation while carrying a precise order?",
+      "pacing": "briefing → first pressure → ordinary human logistics"
+    },
+    {
+      "phase": "P02",
+      "question": "Does the fortress correspond to what trusted contacts think they know?",
+      "pacing": "hazard → prisoner voices → practical box relief → mercenaries"
+    },
+    {
+      "phase": "P03",
+      "question": "Can Snake trust himself with no kit and no voice of command?",
+      "pacing": "capture silence → curiosity → Fox companionship → escape"
+    },
+    {
+      "phase": "P04",
+      "question": "Is the equipment he trusted itself reliable?",
+      "pacing": "boss warning → gear regained → suspicious transmitter → new clearance"
+    },
+    {
+      "phase": "P05",
+      "question": "What does rescuing a teammate oblige Snake to do next?",
+      "pacing": "dog tension → architecture puzzle → focused combat → breathing room"
+    },
+    {
+      "phase": "P06",
+      "question": "Can independent observation become decisive under a much larger enemy?",
+      "pacing": "roof scale reveal → tactical adaptation → landing → tank"
+    },
+    {
+      "phase": "P07",
+      "question": "Who is helping, and who will carry the consequences of this raid?",
+      "pacing": "machine danger → human contact → fire confrontation"
+    },
+    {
+      "phase": "P08",
+      "question": "What does Snake owe the civilians whose lives are being used as leverage?",
+      "pacing": "insider contact → doctor confrontation → two-robot threat"
+    },
+    {
+      "phase": "P09",
+      "question": "Will Snake expend time and risk to fulfil a promise?",
+      "pacing": "long backtrack → Ellen quiet close-up → return to Madnar → hostage boss"
+    },
+    {
+      "phase": "P10",
+      "question": "What does the rookie do when the person he trusted is the threat?",
+      "pacing": "final prisoner truth → silent preparation → TX-55 → confrontation → escape"
+    }
+  ],
+  "implementation": {
+    "allRelationalBeatsMappedToCanonicalGameplay": true,
+    "sourceEngineActedScenes": 0,
+    "castWithApprovedRealisticRig": 0,
+    "productionCompleteScenes": 0
+  }
+}
