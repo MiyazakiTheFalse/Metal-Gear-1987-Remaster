@@ -948,6 +948,15 @@ FName AMGGrayFoxMission::GetActiveStoryCinematic() const
 void AMGGrayFoxMission::SkipStoryCinematic()
 {
     if (IsValid(StoryCamera)) StoryCamera->SkipScene();
+    if (bCapturePending)
+    {
+        bCaptureSkipped = true;
+        bCapturePending = false;
+        AMGPlayerCharacter* Pending = PendingCapturePlayer.Get();
+        PendingCapturePlayer.Reset();
+        if (IsValid(Pending))
+            ApplyAction(MG_FOX_CAPTURE, Pending);
+    }
 }
 
 void AMGGrayFoxMission::NotifyBodyRelocated(AMGPlayerCharacter* Player)
@@ -1106,8 +1115,9 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
                         FLinearColor::Black, true, false);
             }
         }
-        if (IsValid(Player))
-            StartStoryCinematic(TEXT("capture"),Player,Player);
+        if (IsValid(Player) && !bCaptureSkipped)
+            StartStoryCinematic(TEXT("wake"), Player, Player);
+        bCaptureSkipped = false;
         Dialogue = TEXT("DETENTION — WEAPONS CONFISCATED. ASSESS THE CELL.");
         break;
     case MG_FOX_LEARN_DETENTION_ROUTE:
@@ -1334,9 +1344,19 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
                     DialogueTimeRemaining = 2.5f;
                     return true;
                 }
-                // The player deliberately steps into a real guard-controlled
-                // prisoner transport point; the guard has no reason to infer
-                // Snake's plan. A cinematic capture performance is pending.
+                // The custody camera films real actors at the actual OUTSIDE
+                // post before Snake is moved to the cell. This is not a
+                // gameplay-flag callback from Sequencer. The mission commits
+                // arrest on completion or skip and checkpoints afterwards.
+                if (bCapturePending) return true;
+                if (StartStoryCinematic(TEXT("capture"), Player, Player))
+                {
+                    bCapturePending = true;
+                    PendingCapturePlayer = Player;
+                    Dialogue = TEXT("SECURITY: KEEP YOUR HANDS WHERE I CAN SEE THEM.");
+                    DialogueTimeRemaining = 3.f;
+                    return true;
+                }
                 return ApplyAction(MG_FOX_CAPTURE, Player);
             }
         }
@@ -1948,6 +1968,14 @@ void AMGGrayFoxMission::Tick(float Dt)
     UpdateGuardAlert(Dt);
     AMGPlayerCharacter* Player =
         Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
+    if (bCapturePending && (!IsValid(StoryCamera) || !StoryCamera->IsPlaying()))
+    {
+        bCapturePending = false;
+        AMGPlayerCharacter* Pending = PendingCapturePlayer.Get();
+        PendingCapturePlayer.Reset();
+        if (IsValid(Pending))
+            ApplyAction(MG_FOX_CAPTURE, Pending);
+    }
     if (Player)
     {
         if (BreachRemaining >= 0.f)
