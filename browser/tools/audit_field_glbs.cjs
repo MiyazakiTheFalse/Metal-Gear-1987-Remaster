@@ -4,7 +4,8 @@
 const fs=require('node:fs'),path=require('node:path');
 const dir=process.argv[2]||path.join(__dirname,'../assets/models');
 let failed=0;
-for(const role of ['snake','fox','guard','shoot_gunner']){
+const {FieldRigs}=require('../assets/field_rigs.js');
+for(const role of FieldRigs.castRoles){
  try{
   const file=fs.readFileSync(path.join(dir,role+'.glb'));
   function check(ok,message){if(!ok)throw new Error(message);}
