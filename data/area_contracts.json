@@ -3,7 +3,7 @@
   "doctrine": "DOCTRINE_005",
   "supreme_doctrine": "DOCTRINE_000",
   "scope": "game_wide",
-  "coverage_status": "full_slice_blockout_contracts_unverified_j2me_unreal",
+  "coverage_status": "source_greybox_PostCard3_dog_corridor_and_prone_duct;_explosive_gate_design_only",
   "areas": [
     {
       "provenance": "comparative_msx2_pending_target_j2me",
@@ -724,6 +724,223 @@
         "No forced next enemy wave",
         "Aftermath hints do not reveal Card2 immediately",
         "No duplicate rewards on reload"
+      ]
+    },
+    {
+      "id": "building1.after_card3_dog_corridor",
+      "stage": "post_card3",
+      "beat_ids": [
+        "building1.after_card3_kennel"
+      ],
+      "provenance": "MSX2_dogs_verified_third_person_layout_interpretation",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Canon dogs after Card3, but room sizes, kennel props and dog movements are 3D adaptation, never misrepresented as 1987 source screenshots.",
+      "test_evidence": [],
+      "arrival": {
+        "entry": "Full-width chapter gate removed only after canonical Card3 exit transaction",
+        "safe_observation": "View dog-kennel infrastructure before close contact",
+        "first_goal": "Get past dogs to investigate the passage",
+        "landmark": "Kennel block and service-duct alternative"
+      },
+      "topology": {
+        "adjacency": [
+          "shotmaker.card_store_and_exit",
+          "building1.after_card3_crawl"
+        ],
+        "gates": [
+          "ChapterExit must span width until complete"
+        ],
+        "choices": [
+          "Main north dog sightline",
+          "Southern low crawl route",
+          "Cover behind kennel supply"
+        ],
+        "camera_clearance": "Actual standing/crouch/prone body and camera collision require UE verification."
+      },
+      "visual": {
+        "forewarning": "Dog care station and visible patrols",
+        "reveal": "Animals emerge from physically placed patrols, not player-proximity spawn",
+        "spatial_readability": "Retains distinct main/alternate lanes at 720p"
+      },
+      "audio": {
+        "sources": [
+          "Optional local dog bark with human reaction dependent on true proximity"
+        ],
+        "occlusion": "Physical wall blocks dog sight and bite",
+        "non_audio_equivalent": "Dog acting state and visible windup"
+      },
+      "risk": {
+        "safe_points": [
+          "Eastern side of main chapter gate"
+        ],
+        "exposure_windows": [
+          "Main center/north dog sightline"
+        ],
+        "pressure": "Two preplaced dog patrols, no infinite spawn"
+      },
+      "timing": {
+        "start_event": "Crossing physical threshold",
+        "feedback_target_ms": 150,
+        "forced_lock_seconds": 0,
+        "tempo_role": "postboss_new_threat"
+      },
+      "accessibility": {
+        "non_audio": "Readable dog movement and lunge; captions/animations pending",
+        "posture": "Player can avoid with no required gun"
+      },
+      "failure": {
+        "deaths": "Existing chapter checkpoint saved after entering corridor",
+        "recovery": "Dog checkpoint body state persistence still pending"
+      },
+      "tests": [
+        "No premature entry before chapter flags",
+        "Dog hit blocked by wall and line-of-sight",
+        "First-entry checkpoint reload valid",
+        "No forced scripted animal attack"
+      ]
+    },
+    {
+      "id": "building1.after_card3_crawl",
+      "stage": "post_card3_optional",
+      "beat_ids": [
+        "building1.after_card3_crawl"
+      ],
+      "provenance": "remake_3d_interpretation_not_original_MSX_map",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Optional headroom route only; never replaces original dog threat or the next plastic-explosive wall.",
+      "test_evidence": [],
+      "arrival": {
+        "entry": "Left/southern diversion before main kennel",
+        "safe_observation": "Roof visibly too low for crouch",
+        "first_goal": "Crawl to avoid a dog sightline",
+        "landmark": "Low concrete service duct"
+      },
+      "topology": {
+        "adjacency": [
+          "building1.after_card3_dog_corridor"
+        ],
+        "gates": [
+          "Real 81 cm roof clearance forces validated 76 cm prone capsule"
+        ],
+        "choices": [
+          "Crawl concealed route",
+          "Use main dog lane"
+        ],
+        "camera_clearance": "Spring arm and head/shoulders collision test needed"
+      },
+      "visual": {
+        "forewarning": "Low roof with side rails",
+        "reveal": "Prone body travels under geometry",
+        "spatial_readability": "Unambiguous entrance and exit"
+      },
+      "audio": {
+        "sources": [
+          "Prone textile scrape not recorded"
+        ],
+        "occlusion": "Solid roof blocks visual dog detection",
+        "non_audio_equivalent": "Visible narrow passage"
+      },
+      "risk": {
+        "safe_points": [
+          "Duct ends"
+        ],
+        "exposure_windows": [
+          "Approach to mouth"
+        ],
+        "pressure": "Enemy cannot enter lower-than-dog-capsule crawl"
+      },
+      "timing": {
+        "start_event": "Player toggles physical prone",
+        "feedback_target_ms": 120,
+        "forced_lock_seconds": 0,
+        "tempo_role": "rest_before_next_stealth_exposure"
+      },
+      "accessibility": {
+        "non_audio": "Collision/stance feedback",
+        "posture": "Exit if no overhead obstruction; no automatic warp"
+      },
+      "failure": {
+        "deaths": "Ordinary checkpoint",
+        "recovery": "Reversible duck/crawl"
+      },
+      "tests": [
+        "Prone enters; crouch blocked",
+        "Rising under roof blocked",
+        "Camera does not pop through wall",
+        "Alternative main path remains open"
+      ]
+    },
+    {
+      "id": "building1.after_card3_explosive_boundary",
+      "stage": "next_campaign_boundary",
+      "beat_ids": [
+        "building1.after_card3_explosive_wall",
+        "building1.machinegun_kid_leadin"
+      ],
+      "provenance": "original_MSX_weak_blast_wall_event_3d_location_unverified",
+      "verification_status": "unverified",
+      "implementation_status": "design_only",
+      "constraints": "The next scene is explicitly NOT playable until timed plastic explosives, breakable geometry, and downstream area exist; do not bluff completion.",
+      "test_evidence": [],
+      "arrival": {
+        "entry": "After passing the dog patrol area",
+        "safe_observation": "Readable patched wall",
+        "first_goal": "Investigate destructive route",
+        "landmark": "Subtle damaged masonry seam"
+      },
+      "topology": {
+        "adjacency": [
+          "building1.after_card3_dog_corridor"
+        ],
+        "gates": [
+          "Solid temporary boundary until bomb and follow-up mission"
+        ],
+        "choices": [
+          "Explore prior kennel and backtrack"
+        ],
+        "camera_clearance": "Future implementation needs collision opening and debounce"
+      },
+      "visual": {
+        "forewarning": "Patched masonry",
+        "reveal": "No false breach or invisible loading door",
+        "spatial_readability": "Expansion boundary must be called out as unfinished in dev builds"
+      },
+      "audio": {
+        "sources": [
+          "No recorded explosion or masonry debris"
+        ],
+        "occlusion": "Wall remains physically solid",
+        "non_audio_equivalent": "Weak patch visibly distinct"
+      },
+      "risk": {
+        "safe_points": [
+          "Behind kennel supplies"
+        ],
+        "exposure_windows": [
+          "Dog pursuit remains natural"
+        ],
+        "pressure": "No extra invented enemy"
+      },
+      "timing": {
+        "start_event": "Not yet implemented",
+        "feedback_target_ms": 150,
+        "forced_lock_seconds": 0,
+        "tempo_role": "next_campaign_problem"
+      },
+      "accessibility": {
+        "non_audio": "No misleading objective claiming the wall can be opened yet",
+        "posture": "No softlock; can retreat"
+      },
+      "failure": {
+        "deaths": "Current checkpoint",
+        "recovery": "Backtrack possible"
+      },
+      "tests": [
+        "No fake access beyond wall",
+        "Canon plastic explosive not bare fists",
+        "Next Machinegun Kid order preserved"
       ]
     }
   ]
