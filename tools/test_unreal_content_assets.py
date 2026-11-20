@@ -12,10 +12,11 @@ class UnrealSourceAssetDeliveryTests(unittest.TestCase):
     def test_all_four_skeletal_glbs_are_physically_present_in_unreal_content(self):
         manifest = validate()
         self.assertEqual(manifest["status"], "self_contained_source_assets_verified")
-        self.assertEqual(len(manifest["characters"]), 4)
+        self.assertEqual(len(manifest["characters"]), 22)
         self.assertEqual(
             {row["role"] for row in manifest["characters"]},
-            {"snake", "fox", "guard", "shoot_gunner"},
+            {"snake", "fox", "guard", "shoot_gunner",
+             "real_big_boss", "venom_snake", "kyle_schneider", "diane", "steve", "jennifer", "jennifers_brother", "drago_madnar", "ellen_madnar", "machinegun_kid", "fire_trooper", "dirty_duck", "pow_informant", "madnar_decoy", "mercenary_1", "mercenary_2", "mercenary_3", "mercenary_4"},
         )
 
     def test_each_binary_is_a_real_animated_skin_not_static_placeholder(self):
