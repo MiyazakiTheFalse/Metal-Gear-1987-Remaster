@@ -249,6 +249,11 @@ void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AMGPlayerCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    if (bBinocularView && (!Equipment || !Equipment->IsItemEquipped(TEXT("BINOCULARS"))))
+    {
+        bBinocularView = false;
+        if (FollowCamera) FollowCamera->SetFieldOfView(85.f);
+    }
     if (PendingHandgunCasingSeconds >= 0.f)
     {
         PendingHandgunCasingSeconds -= FMath::Max(0.f, DeltaSeconds);
@@ -1157,12 +1162,23 @@ void AMGPlayerCharacter::UseItem()
         NotifyFeedback(TEXT("TRANSMITTER CANNOT BE DISCARDED"), TEXT("denied"));
         return;
     }
+    if (Equipment->IsItemEquipped(TEXT("BINOCULARS")))
+    {
+        bBinocularView = !bBinocularView;
+        if (FollowCamera) FollowCamera->SetFieldOfView(bBinocularView ? 34.f : 85.f);
+        NotifyFeedback(bBinocularView ? TEXT("BINOCULARS — SCOUTING")
+                                     : TEXT("BINOCULARS LOWERED"), TEXT("select"));
+        return;
+    }
     if (Health >= 100.f)
     { NotifyFeedback(TEXT("HEALTH FULL"), TEXT("denied")); return; }
     if (Equipment->ConsumeRation())
     {
         Health = FMath::Min(100.f, Health + 45.f);
         NotifyFeedback(TEXT("RATION USED — HEALTH RESTORED"), TEXT("select"));
+        if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+            UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+            Mission->NotifyItemConsumed(this);
     }
     else NotifyFeedback(TEXT("EQUIP A RATION FIRST"), TEXT("denied"));
 }
