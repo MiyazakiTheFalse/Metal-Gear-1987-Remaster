@@ -80,6 +80,17 @@ private:
     UStaticMeshComponent* WeaponBodyVisual;
     UPROPERTY(VisibleAnywhere, Category="Character|Weapon")
     UStaticMeshComponent* WeaponGripVisual;
+    // Original removable scalp/hair geometry follows the actual head joint,
+    // including infiltration -> disarmed mesh variants. No free-floating hair.
+    UPROPERTY(VisibleAnywhere, Category="Character|Hair")
+    UStaticMeshComponent* HairVisual;
+    UPROPERTY(EditAnywhere, Category="Character|Hair")
+    FName HairAttachmentBone = TEXT("head");
+    UPROPERTY(EditAnywhere, Category="Character|Hair")
+    FVector HairOffsetCm = FVector(0.f, 0.f, 9.f);
+    UPROPERTY(EditAnywhere, Category="Character|Hair")
+    FRotator HairRotation = FRotator::ZeroRotator;
+    void UpdateHairPresentation();
     bool bHasAuthoredWeaponMesh = false;
     UPROPERTY(Transient)
     UStaticMesh* StunGunArt = nullptr;
