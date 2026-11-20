@@ -15,6 +15,7 @@
 #include "Engine/World.h"
 #include "Sound/SoundBase.h"
 #include "GameFramework/PlayerController.h"
+#include "Camera/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 #include "EngineUtils.h"
@@ -515,6 +516,16 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
                 Player->GetEquipment()->SetConfiscated(true);
             Player->SetActorLocation(CellStart, false, nullptr,
                 ETeleportType::TeleportPhysics);
+            // Skip-safe fall-back for the still-unmade custody -> unconscious
+            // transport Sequencer: game state and checkpoint handoff occur
+            // immediately, then the view recovers from black in the cell.
+            // No VO, animation or camera callback can change the capture flag.
+            if (APlayerController* PC = Cast<APlayerController>(Player->GetController()))
+            {
+                if (APlayerCameraManager* Camera = PC->PlayerCameraManager)
+                    Camera->StartCameraFade(1.f, 0.f, .82f,
+                        FLinearColor::Black, true, false);
+            }
         }
         Dialogue = TEXT("DETENTION — WEAPONS CONFISCATED. ASSESS THE CELL.");
         break;
