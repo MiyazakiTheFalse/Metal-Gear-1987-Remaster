@@ -2,7 +2,13 @@
 
 PC-first, Switch-targeted modern 3D remake of the supplied Connect2Media **J2ME Metal Gear v3.3.0** edition. The direction is free-camera MGS4/MGSV-style movement, stealth and aiming, while faithfully reconstructing the original game's locations and mission progression.
 
-> **Current status (20 November 2026): early-campaign source prototype, NOT a completed game.** The browser has an executable-by-source Gray Fox-to-west-lift sequence with provisional models; there is no verified downloadable browser package in this session. The UE5 project has **not** been compiled or packaged in this environment. No playable Windows .exe or Switch build is established. The ten original-game conversion phases are **four partial source prototypes and six design-only**, and only two of eleven major combat set-pieces have source prototypes. A UE-capable build host is needed to produce PC playtest packages.
+> **Current status (20 November 2026): early-campaign source prototype, NOT a completed game.** The browser has an executable-by-source Gray Fox-to-west-lift sequence with provisional models; there is no verified downloadable browser package in this session. The UE5 project has **not** been compiled or packaged in this environment. No playable Windows .exe or Switch build is established. The browser and Unreal source now extend from Gray Fox through Shotmaker, Machinegun Kid, Building 1 roof/Hind D and the Building 2 tank road. These later encounters are provisional, not Unreal-compiled or production-ready; the remainder of the original campaign still needs implementation. A UE-capable build host is needed to produce PC playtest packages.
+
+## Unreal tester checkout — current development branch
+
+For the latest **uncompiled** Unreal 5.7 C++ source and committed skinned GLB assets, check out `feature/character-art-pipeline-1995`, tracked in [draft PR #3](https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/pull/3). Do **not** assume `main` includes this pass.
+
+**Tester instructions:** [Unreal Tester Handoff](docs/UNREAL_TESTER_HANDOFF_2026_11_20.md). Run `scripts/unreal_tester_preflight.ps1` on a Windows UE5.7 build host, import the character GLBs through `unreal/MGRemaster/Content/Python/import_field_character_glbs.py`, then run `scripts/build_windows.ps1` for a locally generated Windows Development package. None of these steps is a verified Unreal build in this authoring environment. The four skinned characters are original, procedural prototypes, not photorealistic finished art.
 
 ## Title screen and metagame (browser source, 20 Nov 2026)
 
