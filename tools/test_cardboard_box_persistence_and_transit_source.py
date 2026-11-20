@@ -68,7 +68,7 @@ class CardboardBoxAndFreightPacingSourceTests(unittest.TestCase):
         self.assertIn("BOX_TRANSIT_TENSION_RELEASE", by_id)
         self.assertIn("one_source_prototype", by_id["BOX_TRANSIT_TENSION_RELEASE"]["status"])
         self.assertIn("1987", by_id["BOX_TRANSIT_TENSION_RELEASE"]["source_canon"])
-        self.assertTrue(any("reusable" in x for x in by_id["CARDBOARD_CONCEALED_BOX"]["verification"]))
+        self.assertIn("reusable", by_id["CARDBOARD_CONCEALED_BOX"]["source_canon"])
 
 if __name__ == "__main__":
     unittest.main()
