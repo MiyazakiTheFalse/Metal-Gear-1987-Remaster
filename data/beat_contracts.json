@@ -2,8 +2,8 @@
   "schema_version": 1,
   "doctrine": "DOCTRINE_004",
   "scope": "game_wide",
-  "coverage_status": "expanded_full_slice_source_contracts_not_playtested",
-  "note": "Expanded opening, earned custody, prison wall damage, connected Shoot Gunner wing, inventory tracking and postboss access. Source status only; exact J2ME layout and final cinematic/audio assets not certified.",
+  "coverage_status": "expanded_PostCard3_kennel_source_no_UE_playtests",
+  "note": "Expanded opening, earned custody, prison wall damage, connected Shoot Gunner wing, inventory tracking and postboss access. Source status only; exact J2ME layout and final cinematic/audio assets not certified. 2026-11-20: playable-area source extends to the dog corridor after Card 3; crawl is a marked 3D adaptation, and explosive wall/Machinegun Kid/roof remain design-only. See data/MSX2_1987_STORY_AND_WEAPON_PROVENANCE.json.",
   "beats": [
     {
       "provenance": "remake_adaptation_pending_j2me",
@@ -769,6 +769,184 @@
       ],
       "implementation_status": "source_prototype",
       "verification_status": "unverified"
+    },
+    {
+      "id": "building1.after_card3_kennel",
+      "kind": "guard_dog_stealth_encounter",
+      "provenance": "MSX2_event_verified_3d_layout_interpretation",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "intent": "Preserve original dog hazard after Card 3, using authentic animal perception and a fair low-risk observation before commitment.",
+      "trigger": "Player physically crosses the full-width chapter exit after Card 3 is earned and original boss segment has been resolved.",
+      "action": "Two pre-placed dogs notice by unobstructed sight, bark from their own world positions, pursue last known actual contact, wind up a close-range lunge, then visibly recover; sneak or outmanoeuvre rather than demanding a kill.",
+      "visual": {
+        "foreshadow": "Kennel and animal-care clutter warn of the threat; a separate low service roof suggests an alternate stealth approach.",
+        "impact": "Dog body and own position cause movement/bark/attack; optional real skeletal animation hooks, never an unannounced instantaneous bite.",
+        "aftermath": "Canine pursuit can be shaken by walls and crawl cover, and the player can inspect the next damaged masonry segment."
+      },
+      "audio": {
+        "origin": "Bark at actual dog position, no invisible player's location broadcast",
+        "response": "Optional diegetic bark SoundWave imported in UE; source currently has no approved recording",
+        "non_audio_equivalent": "Dog state, body turn, lunge telegraph and readable environment; accessibility tests pending"
+      },
+      "timing": {
+        "start_event": "Sighted trespasser after entering physically open passage",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "candidate_ue_unverified"
+      },
+      "state": {
+        "transaction": "No new story flag; existing MG_FOX_SLICE_COMPLETED earns passage",
+        "persistence": "First entry saves position in extended range; defeated dogs are not yet persisted, so this is not a complete checkpoint model",
+        "ai_knowledge": "Sentry barks reported at dog position; no GPS player knowledge when view is lost"
+      },
+      "interruptions": [
+        "cover",
+        "prone",
+        "dog_stagger",
+        "save_reload",
+        "deaf_mode",
+        "dog_killed_during_windup"
+      ],
+      "verification": [
+        "Crouched body cannot fit 81 cm duct, prone 76 cm capsule can if physically aligned",
+        "Dog never bites through wall or doghouse and must telegraph",
+        "ChapterExit cannot be bypassed before Card 3",
+        "Dog collision and 720p facing readability captured on UE host"
+      ]
+    },
+    {
+      "id": "building1.after_card3_crawl",
+      "kind": "optional_spatial_stealth_route",
+      "provenance": "remake_interpretation_not_1987_room",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "intent": "Give players an accessible way to avoid a dog sightline using existing low posture rather than a cutscene or a new magic ability.",
+      "trigger": "Player notices a roofed service duct south of main kennel route.",
+      "action": "Enter prone using existing Z / D-pad, physically crawl through the 81 cm gap; standing/crouching remains blocked by real geometry. Main northern approach still works.",
+      "visual": {
+        "foreshadow": "Restrained concrete crawl roof, side rails, service grate and industrial shadow pattern.",
+        "impact": "Collision ensures player fits rather than letting an animation ghost through masonry.",
+        "aftermath": "Rejoin the main passage beyond the exposed kennel."
+      },
+      "audio": {
+        "origin": "Provisional surface-specific cloth/limb shuffle, not included",
+        "response": "Less footfall noise in prone state under existing sound model",
+        "non_audio_equivalent": "Visible headroom and optional environmental caption"
+      },
+      "timing": {
+        "start_event": "Player chooses stance, no artificial wait",
+        "feedback_target_ms": 120,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "unverified"
+      },
+      "state": {
+        "transaction": "None; just physical space and player posture",
+        "persistence": "Position-only checkpoint",
+        "ai_knowledge": "Dogs require actual line of sight to see a player inside duct"
+      },
+      "interruptions": [
+        "rise_under_roof",
+        "cancel_prone",
+        "reversal",
+        "camera_clipping",
+        "reenter"
+      ],
+      "verification": [
+        "Roof underside -19 cm, floor top -100 cm, 81 cm gap: prone collision height 76cm",
+        "Crouch clearance 110cm is insufficient",
+        "Open end-to-end and at least one noncrawl route",
+        "No invisible forced crawl or automatic stance"
+      ]
+    },
+    {
+      "id": "building1.after_card3_explosive_wall",
+      "kind": "destruction_puzzle_next_mission",
+      "provenance": "MSX2_event_verified_3d_placement_interpretation",
+      "implementation_status": "design_only_not_playable",
+      "verification_status": "unverified",
+      "intent": "Preserve the post-dog mysterious weak surface that requires plastic explosive instead of Snake suddenly punching arbitrary full concrete.",
+      "trigger": "After leaving the dog sector, inspect the damaged masonry on the outer boundary.",
+      "action": "Future plastic explosive system must arm a timed charge, respect the one-charge-at-a-time MSX rule, physically breach collision, and open the Machinegun Kid approach; presently deliberately blocked by honest sector boundary.",
+      "visual": {
+        "foreshadow": "Subtle damaged seam visible beyond dog challenge.",
+        "impact": "Future geometry destruction VFX and actual portal clearance.",
+        "aftermath": "A purposeful transition to the next 1987 encounter rather than false end-credits."
+      },
+      "audio": {
+        "origin": "Surface knock and bomb beep/explosion pending",
+        "response": "Guard local hearing from actual blast position",
+        "non_audio_equivalent": "Fracture and debris clue"
+      },
+      "timing": {
+        "start_event": "Source placement and countdown, not implemented",
+        "feedback_target_ms": 120,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "pending_design_and_UE"
+      },
+      "state": {
+        "transaction": "No new mission action yet; cannot falsely complete before the explosives and downstream sector exist",
+        "persistence": "Future breach/open portal + saved charge-consumption authority",
+        "ai_knowledge": "Only blast and actual observed player movements"
+      },
+      "interruptions": [
+        "cancel_charge",
+        "dog_alert",
+        "death",
+        "save_reload",
+        "repeated_explosive"
+      ],
+      "verification": [
+        "Do not make this a punch wall without proof",
+        "Do not award explosives after they were confiscated without actual recovery",
+        "No fake mission completion at blocked boundary"
+      ]
+    },
+    {
+      "id": "building1.machinegun_kid_leadin",
+      "kind": "future_mission",
+      "provenance": "MSX2_event_verified_location_and_order_not_geometry",
+      "implementation_status": "design_only_not_playable",
+      "verification_status": "unverified",
+      "intent": "Plan the next original mercenary and rooftop/parachute sequence, respecting its order after Shotmaker and explosive wall.",
+      "trigger": "After authentic plastic explosive breach and continued Building 1 progression.",
+      "action": "Future navigable space with distinct guard patterns, Machinegun Kid's fire lane, cover, retained weapon alternatives, earned parachute and roof, not spawned in the present kennel.",
+      "visual": {
+        "foreshadow": "Threat communicated by actual weapon lane and staging, not a random boss popup.",
+        "impact": "Future high-authenticity character mesh/rig and weapon/stance animation.",
+        "aftermath": "Parachute obtained after boss in source route"
+      },
+      "audio": {
+        "origin": "Distinct machine-gun reports with physically coherent cover falloff",
+        "response": "Named human voice must match 1987 knowledge, not later-era lore",
+        "non_audio_equivalent": "Weapon flash/cover impact/accessible subtitles"
+      },
+      "timing": {
+        "start_event": "Not wired",
+        "feedback_target_ms": 150,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "pending"
+      },
+      "state": {
+        "transaction": "Future flags/Rust ABI review needed",
+        "persistence": "Not yet implemented",
+        "ai_knowledge": "No omniscience or contrived reinforcements"
+      },
+      "interruptions": [
+        "cover",
+        "retreat",
+        "alternate_weapon",
+        "save_reload"
+      ],
+      "verification": [
+        "Do not place before Gray Fox/Shotmaker",
+        "Do not invent late-game spoiler lines",
+        "Verify against 1987 MSX maps"
+      ]
     }
   ],
   "supreme_doctrine": "DOCTRINE_000",
