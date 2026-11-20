@@ -35,6 +35,8 @@ public:
     UPROPERTY(SaveGame)
     bool bOwnsCarton = false;
     UPROPERTY(SaveGame)
+    bool bHeardFreightClerk = false; // Optional scene, no canon mission flag.
+    UPROPERTY(SaveGame)
     bool bDispatchCameraOffline = false;
     UPROPERTY(SaveGame)
     bool bServiceChargeCollected = false;
