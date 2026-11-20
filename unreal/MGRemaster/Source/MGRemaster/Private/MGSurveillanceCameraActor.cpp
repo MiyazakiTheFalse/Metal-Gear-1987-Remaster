@@ -154,6 +154,12 @@ void AMGSurveillanceCameraActor::Disable(bool bByInteraction)
     SetActorTickEnabled(false);
 }
 
+FVector AMGSurveillanceCameraActor::GetControlPanelWorldLocation() const
+{
+    return IsValid(ControlPanel) ? ControlPanel->GetComponentLocation()
+        : GetActorLocation();
+}
+
 bool AMGSurveillanceCameraActor::TryDisableAtControlPanel(const AMGPlayerCharacter* Player)
 {
     if (!bOperational || !IsValid(Player) || !GetWorld()) return false;
