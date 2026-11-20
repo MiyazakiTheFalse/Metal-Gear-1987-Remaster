@@ -1192,6 +1192,11 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         break;
     case MG_FOX_DEFEAT_SHOTMAKER:
         Dialogue = TEXT("SHOOT GUNNER DOWN — SEARCH FOR THE ACCESS CARD.");
+        // A brief aftermath uses the same defeated in-world actor and
+        // camera as the boss intro. The action/save already succeeded;
+        // skipping or moving can never respawn the boss or lose Card 3.
+        if (IsValid(Player) && IsValid(Shotmaker))
+            StartStoryCinematic(TEXT("down"), Player, Shotmaker);
         break;
     case MG_FOX_COLLECT_CARD3:
         if (Player && Player->GetEquipment())
