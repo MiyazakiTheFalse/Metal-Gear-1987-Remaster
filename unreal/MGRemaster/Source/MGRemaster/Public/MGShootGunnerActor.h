@@ -90,6 +90,10 @@ private:
     UPROPERTY(VisibleAnywhere, Category="Shotmaker|Presentation")
     UPointLightComponent* MuzzleFlash = nullptr;
     float MuzzleFlashRemaining = 0.f;
+    // Delay the shoulder/pump cycle until after muzzle blast. A pump notify
+    // must never be emitted in the same frame as the authoritative shot.
+    float PumpCueRemaining = -1.f;
+    int32 PendingPumpShotIndex = INDEX_NONE;
 
     // Modern 3D design hypotheses (NOT measured MSX2 firearm statistics).
     // Editable in a BP child and bounded in the actual gameplay methods.
@@ -97,6 +101,8 @@ private:
     float WindupSeconds = .78f;
     UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="0.25", ClampMax="1.5"))
     float IntervalSeconds = .52f;
+    UPROPERTY(EditAnywhere, Category="Shotmaker|Animation", meta=(ClampMin="0.05", ClampMax="0.40"))
+    float PumpOffsetSeconds = .17f;
     UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="0.8", ClampMax="5.0"))
     float RecoverySeconds = 1.85f;
     UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="3", ClampMax="12"))
