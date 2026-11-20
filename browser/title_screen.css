@@ -1,0 +1,131 @@
+/* Outer Heaven 1995 — original atmospheric metagame shell.
+ * Inspired by cinematic espionage UI conventions, not a lifted MGS screen.
+ * No Konami logo, artwork, music or copyrighted menu animations embedded. */
+#intro.mg-title {
+  display:flex;position:fixed;inset:0;overflow:auto;align-items:center;
+  justify-content:center;padding:clamp(16px,3vw,46px);
+  background:radial-gradient(ellipse at 72% 42%,#16372e 0%,#091d20 28%,#03090d 73%);
+  color:#dce8df;font-family:ui-sans-serif,system-ui,Segoe UI,sans-serif;
+  isolation:isolate;
+}
+.mg-title__grid {
+  pointer-events:none;position:absolute;inset:0;z-index:-1;opacity:.36;
+  background-image:linear-gradient(90deg,transparent 95%,#7cac931d 95%),
+    linear-gradient(0deg,transparent 95%,#7cac931a 95%);
+  background-size:56px 56px;
+  mask-image:radial-gradient(ellipse at 67% 42%,#000 4%,transparent 75%);
+}
+.mg-title__scan {
+  pointer-events:none;position:absolute;inset:0;z-index:0;opacity:.38;
+  background:repeating-linear-gradient(0deg,transparent 0 3px,#0d212522 4px 5px);
+}
+.mg-title__noise {
+  pointer-events:none;position:absolute;inset:-20%;z-index:0;opacity:.55;
+  background:radial-gradient(ellipse at 75% 40%,#7ee2a918,transparent 37%),
+    radial-gradient(ellipse at 18% 91%,#b5b68117,transparent 51%);
+  animation:mg-attract-breathe 9s ease-in-out infinite alternate;
+}
+.mg-title__composition {
+  position:relative;z-index:1;display:grid;grid-template-columns:minmax(330px,1fr) minmax(280px,.82fr);
+  gap:clamp(24px,5vw,92px);align-items:center;width:min(1240px,100%);
+  min-height:min(710px,calc(100vh - 60px));padding:clamp(20px,3vw,40px);
+  border:1px solid #48665751;
+  background:linear-gradient(115deg,#030b0de5,#0a1917a3 60%,#0713115e);
+  box-shadow:0 25px 110px #000a, inset 0 1px #88d4ae26;
+}
+.mg-title__composition:before,
+.mg-title__composition:after{
+  content:"";position:absolute;width:64px;height:64px;pointer-events:none;
+  border-color:#8ecdb4;opacity:.67;
+}
+.mg-title__composition:before{top:0;left:0;border-left:2px solid;border-top:2px solid}
+.mg-title__composition:after{bottom:0;right:0;border-right:2px solid;border-bottom:2px solid}
+.mg-title__label {font:700 11px/1.5 ui-monospace,Consolas,monospace;
+  letter-spacing:.24em;color:#9ecbb0;text-transform:uppercase}
+.mg-title__logo {
+  margin:clamp(18px,6vh,72px) 0 8px;
+  font:900 clamp(58px,8vw,130px)/.79 Impact,"Arial Narrow",ui-sans-serif,sans-serif;
+  letter-spacing:-.075em;transform:scaleX(.87);transform-origin:left center;
+  color:#e3e9d9;text-shadow:0 4px #0c1717,0 16px 48px #000;
+}
+.mg-title__logo em {display:block;font-style:normal}
+.mg-title__divider{height:3px;width:min(380px,92%);margin:16px 0 19px;
+  background:linear-gradient(90deg,#c9e5c8,#4c8468 45%,transparent);}
+.mg-title__sub{font:700 clamp(12px,1.2vw,16px)/1.6 ui-monospace,Consolas,monospace;
+  letter-spacing:.13em;color:#a9bfb0;}
+.mg-title__chapter {font:700 12px/1.5 ui-monospace,Consolas,monospace;
+  color:#c8a778;margin:12px 0 18px;letter-spacing:.1em}
+.mg-title__menu {display:flex;flex-direction:column;align-items:stretch;gap:5px;margin-top:25px;max-width:435px;}
+#intro .mg-title__action {
+  all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;
+  min-height:46px;padding:12px 11px 11px 22px;position:relative;
+  border-left:2px solid #536a5c64;
+  background:#0b1d1c52;color:#dce8de;
+  text-transform:uppercase;letter-spacing:.095em;
+  font:700 13px/1.35 ui-monospace,Consolas,monospace;
+  transition:background .16s,border-color .16s,padding-left .16s;
+}
+#intro .mg-title__action small {font:600 9px ui-monospace,monospace;
+  color:#8da49a;margin-left:auto;letter-spacing:.07em;text-align:right;padding-left:10px}
+#intro .mg-title__action:before{content:"";position:absolute;left:7px;top:50%;
+  width:0;height:0;border-left:7px solid #b9d2ab;border-top:4px solid transparent;
+  border-bottom:4px solid transparent;transform:translateY(-50%);opacity:0}
+#intro .mg-title__action:is(:hover,:focus-visible,[data-selected="true"]) {
+  padding-left:25px;background:#29483ba3;border-left-color:#c5e3b0;color:#f1f5d9;
+}
+#intro .mg-title__action:is(:hover,:focus-visible,[data-selected="true"]):before {opacity:1}
+#intro .mg-title__action:focus-visible {outline:2px solid #b6d8b5;outline-offset:2px}
+#intro .mg-title__action:disabled{color:#70857c;cursor:not-allowed;border-color:#3a4845;opacity:.58}
+#intro .mg-title__action:disabled:before{display:none}
+#intro .mg-title__options {margin:5px 0 0;border:1px solid #517767;
+  background:#081918;padding:12px 15px;}
+#intro .mg-title__options[hidden]{display:none}
+#intro .mg-title__options .checklabel{margin:8px 0;color:#d2e2d6}
+.mg-title__foot {margin:24px 0 0;font:10px/1.55 ui-monospace,Consolas,monospace;
+  color:#86a299;letter-spacing:.04em}
+.mg-title__foot strong{font-weight:700;color:#d8cba9}
+.mg-title__visual{position:relative;width:100%;aspect-ratio:4/5;max-height:570px;
+  align-self:center;overflow:hidden;border:1px solid #5e847345;
+  background:radial-gradient(circle at 46% 45%,#335043 0%,#112b29 30%,#061417 67%,#02090c);
+  box-shadow:inset 0 0 60px #0009,0 0 45px #0004;}
+.mg-title__visual svg {display:block;width:100%;height:100%;opacity:.80}
+.mg-title__visual:after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(0deg,#041313de,transparent 28%,transparent 78%,#041313d9);
+}
+.mg-title__ring{position:absolute;top:50%;left:50%;width:90%;aspect-ratio:1;
+  border:1px solid #7eb9a034;border-radius:50%;transform:translate(-50%,-50%);
+  box-shadow:0 0 35px #84ae6d10;}
+.mg-title__ring:after{content:"";position:absolute;inset:13%;border-radius:50%;
+  border:1px dashed #9fb2a828}
+.mg-title__sweep{position:absolute;top:50%;left:50%;width:41%;height:1px;transform-origin:left;
+  background:linear-gradient(90deg,#9bd7ba83,transparent);animation:mg-sweep 16s linear infinite;}
+.mg-title__sweep:after{content:"";position:absolute;right:20%;width:26px;height:30px;top:-15px;
+  filter:blur(10px);background:#8fcfae4d}
+.mg-title__visual-text{position:absolute;left:20px;bottom:24px;color:#bed3b9;z-index:1;
+  font:600 10px/1.6 ui-monospace,Consolas,monospace;letter-spacing:.18em}
+.mg-title__visual-text span{color:#7fbca1;display:block;}
+.mg-title__corner{position:absolute;right:16px;top:15px;z-index:2;color:#a4c1b0;
+  font:600 9px/1.5 ui-monospace,monospace;letter-spacing:.12em;text-align:right}
+.mg-title__menu-status{font:10px ui-monospace,monospace;margin:8px 0;color:#9fb6a4}
+@keyframes mg-sweep{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes mg-attract-breathe{from{transform:scale(1)}to{transform:scale(1.09)}}
+@media(max-width:900px){
+ .mg-title__composition {grid-template-columns:1fr;gap:18px;max-width:680px}
+ .mg-title__visual{position:absolute;right:0;top:0;width:48%;height:45%;max-height:none;
+  opacity:.3;z-index:-1;pointer-events:none}
+ .mg-title__logo{margin:25px 0 8px}
+ .mg-title__menu{max-width:none}
+}
+@media(max-width:600px){
+ #intro.mg-title{padding:9px;align-items:flex-start}
+ .mg-title__composition{padding:22px 16px;min-height:calc(100dvh - 20px)}
+ .mg-title__logo{font-size:clamp(58px,16vw,94px)}
+ .mg-title__visual{opacity:.17;width:90%;height:75%}
+ #intro .mg-title__action{font-size:12px}
+ #intro .mg-title__action small{font-size:8px}
+ .mg-title__chapter{font-size:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .mg-title__sweep,.mg-title__noise{animation:none}
+ #intro .mg-title__action{transition:none}
+}
