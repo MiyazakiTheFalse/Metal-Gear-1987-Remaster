@@ -159,9 +159,15 @@
       ],
       "relationshipTension": "uncertain rookie / authority",
       "limit": "No final reveal, no plot change",
-      "sourceState": "planned",
+      "sourceState": "source_text_prototype",
       "gatedBy": "authoritative gameplay beat only",
-      "skipDoesNotAffectGameplay": true
+      "skipDoesNotAffectGameplay": true,
+      "sourceEvidenceNote": "original briefing speech in both builds; no recorded voice",
+      "sourceFiles": [
+        "browser/story_relationships.js",
+        "browser/game.js",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ]
     },
     {
       "trigger": "P01.freight",
@@ -175,9 +181,15 @@
       ],
       "relationshipTension": "curiosity",
       "limit": "Optional no player-control loss",
-      "sourceState": "planned",
+      "sourceState": "source_text_prototype",
       "gatedBy": "authoritative gameplay beat only",
-      "skipDoesNotAffectGameplay": true
+      "skipDoesNotAffectGameplay": true,
+      "sourceEvidenceNote": "optional freight clerk ambience; incomplete character-specific casting",
+      "sourceFiles": [
+        "browser/story_relationships.js",
+        "browser/game.js",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ]
     },
     {
       "trigger": "P02.pow3",
@@ -223,9 +235,15 @@
       ],
       "relationshipTension": "distance from command",
       "limit": "Take equipment transaction before cut",
-      "sourceState": "first_pass_source_candidate",
+      "sourceState": "source_text_prototype",
       "gatedBy": "authoritative gameplay beat only",
-      "skipDoesNotAffectGameplay": true
+      "skipDoesNotAffectGameplay": true,
+      "sourceEvidenceNote": "Snake's loss-of-kit reaction in actual cell",
+      "sourceFiles": [
+        "browser/story_relationships.js",
+        "browser/game.js",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ]
     },
     {
       "trigger": "P03.wall1",
@@ -239,9 +257,15 @@
       ],
       "relationshipTension": "mutual uncertainty",
       "limit": "Guide never gives exact wall coordinate",
-      "sourceState": "first_pass_source_candidate",
+      "sourceState": "source_text_prototype",
       "gatedBy": "authoritative gameplay beat only",
-      "skipDoesNotAffectGameplay": true
+      "skipDoesNotAffectGameplay": true,
+      "sourceEvidenceNote": "Snake observes the authentic physical breach",
+      "sourceFiles": [
+        "browser/story_relationships.js",
+        "browser/game.js",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ]
     },
     {
       "trigger": "P03.fox",
@@ -256,9 +280,15 @@
       ],
       "relationshipTension": "shared trauma / respect",
       "limit": "Only Fox knows what he actually saw",
-      "sourceState": "first_pass_source_candidate",
+      "sourceState": "source_text_prototype",
       "gatedBy": "authoritative gameplay beat only",
-      "skipDoesNotAffectGameplay": true
+      "skipDoesNotAffectGameplay": true,
+      "sourceEvidenceNote": "Snake and Fox exchange original written dialogue after physical rescue",
+      "sourceFiles": [
+        "browser/story_relationships.js",
+        "browser/game.js",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ]
     },
     {
       "trigger": "P03.prison",
@@ -272,9 +302,15 @@
       ],
       "relationshipTension": "earned peer trust",
       "limit": "Never a supernatural radar",
-      "sourceState": "first_pass_source_candidate",
+      "sourceState": "source_text_prototype",
       "gatedBy": "authoritative gameplay beat only",
-      "skipDoesNotAffectGameplay": true
+      "skipDoesNotAffectGameplay": true,
+      "sourceEvidenceNote": "optional listening-to-patrol story earned in cell and world guard-speed response",
+      "sourceFiles": [
+        "browser/story_relationships.js",
+        "browser/game.js",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ]
     },
     {
       "trigger": "P04.introduce",
@@ -304,9 +340,15 @@
       ],
       "relationshipTension": "cautious professionalism",
       "limit": "No unearned certainty about who tampered with it",
-      "sourceState": "first_pass_source_candidate",
+      "sourceState": "source_text_prototype",
       "gatedBy": "authoritative gameplay beat only",
-      "skipDoesNotAffectGameplay": true
+      "skipDoesNotAffectGameplay": true,
+      "sourceEvidenceNote": "Snake inspects confiscated gear as gameplay transaction",
+      "sourceFiles": [
+        "browser/story_relationships.js",
+        "browser/game.js",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ]
     },
     {
       "trigger": "P04.tracker",
@@ -320,9 +362,15 @@
       ],
       "relationshipTension": "first independent judgment",
       "limit": "No automatic mastermind knowledge",
-      "sourceState": "first_pass_source_candidate",
+      "sourceState": "source_text_prototype",
       "gatedBy": "authoritative gameplay beat only",
-      "skipDoesNotAffectGameplay": true
+      "skipDoesNotAffectGameplay": true,
+      "sourceEvidenceNote": "radio/equipment chirp and player inquiry before removal",
+      "sourceFiles": [
+        "browser/story_relationships.js",
+        "browser/game.js",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ]
     },
     {
       "trigger": "P04.card3",
@@ -336,9 +384,15 @@
       ],
       "relationshipTension": "confidence in own observation",
       "limit": "No plan-perfect shortcut",
-      "sourceState": "first_pass_source_candidate",
+      "sourceState": "source_text_prototype",
       "gatedBy": "authoritative gameplay beat only",
-      "skipDoesNotAffectGameplay": true
+      "skipDoesNotAffectGameplay": true,
+      "sourceEvidenceNote": "Schneider's original limited-plan observation after card 3",
+      "sourceFiles": [
+        "browser/story_relationships.js",
+        "browser/game.js",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ]
     },
     {
       "trigger": "P05.dog",
@@ -352,9 +406,15 @@
       ],
       "relationshipTension": "pragmatic solidarity",
       "limit": "Fox absent after original source departure where appropriate",
-      "sourceState": "planned",
+      "sourceState": "source_text_prototype",
       "gatedBy": "authoritative gameplay beat only",
-      "skipDoesNotAffectGameplay": true
+      "skipDoesNotAffectGameplay": true,
+      "sourceEvidenceNote": "optional Schneider kennel/duct radio exists, only when actually in service sector",
+      "sourceFiles": [
+        "browser/story_relationships.js",
+        "browser/game.js"
+      ],
+      "unrealVersion": "not_yet_performed_at_equivalent_beat"
     },
     {
       "trigger": "P05.kid",
@@ -368,9 +428,15 @@
       ],
       "relationshipTension": "trusted specialist",
       "limit": "Only if Diane has been contacted legitimately",
-      "sourceState": "planned",
+      "sourceState": "source_text_prototype",
       "gatedBy": "authoritative gameplay beat only",
-      "skipDoesNotAffectGameplay": true
+      "skipDoesNotAffectGameplay": true,
+      "sourceEvidenceNote": "Snake's aftermath reaction and limited source character dialogue",
+      "sourceFiles": [
+        "browser/story_relationships.js",
+        "browser/game.js"
+      ],
+      "unrealVersion": "not_yet_performed_at_equivalent_beat"
     },
     {
       "trigger": "P05.parachute",
@@ -670,6 +736,10 @@
     "allRelationalBeatsMappedToCanonicalGameplay": true,
     "sourceEngineActedScenes": 0,
     "castWithApprovedRealisticRig": 0,
-    "productionCompleteScenes": 0
-  }
+    "productionCompleteScenes": 0,
+    "sourceTextPrototypes": 11,
+    "verifiedInEngine": 0
+  },
+  "canonicalStatusAuthority": true,
+  "optionalDevelopmentNotes": "data/STORY_RELATIONSHIP_ARCS_1995.json"
 }
