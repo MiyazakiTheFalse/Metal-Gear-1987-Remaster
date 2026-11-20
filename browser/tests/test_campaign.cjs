@@ -228,6 +228,8 @@ assert.equal(freightGame.state.freight.boxed,true);
 freightGame.teleport(-26.65,-3.62);
 for(let i=0;i<210;i++)freightGame.step(1/30);
 assert.ok(Math.abs(freightGame.state.player.x+16)<.02,'parcel reaches its marked stop');
+assert.equal(freightGame.state.freight.freightAmbientHeard,true,
+ 'moving freight triggers only optional authored worker chatter while advancing');
 assert.equal(freightGame.state.freight.reported,false);
 freightGame.teleport(-21.85,-3.1);
 selectItem(4);
@@ -240,6 +242,8 @@ const reloaded=boot(dispatch.storage);
 reloaded.button('resume');
 assert.equal(reloaded.game.state.freight.cameraOff,true);
 assert.equal(reloaded.game.state.freight.box,true);
+assert.equal(reloaded.game.state.freight.freightAmbientHeard,true,
+ 'optional freight breather does not replay after checkpoint reload');
 assert.equal(reloaded.game.state.freight.boxed,false);
 console.log('PASS: carton pickup, belt arrival, cigarette use and checkpointed camera power.');
 
