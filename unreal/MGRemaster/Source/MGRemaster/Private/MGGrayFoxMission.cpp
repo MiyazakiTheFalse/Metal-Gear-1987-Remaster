@@ -890,7 +890,14 @@ void AMGGrayFoxMission::BeginPlay()
             && (!(F & MG_FOX_CARD3_RECOVERED) || (F & MG_FOX_SHOTMAKER_DEFEATED))
             && (!(F & MG_FOX_SLICE_COMPLETED) || (F & MG_FOX_CARD3_RECOVERED));
         const FVector P = Save->CheckpointLocation;
-        const bool bPositionSafe = !P.ContainsNaN()
+        const bool bRoofCheckpoint = Save->SchemaVersion >= 5
+            && Save->bParachuteTaken && Save->bKidDefeated
+            && Save->bServiceWallOpen && Save->bRoofActive
+            && (F & MG_FOX_SLICE_COMPLETED)
+            && P.X >= 8760.f && P.X <= 10900.f
+            && FMath::Abs(P.Y) <= 450.f
+            && P.Z >= 590.f && P.Z <= 850.f;
+        const bool bPositionSafe = bRoofCheckpoint || (!P.ContainsNaN()
             && P.X >= ((F & MG_FOX_CAPTURED) ? -1160.f : -3790.f)
             && P.X <= ((F & MG_FOX_CAPTURED)
                 ? ((F & MG_FOX_SLICE_COMPLETED) ? (Save->bServiceWallOpen && Save->bServiceChargeCollected ? 7830.f : 5480.f)
@@ -904,10 +911,11 @@ void AMGGrayFoxMission::BeginPlay()
             && (!(F & MG_FOX_CAPTURED)
                 || ((F & MG_FOX_EXIT_WALL_BREACHED) || P.X < 420.f))
             // Later boss checkpoints cannot appear before the prison exit.
-            && ((F & MG_FOX_LEFT_PRISON) || P.X < 1300.f);
+            && ((F & MG_FOX_LEFT_PRISON) || P.X < 1300.f));
+        // A forged roof checkpoint must not bypass the original mission flags.
         if (bValid && bPositionSafe
             && ((F & MG_FOX_CAPTURED) || (F & MG_FOX_DETENTION_INTELLIGENCE)
-                || (Save->SchemaVersion == 4 && (Save->bEarnedHandgun || Save->bOwnsCarton || Save->bDispatchCameraOffline))))
+                || (Save->SchemaVersion >= 4 && (Save->bEarnedHandgun || Save->bOwnsCarton || Save->bDispatchCameraOffline))))
         {
             Flags = F;
             SavedPosition = Save->CheckpointLocation;
