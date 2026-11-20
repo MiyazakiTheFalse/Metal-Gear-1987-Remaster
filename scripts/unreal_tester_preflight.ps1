@@ -27,13 +27,16 @@ if ($Branch -ne 'feature/character-art-pipeline-1995') {
 $Changes = & git -C $Repo status --porcelain
 if ($Changes) { Write-Warning "Working tree has local changes; preserve your tester edits: $Changes" }
 foreach ($role in @('snake','fox','guard','shoot_gunner')) {
-  $Asset = Join-Path $Repo "browser\assets\models\$role.glb"
+  $Asset = Join-Path $Repo "unreal\MGRemaster\Content\SourceAssets\Characters\$role.glb"
   if (-not (Test-Path $Asset)) { throw "Missing committed GLB: $Asset" }
   if ((Get-Item $Asset).Length -lt 100000) { throw "Suspiciously small GLB: $Asset" }
 }
 function Check-Exit([string]$Label) {
   if ($LASTEXITCODE -ne 0) { throw "$Label failed with exit code $LASTEXITCODE" }
 }
+Write-Host 'Validating self-contained Unreal content sources and their binary parity...'
+& python (Join-Path $Repo 'tools\verify_unreal_source_assets.py')
+Check-Exit 'Unreal source asset manifest'
 Write-Host "Running browser campaign contract..."
 & node (Join-Path $Repo 'browser\tests\test_campaign.cjs')
 Check-Exit 'browser campaign'
