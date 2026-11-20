@@ -1594,17 +1594,23 @@ function updateGuards(dt){kennelTick(dt);kidTick(dt);const pulse=updatePropertyT
  // unlisted carton. Expected freight on the marked conveyor is not suspicious.
  const boxInspection=world.boxed&&!world.moved&&!nearBelt()&&d<1.65&&view&&
   !lineBlockedSight(g,player,1.48,.9);
- const vision=(!world.boxed||world.moved||g.state===3||boxInspection)&&
+ // Phase one: suspect an unattended crate. Phase two: inspect continuously,
+ // before the person inside is IDENTIFIED. Breaking LOS resets the proof.
+ g.boxInspectionAge=boxInspection?Math.min(1.4,(g.boxInspectionAge||0)+dt):0;
+ const boxIdentified=boxInspection&&g.boxInspectionAge>=1.3;
+ const vision=(!world.boxed||world.moved||g.state===3||boxIdentified)&&
   d<10&&(view||d<1.65)&&!lineBlockedSight(g,player);
  if(boxInspection&&g.state<3){
   if(gameTime>=(g.boxInspectCooldown||0)){
    say('boxInspect');
    g.boxInspectCooldown=gameTime+8;
   }
-  // The observed evidence is a crate in an odd place, not a perfect
-  // identification of the operative. Existing suspicion/aim windows apply.
-  g.suspicion=Math.max(g.suspicion,.25);
- }
+  if(!boxIdentified)g.suspicion=Math.max(g.suspicion,.25);
+  else if(!g.boxIdentitySpoken){
+   say('boxExposed');
+   g.boxIdentitySpoken=true;
+  }
+ }else if(!boxInspection)g.boxIdentitySpoken=false;
  const dFox=escortMode&&stage>=2&&fox.alive?dist(g,fox):Infinity;
  const toFox=Math.atan2(fox.z-g.z,fox.x-g.x);
  const foxFacing=Math.abs(Math.atan2(Math.sin(toFox-g.yaw),Math.cos(toFox-g.yaw)))<.94;
