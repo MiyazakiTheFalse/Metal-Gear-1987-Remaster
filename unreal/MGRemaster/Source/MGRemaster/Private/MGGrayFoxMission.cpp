@@ -935,6 +935,16 @@ bool AMGGrayFoxMission::StartStoryCinematic(
     return IsValid(StoryCamera) && StoryCamera->PlayScene(Scene, Player, Focus);
 }
 
+bool AMGGrayFoxMission::IsStoryCinematicPlaying() const
+{
+    return IsValid(StoryCamera) && StoryCamera->IsPlaying();
+}
+
+FName AMGGrayFoxMission::GetActiveStoryCinematic() const
+{
+    return IsValid(StoryCamera) ? StoryCamera->GetActiveScene() : NAME_None;
+}
+
 void AMGGrayFoxMission::SkipStoryCinematic()
 {
     if (IsValid(StoryCamera)) StoryCamera->SkipScene();
