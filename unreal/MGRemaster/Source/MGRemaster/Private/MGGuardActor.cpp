@@ -434,6 +434,79 @@ bool AMGGuardActor::AdvanceNoiseInvestigation(float DeltaSeconds)
     return true;
 }
 
+bool AMGGuardActor::AdvanceBoxInvestigation(float Dt)
+{
+    if (BoxPhase == EMGGuardBoxPhase::None ||
+        BoxPhase == EMGGuardBoxPhase::Confirmed) return false;
+    if (bConfirmedVisualThisFrame && AwarenessState >= 3)
+    {
+        BoxPhase = EMGGuardBoxPhase::None;
+        return false;
+    }
+    BoxInterestRemainingSeconds -= FMath::Max(0.f, Dt);
+    if (BoxInterestRemainingSeconds <= 0.f)
+    {
+        BoxPhase = EMGGuardBoxPhase::None;
+        bCartonInterestAnnounced = false;
+        bCartonInspectionAnnounced = false;
+        CartonInspectionSeconds = 0.f;
+        return false;
+    }
+    // Never chase Snake's current transform: the last *seen* carton coordinate
+    // is the only permissible location. Geometry/capsule sweeps remain active.
+    const FVector ToEvidence = BoxEvidenceWorldPosition - GetActorLocation();
+    const FVector Heading = ToEvidence.GetSafeNormal2D();
+    if (BoxPhase == EMGGuardBoxPhase::Notice)
+    {
+        if (!Heading.IsNearlyZero())
+            SetActorRotation(FMath::RInterpTo(GetActorRotation(),
+                Heading.Rotation(), Dt, 3.0f));
+        BoxReactSeconds -= Dt;
+        if (BoxReactSeconds <= 0.f)
+            BoxPhase = EMGGuardBoxPhase::Approach;
+    }
+    else if (BoxPhase == EMGGuardBoxPhase::Approach)
+    {
+        const float Before = ToEvidence.Size2D();
+        if (Before > 120.f)
+            MoveToward(BoxEvidenceWorldPosition, 105.f, Dt);
+        else BoxPhase = EMGGuardBoxPhase::Inspect;
+        const float After = FVector::Dist2D(GetActorLocation(), BoxEvidenceWorldPosition);
+        BoxApproachStuckSeconds = After > Before - .5f ?
+            BoxApproachStuckSeconds + Dt : 0.f;
+        if (BoxApproachStuckSeconds > 1.5f)
+        {
+            BoxPhase = EMGGuardBoxPhase::Search;
+            BoxSearchSeconds = 3.f;
+        }
+    }
+    else if (BoxPhase == EMGGuardBoxPhase::Inspect)
+    {
+        if (!Heading.IsNearlyZero())
+            SetActorRotation(FMath::RInterpTo(GetActorRotation(),
+                Heading.Rotation(), Dt, 4.5f));
+        // If the visible box has moved/vanished, investigate the known
+        // location, never assign an unseen actor target.
+        if (CartonInspectionSeconds <= 0.f)
+        {
+            BoxPhase = EMGGuardBoxPhase::Search;
+            BoxSearchSeconds = 3.f;
+        }
+    }
+    else if (BoxPhase == EMGGuardBoxPhase::Search)
+    {
+        BoxSearchSeconds -= Dt;
+        if (ToEvidence.Size2D() > 120.f)
+            MoveToward(BoxEvidenceWorldPosition, 88.f, Dt);
+        else
+            SetActorRotation(FRotator(0.f, GetActorRotation().Yaw +
+                32.f * FMath::Sin(GetWorld()->GetTimeSeconds() * 2.f) * Dt, 0.f));
+        if (BoxSearchSeconds <= 0.f)
+            BoxInterestRemainingSeconds = 0.f;
+    }
+    return true;
+}
+
 float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent,
                                 AController* EventInstigator, AActor* DamageCauser)
 {
@@ -581,50 +654,6 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     // real unblocked view from the guard's FRONT; no magical 360-degree ID.
     // Staged parcels on the working conveyor are expected, so the same
     // close look does not create a contrived alert at that position.
-    const FVector GuardForward = GetActorForwardVector().GetSafeNormal2D();
-    const bool bLegitimateReceivingParcel =
-        Player->GetActorLocation().X >= -3400.f
-        && Player->GetActorLocation().X <= -2200.f
-        && FMath::Abs(Player->GetActorLocation().Y + 370.f) < 65.f;
-    const bool bCloseUnusualCarton = Player->IsStillInCarton()
-        && !bLegitimateReceivingParcel && bRealSightline
-        && Distance < 165.f
-        && FVector::DotProduct(GuardForward,
-            ToPlayer.GetSafeNormal2D()) > 0.50f;
-    // Seeing a box is NOT seeing Snake. Only a continuous 1.3s deliberate
-    // inspection upgrades visible-object evidence into a confirmed identity.
-    // Losing sight/turning away resets the timer; guarding through walls fails.
-    if (bCloseUnusualCarton && AwarenessState < 3)
-    {
-        CartonInspectionSeconds = FMath::Min(
-            CartonInspectionSeconds + FMath::Max(0.f, DeltaSeconds), 1.35f);
-        if (!bCartonInspectionAnnounced)
-        {
-            EmitGuardCallout(TEXT("ContainerInspection"),
-                TEXT("GUARD: WHO LEFT THIS CARTON HERE?"));
-            bCartonInspectionAnnounced = true;
-        }
-        if (CartonInspectionSeconds < 1.30f)
-            Suspicion = FMath::Max(Suspicion, .25f);
-    }
-    else
-    {
-        CartonInspectionSeconds = 0.f;
-        bCartonInspectionAnnounced = false;
-    }
-    const bool bCartonIdentityConfirmed = bCloseUnusualCarton
-        && CartonInspectionSeconds >= 1.30f;
-    if (bCartonIdentityConfirmed && !bCartonIdentitySpoken)
-    {
-        EmitGuardCallout(TEXT("ContainerOpened"),
-            TEXT("GUARD: WAIT! THERE'S SOMEONE IN THERE!"));
-        bCartonIdentitySpoken = true;
-        OnCartonInspectionConfirmed(); // presentation only; no free damage
-    }
-    if (!bCloseUnusualCarton) bCartonIdentitySpoken = false;
-    const bool bHasLineOfSight = bRealSightline
-        && (AwarenessState >= 3 || !Player->IsStillInCarton()
-            || bCartonIdentityConfirmed);
     const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
     const EMGFacilitySecurityState BaseState = Mission
@@ -633,6 +662,88 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         BaseState == EMGFacilitySecurityState::Evasion;
     const bool bFacilityCaution = bFacilityLockdown ||
         BaseState == EMGFacilitySecurityState::Caution;
+    const FVector GuardForward = GetActorForwardVector().GetSafeNormal2D();
+    const bool bInFront = FVector::DotProduct(
+        GuardForward, ToPlayer.GetSafeNormal2D()) > 0.50f;
+    // Detect an unusual OBJECT, not Snake. No wall, rear-facing or infinite
+    // range detection; the real world is the authority for plausible cargo.
+    const bool bBoxPhysicallyVisible = Player->IsWearingCarton()
+        && bRealSightline && bInFront && Distance < 930.f;
+    const bool bExpectedCargo = Mission &&
+        Mission->IsExpectedFreightLocation(Player->GetActorLocation());
+    const bool bMovingOnRealBelt = Mission &&
+        Mission->IsWorkingFreightConveyor(Player->GetActorLocation());
+    const bool bBoxMovedByPlayer = bBoxPhysicallyVisible &&
+        !Player->IsStillInCarton();
+    const float SuspiciousRange = (Role == EMGGuardRole::LogisticsPost ? 690.f :
+        Role == EMGGuardRole::Custody ? 650.f : 570.f)
+        + (bFacilityCaution ? 160.f : 0.f);
+    const bool bBoxEvidenceVisible = bBoxPhysicallyVisible &&
+        ((bBoxMovedByPlayer && !bMovingOnRealBelt && Distance < 880.f) ||
+         (!bExpectedCargo && Distance < SuspiciousRange) ||
+         (bFacilityLockdown && Distance < 720.f));
+    if (bBoxEvidenceVisible && AwarenessState < 3)
+    {
+        BoxEvidenceWorldPosition = Player->GetActorLocation();
+        BoxInterestRemainingSeconds = 5.5f;
+        if (!bCartonInterestAnnounced)
+        {
+            BoxPhase = EMGGuardBoxPhase::Notice;
+            BoxReactSeconds = bBoxMovedByPlayer ? .15f : .42f;
+            bCartonInterestAnnounced = true;
+            EmitGuardCallout(TEXT("ContainerNotice"),
+                bBoxMovedByPlayer
+                    ? TEXT("GUARD: THAT CARTON JUST MOVED!")
+                    : TEXT("GUARD: THAT BOX DOES NOT BELONG HERE."));
+            OnCartonNotice();
+        }
+        Suspicion = FMath::Max(Suspicion, bBoxMovedByPlayer ? .46f : .25f);
+    }
+    const bool bCloseUnusualCarton = bBoxEvidenceVisible &&
+        Distance < (bBoxMovedByPlayer ? 245.f : 160.f);
+    CartonInspectionRequiredSeconds = bBoxMovedByPlayer ? .60f :
+        (bFacilityLockdown ? .85f :
+         (Role == EMGGuardRole::LogisticsPost ? 1.70f : 1.30f));
+    if (bCloseUnusualCarton && AwarenessState < 3)
+    {
+        if (BoxPhase != EMGGuardBoxPhase::Inspect &&
+            BoxPhase != EMGGuardBoxPhase::Confirmed &&
+            BoxReactSeconds <= 0.f)
+        {
+            BoxPhase = EMGGuardBoxPhase::Inspect;
+            if (!bCartonInspectionAnnounced)
+            {
+                bCartonInspectionAnnounced = true;
+                EmitGuardCallout(TEXT("ContainerInspection"),
+                    TEXT("GUARD: WAIT. I'M CHECKING THIS ONE."));
+                OnCartonInspectStarted();
+            }
+        }
+        // Only continuous LOS in the actual Inspect phase accumulates proof.
+        if (BoxPhase == EMGGuardBoxPhase::Inspect)
+            CartonInspectionSeconds = FMath::Min(
+                CartonInspectionSeconds + FMath::Max(0.f, DeltaSeconds), 1.75f);
+    }
+    else
+        CartonInspectionSeconds = 0.f;
+    const bool bCartonIdentityConfirmed =
+        (bCloseUnusualCarton && CartonInspectionSeconds >= CartonInspectionRequiredSeconds) ||
+        (BoxPhase == EMGGuardBoxPhase::Confirmed &&
+         bBoxPhysicallyVisible && Distance < 350.f);
+    if (bCartonIdentityConfirmed && !bCartonIdentitySpoken)
+    {
+        BoxPhase = EMGGuardBoxPhase::Confirmed;
+        bCartonIdentitySpoken = true;
+        EmitGuardCallout(TEXT("ContainerOpened"),
+            TEXT("GUARD: SOMEONE'S INSIDE!"));
+        OnCartonInspectionConfirmed();
+    }
+    if (!bBoxEvidenceVisible && BoxPhase != EMGGuardBoxPhase::Confirmed)
+        bCartonInspectionAnnounced = false;
+    const bool bHasLineOfSight = bRealSightline &&
+        (!Player->IsWearingCarton() || bCartonIdentityConfirmed);
+    // A moving cardboard box is suspicious, but is not proof of identity
+    // until a real guard actually inspects it.
 
     // The officers at the detention truck CHALLENGE instead of automatically
     // attacking a compliant nearby suspect. Challenge requires first-hand
@@ -904,7 +1015,9 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         SetSecurityPhase(EMGGuardAwarenessPhase::Engaged);
     else if (bConfirmedVisualNow && AwarenessState >= 1)
         SetSecurityPhase(EMGGuardAwarenessPhase::Confirming);
-    else if (DistractionPhase == EDistractionPhase::React ||
+    else if ((BoxPhase != EMGGuardBoxPhase::None &&
+              BoxPhase != EMGGuardBoxPhase::Confirmed) ||
+             DistractionPhase == EDistractionPhase::React ||
              DistractionPhase == EDistractionPhase::Approach)
         SetSecurityPhase(EMGGuardAwarenessPhase::Investigating);
     else if (DistractionPhase == EDistractionPhase::Search ||
@@ -932,7 +1045,11 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         SetGuardPosture(EMGGuardPosture::Report);
     else if (AwarenessState >= 3)
         SetGuardPosture(EMGGuardPosture::Engage);
-    else if (DistractionPhase != EDistractionPhase::None || SearchForLastKnownSeconds > 0.f)
+    else if (BoxPhase == EMGGuardBoxPhase::Notice ||
+             BoxPhase == EMGGuardBoxPhase::Approach ||
+             BoxPhase == EMGGuardBoxPhase::Inspect ||
+             BoxPhase == EMGGuardBoxPhase::Search ||
+             DistractionPhase != EDistractionPhase::None || SearchForLastKnownSeconds > 0.f)
         SetGuardPosture(EMGGuardPosture::Investigate);
     else if (AwarenessState == 2)
         SetGuardPosture(EMGGuardPosture::Search);
@@ -944,7 +1061,12 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     // instant mag swap during a full-speed, two-handed sprint.
     if (bSidearmReloading || bSidearmAiming) return;
     // Noise investigations are interruptible by real detection/alert.
-    if (AdvanceNoiseInvestigation(DeltaSeconds))
+    if (AdvanceBoxInvestigation(DeltaSeconds))
+    {
+        // Contextual box evidence uses the same sweep/physical movement as
+        // other investigations, without duplicating the patrol AI.
+    }
+    else if (AdvanceNoiseInvestigation(DeltaSeconds))
     {
         // Noise behaviour already selected movement/turning for this frame.
     }
