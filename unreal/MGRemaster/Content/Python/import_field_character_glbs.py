@@ -117,23 +117,67 @@ def import_prototype(role: str):
         "Retarget orientation, verify all AnimationSequences, AnimBP, PBR and "
         "720p appearance separately. NOT production art."
     )
-    # UE GLB import can produce separate AnimationSequences. They are not a
-    # finished runtime graph; we report what actually exists instead of
-    # pretending source clips guarantee playable full-body animation.
+    # Convert imported clips to STABLE named assets so native C++ can play a
+    # genuinely breathing idle even when an artist AnimBlueprint is not built.
+    # Reject an importer which silently produces a static skeleton only.
     sequences = [p for p in imported
                  if isinstance(unreal.EditorAssetLibrary.load_asset(p),
                                unreal.AnimSequence)]
     if not sequences:
-        unreal.log_warning(
-            f"{role}: 18-joint skeletal mesh imported, but NO Unreal "
-            "AnimationSequence assets were reported. Enable/import skeletal "
-            "animations and create runtime ABP before accepting animation QA."
+        raise RuntimeError(
+            f"{role}: skinned mesh imported, but UE Interchange produced NO "
+            "AnimationSequence. Install/enable skeletal animation import; "
+            "an unanimated character is not acceptable for a playtest."
+        )
+    role_prefix = {
+        "snake": "Snake", "fox": "GrayFox",
+        "guard": "Guard", "shoot_gunner": "Shotmaker",
+    }[role]
+    expected_names = set(REQUIRED_ANIMS)
+    expected_names.update({"IdleAlert", "IdleLook", "IdleWary"})
+    if role == "fox":
+        expected_names.add("Captive")
+    if role == "shoot_gunner":
+        expected_names.update({"Address", "Shoulder", "Recoil", "Search"})
+    found = set()
+    organized = {}
+    for source_path in sequences:
+        name = str(source_path).split("/")[-1].split(".")[0]
+        matches = [clip for clip in expected_names
+                   if name.lower() == clip.lower()
+                   or name.lower().endswith("_" + clip.lower())]
+        if len(matches) != 1:
+            unreal.log_warning(
+                f"{role}: cannot uniquely identify imported animation "
+                f"{name} from {source_path}; retaining its original path"
+            )
+            continue
+        clip = matches[0]
+        target_anim = f"{destination}/Animations/AS_{role_prefix}_{clip}"
+        if source_path != target_anim:
+            if unreal.EditorAssetLibrary.does_asset_exist(target_anim):
+                raise RuntimeError(
+                    f"{role}: refusing to overwrite existing animation "
+                    f"{target_anim}"
+                )
+            if not unreal.EditorAssetLibrary.rename_asset(source_path, target_anim):
+                raise RuntimeError(
+                    f"{role}: could not move {source_path} to {target_anim}"
+                )
+        found.add(clip)
+        organized[clip] = target_anim
+    missing = expected_names - found
+    if missing:
+        raise RuntimeError(
+            f"{role}: missing real Unreal AnimationSequences: {sorted(missing)}. "
+            "Check Interchange import clip naming or use Editor import settings."
         )
     unreal.log(
-        f"{role}: Unreal imported {len(sequences)} AnimationSequence "
-        f"asset(s): {sequences}"
+        f"{role}: imported 18-joint skinned mesh {target}; "
+        f"{len(found)} verified animation sequences: {organized}. "
+        "These are procedural source performances, not mocap/PBR final art."
     )
-    return {"mesh": target, "animations": sequences}
+    return {"mesh": target, "animations": organized}
 
 
 def main():
