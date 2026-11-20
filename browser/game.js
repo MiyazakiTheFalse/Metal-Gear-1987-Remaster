@@ -209,6 +209,26 @@ for (const [centre,width] of [[-22.6,20],[22,15]]) {
  cameraOnlySolids.push(add('ceiling',centre,3.5,0,width,.28,10.4,color.roof));
 }
 wall('yard boundary',-32.6,0,.28,10.4);
+// Source-derived Building 1 truck pickup, provisionally compressed into the
+// existing connected entry yard. This is NOT a verified 1987 tile-accurate
+// placement. Cargo entrances on their south sides are physically accessible.
+const sourceTruckCentres=[-30.35,-27.55,-24.75];
+for(let i=0;i<sourceTruckCentres.length;i++){
+ const x=sourceTruckCentres[i],name='building one supply truck '+i;
+ add(name+' cargo bed',x,.10,3.7,1.82,.16,2.05,color.metal,mat.steel);
+ for(const side of [-1,1])
+  add(name+' sidewall',x+side*.85,1.12,3.70,.12,1.98,1.98,
+      color.metal,mat.steel,true);
+ add(name+' front cab',x,1.06,4.68,1.75,2.05,.58,color.metal,mat.steel,true);
+ cameraOnlySolids.push(add(name+' cargo roof',x,2.27,3.68,1.79,.16,1.97,
+      color.roof,mat.steel));
+ for(const side of [-1,1])for(const z of [3.12,4.32])
+  add(name+' wheel',x+side*.89,.35,z,.26,.65,.49,color.dark,mat.steel).mesh='cylinder';
+}
+const originalCard1Target={x:-27.55,z:3.52};
+const originalCard1Prop=add('Card 1 inside central original truck',
+ originalCard1Target.x,.40,originalCard1Target.z,.33,.13,.23,
+ color.stripe,mat.light);
 add('concrete floor',35,-.26,0,16,.5,10.4,color.floor,mat.grate);
 for(const z of [-5.15,5.15])wall('kennel boundary',35,z,16,.28);
 cameraOnlySolids.push(add('kennel ceiling',35,3.5,0,16,.28,10.4,color.roof));
@@ -562,6 +582,9 @@ const boxSlot={name:'FREIGHT CARTON [TEMPORARY]',usable:false};
 const smokeSlot={name:'CIGARETTES',usable:false};
 const canonicalBoxSlot={name:'CARDBOARD BOX [F3 / CARD 2]',usable:false};
 inventories.items.push(boxSlot,smokeSlot,canonicalBoxSlot);
+const card1Slot={name:'CARD 1',usable:false};
+inventories.items.push(card1Slot);
+let firstCardEarned=false;
 const bay={x:-26.8,z:-2.3};
 const lens={x:-19.2,z:-4.55};
 const beamX=-21.8;
@@ -672,7 +695,10 @@ let nextImpact=0, sealedWeapon='BARE HANDS', quietSince=0, movementSample=null;
 const boss={...guards[0],x:25,z:.6,yaw:Math.PI,hp:240,boss:true,waypoints:[],last:{x:25,z:.6},knocked:false,cycle:0};
 const yardGuard={...guards[0],x:-17.2,z:2.4,yaw:Math.PI,waypoints:[],last:{x:-17.2,z:2.4},yard:true};
 const arrestGuard={...yardGuard,x:post.x,z:post.z,postGuard:true,waypoints:[],last:{...post}};
-guards.push(yardGuard,arrestGuard);
+const truckSentry={...guards[0],x:-26.15,z:2.02,yaw:Math.PI*.5,
+ yard:true,truckSentry:true,patrol:0,waypoints:[],last:{x:-26.15,z:2.02},
+ state:0,suspicion:0,alert:0,knocked:false,hp:100};
+guards.push(yardGuard,arrestGuard,truckSentry);
 // Bake contact and cast shadows for fixed scenery once. Dynamic shutters,
  // actors and breakable panels are intentionally excluded from this map.
 function bakeFloorShade(){
@@ -710,6 +736,8 @@ function syncEquipment(){
  // Opening cargo is *borrowed* set dressing, not the permanent MSX2 box.
  // The authentic floor-3 Card-2 pickup is still a distinct locked item.
  boxSlot.usable=stage<0&&world.box;
+ card1Slot.usable=firstCardEarned&&kitAvailable();
+ originalCard1Prop.active=!firstCardEarned;
  canonicalBoxSlot.usable=false;
  smokeSlot.usable=kitAvailable();
  parcel.active=tape.active=!world.box;
@@ -765,7 +793,7 @@ function save(){
  try{
   localStorage.setItem(STORAGE,JSON.stringify({version:8,service:{charge:service.charge,open:service.open,intel:service.intel,kidDown:service.kidDown,parachute:service.parachute},storesOpen,legacyFloorCard,freight:{handgun:world.handgun,box:world.box,freightAmbientHeard:world.freightAmbientHeard,cameraOff:world.cameraOff,foxFollowup:world.foxFollowup,preview:world.preview,hallOpen:world.hallOpen},propertyTag:{state:tag.state,point:tag.point},stage,cardDrop,x:player.x,z:player.z,
    rounds,equippedWeapon,sealedWeapon,recoveredGear,wallHits,health,
-   storySeen:window.MGCharacterStory?.heard()||[],
+   firstCardEarned,storySeen:window.MGCharacterStory?.heard()||[],
    bossHP:boss.hp,bossRest:stage>=5?{x:boss.x,z:boss.z,yaw:boss.yaw}:null,
    guardBodies:guards.map((g,i)=>g.knocked&&!g.boss?{
     i,x:g.x,z:g.z,unconscious:g.knockedOut===true}:null).filter(Boolean),
@@ -782,6 +810,7 @@ function load(){
  const legacy=data.version<4;
  if(data.stage<(legacy?0:-2)||data.stage>(legacy?4:data.version===4?6:8))return false;
  stage=legacy?Math.min(3,data.stage):data.stage;
+ firstCardEarned=data.firstCardEarned===true;
  // Version 4 opened the exit on boss defeat. Preserve that earned access.
  if(data.version===4&&stage>=5)stage+=2;
  service.charge=stage===8&&data.service?.charge===true;service.open=service.charge&&data.service?.open===true;
@@ -1131,6 +1160,13 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
    }
    if(exitAction==='locked'){playCue('denied');popup('Reader requires Card 3.');return;}
 
+   if(stage<0&&!firstCardEarned&&dist(player,originalCard1Target)<1.5&&
+      !lineBlockedSight(player,originalCard1Target,1.35,.4)){
+     firstCardEarned=true;
+     syncEquipment();playCue('card');
+     popup('CARD 1 SECURED · CENTRE SUPPLY TRUCK',2.8);
+     save();return;
+   }
    if(stage===-2&&dist(player,informant)<2.2){
      progress(-1);say('informant');return;
    }
@@ -1813,7 +1849,8 @@ function updateGuards(dt){kennelTick(dt);kidTick(dt);const pulse=updatePropertyT
    g.investigateUntil=0;g.suspicion=Math.min(g.suspicion,.13);g.state=0;
    g.pathTime=0;g.scanYaw=null;
  }
- const base=g.postGuard?post:g.yard?{x:-17.5,z:-3}:g.patrol===0?{x:8.0,z:3.15}:{x:11.8,z:-3.05};const alternate=g.postGuard?post:g.yard?{x:-20,z:3}:g.patrol===0?{x:11.7,z:3.0}:{x:7.1,z:-3.05};let target=g.state>=2||investigating?g.last:(g.patrol%2?alternate:base);if(g.state===0&&dist(g,target)<.55){g.patrol=1-g.patrol;target=g.patrol?alternate:base}
+ const base=g.postGuard?post:g.truckSentry?{x:-28.15,z:2.12}:g.yard?{x:-17.5,z:-3}:g.patrol===0?{x:8.0,z:3.15}:{x:11.8,z:-3.05};
+ const alternate=g.postGuard?post:g.truckSentry?{x:-25.85,z:2.12}:g.yard?{x:-20,z:3}:g.patrol===0?{x:11.7,z:3.0}:{x:7.1,z:-3.05};let target=g.state>=2||investigating?g.last:(g.patrol%2?alternate:base);if(g.state===0&&dist(g,target)<.55){g.patrol=1-g.patrol;target=g.patrol?alternate:base}
  g.pathTime-=dt;if(g.pathTime<=0||!g.waypoints.length||dist(target,g.target||{x:0,z:0})>1){g.waypoints=pathfind(g,target);g.target={...target};g.pathTime=.9}
  const next=g.waypoints[0]||target;
  if(investigating&&dist(g,target)<.82){
@@ -2563,7 +2600,8 @@ function frame(now){requestAnimationFrame(frame);const real=clamp((now-last)/100
  updatePlayer(dt);updateFox(dt);updateGuards(dt);
 }ambience(dt);for(const f of footsteps)f.life-=dt;footsteps=footsteps.filter(f=>f.life>0);shots.forEach(s=>s.life-=dt);shots=shots.filter(s=>s.life>0);for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy-=4.4*dt;p.life-=dt}particles=particles.filter(p=>p.life>0);noiseEvents.forEach(n=>n.life-=dt);noiseEvents=noiseEvents.filter(n=>n.life>0);if(awareness===0&&stage!==4&&Math.floor(gameTime/12)!==Math.floor((gameTime-dt)/12))save();if(awareness!==prevAlert)record('awareness.'+awareness);if(awareness===3&&prevAlert!==3)achievement.push({time:gameTime});prevAlert=awareness;}drawFrame(gameTime,dt);if(started)updateHUD(dt);frameCount++;if(now-frameStart>1000){$('fps').textContent=Math.round(frameCount*1000/(now-frameStart))+' FPS';frameStart=now;frameCount=0}}
 // Console contract for deterministic browser tests, never elevated to source fidelity.
-window.__mgGameDebug={get state(){return {stage,service:{...service},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,cinematic:window.MGCinematicDirector?.active||null,cinematicSeen:window.MGCinematicDirector?.seen||[],itemSlots:inventories.items.map(i=>({name:i.name,usable:i.usable})),safeLift:{...safeLift},player:{...player},bodyCollider:{...bodyShape(),orientation:player.stance===2?'horizontal':'vertical',samples:bodySamples(player.x,player.z,player.stance,player.yaw)},awareness,paused,equipOpen,noiseEvents:noiseEvents.map(n=>({...n})),guards:guards.map(g=>({state:g.state,x:g.x,z:g.z,yaw:g.yaw,last:{...g.last},investigateUntil:g.investigateUntil||0,lastKnockId:g.lastKnockId||0,boxInspectionAge:g.boxInspectionAge||0,boxIdentitySpoken:!!g.boxIdentitySpoken,knocked:g.knocked,unconscious:!!g.knockedOut,dragged:!!g.dragged,aimSubject:g.aimSubject,aimTime:g.aimTime,fireCooldown:g.fireCooldown,shotVisual:g.shotVisual})),fox:{x:fox.x,z:fox.z,hp:fox.hp,alive:fox.alive,mode:fox.mode,stance:fox.stance,moveSpeed:fox.moveSpeed},missionFailed,coverAssets:coverAssets.map(c=>({...c})),activeTracers:shots.filter(s=>s.tracer).length,damagePulse,damageDirection,cinematic:window.MGCinematicDirector?.active||null,cinematicBlocking:!!window.MGCinematicDirector?.blocking,foxListeningLearned:world.foxFollowup,storyEvents:window.MGCharacterStory?.heard()||[],originalMapVerified:false,renderedFrames:drawn,visualVersion:'original_humanoid_mk4_escort_armed_guards',meshKinds:Object.keys(meshLibrary),materialAtlas:{...materialAtlas},environmentModelCounts:{bedParts:sceneDetail.filter(o=>o.name.startsWith('cot ')||o.name.startsWith('blanket ')||o.name.startsWith('pillow ')||o.name==='folded wool blanket').length,lockerDetails:sceneDetail.filter(o=>o.name.startsWith('locker ')).length,cabinetDetails:sceneDetail.filter(o=>o.name.includes('front trim')||o.name.includes('bolt head')).length,ceilingsBlockCamera:cameraOnlySolids.some(o=>o.name==='ceiling'&&o.active)},camEye:[...cam.eye],cameraBlocked:cameraPositionPenetrates(cam.eye),cameraBelowFloor:cam.eye[1]<.28,activePadIndex,padPrev:[...padPrev],started}},readPad:()=>readGamepad(),start:()=>start(false),act:action,teleport:(x,z)=>{player.x=x;player.z=z},setCamera:(yaw,pitch=0)=>{cam.yaw=yaw;cam.pitch=pitch},stepCamera:(dt=.016)=>updateCamera(dt),canOccupy:(x,z,stance,yaw=player.yaw)=>canOccupyBody(x,z,stance,yaw),moveBody:(vx,vz,dt)=>movePlayer(vx,vz,dt),step:(dt)=>{gameTime+=dt;updatePlayer(dt);updateFox(dt);updateGuards(dt)},damageFox:(n)=>damageFox(n),stepFox:(dt)=>updateFox(dt),sightBlocked:(a,b,fromY=1.58,toY=1.52)=>lineBlockedSight(a,b,fromY,toY),radarVisionDistance:(index,angle,range=10)=>radarVisionDistance(guards[index],angle,range),findPath:(a,b)=>pathfind(a,b),foxRouteRisk:(p)=>foxRouteRisk(p),guardSeesPosition:(index,pos)=>guardSeesPosition(guards[index],pos),reset};
+window.__mgGameDebug={get state(){return {stage,service:{...service},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
+ firstCardEarned,card1World:originalCard1Prop.active?{...originalCard1Target}:null,cinematic:window.MGCinematicDirector?.active||null,cinematicSeen:window.MGCinematicDirector?.seen||[],itemSlots:inventories.items.map(i=>({name:i.name,usable:i.usable})),safeLift:{...safeLift},player:{...player},bodyCollider:{...bodyShape(),orientation:player.stance===2?'horizontal':'vertical',samples:bodySamples(player.x,player.z,player.stance,player.yaw)},awareness,paused,equipOpen,noiseEvents:noiseEvents.map(n=>({...n})),guards:guards.map(g=>({state:g.state,x:g.x,z:g.z,yaw:g.yaw,last:{...g.last},investigateUntil:g.investigateUntil||0,lastKnockId:g.lastKnockId||0,boxInspectionAge:g.boxInspectionAge||0,boxIdentitySpoken:!!g.boxIdentitySpoken,knocked:g.knocked,unconscious:!!g.knockedOut,dragged:!!g.dragged,aimSubject:g.aimSubject,aimTime:g.aimTime,fireCooldown:g.fireCooldown,shotVisual:g.shotVisual})),fox:{x:fox.x,z:fox.z,hp:fox.hp,alive:fox.alive,mode:fox.mode,stance:fox.stance,moveSpeed:fox.moveSpeed},missionFailed,coverAssets:coverAssets.map(c=>({...c})),activeTracers:shots.filter(s=>s.tracer).length,damagePulse,damageDirection,cinematic:window.MGCinematicDirector?.active||null,cinematicBlocking:!!window.MGCinematicDirector?.blocking,foxListeningLearned:world.foxFollowup,storyEvents:window.MGCharacterStory?.heard()||[],originalMapVerified:false,renderedFrames:drawn,visualVersion:'original_humanoid_mk4_escort_armed_guards',meshKinds:Object.keys(meshLibrary),materialAtlas:{...materialAtlas},environmentModelCounts:{bedParts:sceneDetail.filter(o=>o.name.startsWith('cot ')||o.name.startsWith('blanket ')||o.name.startsWith('pillow ')||o.name==='folded wool blanket').length,lockerDetails:sceneDetail.filter(o=>o.name.startsWith('locker ')).length,cabinetDetails:sceneDetail.filter(o=>o.name.includes('front trim')||o.name.includes('bolt head')).length,ceilingsBlockCamera:cameraOnlySolids.some(o=>o.name==='ceiling'&&o.active)},camEye:[...cam.eye],cameraBlocked:cameraPositionPenetrates(cam.eye),cameraBelowFloor:cam.eye[1]<.28,activePadIndex,padPrev:[...padPrev],started}},readPad:()=>readGamepad(),start:()=>start(false),act:action,teleport:(x,z)=>{player.x=x;player.z=z},setCamera:(yaw,pitch=0)=>{cam.yaw=yaw;cam.pitch=pitch},stepCamera:(dt=.016)=>updateCamera(dt),canOccupy:(x,z,stance,yaw=player.yaw)=>canOccupyBody(x,z,stance,yaw),moveBody:(vx,vz,dt)=>movePlayer(vx,vz,dt),step:(dt)=>{gameTime+=dt;updatePlayer(dt);updateFox(dt);updateGuards(dt)},damageFox:(n)=>damageFox(n),stepFox:(dt)=>updateFox(dt),sightBlocked:(a,b,fromY=1.58,toY=1.52)=>lineBlockedSight(a,b,fromY,toY),radarVisionDistance:(index,angle,range=10)=>radarVisionDistance(guards[index],angle,range),findPath:(a,b)=>pathfind(a,b),foxRouteRisk:(p)=>foxRouteRisk(p),guardSeesPosition:(index,pos)=>guardSeesPosition(guards[index],pos),reset};
 // Deterministic development-only combat hook (absent unless tests opt in).
 if(window.__MG_TEST__){
  window.__mgGameDebug.testSetGuard=(index,settings)=>{
