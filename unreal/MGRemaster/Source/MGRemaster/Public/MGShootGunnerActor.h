@@ -46,6 +46,8 @@ public:
     UFUNCTION(BlueprintPure, Category="Shotmaker|Animation")
     bool IsFiringVolley() const { return State == EAttackState::Volley; }
     UFUNCTION(BlueprintPure, Category="Shotmaker|Animation")
+    bool IsRecovering() const { return State == EAttackState::Recovery; }
+    UFUNCTION(BlueprintPure, Category="Shotmaker|Animation")
     float GetHealthFraction() const { return FMath::Clamp(Health / 100.f, 0.f, 1.f); }
     UFUNCTION(BlueprintPure, Category="Shotmaker|Animation")
     FVector GetLockedAimPoint() const { return LockedAimPoint; }
