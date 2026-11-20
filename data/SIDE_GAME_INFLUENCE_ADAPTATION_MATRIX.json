@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "updated": "2026-11-20",
+  "production_rule": "1987 MSX2 is the progression authority. Other entries supply presentation and mechanics, never auto-authorize plot, items, boss identities or architecture. Every inspired mechanic must earn its place through a tested player decision.",
+  "historical_sources": [
+    {
+      "game": "Metal Gear (MSX2, 1987)",
+      "authority": "CANON_ANCHOR",
+      "why": "Original Outer Heaven 1995 mission, characters, item/card gates, boss identities, PO Ws, finale",
+      "verification": [
+        "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/7524",
+        "https://metalgear.konami.net/manual/mc1/mg1_msx/pc/en/page10.html"
+      ],
+      "protected": [
+        "Card 2 before canonical cardboard box on Building 1 floor 3",
+        "cigarettes lengthen self-destruct escape in finale; exact timer values version-sensitive",
+        "avoid NES-specific bosses or layout"
+      ]
+    },
+    {
+      "game": "Metal Gear: Ghost Babel (Game Boy Color, 2000)",
+      "authority": "NONCANON_GAMEPLAY_REFERENCE",
+      "why": "Stealth challenge replay, cargo/box deception and distinct layouts; caution against repetitive colour-coded conveyor maze",
+      "verification": [
+        "https://www.nintendo.com/en-gb/Games/Game-Boy/Metal-Gear-Solid-Ghost-Babel-265999.html",
+        "https://nintendowire.com/features/taking-a-look-back-at-the-game-boy-colors-metal-gear-solid/"
+      ],
+      "adopt": [
+        "One optional signed freight bypass with meaningful camera/guard counterplay",
+        "Out-of-place box inspection: close, visible, frontal, staged container exempt, advance warning",
+        "Post-clear noncanonical VR-style rehearsals with no changes to main story state"
+      ],
+      "reject": [
+        "import Ghost Babel story/characters/bosses",
+        "multiply colour-coded transit permutations",
+        "force freight-route puzzle into 1987 plot"
+      ]
+    },
+    {
+      "game": "Metal Gear Solid: Peace Walker (PSP, 2010)",
+      "authority": "OPTIONAL_PRESENTATION_REFERENCE",
+      "why": "User-driven mission briefings, audio/debriefs and clear replay loops",
+      "verification": [
+        "https://www.gamespot.com/articles/metal-gear-solid-peace-walker-hands-on/1100-6229066/"
+      ],
+      "adopt": [
+        "Optional frequency/information log accessed without interrupting player",
+        "Mission practice modes completely isolated from campaign items/checkpoints"
+      ],
+      "reject": [
+        "Mother Base troops/crafting/research and replay grind in 1995 Outer Heaven",
+        "secret lore exposition before player can earn it"
+      ]
+    },
+    {
+      "game": "Metal Gear Solid: Portable Ops (PSP, 2006)",
+      "authority": "CONTESTED_LORE_REFERENCE",
+      "why": "Earlier interpretive Gray Fox/Null material appears in Konami's retrospective but franchise canon classifications differ",
+      "verification": [
+        "https://eu-support.konami.com/hc/en-gb/articles/9822256083863-Backstory-What-is-the-story-of-Metal-Gear-Solid-Portable-Ops"
+      ],
+      "adopt": [
+        "Subtle human fatigue/body language and competence for 1995 Gray Fox",
+        "Leave earlier history uncertain until source-ranked timeline review"
+      ],
+      "reject": [
+        "mandatory Null recollection or direct 1970 flashback inside prison",
+        "treat every Portable Ops detail as incontrovertible 1987 character knowledge"
+      ]
+    },
+    {
+      "game": "Metal Gear 2: Solid Snake (MSX2, 1990)",
+      "authority": "LATER_ENTRY_MECHANICAL_REFERENCE",
+      "why": "Build upon stealth/audio/crawling/camera and NPC rhythms without moving Zanzibar Land events into 1995",
+      "verification": [
+        "https://www.konami.com/mg/history/jp/ja/mg2"
+      ],
+      "adopt": [
+        "Readable guard searches, reaction to environmental sound, varied corridors and low passages"
+      ],
+      "reject": [
+        "future plot twists, unearned future equipment or established later identity memories"
+      ]
+    },
+    {
+      "game": "Metal Gear Acid series (PSP, 2004–2005)",
+      "authority": "NONCANON_SYSTEMIC_REFERENCE",
+      "why": "Combinatorial problem solving; choose tactics that interact with surface, timing and threat",
+      "verification": [
+        "https://www.konami.com/games/metalgear/"
+      ],
+      "adopt": [
+        "A boss arena with more than one physical way to break sight or redirect risk"
+      ],
+      "reject": [
+        "real-time campaign replaced by deck building or unearned card-based power systems"
+      ]
+    },
+    {
+      "game": "Metal Gear Solid V: The Phantom Pain (2015)",
+      "authority": "LATER_CANON_PRESENTATION_REFERENCE",
+      "why": "Motion, cinematic direction, material craft, readable stealth systemic complexity and 1984 character context—not an Outer Heaven 1995 fortress floorplan",
+      "verification": [
+        "https://www.konami.com/mg/history/jp/ja/mgsvtpp"
+      ],
+      "adopt": [
+        "foot and hand contacts, physical positioning and reactive sightlines",
+        "silent player-facing performances that carry subtext"
+      ],
+      "reject": [
+        "claim Mother Base is 1995 Outer Heaven",
+        "copy Snake's later outfits or reveal the 1987 ending early",
+        "ripped models/recorded sound"
+      ]
+    }
+  ],
+  "adaptations": [
+    {
+      "id": "CARDBOARD_CONCEALED_BOX",
+      "source_pattern": "Ghost Babel / original MG",
+      "source_canon": "Original cardboard box acquired after Card 2 on Building 1 third floor",
+      "implemented_browser": "Browser freight carton and stationary-cover plus close-range guard inspection in current source",
+      "implemented_unreal": "Dispatch freight carton and physical guard inspection code in current source",
+      "status": "source_prototype_unverified",
+      "verification": [
+        "real line of sight required",
+        "unmanifested close frontal crate gradually raises suspicion",
+        "marked freight line protected against arbitrary suspicion",
+        "box is confiscated on capture",
+        "no perfect invisible box in a guard's face"
+      ],
+      "followup": "Separate prelude-only freight disguise from actual canonical third-floor permanent box acquisition in both save systems, then test inventory parity."
+    },
+    {
+      "id": "CIGARETTES_REVEAL_HIDDEN_BEAM",
+      "source_pattern": "later-game optical puzzles; stealth smoke interactions",
+      "source_canon": "MSX2 cigarettes extend self-destruct escape time; smoke beam reveal is optional remake interpretation",
+      "implemented_browser": "Short smoke near freight optical barrier",
+      "implemented_unreal": "Short smoke visualization near dispatch",
+      "status": "source_prototype_unverified",
+      "verification": [
+        "smoke neither disables laser nor makes player invisible",
+        "no requirement to smoke as mission solution",
+        "final escape timer effect remains a separate future canonical obligation"
+      ]
+    },
+    {
+      "id": "OPTIONAL_DIEGETIC_BRIEFINGS",
+      "source_pattern": "Peace Walker briefing selection",
+      "source_canon": "Original radio contacts and earned prisoner intelligence",
+      "implemented_browser": "Radio and intelligence log already exist",
+      "implemented_unreal": "Transceiver and contextual objective log",
+      "status": "partial_source",
+      "verification": [
+        "no unasked mandatory cutscene",
+        "only knowledge speaker plausibly has",
+        "not a new lore shortcut"
+      ]
+    },
+    {
+      "id": "POST_CLEAR_REPLAY_DRILLS",
+      "source_pattern": "Ghost Babel VR Challenges / Peace Walker replay",
+      "source_canon": "Outside historical story",
+      "implemented_browser": "Separate Shoot Gunner rehearsal exists; other drills planned",
+      "implemented_unreal": "Not yet a separate practice mode",
+      "status": "design_only",
+      "verification": [
+        "separate save slots",
+        "no free story items or flags",
+        "optional score/review and no canon writing",
+        "similar challenge/parity in both builds"
+      ]
+    },
+    {
+      "id": "GRAY_FOX_SUBTEXT",
+      "source_pattern": "Portable Ops Null as disputed heritage",
+      "source_canon": "1987 Gray Fox rescue and Metal Gear intelligence",
+      "implemented_browser": "Short optional line about counting guards' steps; stage-appropriate",
+      "implemented_unreal": "Source world/animation bridge but no final hand-authored acting",
+      "status": "partial_source",
+      "verification": [
+        "no premature Null identity statement",
+        "no claims about Venom/Big Boss relationship",
+        "Gray Fox's present experience shown through behavior"
+      ]
+    },
+    {
+      "id": "BOSS_ADAPTIVE_THREAT",
+      "source_pattern": "MGS V systems and Ghost Babel distinctive bosses",
+      "source_canon": "1987 encounter identity and viable equipment",
+      "implemented_browser": "Shoot Gunner movement, interrupted volleys and Machinegun Kid source follow-up",
+      "implemented_unreal": "Shoot Gunner source, other boss content less advanced",
+      "status": "source_prototype_unverified",
+      "verification": [
+        "real telegraphs and recoveries",
+        "unique readable counterplay rather than damage sponge",
+        "enemy cannot instantly know where Snake went when LOS lost"
+      ]
+    }
+  ],
+  "global_safeguards": [
+    "No ripped assets, voice performances or soundtrack copies",
+    "Compare actual MSX2 1987 room/item order before accepting a new branch",
+    "Document why players would choose a tactic and what they can see/hear as feedback",
+    "Each inspiration has a non-canonical/story status and no-early-spoiler gate",
+    "Browser/Unreal parity required before an inspired system graduates from source_prototype"
+  ]
+}
