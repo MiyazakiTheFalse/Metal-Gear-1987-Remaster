@@ -52,6 +52,10 @@ class ShotmakerSourceChecks(unittest.TestCase):
         self.assertIn("LineTraceSingleByChannel(Hit, Muzzle", BOSS)
         self.assertIn("Hit.GetActor() == Player", BOSS)
         self.assertIn("ShotmakerSight", BOSS)
+        self.assertIn("PendingPumpShotIndex = CompletedShotIndex", BOSS)
+        self.assertIn("PumpCueRemaining = FMath::Min(", BOSS)
+        self.assertIn("OnPumpAction(PumpedShot)", BOSS)
+        self.assertNotIn("OnPumpAction(CompletedShotIndex)", BOSS)
         self.assertIn("ECC_Visibility", BOSS)
 
     def test_route_and_flag_awards_are_earned(self):
