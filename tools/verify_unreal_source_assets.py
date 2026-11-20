@@ -18,7 +18,7 @@ CHARACTERS = ROOT / "unreal" / "MGRemaster" / "Content" / "SourceAssets" / "Char
 BROWSER = ROOT / "browser" / "assets" / "models"
 ROLE_NAMES = ("snake", "fox", "guard", "shoot_gunner")
 COMMON_CLIPS = {
-    "Idle", "Walk", "Run", "Crouch", "Prone", "Down",
+    "Idle", "IdleAlert", "IdleLook", "IdleWary", "Walk", "Run", "Crouch", "Prone", "Down",
     "Aim", "Cover", "Melee", "Reaching", "Hit",
     "RadioListen", "CrouchAim", "ProneAim",
 }
