@@ -164,4 +164,6 @@ private:
     FVector GetActualMuzzleLocation() const;
     void FireShot(AMGPlayerCharacter* Player);
     void EnterDefeatedState();
+    FName PrototypeAnimationRequest = NAME_None;
+    void UpdatePrototypeFallbackAnimation();
 };
