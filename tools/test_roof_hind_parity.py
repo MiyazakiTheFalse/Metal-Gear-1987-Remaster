@@ -46,7 +46,7 @@ class RoofParitySourceTests(unittest.TestCase):
         self.assertIn("const skeleton=role=>facialBones", RIG)
         self.assertIn("rot[16]", RIG)
         self.assertIn("rot[17]", RIG)
-        for clip in ["Aim:", "Cover:", "Melee:", "Reaching:", "Hit:", "RadioListen:", "CrouchAim:", "ProneAim:"]:
+        for clip in ["IdleAlert:", "IdleLook:", "IdleWary:", "Aim:", "Cover:", "Melee:", "Reaching:", "Hit:", "RadioListen:", "CrouchAim:", "ProneAim:"]:
             self.assertIn(clip, EXPORT)
         self.assertIn("length:49", EXPORT)
 
