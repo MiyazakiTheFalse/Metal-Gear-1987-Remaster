@@ -739,7 +739,10 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
     if (bPlayerInitialised) return;
     AMGPlayerCharacter* Player =
         Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
-    if (!Player) return;
+    if (!Player || !Player->GetEquipment() ||
+        !Player->GetEquipment()->HasInitializedInventory()) return;
+    // Never restore inventory before UMGEquipmentComponent::BeginPlay has
+    // populated canonical slots, regardless of actor BeginPlay ordering.
     Player->SetActorLocation(bHasLoadedSave ? SavedPosition : PreludeStart,
                              false, nullptr, ETeleportType::TeleportPhysics);
     if (APlayerController* PC = Cast<APlayerController>(Player->GetController()))
