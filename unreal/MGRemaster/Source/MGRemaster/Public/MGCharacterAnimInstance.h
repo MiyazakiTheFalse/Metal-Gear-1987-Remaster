@@ -54,6 +54,12 @@ public:
     UPROPERTY(BlueprintReadOnly, Category="MG|Posture")
     bool bProne = false;
     UPROPERTY(BlueprintReadOnly, Category="MG|Posture")
+    float CrouchTransitionAlpha = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Posture")
+    float ProneTransitionAlpha = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Posture")
+    float CoverTransitionAlpha = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Posture")
     bool bAiming = false;
     UPROPERTY(BlueprintReadOnly, Category="MG|Aim")
     float AimBlendAlpha = 0.f;
