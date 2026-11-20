@@ -230,6 +230,7 @@ private:
     void FireStun();
     void Interact();
     void RestartRescue();
+    void SkipStoryCinematic();
     void ToggleMissionLog();
     void CycleGraphicsQuality();
     void WeaponWindowStart();
