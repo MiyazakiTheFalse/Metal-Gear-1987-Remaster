@@ -125,6 +125,14 @@ public:
     float LeftHandGripAlpha = 0.f;
     UPROPERTY(BlueprintReadOnly, Category="MG|Hands")
     float RightHandGripAlpha = 0.f;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Hands")
+    bool bHasValidRightWeaponSocket = false;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Hands")
+    bool bHasValidSupportHandSocket = false;
+    // AnimBlueprint target is world space, and is valid only if the imported
+    // weapon actually contains an artist-placed support_hand socket.
+    UPROPERTY(BlueprintReadOnly, Category="MG|Hands")
+    FTransform SupportHandTargetWS = FTransform::Identity;
     UFUNCTION(BlueprintImplementableEvent, Category="MG|Transitions")
     void OnPerformanceActionTransition(EMGPerformanceAction From, EMGPerformanceAction To, bool bInterrupted);
 
