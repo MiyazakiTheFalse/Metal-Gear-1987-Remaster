@@ -2,8 +2,8 @@
   "schema_version": 1,
   "doctrine": "DOCTRINE_004",
   "scope": "game_wide",
-  "coverage_status": "expanded_PostCard3_kennel_source_no_UE_playtests",
-  "note": "Expanded opening, earned custody, prison wall damage, connected Shoot Gunner wing, inventory tracking and postboss access. Source status only; exact J2ME layout and final cinematic/audio assets not certified. 2026-11-20: playable-area source extends to the dog corridor after Card 3; crawl is a marked 3D adaptation, and explosive wall/Machinegun Kid/roof remain design-only. See data/MSX2_1987_STORY_AND_WEAPON_PROVENANCE.json.",
+  "coverage_status": "23_contracts_20_source_prototypes_3_design_only_no_UE_compile",
+  "note": "Expanded opening, earned custody, prison wall damage, connected Shoot Gunner wing, inventory tracking and postboss access. Source status only; exact J2ME layout and final cinematic/audio assets not certified. 2026-11-20: playable-area source extends to the dog corridor after Card 3; crawl is a marked 3D adaptation, and explosive wall/Machinegun Kid/roof remain design-only. See data/MSX2_1987_STORY_AND_WEAPON_PROVENANCE.json. 2026-11-20: the early MSX2 pistol is now a physical V4-persisted pickup; existing design-only strings normalized for Doctrine 004 validation.",
   "beats": [
     {
       "provenance": "remake_adaptation_pending_j2me",
@@ -865,7 +865,7 @@
       "id": "building1.after_card3_explosive_wall",
       "kind": "destruction_puzzle_next_mission",
       "provenance": "MSX2_event_verified_3d_placement_interpretation",
-      "implementation_status": "design_only_not_playable",
+      "implementation_status": "design_only",
       "verification_status": "unverified",
       "intent": "Preserve the post-dog mysterious weak surface that requires plastic explosive instead of Snake suddenly punching arbitrary full concrete.",
       "trigger": "After leaving the dog sector, inspect the damaged masonry on the outer boundary.",
@@ -903,13 +903,14 @@
         "Do not make this a punch wall without proof",
         "Do not award explosives after they were confiscated without actual recovery",
         "No fake mission completion at blocked boundary"
-      ]
+      ],
+      "design_note": "Not playable; intentionally remains an actual opaque 3D build boundary, not a shipped mission."
     },
     {
       "id": "building1.machinegun_kid_leadin",
       "kind": "future_mission",
       "provenance": "MSX2_event_verified_location_and_order_not_geometry",
-      "implementation_status": "design_only_not_playable",
+      "implementation_status": "design_only",
       "verification_status": "unverified",
       "intent": "Plan the next original mercenary and rooftop/parachute sequence, respecting its order after Shotmaker and explosive wall.",
       "trigger": "After authentic plastic explosive breach and continued Building 1 progression.",
@@ -946,7 +947,58 @@
         "Do not place before Gray Fox/Shotmaker",
         "Do not invent late-game spoiler lines",
         "Verify against 1987 MSX maps"
-      ]
+      ],
+      "design_note": "Not playable; intentionally remains an actual opaque 3D build boundary, not a shipped mission."
+    },
+    {
+      "id": "prelude.handgun_pickup",
+      "kind": "canonical_weapon_acquisition",
+      "provenance": "MSX2_handgun_early_building1_placement_is_1995_remake_interpretation",
+      "implementation_status": "source_prototype",
+      "verification_status": "unverified",
+      "intent": "Replace inherited prototype handgun with an earned, inspectable early-game weapon in the 1987 source acquisition order.",
+      "trigger": "Player approaches the physically placed Building 1 handgun storage cache before any capture.",
+      "action": "Face the cache within reach and interact. A successful authoritative inventory award grants 24 provisional rounds once; V4 saves ownership and remaining ammo. Returning/reloading never duplicates it.",
+      "visual": {
+        "foreshadow": "Reachable ground-level storage shelf in a coherent logistics bay",
+        "impact": "Weapon cache hides only after actual inventory award, without granting itself through an animation",
+        "aftermath": "Snake can equip the handgun; no test stun pistol becomes available"
+      },
+      "audio": {
+        "origin": "One-shot pickup confirm cue is optional source feedback, not recorded production audio",
+        "response": "Localized radio/subtitle feedback acknowledges the acquired weapon",
+        "non_audio_equivalent": "Item disappears on collection and handgun entry becomes selectable in equipment"
+      },
+      "timing": {
+        "start_event": "Reachable physical E interaction with the cache",
+        "feedback_target_ms": 120,
+        "max_forced_lock_seconds": 0,
+        "optional_hint_seconds": [],
+        "timing_status": "source_not_UE_verified"
+      },
+      "state": {
+        "transaction": "UMGEquipmentComponent::AwardWeapon(HANDGUN,24), bEarlyHandgunAcquired, V4 SaveGame; no Rust mission flag needed",
+        "persistence": "V4 bEarnedHandgun plus exact ammo; V1–V3 previously owned handgun migration; component readiness guard before restore",
+        "ai_knowledge": "Weapon pickup does not broadcast a magical sighting or reposition guards"
+      },
+      "interruptions": [
+        "player walks past",
+        "cache approached from blocked side",
+        "rapid E presses",
+        "capture after pickup",
+        "save immediately after pickup",
+        "old save migration",
+        "ammo empty after load"
+      ],
+      "verification": [
+        "Source component initially lists handgun owned=false and ammo=0",
+        "CanReach requires distance,facing,physical unobstructed line trace",
+        "One successful award hides cache and serializes earned state",
+        "No duplication after checkpoint reload or repeated input",
+        "No firearms until original item actually collected",
+        "Preexisting V1–V3 player progress unaffected"
+      ],
+      "test_evidence": []
     }
   ],
   "supreme_doctrine": "DOCTRINE_000",
