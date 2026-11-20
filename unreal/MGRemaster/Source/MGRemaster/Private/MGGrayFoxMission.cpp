@@ -1905,7 +1905,7 @@ FString AMGGrayFoxMission::GetObjectiveText() const
         return TEXT("Continue east through the security checkpoint.");
     if (!(Flags & MG_FOX_GEAR_RECOVERED))
         return TEXT("Survive the gunner. Find your confiscated equipment.");
-    if (IsTransmitterActive())
+    if (IsTransmitterActive() && !(Flags & MG_FOX_SLICE_COMPLETED))
         return TEXT("Your equipment has been tampered with. Inspect your items.");
     if (!(Flags & MG_FOX_SHOTMAKER_DEFEATED))
         return TEXT("Outmanoeuvre the gunner. Use cover between volleys.");
@@ -1913,7 +1913,14 @@ FString AMGGrayFoxMission::GetObjectiveText() const
         return TEXT("Investigate the secured storeroom for a way forward.");
     if (!(Flags & MG_FOX_SLICE_COMPLETED))
         return TEXT("Find the route deeper into Outer Heaven.");
-    if (bParachuteTaken) return TEXT("Parachute secured. Roof lift reached. End of current build.");
+    if (bParachuteTaken)
+    {
+        if (bHindDefeated) return TEXT("Hind D disabled. Return by the west lift.");
+        if (bRoofActive)
+            return FString::Printf(TEXT("Find shelter and use the grenade rack. %d rounds remain."),
+                                   RoofGrenadesRemaining);
+        return TEXT("Use the west lift to reach Building 1 roof.");
+    }
     if (bKidDefeated) return TEXT("Collect the parachute at the west lift.");
     if (bRelayIntel) return TEXT("Follow the relay passage to the west lift.");
     if (bServiceWallOpen) return TEXT("Investigate the relay room beyond the kennels.");
