@@ -28,6 +28,18 @@ git rev-parse HEAD
 
 **If any preflight check fails, report the first failing command and complete output; do not proceed as if the build is verified.** The script checks Git, engine paths, 17 browser campaign checkpoints (simulated harness evidence), a new deterministic animation-intent test, four core GLB binary contracts, Python source contracts and Rust tests. It cannot run the Unreal Editor in this project-authoring session.
 
+## Unreal native import and packaging troubleshooting added this pass
+
+**Do not trust a successful .exe build just because the source code references GLBs.** The project now explicitly cooks its dynamic `/Game/Characters`, `/Game/Weapons`, `/Game/Feedback` and `/Game/Audio/Weapons` roots. The importer rejects pre-existing mesh-only/partial imports, and PowerShell requires affirmative import/audit markers instead of trusting a zero Editor exit code. After the character import step, run:
+
+```powershell
+.\scripts\verify_unreal_content.ps1 -UnrealRoot "C:\Program Files\Epic Games\UE_5.7"
+```
+
+This **actual Unreal Editor** script checks all 22 imported character SkeletalMeshes, correct metre-to-centimetre scale, required native AnimationSequences, frame lengths and each clip's bound Skeleton. The packager runs the same check before cooking, in addition to five active named skeletal meshes and 16 minimum active animation clips. In PIE, also inspect Machinegun Kid for inherited Guard AnimBP incompatibility, guard/Snake gun fallback visibility, and whether physically traced shots originate from the visible muzzle flash rather than behind nearby cover.
+
+Missing files or incompatible imports will now block a test package rather than fabricate production readiness. Detailed failures, log locations and corrections are in [Unreal 5.7 hardening pass](UNREAL_ENGINE_HARDENING_PASS_2026_11_20.md). **This authoring session has not run the UE5.7 Editor, Windows build or native Python unittest suite.**
+
 ## Import visual character rigs before judging character quality
 
 Start `unreal/MGRemaster/MGRemaster.uproject` in Unreal Editor 5.7. Under Python scripting use **Tools > Execute Python Script** (or the Python console's `exec(open(...).read())`) and select:
