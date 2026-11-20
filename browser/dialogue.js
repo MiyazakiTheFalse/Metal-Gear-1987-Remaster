@@ -1,6 +1,7 @@
 /* Independently written temporary scene dialogue; not transcribed J2ME text. */
 window.MGDialogue = Object.freeze({
   boxCall:{speaker:'BIG BOSS',text:'A packing box? Moving out already, Snake?',duration:3},
+  boxInspect:{speaker:'GUARD',text:'Who left this carton here? I should check.',duration:2.4,direction:'Confused curiosity, then deliberate movement; not an automatic alarm.'},
   dispatchCall:{speaker:'SCHNEIDER',text:'Those two posts used to count outgoing freight. The lamps went years ago. The counter still works.',duration:4.3},
   foxAfter:{speaker:'GRAY FOX',text:'I counted the steps between shifts. After a while I could tell who was bringing water.',duration:4.2},
   bossEntry:{speaker:'SHOOT GUNNER',text:'Property stays on this side of the line. That includes you.',duration:3.5},
