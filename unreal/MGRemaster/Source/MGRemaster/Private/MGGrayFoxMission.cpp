@@ -240,19 +240,21 @@ namespace
     constexpr float DispatchSensorX = -2700.f;
 }
 
+bool AMGGrayFoxMission::IsWorkingFreightConveyor(const FVector& P) const
+{
+    return IsPreludeActive() && P.X >= DispatchBeltStart && P.X <= DispatchBeltEnd
+        && FMath::Abs(P.Y - DispatchLaneY) <= 55.f;
+}
+
 bool AMGGrayFoxMission::IsExpectedFreightLocation(const FVector& P) const
 {
     if (!IsPreludeActive()) return false;
-    // A legitimate package must actually lie in the receiving lane or
-    // adjacent to authored stacks. This is tied to physical level geometry,
-    // not a global 'boxes are always safe' exception.
-    const bool bOnWorkingBelt =
-        P.X >= DispatchBeltStart && P.X <= DispatchBeltEnd
-        && FMath::Abs(P.Y - DispatchLaneY) <= 55.f;
+    // A crate may be either on the WORKING conveyor or legitimately staged
+    // beside authored stack geometry. Movement is only normal on the belt.
     const bool bInStoredCargo =
         FVector::Dist2D(P, FVector(-2880.f, -250.f, P.Z)) <= 135.f ||
         FVector::Dist2D(P, FVector(-2340.f, 30.f, P.Z)) <= 155.f;
-    return bOnWorkingBelt || bInStoredCargo;
+    return IsWorkingFreightConveyor(P) || bInStoredCargo;
 }
 
 void AMGGrayFoxMission::CreateDispatchBay()
