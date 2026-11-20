@@ -240,6 +240,21 @@ namespace
     constexpr float DispatchSensorX = -2700.f;
 }
 
+bool AMGGrayFoxMission::IsExpectedFreightLocation(const FVector& P) const
+{
+    if (!IsPreludeActive()) return false;
+    // A legitimate package must actually lie in the receiving lane or
+    // adjacent to authored stacks. This is tied to physical level geometry,
+    // not a global 'boxes are always safe' exception.
+    const bool bOnWorkingBelt =
+        P.X >= DispatchBeltStart && P.X <= DispatchBeltEnd
+        && FMath::Abs(P.Y - DispatchLaneY) <= 55.f;
+    const bool bInStoredCargo =
+        FVector::Dist2D(P, FVector(-2880.f, -250.f, P.Z)) <= 135.f ||
+        FVector::Dist2D(P, FVector(-2340.f, 30.f, P.Z)) <= 155.f;
+    return bOnWorkingBelt || bInStoredCargo;
+}
+
 void AMGGrayFoxMission::CreateDispatchBay()
 {
     CartonPickup = SpawnBlock(TEXT("DispatchCarton"), FVector(-3410.f, -268.f, -55.f),
