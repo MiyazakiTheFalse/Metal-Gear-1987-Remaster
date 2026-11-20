@@ -1019,7 +1019,9 @@ void AMGGrayFoxMission::BeginPlay()
         // A forged roof checkpoint must not bypass the original mission flags.
         if (bValid && bPositionSafe
             && ((F & MG_FOX_CAPTURED) || (F & MG_FOX_DETENTION_INTELLIGENCE)
-                || (Save->SchemaVersion >= 4 && (Save->bEarnedHandgun || Save->bOwnsCarton || Save->bDispatchCameraOffline))))
+                || (Save->SchemaVersion >= 4 && (Save->bEarnedHandgun || Save->bOwnsCarton || Save->bDispatchCameraOffline))
+                || (Save->SchemaVersion >= 7 && (Save->bEarnedCard1 || Save->bEarnedTruckRation
+                    || Save->bEarnedBinoculars))))
         {
             Flags = F;
             SavedPosition = Save->CheckpointLocation;
