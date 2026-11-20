@@ -28,7 +28,7 @@ class PostCard3SourceChecks(unittest.TestCase):
         self.assertEqual(PROVENANCE["weapon_rules"]["original_mine_limit"], 3)
         self.assertEqual(PROVENANCE["weapon_rules"]["original_plastic_explosive_limit"], 1)
         self.assertEqual(PROVENANCE["weapon_rules"]["noncanonical_debug_only"], ["STUN"])
-        self.assertTrue(any("MAC11" in x for x in PROVENANCE["weapon_rules"]["smg_reference"].splitlines()))
+        self.assertTrue(any("MAC-11" in x for x in PROVENANCE["weapon_rules"]["smg_reference"].splitlines()))
 
     def test_gate_is_full_width_and_later_walkway_is_connected(self):
         self.assertIn('TEXT("ChapterExit"), FVector(3610.f, 0.f, 90.f)', CPP)
