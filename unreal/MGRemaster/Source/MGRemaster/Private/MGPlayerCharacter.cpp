@@ -210,6 +210,7 @@ bool AMGPlayerCharacter::HasAuthoredCharacterArt() const
 void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     StopIncomingRing();
+    StopRadioDialogue();
     // Ensure a checkpoint restart cannot inherit a slowed or paused world.
     if (GetWorld())
     {
@@ -233,7 +234,11 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
             CodecStatus = TEXT("CONNECTED — BIG BOSS / 120.85");
         }
     }
-    if (bCodecOpen) RadioTranscriptSeconds += FMath::Max(0.f, DeltaSeconds);
+    if (bCodecOpen)
+    {
+        RadioTranscriptSeconds += FMath::Max(0.f, DeltaSeconds);
+        UpdateRadioDialogue(DeltaSeconds);
+    }
     CombatNoiseTimer = FMath::Max(0.f, CombatNoiseTimer - DeltaSeconds);
     WeaponRecoilTimer = FMath::Max(0.f, WeaponRecoilTimer - DeltaSeconds);
     MeleeVisualTimer = FMath::Max(0.f, MeleeVisualTimer - DeltaSeconds);
@@ -460,6 +465,7 @@ void AMGPlayerCharacter::ShoulderSwap()
     {
         TransceiverChannel = (TransceiverChannel + 1) % 2;
         bStagedOpeningCall = false; // Explicit tuning reveals the full contact.
+        StopRadioDialogue(); // No wrong-speaker tails while changing stations.
         RadioTranscriptSeconds = 0.f;
         StopIncomingRing();
         EnsureRadioSfxLoaded();
@@ -1068,12 +1074,78 @@ int32 AMGPlayerCharacter::GetVisibleRadioLineCount(int32 AvailableLines) const
 {
     if (AvailableLines <= 0) return 0;
     if (!bStagedOpeningCall || !bCodecOpen) return AvailableLines;
-    // A first-time call is staged as dialogue beats, not dumped all at once.
-    // This is visual pacing, NOT a 9-second gameplay lock. Closing, tuning or
-    // re-opening never loses the full transcript or objective intelligence.
-    const float SinceConnect = FMath::Max(0.f, RadioTranscriptSeconds - .94f);
-    return FMath::Clamp(1 + FMath::FloorToInt(SinceConnect / 1.65f),
-        1, AvailableLines);
+    // Reveal intervals follow the duration of imported voice performances
+    // (or equivalent accessible reading time when no voice exists).
+    return FMath::Clamp(RevealedRadioLines, 1, AvailableLines);
+}
+
+void AMGPlayerCharacter::StopRadioDialogue()
+{
+    if (IsValid(ActiveRadioDialogue))
+        ActiveRadioDialogue->Stop();
+    ActiveRadioDialogue = nullptr;
+    CurrentVoiceScene.Empty();
+    NextVoiceLine = 0;
+    RevealedRadioLines = 0;
+    VoiceLineAdvanceDelay = 0.f;
+}
+
+float AMGPlayerCharacter::PlayRadioDialogueLine(
+    const FString& SceneKey, int32 Index, const FString& FullLine)
+{
+    FString Speaker, Spoken;
+    if (!FullLine.Split(TEXT(":"), &Speaker, &Spoken)) return 1.65f;
+    Speaker.TrimStartAndEndInline();
+    Spoken.TrimStartAndEndInline();
+    // Performances should follow the identity bible; never impersonate the
+    // particular voice of an existing actor. Missing assets remain captions.
+    const FString SpeakerId = Speaker.ToLower().Replace(TEXT(" "), TEXT("_"));
+    const FString AssetName = FString::Printf(TEXT("VO_%s_%02d"),
+        *SceneKey, Index + 1);
+    const FString AssetPath = FString::Printf(TEXT("/Game/Audio/VO/%s/%s.%s"),
+        *SpeakerId, *AssetName, *AssetName);
+    if (USoundBase* Cue = LoadObject<USoundBase>(nullptr, *AssetPath))
+    {
+        ActiveRadioDialogue = UGameplayStatics::SpawnSound2D(this, Cue, .72f);
+        if (IsValid(ActiveRadioDialogue))
+        {
+            const float Duration = Cue->GetDuration();
+            if (FMath::IsFinite(Duration) && Duration > 0.f)
+                return FMath::Clamp(Duration + .22f, 1.65f, 18.f);
+        }
+    }
+    // Subtitle duration approximation is NOT generated/recorded speech.
+    return FMath::Clamp(Spoken.Len() / 16.f + .50f, 1.65f, 5.5f);
+}
+
+void AMGPlayerCharacter::UpdateRadioDialogue(float DeltaSeconds)
+{
+    const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
+    if (!Mission || IncomingConnectionDelay >= 0.f) return;
+    const FString SceneKey = Mission->GetTransceiverVoiceSceneKey(TransceiverChannel);
+    if (SceneKey != CurrentVoiceScene)
+    {
+        StopRadioDialogue();
+        CurrentVoiceScene = SceneKey;
+    }
+    TArray<FString> Lines;
+    Mission->GetTransceiverDialogue(TransceiverChannel).ParseIntoArrayLines(Lines, true);
+    if (!bStagedOpeningCall)
+        RevealedRadioLines = Lines.Num(); // Player may review all intel instantly.
+    if (NextVoiceLine >= Lines.Num()) return;
+    VoiceLineAdvanceDelay -= FMath::Max(0.f, DeltaSeconds);
+    if (VoiceLineAdvanceDelay > 0.f) return;
+    if (IsValid(ActiveRadioDialogue))
+    {
+        ActiveRadioDialogue->Stop();
+        ActiveRadioDialogue = nullptr;
+    }
+    VoiceLineAdvanceDelay = PlayRadioDialogueLine(
+        SceneKey, NextVoiceLine, Lines[NextVoiceLine]);
+    ++NextVoiceLine;
+    if (bStagedOpeningCall)
+        RevealedRadioLines = FMath::Max(RevealedRadioLines, NextVoiceLine);
 }
 
 void AMGPlayerCharacter::PlayRadioCue(USoundBase* Cue, float Level) const
@@ -1089,6 +1161,7 @@ void AMGPlayerCharacter::OpenIncomingMissionBriefing()
     // dialogue are read from the mission's authoritative stage.
     EnsureRadioSfxLoaded();
     StopIncomingRing();
+    StopRadioDialogue();
     CloseEquipmentWindows();
     bCodecOpen = true;
     TransceiverChannel = 1; // Real Big Boss, FOXHOUND 120.85
@@ -1114,6 +1187,7 @@ void AMGPlayerCharacter::ToggleCodec()
         bStagedOpeningCall = false;
         RadioTranscriptSeconds = 0.f;
         StopIncomingRing();
+        StopRadioDialogue();
         IncomingConnectionDelay = -1.f;
         CodecStatus.Empty();
         PlayRadioCue(CloseRadioSfx, .50f);
@@ -1126,6 +1200,7 @@ void AMGPlayerCharacter::ToggleCodec()
     // treated as an implanted 2005-era Codec. Manual, optional, replayable,
     // non-pausing: players remain free to move and solve the wall immediately.
     StopIncomingRing();
+    StopRadioDialogue();
     CloseEquipmentWindows();
     ApplyMenuTimeState();
     bCodecOpen = true;
