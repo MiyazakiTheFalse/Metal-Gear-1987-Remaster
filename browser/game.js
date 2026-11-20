@@ -199,7 +199,10 @@ const geometry=[];const obstacles=[];const add=(name,x,y,z,w,h,d,clr,material=0,
 const wall=(name,x,z,w,d)=>add(name,x,1.6,z,w,3.25,d,color.wall,mat.concrete,true);
 add('concrete floor',1.1,-.26,0,27.7,.5,10.4,color.floor,mat.grate,true);
 const cameraOnlySolids=[add('ceiling',1.1,3.5,0,27.7,.28,10.4,color.roof,mat.concrete,false)];
-wall('north corridor',1.1,5.15,27.6,.28);wall('south corridor',1.1,-5.15,27.6,.28);wall('west boundary',-12.6,0,.28,10.4);for (const z of [-3.4,3.4]) wall('arena entrance frame',14.6,z,.28,3.5);
+wall('north corridor',1.1,5.15,27.6,.28);wall('south corridor',1.1,-5.15,27.6,.28);wall('west return north pier',-12.6,3.5,.28,3.4);
+wall('west return south pier',-12.6,-3.5,.28,3.4);
+const westReturnGate=wall('west return freight shutter',-12.6,0,.28,3.4);
+for (const z of [-3.4,3.4]) wall('arena entrance frame',14.6,z,.28,3.5);
 const propertyGate=wall('arena entrance shutter',14.6,0,.28,3.4);
 const finalGate=wall('east exit shutter',27.3,0,.24,3.2);
 for (const z of [-3.4,3.4]) wall('exit masonry',27.3,z,.28,3.6);
@@ -892,6 +895,8 @@ function syncEquipment(){
  boxSlot.usable=stage<0&&world.box;
  card1Slot.usable=firstCardEarned&&kitAvailable();
  originalCard1Prop.active=!firstCardEarned;
+ // Return freight shutter unlocks with personal gear; no invisible item grant.
+ westReturnGate.active=stage<4;
  rationSlot.usable=rationRemaining>0&&kitAvailable();
  originalRationProp.active=!rationEarned;
  binocularsSlot.usable=binocularsEarned&&kitAvailable();
@@ -1051,11 +1056,11 @@ function load(){
   boss.x=rest.x;boss.z=rest.z;boss.yaw=Number.isFinite(rest.yaw)?rest.yaw:Math.PI;
  }
  const fallback=stage===10?(b2.active?[99.2,0]:roof.active?[87.5,0]:[62.5,0]):stage===9?(roof.active?[72.3,0]:[62.5,0]):stage<0?[-27,0]:stage===0?[-10.6,0]:stage<3?[-.5,0]:stage===3?[5.4,-3.7]:stage===4?[15.7,0]:[26,0];
- const withinStage=stage===10?(b2.active?data.x>=97.0&&data.x<=123.0:roof.active?data.x>=69&&data.x<=90.7:data.x>=-12.6&&data.x<=65.3):
-  stage===9?(roof.active?data.x>=69&&data.x<=90.7:data.x>=-12.6&&data.x<=65.3):
+ const withinStage=stage===10?(b2.active?data.x>=97.0&&data.x<=123.0:roof.active?data.x>=69&&data.x<=90.7:data.x>=-32.5&&data.x<=65.3):
+  stage===9?(roof.active?data.x>=69&&data.x<=90.7:data.x>=-32.5&&data.x<=65.3):
   stage<0?data.x<-12.6:stage===0?data.x>-12.6&&data.x<-4.1:
   stage<3?data.x>-12.6&&data.x<4.5:stage===3?data.x>-12.6&&data.x<(world.hallOpen?27.3:14.6):
-  stage<7?data.x>-12.6&&data.x<27.3:data.x>-12.6&&(service.open||data.x<42.85);
+  stage<7?data.x> (stage>=4?-32.5:-12.6)&&data.x<27.3:data.x>-32.5&&(service.open||data.x<42.85);
  const safe=withinStage&&Number.isFinite(data.x)&&Number.isFinite(data.z)&&canOccupyBody(data.x,data.z,0,0);
  [player.x,player.z]=!legacy&&safe?[data.x,data.z]:fallback;
  player.cover=false;player.stance=0;
@@ -1348,21 +1353,21 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
    }
    if(exitAction==='locked'){playCue('denied');popup('Reader requires Card 3.');return;}
 
-   if(stage<0&&!rationEarned&&dist(player,originalRationTarget)<1.5&&
+   if((stage<0||stage>=4)&&!rationEarned&&dist(player,originalRationTarget)<1.5&&
       !lineBlockedSight(player,originalRationTarget,1.35,.4)){
      rationEarned=true;rationRemaining=1;
      syncEquipment();playCue('card');
      popup('WEST SUPPLY TRUCK — RATION. Use from ITEMS when injured.',3);
      save();return;
    }
-   if(stage<0&&!binocularsEarned&&dist(player,originalBinocularsTarget)<1.5&&
+   if((stage<0||stage>=4)&&!binocularsEarned&&dist(player,originalBinocularsTarget)<1.5&&
       !lineBlockedSight(player,originalBinocularsTarget,1.35,.4)){
      binocularsEarned=true;
      syncEquipment();playCue('card');
      popup('EAST SUPPLY TRUCK — BINOCULARS. Select in ITEMS to scout.',3);
      save();return;
    }
-   if(stage<0&&!firstCardEarned&&dist(player,originalCard1Target)<1.5&&
+   if((stage<0||stage>=4)&&!firstCardEarned&&dist(player,originalCard1Target)<1.5&&
       !lineBlockedSight(player,originalCard1Target,1.35,.4)){
      firstCardEarned=true;
      syncEquipment();playCue('card');
@@ -2604,7 +2609,7 @@ function updateHUD(dt){
   audible&&stage===4&&tag.state==='placed'&&dist(player,tag.point)<6?'Two chirps · loose tag':'';
  let prompt=serviceAction()||freightAction();if(prompt)prompt='E / A · '+prompt;
  // Physical loot should teach itself through proximity, not a minimap spoiler.
- if(stage<0){
+ if(stage<0||stage>=4){
   const caches=[
    [originalRationTarget,rationEarned,'TAKE RATION'],
    [originalCard1Target,firstCardEarned,'TAKE CARD 1'],
