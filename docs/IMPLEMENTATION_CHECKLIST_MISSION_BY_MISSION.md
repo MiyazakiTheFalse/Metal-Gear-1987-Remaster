@@ -288,7 +288,7 @@ Current status: **design only**. Original game does not name these missions as c
 - [~] **SYS.SAVE** — Entire game persistence/mission re-entry with automatic data migration and no flag bypass. Current: partial source.
 - [~] **SYS.SFX** — Original sound design, spatial occlusion, performance VO and adaptive 1995 score. Current: partial source.
 - [~] **SYS.META** — Title, mission dossier, save slots, accessibility, records and noncanon VR separation. Current: partial source.
-- [ ] **SYS.QA** — Full regression, UE5.7 actual compile and PIE, 720p/4K motion/collision and human testers. Current: not started.
+- [~] **SYS.QA** — Full regression, UE5.7 actual compile and PIE, 720p/4K motion/collision and human testers. Current: **partial source only**: 22-role Unreal import recovery and native clip/skeleton/scale audit scripted, dynamic cook roots corrected, muzzle/cast source regression added, PC build fail-closed. **Not run here:** real Unreal build, Editor script, PIE, packaged game, user test or performance capture.
 
 ## Exact enemy and architectural placement acceptance
 
