@@ -45,6 +45,14 @@ void AMGRemasterGameMode::StartPlay()
             if (Pawn) PC->Possess(Pawn);
         }
     }
-    GetWorld()->SpawnActor<AMGGrayFoxMission>(AMGGrayFoxMission::StaticClass(),
-                                            FVector::ZeroVector, FRotator::ZeroRotator);
+    // Editor-authored levels may already contain this mission controller.
+    // A duplicate would spawn overlapping collision walls, duplicate guards
+    // and race on the same SaveGame slot. Spawn only in the Entry fallback.
+    if (!UGameplayStatics::GetActorOfClass(
+            this, AMGGrayFoxMission::StaticClass()))
+    {
+        GetWorld()->SpawnActor<AMGGrayFoxMission>(
+            AMGGrayFoxMission::StaticClass(), FVector::ZeroVector,
+            FRotator::ZeroRotator);
+    }
 }
