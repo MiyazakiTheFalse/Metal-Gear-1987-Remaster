@@ -12,6 +12,7 @@ class USkeletalMesh;
 class USoundBase;
 class UAudioComponent;
 class UPointLightComponent;
+class AMGGuardActor;
 
 UCLASS()
 class MGREMASTER_API AMGPlayerCharacter : public ACharacter
@@ -60,6 +61,10 @@ public:
     UFUNCTION(BlueprintImplementableEvent, Category="Character|Damage")
     void OnSnakeDamaged(float ActualDamage, FVector WorldDamageDirection);
     bool IsWearingCarton() const;
+    UFUNCTION(BlueprintPure, Category="Stealth|Body")
+    bool IsDraggingBody() const { return DraggedBody.IsValid(); }
+    UFUNCTION(BlueprintImplementableEvent, Category="Stealth|Body")
+    void OnBodyDragChanged(bool bDragging, AActor* BodyActor);
     bool IsStillInCarton() const;
     bool IsProne() const { return bIsProne; }
     bool IsInCover() const { return bInCover; }
@@ -204,6 +209,11 @@ private:
     float MeleeVisualTimer = 0.f;
     float CombatNoiseTimer = 0.f;
     int32 MeleeComboStep = 0;
+    UPROPERTY(Transient)
+    TWeakObjectPtr<AMGGuardActor> DraggedBody;
+    bool TryToggleBodyDrag();
+    void StopDraggingBody();
+    void UpdateDraggedBody(float DeltaSeconds);
 
     void MoveForward(float Value);
     void MoveRight(float Value);
