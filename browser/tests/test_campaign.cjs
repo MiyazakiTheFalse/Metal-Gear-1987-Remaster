@@ -111,6 +111,24 @@ assert.equal(spentRation.game.state.health,85,'healed checkpoint persists');
 assert.equal(spentRation.game.state.rationRemaining,0,'ration is not replenished by loading');
 assert.equal(spentRation.game.state.rationWorld,null,'used ration never respawns');
 console.log('PASS: 1987 truck rewards, optics, finite ration use and checkpoint persistence.');
+// Card 1 must remain recoverable after custody; no softlocking a novice
+// who took the optional opening route before inspecting the central truck.
+const lateCardSave=new Map([[slot,JSON.stringify({
+ version:10,stage:4,recoveredGear:true,health:100,x:-10.6,z:0,
+ firstCardEarned:false,rationEarned:false,binocularsEarned:false
+})]]);
+const lateCard=boot(lateCardSave);lateCard.button('resume');
+assert.equal(lateCard.game.canOccupy(-12.6,0,0,0),true,
+ 'recovered gear opens a physical walkable backtrack gate');
+lateCard.game.teleport(-27.55,2.9);lateCard.game.act('interact');
+assert.equal(lateCard.game.state.firstCardEarned,true,
+ 'post-recovery return visit can still collect Card 1');
+const backtrackReload=boot(lateCard.storage);backtrackReload.button('resume');
+assert.equal(backtrackReload.game.state.firstCardEarned,true,
+ 'late Card 1 persists across the return-route checkpoint');
+assert.equal(backtrackReload.game.state.player.x,-27.55,
+ 'a backtrack checkpoint remains in the visited truck, not teleported away');
+console.log('PASS: non-missable Card 1 via physical after-recovery yard return.');
 
 let run=boot();
 run.button('start');
