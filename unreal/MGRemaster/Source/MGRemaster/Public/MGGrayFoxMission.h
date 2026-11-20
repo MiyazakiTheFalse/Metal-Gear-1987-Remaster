@@ -65,6 +65,10 @@ public:
     void OnPacingBeatChanged(int32 PreviousPhase, int32 NewPhase, float SuggestedIntensity);
     UFUNCTION(BlueprintImplementableEvent, Category="Mission|Environment")
     void OnSurfaceImpact(FName SurfaceTag, int32 ContactIndex, bool bOpened);
+    // Visual lip/jaw and expression cue from actual imported voice playback.
+    // Mission rescue state is authoritative and never depends on clip length.
+    UFUNCTION(BlueprintImplementableEvent, Category="Mission|Voice")
+    void OnNarrativeVoiceStarted(FName Performer, FName ClipId, float ClipSeconds);
     void RestartMission();
 
 private:
