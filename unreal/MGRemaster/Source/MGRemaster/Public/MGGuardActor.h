@@ -130,7 +130,10 @@ private:
     bool bPendingRadioReport = false;
     float ChallengeAge = 0.f;
     float CustodyThreatMemorySeconds = 0.f;
+    // Age since firsthand visual proof, never reset by a footstep or radio rumour.
     float ContactEvidenceAge = 99.f;
+    float FootstepLocalizationRefreshSeconds = 0.f;
+    void ObserveApproximateFootstep(const FVector& AudibleSource, bool bOccluded);
     float PendingRadioDelay = 0.f;
     FVector PendingConfirmedRadioSighting = FVector::ZeroVector;
     float SquadBroadcastCooldown = 0.f;
