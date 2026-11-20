@@ -138,6 +138,9 @@ public:
     bool HasAuthoredCharacterArt() const;
     UStaticMeshComponent* GetHeldWeaponVisual() const { return SecuritySidearm; }
     USkeletalMeshComponent* GetRigMesh() const { return CharacterMesh; }
+    // Reusable for unique boss subclasses whose AI does not call Guard::Tick.
+    void SetPrototypeAnimationSource(const FString& Folder, const FString& Prefix);
+    void PlayPrototypeActing(FName Requested, float Rate = 1.f);
     // Shared 3D cast pipeline: individual elite/boss archetypes replace the
     // plain guard rig without cloning combat collision or AI.
     bool TryUseBespokeSkeletalArt(const TCHAR* MeshPath, const TCHAR* AnimClassPath);
@@ -182,6 +185,10 @@ private:
 
     UPROPERTY(VisibleAnywhere, Category="Character|Art")
     USkeletalMeshComponent* CharacterMesh;
+    FString PrototypeAnimationFolder = TEXT("/Game/Characters/Guard");
+    FString PrototypeAnimationPrefix = TEXT("Guard");
+    FName PrototypeAnimationRequest = NAME_None;
+    void UpdatePrototypeFallbackAnimation();
     UPROPERTY(VisibleAnywhere, Category="Security|Weapon")
     UStaticMeshComponent* SecuritySidearm;
     UPROPERTY(VisibleAnywhere, Category="Security|Weapon")
