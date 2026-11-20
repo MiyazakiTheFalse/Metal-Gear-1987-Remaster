@@ -6,6 +6,8 @@
 class UStaticMeshComponent;
 class UCapsuleComponent;
 class USkeletalMeshComponent;
+class UPointLightComponent;
+class USoundBase;
 
 // Source-only operational role. The custody role is security procedure,
 // not a different 'evil/innocent' faction and not scripted awareness.
@@ -121,6 +123,8 @@ public:
     void OnSidearmReloadFinished();
     UFUNCTION(BlueprintImplementableEvent, Category="Security|Weapon")
     void OnSidearmReloadInterrupted();
+    UFUNCTION(BlueprintImplementableEvent, Category="Security|Weapon")
+    void OnSidearmCasingEjected();
 
 private:
     enum class EDistractionPhase : uint8 { None, React, Approach, Search, Return };
@@ -143,6 +147,11 @@ private:
     USkeletalMeshComponent* CharacterMesh;
     UPROPERTY(VisibleAnywhere, Category="Security|Weapon")
     UStaticMeshComponent* SecuritySidearm;
+    UPROPERTY(VisibleAnywhere, Category="Security|Weapon")
+    UPointLightComponent* SidearmMuzzleLight;
+    UPROPERTY(Transient)
+    USoundBase* SidearmShotSound = nullptr;
+    float PendingSidearmCaseSeconds = -1.f;
     // 1987 guards shoot, but the 3D weapon model, magazine capacity and reload
     // interval are reversible art/balance hypotheses, NOT exact MSX2 stats.
     UPROPERTY(EditAnywhere, Category="Security|Weapon", meta=(ClampMin="4", ClampMax="16"))
