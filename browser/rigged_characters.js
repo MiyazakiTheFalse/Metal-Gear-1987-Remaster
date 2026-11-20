@@ -13,10 +13,13 @@ const ROLE_FILES=Object.freeze({
  player:'assets/models/snake.glb',
  fox:'assets/models/fox.glb',
  guard:'assets/models/guard.glb',
+ machinegun_kid:'assets/models/machinegun_kid.glb',
+ pow_informant:'assets/models/pow_informant.glb',
  shoot_gunner:'assets/models/shoot_gunner.glb'
 });
 const ROLE_HEIGHTS=Object.freeze({
- player:1.78,fox:1.79,guard:1.76,shoot_gunner:1.83
+ player:1.78,fox:1.79,guard:1.76,shoot_gunner:1.83,
+ machinegun_kid:1.78,pow_informant:1.72
 }); // Prototype centimetres are reversible, not final character-bible approvals.
 const status=document.getElementById('rigStatus');
 const toggle=document.getElementById('rigToggle');
@@ -106,6 +109,7 @@ function chooseAction(record,name){
 function pose(record,actor,dt,time){
  record.root.position.set(actor.x,0,actor.z);
  record.root.rotation.y=-(Number.isFinite(actor.yaw)?actor.yaw:0);
+ record.root.visible=actor.visible!==false;
  if(dt<=0)return; // Paused gameplay must not advance an acting loop.
  const moved=record.previous?
   Math.hypot(actor.x-record.previous[0],actor.z-record.previous[1]):0;
@@ -126,7 +130,6 @@ function pose(record,actor,dt,time){
  if(record.jaw&&actor.talking&&!actor.down)
   record.jaw.rotation.z-=.10*(.5+.5*Math.sin(time*15));
  if(record.brow&&actor.hit)record.brow.rotation.z-=.08;
- record.root.visible=actor.visible!==false;
 }
 function syncOccluders(solids){
  const keep=new Set();
@@ -177,12 +180,12 @@ toggle?.addEventListener('change',()=>{
  enabled=toggle.checked;
  window.__MG_RIG_READY=enabled&&ready;
  if(renderer)renderer.domElement.style.display=enabled&&ready?'block':'none';
- label(enabled?(ready?'22-CAST SOURCE · 4 ACTIVE GLB ROLES':'GLB REVIEW LOADING'):
+ label(enabled?(ready?'22-CAST SOURCE · 6 ACTIVE GLB ROLES':'GLB REVIEW LOADING'):
   'LOCAL ANIMATED FIELD RIGS ACTIVE');
 });
 async function loadRig(){
  if(!renderer)return;
- label('LOADING FOUR LOCAL CAST MODELS');
+ label('LOADING LOCAL CAST MODELS');
  try {
   const loader=new GLTFLoader();
   const loaded=await Promise.all(Object.entries(ROLE_FILES).map(async([kind,url])=>{
@@ -202,7 +205,7 @@ async function loadRig(){
   window.__MG_RIG_PRONE=true;window.__MG_RIG_CROUCH=true;
   window.__MG_RIG_READY=enabled;
   renderer.domElement.style.display=enabled?'block':'none';
-  label(enabled?'FOUR CAST-SPECIFIC GLB RIGS · ACTIVE':'LOCAL FIELD RIGS · GLB REVIEW READY');
+  label(enabled?'SIX CAST-SPECIFIC GLB RIGS · ACTIVE':'LOCAL FIELD RIGS · GLB REVIEW READY');
  }catch(error){
   ready=false;window.__MG_RIG_READY=false;
   if(renderer)renderer.domElement.style.display='none';
