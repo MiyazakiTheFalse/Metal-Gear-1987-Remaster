@@ -36,7 +36,10 @@ void UMGEquipmentComponent::BeginPlay()
         {FName(TEXT("CARD2")), TEXT("KEYCARD 2 [CARRYOVER]"), 0, true, false},
         {FName(TEXT("CARD3")), TEXT("KEYCARD 3 [SLICE]"), 0, false, false},
         // This is placed in Snake's actual inventory when his gear is returned.
-        {FName(TEXT("TRANSMITTER")), TEXT("UNKNOWN TRANSMITTER"), 0, false, false}
+        {FName(TEXT("TRANSMITTER")), TEXT("UNKNOWN TRANSMITTER"), 0, false, false},
+        {FName(TEXT("PARACHUTE")), TEXT("PARACHUTE"), 0, false, false},
+        {FName(TEXT("BOX")), TEXT("CARDBOARD BOX"), 0, false, false},
+        {FName(TEXT("CIGARETTES")), TEXT("CIGARETTES"), 1, true, false}
     };
     // A captured Snake cannot use pre-capture weapons or items. Test entries are
     // deliberately marked provisional rather than claims about J2ME inventory.
@@ -186,6 +189,11 @@ bool UMGEquipmentComponent::HasPlantedTransmitter() const
         if (E.Id == TEXT("TRANSMITTER"))
             return E.bOwned;
     return false;
+}
+bool UMGEquipmentComponent::IsItemEquipped(FName ItemId) const
+{
+    return !bConfiscated && Items.IsValidIndex(EquippedItem)
+        && Items[EquippedItem].bOwned && Items[EquippedItem].Id == ItemId;
 }
 bool UMGEquipmentComponent::IsTransmitterEquipped() const
 {

@@ -31,8 +31,8 @@ class WallInteractionContract(unittest.TestCase):
     def test_guard_can_investigate_and_return(self):
         for phase in ["React", "Approach", "Search", "Return"]:
             self.assertIn("EDistractionPhase::" + phase, GUARD)
-        self.assertIn("if (AwarenessState >= 2)", GUARD)
-        self.assertIn("SetActorLocation(GetActorLocation() + Step, true)", GUARD)
+        self.assertIn("bConfirmedVisualThisFrame && AwarenessState >= 3", GUARD)
+        self.assertIn("SetActorLocation(Before + SmoothedGroundVelocity * DeltaSeconds, true)", GUARD)
 
 if __name__ == "__main__":
     unittest.main()

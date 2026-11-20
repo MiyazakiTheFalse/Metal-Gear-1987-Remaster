@@ -6,6 +6,8 @@
 class AStaticMeshActor;
 class AMGPlayerCharacter;
 class AMGShootGunnerActor;
+class AMGMachinegunKid;
+class AMGSurveillanceCameraActor;
 class AMGGuardActor;
 class UStaticMesh;
 class APointLight;
@@ -70,8 +72,35 @@ public:
     UFUNCTION(BlueprintImplementableEvent, Category="Mission|Voice")
     void OnNarrativeVoiceStarted(FName Performer, FName ClipId, float ClipSeconds);
     void RestartMission();
+    void ExhaleSmoke(const AMGPlayerCharacter* Player);
 
 private:
+    TWeakObjectPtr<AMGSurveillanceCameraActor> PrisonCamera;
+    TWeakObjectPtr<AMGSurveillanceCameraActor> KennelCamera;
+    bool bHeardFoxFollowup = false;
+    bool bOwnsCarton = false;
+    TWeakObjectPtr<AMGSurveillanceCameraActor> DispatchCamera;
+    UPROPERTY(Transient) AStaticMeshActor* CartonPickup = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* WornCarton = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* SmokePuff = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* BeamSegment = nullptr;
+    FVector SmokeOrigin = FVector::ZeroVector;
+    float SmokeAge = 3.f;
+    UPROPERTY(Transient) AStaticMeshActor* ServiceWall = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* ChargeParcel = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* ChargeMarker = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* RelayDesk = nullptr;
+    bool bServiceChargeCollected = false;
+    bool bServiceWallOpen = false;
+    bool bRelayIntel = false;
+    bool bKidDefeated = false;
+    bool bParachuteTaken = false;
+    UPROPERTY(Transient) AMGMachinegunKid* MachinegunKid = nullptr;
+    UPROPERTY(Transient) AStaticMeshActor* ParachutePack = nullptr;
+    float BreachRemaining = -1.f;
+    bool TryServiceInteraction(AMGPlayerCharacter* Player);
+    void CreateDispatchBay();
+    void TickDispatch(AMGPlayerCharacter* Player, float Dt);
     UPROPERTY(Transient)
     UStaticMesh* BlockMesh = nullptr;
     UPROPERTY(Transient)

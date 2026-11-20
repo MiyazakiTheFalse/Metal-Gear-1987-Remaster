@@ -962,12 +962,34 @@ void AMGPlayerCharacter::ItemWindowStart()
         NotifyFeedback(TEXT("ITEM SELECTION — TIME SLOWED"), TEXT("menu"));
     }
 }
+bool AMGPlayerCharacter::IsWearingCarton() const
+{
+    return Equipment && Equipment->IsItemEquipped(TEXT("BOX")) && bIsCrouched
+        && !bAiming && !bIsProne && !IsMeleeVisualActive() && !bInCover;
+}
+bool AMGPlayerCharacter::IsStillInCarton() const
+{
+    return IsWearingCarton() && GetVelocity().SizeSquared2D() < 4.f;
+}
 void AMGPlayerCharacter::ItemWindowStop()
 {
     if (Equipment)
     {
+        if (!Equipment->IsItemWindowOpen()) return;
         const int32 Selected = Equipment->GetItemSelection();
         Equipment->CloseItemWindow();
+        if (Equipment->GetEquippedItemIndex() == Selected)
+        {
+            if (Equipment->IsItemEquipped(TEXT("BOX")) && !bIsProne)
+            {
+                if (bInCover) LeaveCover();
+                Crouch();
+            }
+            if (Equipment->IsItemEquipped(TEXT("CIGARETTES")))
+                if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+                    UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+                    Mission->ExhaleSmoke(this);
+        }
         ApplyMenuTimeState();
         NotifyFeedback(Equipment->GetEquippedItemIndex() == Selected ?
             TEXT("ITEM CONFIRMED") : TEXT("ITEM UNAVAILABLE"),

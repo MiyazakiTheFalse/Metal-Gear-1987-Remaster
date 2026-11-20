@@ -70,6 +70,7 @@ void AMGSurveillanceCameraActor::ConfigureSector(float HalfAngleDegrees, float R
 bool AMGSurveillanceCameraActor::CanActuallySee(const AMGPlayerCharacter* Player) const
 {
     if (!bOperational || !IsValid(Player) || !GetWorld()) return false;
+    if (Player->IsStillInCarton()) return false;
     const FVector Eye = Housing->GetComponentLocation() +
         Housing->GetForwardVector() * 25.f;
     const FVector Target = Player->GetActorLocation() + FVector(0.f, 0.f,
@@ -143,6 +144,12 @@ void AMGSurveillanceCameraActor::Tick(float DeltaSeconds)
 void AMGSurveillanceCameraActor::Disable(bool bByInteraction)
 {
     if (!bOperational) return;
+    RestoreOfflineState();
+    OnCameraDisabled(bByInteraction);
+}
+
+void AMGSurveillanceCameraActor::RestoreOfflineState()
+{
     bOperational = false;
     bTrackingPlayer = false;
     bReportedIntruder = false;
@@ -150,7 +157,6 @@ void AMGSurveillanceCameraActor::Disable(bool bByInteraction)
     StatusLamp->SetVisibility(false);
     // Breakable optic remains physical set dressing and can still block an
     // actual bullet. Disabled electronics cannot update facility mission flags.
-    OnCameraDisabled(bByInteraction);
     SetActorTickEnabled(false);
 }
 

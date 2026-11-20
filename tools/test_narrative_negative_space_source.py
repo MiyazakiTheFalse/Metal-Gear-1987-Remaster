@@ -34,7 +34,8 @@ class NegativeSpaceTests(unittest.TestCase):
             "CargoTransferManifest", "DutyRotationSlate", "CellRepairReceipt",
             "PropertyCustodyReceipt", "KennelDutyBoard"
         )
-        self.assertEqual(MISSION.count("AddWorldTrace(TEXT("), 5)
+        trace_count = MISSION.count("AddWorldTrace(TEXT(")
+        self.assertGreaterEqual(trace_count, len(names))
         for name in names:
             self.assertIn('AddWorldTrace(TEXT("' + name + '")', MISSION)
         captions = re.findall(
@@ -42,7 +43,7 @@ class NegativeSpaceTests(unittest.TestCase):
             r'(?:MG_FOX_[A-Z_]+|0u),\s*(?:MG_FOX_[A-Z_]+|0u)\);',
             MISSION
         )
-        self.assertEqual(len(captions), 5)
+        self.assertEqual(len(captions), trace_count)
         self.assertTrue(all(len(caption) <= 68 for caption in captions))
         for caption in captions:
             self.assertNotIn("BIG BOSS", caption)

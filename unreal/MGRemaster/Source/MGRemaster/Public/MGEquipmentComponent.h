@@ -62,6 +62,7 @@ public:
     void RestoreStunRounds(int32 Rounds);
     bool ConsumeStunRound();
     bool ConsumeRation();
+    bool IsItemEquipped(FName ItemId) const;
     bool IsTransmitterEquipped() const;
     bool HasPlantedTransmitter() const;
     bool DiscardPlantedTransmitter();

@@ -1,11 +1,14 @@
 #include "MGGrayFoxMission.h"
 
 #include "MGGuardActor.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Engine/PointLight.h"
 #include "Components/PointLightComponent.h"
 #include "MGShootGunnerActor.h"
 #include "MGSentryDogActor.h"
+#include "MGMachinegunKid.h"
 #include "MGSurveillanceCameraActor.h"
+#include "Components/CapsuleComponent.h"
 #include "MGGrayFoxSaveGame.h"
 #include "MGPlayerCharacter.h"
 #include "MGEquipmentComponent.h"
@@ -229,6 +232,90 @@ void AMGGrayFoxMission::CreatePrelude()
     }
 }
 
+namespace
+{
+    constexpr float DispatchBeltStart = -3350.f;
+    constexpr float DispatchBeltEnd = -2250.f;
+    constexpr float DispatchLaneY = -370.f;
+    constexpr float DispatchSensorX = -2700.f;
+}
+
+void AMGGrayFoxMission::CreateDispatchBay()
+{
+    CartonPickup = SpawnBlock(TEXT("DispatchCarton"), FVector(-3410.f, -268.f, -55.f),
+        FVector(1.14f, .95f, .90f), false);
+    WornCarton = SpawnBlock(TEXT("CarriedCarton"), FVector::ZeroVector, FVector(1.2f, 1.05f, 1.18f), false);
+    for (AStaticMeshActor* Box : {CartonPickup, WornCarton})
+        if (IsValid(Box))
+            if (UMaterialInstanceDynamic* Paper = Box->GetStaticMeshComponent()->CreateAndSetMaterialInstanceDynamic(0))
+                Paper->SetVectorParameterValue(TEXT("Color"),FLinearColor(.48f,.31f,.16f));
+    SmokePuff = SpawnBlock(TEXT("ExhaledSmoke"), FVector::ZeroVector, FVector(.12f), false);
+    if (IsValid(SmokePuff))
+    {
+        if (UStaticMesh* Sphere = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Sphere.Sphere")))
+            SmokePuff->GetStaticMeshComponent()->SetStaticMesh(Sphere);
+        SmokePuff->SetActorHiddenInGame(true);
+    }
+    BeamSegment = SpawnBlock(TEXT("IlluminatedSmoke"), FVector::ZeroVector, FVector(.025f,.65f,.025f), false);
+    if (IsValid(BeamSegment)) BeamSegment->SetActorHiddenInGame(true);
+    if (IsValid(WornCarton)) WornCarton->SetActorHiddenInGame(true);
+    SpawnBlock(TEXT("FreightBelt"), FVector((DispatchBeltStart + DispatchBeltEnd) * .5f, DispatchLaneY, -97.f),
+        FVector((DispatchBeltEnd - DispatchBeltStart)/100.f, 1.05f, .06f), false);
+    for (float X = DispatchBeltStart; X <= DispatchBeltEnd; X += 75.f)
+        SpawnBlock(TEXT("BeltCleat"), FVector(X, DispatchLaneY, -93.f), FVector(.04f, 1.05f, .03f), false);
+    for (const float Y : {-475.f, -175.f})
+        SpawnBlock(TEXT("OpticalGate"), FVector(DispatchSensorX, Y, 34.f), FVector(.15f,.16f,.22f), false);
+    DispatchCamera = GetWorld()->SpawnActor<AMGSurveillanceCameraActor>(
+        FVector(-2120.f, -435.f, 180.f), FRotator(0.f, 148.f, 0.f));
+    if (DispatchCamera.IsValid()) DispatchCamera->ConfigureSector(38.f, 700.f);
+}
+
+void AMGGrayFoxMission::ExhaleSmoke(const AMGPlayerCharacter* Player)
+{
+    if (!IsValid(Player) || !Player->GetEquipment() ||
+        !Player->GetEquipment()->IsItemEquipped(TEXT("CIGARETTES"))) return;
+    SmokeOrigin = Player->GetActorLocation() + Player->GetActorForwardVector()*28.f;
+    SmokeOrigin.Z += Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()*.62f;
+    SmokeAge = 0.f;
+}
+
+void AMGGrayFoxMission::TickDispatch(AMGPlayerCharacter* Player, float Dt)
+{
+    const FVector P = Player->GetActorLocation();
+    const bool bBox = Player->IsWearingCarton();
+    if (IsPreludeActive() && bBox && P.X >= DispatchBeltStart && P.X < DispatchBeltEnd
+        && FMath::Abs(P.Y - DispatchLaneY) < 52.f)
+        Player->AddActorWorldOffset(FVector(FMath::Min(165.f*Dt, DispatchBeltEnd-P.X), 0.f, 0.f), true);
+    if (IsValid(WornCarton))
+    {
+        WornCarton->SetActorHiddenInGame(!bBox);
+        if (bBox) WornCarton->SetActorLocationAndRotation(
+            Player->GetActorLocation() + FVector(0.f,0.f,59.f-Player->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()),
+            Player->GetActorRotation());
+    }
+    if (IsPreludeActive() && bHasObservedPlayer && (LastObservedPlayerLocation.X < DispatchSensorX) != (P.X < DispatchSensorX)
+        && P.Y >= -475.f && P.Y <= -175.f && !Player->bIsCrouched && !Player->IsProne())
+    {
+        NotifyGuardContactReported(FVector(DispatchSensorX, P.Y, P.Z));
+        Player->NotifyFeedback(TEXT("DISPATCH GATE — ALARM"), TEXT("alert"));
+    }
+    SmokeAge = FMath::Min(3.f, SmokeAge + Dt);
+    const FVector Puff = SmokeOrigin + FVector(16.f*SmokeAge,0.f,12.f*SmokeAge);
+    if (IsValid(SmokePuff))
+    {
+        SmokePuff->SetActorHiddenInGame(SmokeAge >= 3.f);
+        SmokePuff->SetActorLocation(Puff);
+        SmokePuff->SetActorScale3D(FVector(.12f + .12f*SmokeAge)*(1.f-SmokeAge/3.f));
+    }
+    if (IsValid(BeamSegment))
+    {
+        const bool bReveal = SmokeAge < 3.f && FMath::Abs(Puff.X-DispatchSensorX) < 95.f
+            && Puff.Y > -475.f && Puff.Y < -175.f && FMath::Abs(Puff.Z-34.f)<65.f;
+        BeamSegment->SetActorHiddenInGame(!bReveal);
+        BeamSegment->SetActorLocation(FVector(DispatchSensorX,FMath::Clamp(Puff.Y,-442.f,-208.f),34.f));
+    }
+}
+
 void AMGGrayFoxMission::CreateGreybox()
 {
     // Unreal's basic cube is 100cm at scale 1. Floor top is -100cm.
@@ -328,17 +415,32 @@ void AMGGrayFoxMission::CreatePostCard3Service()
     // Adaptation of the original MSX2's Card 3 -> guard-dog -> suspicious
     // plastic-explosive wall sequence. Layout/metres are explicitly NEW,
     // reversible 3D interpretation, not an extracted J2ME or MSX2 map.
-    // The next room ends at an honest, solid build boundary until the
-    // explosive mechanic and further campaign are implemented and tested.
+    // The single contextual charge opens the relay passage to the lift hall.
     SpawnBlock(TEXT("PostCard3Floor"), FVector(4650.f, 0.f, -150.f),
         FVector(18.f, 10.f, 1.f), true);
     SpawnBlock(TEXT("PostCard3NorthBoundary"), FVector(4650.f, 500.f, 90.f),
         FVector(18.f, .4f, 3.8f), true);
     SpawnBlock(TEXT("PostCard3SouthBoundary"), FVector(4650.f, -500.f, 90.f),
         FVector(18.f, .4f, 3.8f), true);
-    SpawnBlock(TEXT("PostCard3FutureSectorWall"), FVector(5550.f, 0.f, 90.f),
+    ServiceWall = SpawnBlock(TEXT("PostCard3FutureSectorWall"), FVector(5550.f, 0.f, 90.f),
         FVector(.4f, 10.f, 3.8f), true);
 
+    ChargeParcel = SpawnBlock(TEXT("ServiceChargeParcel"), FVector(4670.f, 155.f, -70.f),
+        FVector(.65f,.48f,.4f), false);
+    SpawnBlock(TEXT("RelayFloor"), FVector(6050.f,0.f,-150.f), FVector(10.f,10.f,1.f), true);
+    for (const float Y : {-500.f,500.f})
+        SpawnBlock(TEXT("RelaySideWall"), FVector(6050.f,Y,90.f), FVector(10.f,.4f,3.8f), true);
+    SpawnBlock(TEXT("LiftHallFloor"), FVector(7210.f,0.f,-150.f), FVector(13.4f,10.f,1.f), true);
+    for (float Y : {-500.f,500.f})
+        SpawnBlock(TEXT("LiftHallSide"), FVector(7210.f,Y,90.f), FVector(13.4f,.4f,3.8f), true);
+    SpawnBlock(TEXT("RoofLift"), FVector(7880.f,0.f,90.f), FVector(.4f,10.f,3.8f), true);
+    SpawnBlock(TEXT("LiftMotorWest"), FVector(6790.f,140.f,-5.f), FVector(.9f,1.5f,1.9f), true);
+    SpawnBlock(TEXT("LiftMotorEast"), FVector(7230.f,-100.f,-5.f), FVector(.9f,1.5f,1.9f), true);
+    MachinegunKid = GetWorld()->SpawnActor<AMGMachinegunKid>(FVector(7560.f,80.f,-11.f),FRotator(0.f,180.f,0.f));
+    ParachutePack = SpawnBlock(TEXT("LiftParachute"),FVector(7700.f,-200.f,-68.f),FVector(.72f,.59f,.50f),false);
+    SpawnBlock(TEXT("RelaySwitchbank"), FVector(5900.f,150.f,-12.f), FVector(1.8f,.8f,1.76f), true);
+    RelayDesk = SpawnBlock(TEXT("RelayHeadset"), FVector(6320.f,-145.f,-7.f), FVector(.48f,.42f,.24f), false);
+    SpawnBlock(TEXT("RelayDesk"), FVector(6320.f,-170.f,-63.f), FVector(1.5f,.7f,.7f), true);
     // Kennel architecture: evidence of a working security service, not
     // arbitrarily scattered enemies or an invisible dog spawn trigger.
     SpawnBlock(TEXT("KennelConcreteNorth"), FVector(4140.f, 362.f, -25.f),
@@ -371,8 +473,8 @@ void AMGGrayFoxMission::CreatePostCard3Service()
     SpawnBlock(TEXT("ServiceDuctExitGrate"), FVector(4770.f, -300.f, -69.f),
         FVector(.16f, 1.1f, .35f), false);
     // The next destructible seam is represented as visible evidence but
-    // remains a build boundary until the timer/explosive system exists.
-    SpawnBlock(TEXT("PostCard3DamagedSeam"), FVector(5521.f, 0.f, 30.f),
+    // marks the placement point for the contextual service charge.
+    ChargeMarker = SpawnBlock(TEXT("PostCard3DamagedSeam"), FVector(5521.f, 0.f, 30.f),
         FVector(.06f, .14f, 2.1f), false);
 
     if (!GetWorld()) return;
@@ -408,7 +510,7 @@ void AMGGrayFoxMission::CreateConnectiveSpaces()
         FVector(.85f, .55f, 1.1f), true);
     AddWorldTrace(TEXT("ServiceMaintenanceLedger"),
         FVector(-3330.f, 376.f, 8.f), FVector(.47f, .06f, .43f),
-        TEXT("SERVICE LOG / 1991: WATER PURIFIER REBUILT. ORIGINAL INSTALLATION DATE UNKNOWN."),
+        TEXT("1991: PURIFIER REBUILT. ORIGINAL FITTING DATE UNKNOWN."),
         0u, MG_FOX_CAPTURED);
 
     // A second, clearly distinct visual landmark before the custody truck.
@@ -420,7 +522,7 @@ void AMGGrayFoxMission::CreateConnectiveSpaces()
         FVector(5.3f, 1.9f, .22f), false);
     AddWorldTrace(TEXT("FreightReceivingSlip"),
         FVector(-2315.f, 420.f, 9.f), FVector(.33f, .06f, .46f),
-        TEXT("RECEIVING: CLEAN LINEN / BULK RATIONS / REPAIR PARTS. ONE CART UNACCOUNTED FOR."),
+        TEXT("RECEIVED: LINEN, RATIONS, SPARES. ONE CART MISSING."),
         0u, MG_FOX_CAPTURED);
     // Keep custody visible, rather than hiding the canonical transport
     // transaction behind maintenance-room keys or a second forced arrest.
@@ -430,7 +532,7 @@ void AMGGrayFoxMission::CreateConnectiveSpaces()
         FVector(1.6f, .28f, .22f), false);
     AddWorldTrace(TEXT("CustodyTransferDutyCard"),
         FVector(-1875.f, -405.f, 16.f), FVector(.44f, .06f, .43f),
-        TEXT("TRANSFER ORDER: CHECK EQUIPMENT SEALS BEFORE UNLOADING. HANDOVER SIGNATURE PENDING."),
+        TEXT("CHECK SEALS BEFORE UNLOADING. HANDOVER SIGNATURE MISSING."),
         MG_FOX_DETENTION_INTELLIGENCE, MG_FOX_CAPTURED);
 
     // B. Prison-to-arena threshold: recognizable building services and
@@ -462,7 +564,7 @@ void AMGGrayFoxMission::CreateConnectiveSpaces()
         FVector(.70f, .65f, 2.4f), true);
     AddWorldTrace(TEXT("KennelServiceLog"),
         FVector(5175.f, 447.f, 10.f), FVector(.46f, .07f, .42f),
-        TEXT("KENNEL: WATER TEST LOGGED. DRAINAGE CONTRACTOR REQUESTED. NO APPOINTMENT SET."),
+        TEXT("KENNEL WATER TEST FILED. DRAIN REPAIR STILL UNSCHEDULED."),
         MG_FOX_SLICE_COMPLETED, 0u);
 
     // Status: service architecture is original source GREYBOX, not an
@@ -541,13 +643,19 @@ void AMGGrayFoxMission::CreateSurveillancePosts()
     // cell where the player has no means to counter surveillance.
     if (AMGSurveillanceCameraActor* CCTV = GetWorld()->SpawnActor<AMGSurveillanceCameraActor>(
             FVector(1180.f, 424.f, 235.f), FRotator(0.f, 180.f, 0.f)))
+    {
+        PrisonCamera = CCTV;
         CCTV->ConfigureSector(38.f, 710.f);
+    }
 
     // Kennel maintenance transfer: visible as the player approaches Card 3's
     // next guard-dog hazard. It cannot see through the duct walls.
     if (AMGSurveillanceCameraActor* CCTV = GetWorld()->SpawnActor<AMGSurveillanceCameraActor>(
             FVector(5170.f, 427.f, 235.f), FRotator(0.f, 180.f, 0.f)))
+    {
+        KennelCamera = CCTV;
         CCTV->ConfigureSector(33.f, 760.f);
+    }
 }
 
 void AMGGrayFoxMission::CreateZoneLighting()
@@ -628,6 +736,7 @@ void AMGGrayFoxMission::BeginPlay()
 {
     Super::BeginPlay();
     CreatePrelude();
+    CreateDispatchBay();
     CreateGreybox();
     CreateBossWing();
     CreatePostCard3Service();
@@ -662,7 +771,7 @@ void AMGGrayFoxMission::BeginPlay()
         const bool bPositionSafe = !P.ContainsNaN()
             && P.X >= ((F & MG_FOX_CAPTURED) ? -1160.f : -3790.f)
             && P.X <= ((F & MG_FOX_CAPTURED)
-                ? ((F & MG_FOX_SLICE_COMPLETED) ? 5480.f
+                ? ((F & MG_FOX_SLICE_COMPLETED) ? (Save->bServiceWallOpen && Save->bServiceChargeCollected ? 7830.f : 5480.f)
                     : ((F & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 3650.f : 1310.f))
                 : -1300.f)
             && FMath::Abs(P.Y) < ((F & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 1020.f : 410.f)
@@ -676,7 +785,7 @@ void AMGGrayFoxMission::BeginPlay()
             && ((F & MG_FOX_LEFT_PRISON) || P.X < 1300.f);
         if (bValid && bPositionSafe
             && ((F & MG_FOX_CAPTURED) || (F & MG_FOX_DETENTION_INTELLIGENCE)
-                || (Save->SchemaVersion == 4 && Save->bEarnedHandgun)))
+                || (Save->SchemaVersion == 4 && (Save->bEarnedHandgun || Save->bOwnsCarton || Save->bDispatchCameraOffline))))
         {
             Flags = F;
             SavedPosition = Save->CheckpointLocation;
@@ -686,6 +795,28 @@ void AMGGrayFoxMission::BeginPlay()
             // V1–V3 were prison-slice builds with the handgun pre-owned.
             bLoadedHandgunAcquired = Save->SchemaVersion < 4 || Save->bEarnedHandgun;
             bEarlyHandgunAcquired = bLoadedHandgunAcquired;
+            bServiceChargeCollected = (F & MG_FOX_SLICE_COMPLETED) && Save->bServiceChargeCollected;
+            bServiceWallOpen = bServiceChargeCollected && Save->bServiceWallOpen;
+            bRelayIntel = bServiceWallOpen && Save->bRelayIntel;
+            bKidDefeated = bServiceWallOpen && Save->bKidDefeated;
+            bParachuteTaken = bKidDefeated && Save->bParachuteTaken;
+            if (bKidDefeated && IsValid(MachinegunKid)) MachinegunKid->Destroy();
+            if (bParachuteTaken && IsValid(ParachutePack)) ParachutePack->SetActorHiddenInGame(true);
+            if (IsValid(ChargeParcel)) ChargeParcel->SetActorHiddenInGame(bServiceChargeCollected);
+            if (bServiceWallOpen)
+            {
+                if (IsValid(ServiceWall)) ServiceWall->Destroy();
+                if (IsValid(ChargeMarker)) ChargeMarker->Destroy();
+            }
+            bOwnsCarton = Save->bOwnsCarton;
+            if (bOwnsCarton && IsValid(CartonPickup)) CartonPickup->SetActorHiddenInGame(true);
+            if (Save->bDispatchCameraOffline && DispatchCamera.IsValid())
+                DispatchCamera->RestoreOfflineState();
+            bHeardFoxFollowup = Save->bHeardFoxFollowup;
+            if (Save->bPrisonCameraOffline && PrisonCamera.IsValid())
+                PrisonCamera->RestoreOfflineState();
+            if (Save->bKennelCameraOffline && KennelCamera.IsValid())
+                KennelCamera->RestoreOfflineState();
             bHasLoadedSave = true;
         }
     }
@@ -756,6 +887,8 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
     // Gear usability depends on the distinct actual recovery transaction.
     if (UMGEquipmentComponent* Inventory = Player->GetEquipment())
     {
+        if (bParachuteTaken) Inventory->AwardItem(TEXT("PARACHUTE"),1);
+        if (bOwnsCarton) Inventory->AwardItem(TEXT("BOX"), 1);
         if (bHasLoadedSave && bLoadedHandgunAcquired)
         {
             // Ownership and remaining rounds are different facts. Older
@@ -802,6 +935,16 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     if (!Save) return;
     Save->SchemaVersion = 4;
     Save->MissionFlags = Flags;
+    Save->bServiceChargeCollected = bServiceChargeCollected;
+    Save->bServiceWallOpen = bServiceWallOpen;
+    Save->bRelayIntel = bRelayIntel;
+    Save->bKidDefeated = bKidDefeated;
+    Save->bParachuteTaken = bParachuteTaken;
+    Save->bOwnsCarton = bOwnsCarton;
+    Save->bDispatchCameraOffline = DispatchCamera.IsValid() && !DispatchCamera->IsOperational();
+    Save->bHeardFoxFollowup = bHeardFoxFollowup;
+    Save->bPrisonCameraOffline = PrisonCamera.IsValid() && !PrisonCamera->IsOperational();
+    Save->bKennelCameraOffline = KennelCamera.IsValid() && !KennelCamera->IsOperational();
     Save->bEarnedHandgun = bEarlyHandgunAcquired;
     Save->CheckpointLocation = Player ? Player->GetActorLocation() : PreludeStart;
     if (Player && Player->GetEquipment())
@@ -864,7 +1007,7 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         if (AMGPrisonerCharacter* Fox = Cast<AMGPrisonerCharacter>(FoxProxy))
             Fox->SetRescued(true);
         // Placeholder original prose, not a published game-script transcription.
-        Dialogue = TEXT("GRAY FOX: Metal Gear is real. Find the scientist behind it.");
+        Dialogue = TEXT("GRAY FOX: I saw it walk, Snake. Metal Gear can launch a nuclear missile. Find Dr. Pettrovich.");
         // Optional dry recorded human voice, positioned at the actual cell.
         // The player receives the rescue + intelligence even with no VO asset.
         if (IsValid(FoxProxy))
@@ -966,11 +1109,58 @@ bool AMGGrayFoxMission::CanReach(
     return !bBlocked || Hit.GetActor() == Target;
 }
 
+bool AMGGrayFoxMission::TryServiceInteraction(AMGPlayerCharacter* Player)
+{
+    if (!(Flags & MG_FOX_SLICE_COMPLETED)) return false;
+    if (!bServiceChargeCollected && CanReach(Player, ChargeParcel, 185.f))
+    {
+        bServiceChargeCollected = true;
+        ChargeParcel->SetActorHiddenInGame(true);
+        Dialogue = TEXT("Plastic explosive recovered. One charge.");
+    }
+    else if (!bServiceWallOpen && CanReach(Player, ChargeMarker, 200.f))
+    {
+        if (bServiceChargeCollected && BreachRemaining < 0.f)
+        {
+            BreachRemaining = 2.4f;
+            ChargeMarker->SetActorScale3D(FVector(.25f,.42f,.48f));
+        }
+        Dialogue = bServiceChargeCollected ? TEXT("Charge ticking.") : TEXT("A patched joint. A fist will do nothing here.");
+    }
+    else if (bKidDefeated && !bParachuteTaken && CanReach(Player, ParachutePack, 165.f))
+    {
+        if (!Player->GetEquipment() || !Player->GetEquipment()->AwardItem(TEXT("PARACHUTE"),1)) return false;
+        bParachuteTaken = true;
+        ParachutePack->SetActorHiddenInGame(true);
+        Dialogue = TEXT("Parachute recovered. The lift goes to the roof.");
+    }
+    else if (bServiceWallOpen && CanReach(Player, RelayDesk, 180.f))
+    {
+        bRelayIntel = true;
+        Dialogue = TEXT("DUTY LOG: Asked for the west lift back. Machinegun Kid sent the key. Kept the lift.");
+    }
+    else return false;
+    DialogueTimeRemaining = 5.f;
+    SaveProgress(Player);
+    return true;
+}
+
 bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
 {
     if (!bPlayerInitialised || !Player) return false;
+    if (TryServiceInteraction(Player)) return true;
     if (!(Flags & MG_FOX_CAPTURED))
     {
+        if (!bOwnsCarton && CanReach(Player, CartonPickup, 160.f) && Player->GetEquipment())
+        {
+            if (!Player->GetEquipment()->AwardItem(TEXT("BOX"), 1)) return false;
+            bOwnsCarton = true;
+            CartonPickup->SetActorHiddenInGame(true);
+            Dialogue = TEXT("Folded dispatch carton. Equip it from items.");
+            DialogueTimeRemaining = 3.f;
+            SaveProgress(Player);
+            return true;
+        }
         if (!bEarlyHandgunAcquired &&
             CanReach(Player, EarlyHandgunPickup, 185.f))
         {
@@ -1041,6 +1231,16 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
     if ((Flags & MG_FOX_RESCUED) == 0
         && CanReach(Player, FoxProxy, 210.f))
         return ApplyAction(MG_FOX_RESCUE, Player);
+    if ((Flags & MG_FOX_RESCUED) && !(Flags & MG_FOX_EXIT_WALL_BREACHED)
+        && !bHeardFoxFollowup && DialogueTimeRemaining <= 0.f
+        && CanReach(Player, FoxProxy, 175.f))
+    {
+        bHeardFoxFollowup = true;
+        Dialogue = TEXT("GRAY FOX: I counted the steps between shifts. After a while I could tell who was bringing water.");
+        DialogueTimeRemaining = 5.f;
+        SaveProgress(Player);
+        return true;
+    }
     if ((Flags & MG_FOX_EXIT_WALL_BREACHED) == 0
         && CanReach(Player, EscapeWall, 240.f))
     {
@@ -1384,7 +1584,7 @@ FString AMGGrayFoxMission::GetObjectiveText() const
             ? TEXT("Investigate the transport security. Keep your weapon lowered.")
             : TEXT("Trace Gray Fox's disappearance. Look for prisoners.");
     if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
-        return TEXT("Examine the detention cell for an escape route.");
+        return TEXT("Search your cell for a way out.");
     if (!(Flags & MG_FOX_RESCUED))
         return TEXT("Find and speak to Gray Fox.");
     if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
@@ -1403,6 +1603,10 @@ FString AMGGrayFoxMission::GetObjectiveText() const
         return TEXT("Investigate the secured storeroom for a way forward.");
     if (!(Flags & MG_FOX_SLICE_COMPLETED))
         return TEXT("Find the route deeper into Outer Heaven.");
+    if (bParachuteTaken) return TEXT("Parachute secured. Roof lift reached. End of current build.");
+    if (bKidDefeated) return TEXT("Collect the parachute at the west lift.");
+    if (bRelayIntel) return TEXT("Follow the relay passage to the west lift.");
+    if (bServiceWallOpen) return TEXT("Investigate the relay room beyond the kennels.");
     return TEXT("Continue through the Card 3 service passage. Scout the kennel and damaged masonry.");
 }
 
@@ -1583,6 +1787,29 @@ void AMGGrayFoxMission::Tick(float Dt)
         Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (Player)
     {
+        if (BreachRemaining >= 0.f)
+        {
+            BreachRemaining -= Dt;
+            if (BreachRemaining <= 0.f)
+            {
+                BreachRemaining = -1.f;
+                bServiceWallOpen = true;
+                if (IsValid(ServiceWall)) ServiceWall->Destroy();
+                if (IsValid(ChargeMarker)) ChargeMarker->Destroy();
+                BroadcastStructuralImpact(FVector(5550.f,0.f,0.f), 1100.f, this);
+                Dialogue = TEXT("Beyond the dust, a headset swings against a desk.");
+                DialogueTimeRemaining = 3.f;
+                SaveProgress(Player);
+            }
+        }
+        if (bServiceWallOpen && !bKidDefeated && IsValid(MachinegunKid) && MachinegunKid->IsIncapacitated())
+        {
+            bKidDefeated = true;
+            Dialogue = TEXT("The feed belt settles. A parachute hangs by the lift.");
+            DialogueTimeRemaining = 4.f;
+            SaveProgress(Player);
+        }
+        TickDispatch(Player, Dt);
         const FVector CurrentPosition = Player->GetActorLocation();
         const APlayerController* PC = Cast<APlayerController>(Player->GetController());
         const FRotator View = PC ? PC->GetControlRotation() : Player->GetActorRotation();

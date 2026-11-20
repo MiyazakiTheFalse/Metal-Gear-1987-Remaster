@@ -575,7 +575,8 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     const FVector Eye = GetActorLocation() + FVector(0.f, 0.f, 55.f);
     const FVector Target = Player->GetActorLocation() + FVector(0.f, 0.f, 55.f);
     const bool bTraceHit = GetWorld()->LineTraceSingleByChannel(Hit, Eye, Target, ECC_Visibility, Params);
-    const bool bHasLineOfSight = !bTraceHit || Hit.GetActor() == Player;
+    const bool bHasLineOfSight = (!bTraceHit || Hit.GetActor() == Player)
+        && (AwarenessState >= 3 || !Player->IsStillInCarton());
     const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
     const EMGFacilitySecurityState BaseState = Mission

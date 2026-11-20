@@ -865,31 +865,31 @@
       "id": "building1.after_card3_explosive_wall",
       "kind": "destruction_puzzle_next_mission",
       "provenance": "MSX2_event_verified_3d_placement_interpretation",
-      "implementation_status": "design_only",
+      "implementation_status": "source_prototype",
       "verification_status": "unverified",
       "intent": "Preserve the post-dog mysterious weak surface that requires plastic explosive instead of Snake suddenly punching arbitrary full concrete.",
       "trigger": "After leaving the dog sector, inspect the damaged masonry on the outer boundary.",
-      "action": "Future plastic explosive system must arm a timed charge, respect the one-charge-at-a-time MSX rule, physically breach collision, and open the Machinegun Kid approach; presently deliberately blocked by honest sector boundary.",
+      "action": "Collect the single service parcel and interact at the patched joint.",
       "visual": {
         "foreshadow": "Subtle damaged seam visible beyond dog challenge.",
-        "impact": "Future geometry destruction VFX and actual portal clearance.",
+        "impact": "Visible opening through the patched wall.",
         "aftermath": "A purposeful transition to the next 1987 encounter rather than false end-credits."
       },
       "audio": {
-        "origin": "Surface knock and bomb beep/explosion pending",
+        "origin": "Charge countdown caption and impact feedback.",
         "response": "Guard local hearing from actual blast position",
         "non_audio_equivalent": "Fracture and debris clue"
       },
       "timing": {
-        "start_event": "Source placement and countdown, not implemented",
+        "start_event": "Arm the joint.",
         "feedback_target_ms": 120,
         "max_forced_lock_seconds": 0,
         "optional_hint_seconds": [],
-        "timing_status": "pending_design_and_UE"
+        "timing_status": "source_not_UE_verified"
       },
       "state": {
-        "transaction": "No new mission action yet; cannot falsely complete before the explosives and downstream sector exist",
-        "persistence": "Future breach/open portal + saved charge-consumption authority",
+        "transaction": "One collected charge opens the wall after a 2.4 second fuse.",
+        "persistence": "Restore earned pickup and opened passage. An interrupted fuse can be armed again.",
         "ai_knowledge": "Only blast and actual observed player movements"
       },
       "interruptions": [
@@ -904,37 +904,37 @@
         "Do not award explosives after they were confiscated without actual recovery",
         "No fake mission completion at blocked boundary"
       ],
-      "design_note": "Not playable; intentionally remains an actual opaque 3D build boundary, not a shipped mission."
+      "design_note": "Playable browser prototype and uncompiled Unreal source. Room placement and cooldowns are remake interpretations."
     },
     {
       "id": "building1.machinegun_kid_leadin",
       "kind": "future_mission",
       "provenance": "MSX2_event_verified_location_and_order_not_geometry",
-      "implementation_status": "design_only",
+      "implementation_status": "source_prototype",
       "verification_status": "unverified",
       "intent": "Plan the next original mercenary and rooftop/parachute sequence, respecting its order after Shotmaker and explosive wall.",
       "trigger": "After authentic plastic explosive breach and continued Building 1 progression.",
-      "action": "Future navigable space with distinct guard patterns, Machinegun Kid's fire lane, cover, retained weapon alternatives, earned parachute and roof, not spawned in the present kennel.",
+      "action": "Enter the lift hall, interrupt sight during the marked burst and collect the parachute after the guard falls.",
       "visual": {
         "foreshadow": "Threat communicated by actual weapon lane and staging, not a random boss popup.",
-        "impact": "Future high-authenticity character mesh/rig and weapon/stance animation.",
+        "impact": "A committed burst followed by a reload opening.",
         "aftermath": "Parachute obtained after boss in source route"
       },
       "audio": {
-        "origin": "Distinct machine-gun reports with physically coherent cover falloff",
+        "origin": "Mechanical warning followed by a burst and feed-cover cue.",
         "response": "Named human voice must match 1987 knowledge, not later-era lore",
         "non_audio_equivalent": "Weapon flash/cover impact/accessible subtitles"
       },
       "timing": {
-        "start_event": "Not wired",
+        "start_event": "Enter the west lift hall within sight.",
         "feedback_target_ms": 150,
         "max_forced_lock_seconds": 0,
         "optional_hint_seconds": [],
-        "timing_status": "pending"
+        "timing_status": "source_not_UE_verified"
       },
       "state": {
-        "transaction": "Future flags/Rust ABI review needed",
-        "persistence": "Not yet implemented",
+        "transaction": "Boss incapacitation enables the parachute pickup.",
+        "persistence": "Save boss defeat and parachute acquisition independently.",
         "ai_knowledge": "No omniscience or contrived reinforcements"
       },
       "interruptions": [
@@ -948,7 +948,7 @@
         "Do not invent late-game spoiler lines",
         "Verify against 1987 MSX maps"
       ],
-      "design_note": "Not playable; intentionally remains an actual opaque 3D build boundary, not a shipped mission."
+      "design_note": "Playable browser prototype and uncompiled Unreal source. Room placement and cooldowns are remake interpretations."
     },
     {
       "id": "prelude.handgun_pickup",

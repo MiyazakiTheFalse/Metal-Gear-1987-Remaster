@@ -67,7 +67,7 @@ class PostCard3SourceChecks(unittest.TestCase):
 
     def test_new_sector_checkpoint_only_allowed_after_canonical_card3(self):
         self.assertIn("MG_FOX_SLICE_COMPLETED", CPP)
-        self.assertIn("(F & MG_FOX_SLICE_COMPLETED) ? 5480.f", CPP)
+        self.assertIn("Save->bServiceWallOpen && Save->bServiceChargeCollected ? 7830.f : 5480.f", CPP)
         self.assertIn("bPostCard3ServiceEntered", CPP)
         self.assertIn("SaveProgress(Player);", CPP)
         self.assertIn('SECURITY KENNEL AHEAD', CPP)
@@ -84,8 +84,9 @@ class PostCard3SourceChecks(unittest.TestCase):
                   "building1.after_card3_explosive_boundary"):
             self.assertIn(a, area_ids)
         future = next(b for b in BEATS["beats"] if b["id"] == "building1.after_card3_explosive_wall")
-        self.assertEqual(future["implementation_status"], "design_only")
-        self.assertEqual(future["state"]["transaction"].split(";")[0], "No new mission action yet")
+        self.assertEqual(future["implementation_status"], "source_prototype")
+        self.assertIn("BreachRemaining = 2.4f", CPP)
+        self.assertIn("if (IsValid(ServiceWall)) ServiceWall->Destroy()", CPP)
         self.assertTrue(all(b.get("verification_status") == "unverified" for b in BEATS["beats"][-4:]))
 
 if __name__ == "__main__":

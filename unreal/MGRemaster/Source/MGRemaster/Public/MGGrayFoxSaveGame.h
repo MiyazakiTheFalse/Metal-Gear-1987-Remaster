@@ -25,4 +25,25 @@ public:
     int32 StunRounds = 0; // Legacy V3 field; no active campaign stun slot.
     UPROPERTY(SaveGame)
     bool bEarnedHandgun = false;
+    // Additive fields default to the original state in older V4 saves.
+    UPROPERTY(SaveGame)
+    bool bPrisonCameraOffline = false;
+    UPROPERTY(SaveGame)
+    bool bKennelCameraOffline = false;
+    UPROPERTY(SaveGame)
+    bool bHeardFoxFollowup = false;
+    UPROPERTY(SaveGame)
+    bool bOwnsCarton = false;
+    UPROPERTY(SaveGame)
+    bool bDispatchCameraOffline = false;
+    UPROPERTY(SaveGame)
+    bool bServiceChargeCollected = false;
+    UPROPERTY(SaveGame)
+    bool bServiceWallOpen = false;
+    UPROPERTY(SaveGame)
+    bool bRelayIntel = false;
+    UPROPERTY(SaveGame)
+    bool bKidDefeated = false;
+    UPROPERTY(SaveGame)
+    bool bParachuteTaken = false;
 };

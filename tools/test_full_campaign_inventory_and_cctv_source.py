@@ -29,7 +29,7 @@ class WholeGameSourceAudit(unittest.TestCase):
             "grenade_launcher", "smg", "rocket_launcher"
         ])
         self.assertEqual(PLAN["nonCanonTools"], ["stun"])
-        self.assertEqual(PLAN["currentlyImplementedBossSetPieces"], 1)
+        self.assertEqual(PLAN["currentlyImplementedBossSetPieces"], 2)
         self.assertEqual(
             [x["id"] for x in PLAN["bosses"]],
             ["four_mercenaries", "shoot_gunner", "machinegun_kid", "hind_d",

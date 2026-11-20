@@ -901,14 +901,14 @@
     },
     {
       "id": "building1.after_card3_explosive_boundary",
-      "stage": "next_campaign_boundary",
+      "stage": "relay_to_west_lift",
       "beat_ids": [
         "building1.after_card3_explosive_wall",
         "building1.machinegun_kid_leadin"
       ],
       "provenance": "original_MSX_weak_blast_wall_event_3d_location_unverified",
       "verification_status": "unverified",
-      "implementation_status": "design_only",
+      "implementation_status": "source_greybox",
       "constraints": "The next scene is explicitly NOT playable until timed plastic explosives, breakable geometry, and downstream area exist; do not bluff completion.",
       "test_evidence": [],
       "arrival": {
@@ -922,23 +922,27 @@
           "building1.after_card3_dog_corridor"
         ],
         "gates": [
-          "Solid temporary boundary until bomb and follow-up mission"
+          "Card 3 entry",
+          "Service charge opens masonry",
+          "Machinegun Kid guards the parachute"
         ],
         "choices": [
-          "Explore prior kennel and backtrack"
+          "Kennel or crawl route",
+          "Optional relay desk",
+          "Two lift motors provide cover"
         ],
-        "camera_clearance": "Future implementation needs collision opening and debounce"
+        "camera_clearance": "Check the relay entrance, motor housings and pickup from both shoulders."
       },
       "visual": {
         "forewarning": "Patched masonry",
-        "reveal": "No false breach or invisible loading door",
-        "spatial_readability": "Expansion boundary must be called out as unfinished in dev builds"
+        "reveal": "The breach opens into the relay room.",
+        "spatial_readability": "The west lift terminates the current playable route."
       },
       "audio": {
         "sources": [
           "No recorded explosion or masonry debris"
         ],
-        "occlusion": "Wall remains physically solid",
+        "occlusion": "A solid wall blocks sight until the fuse completes.",
         "non_audio_equivalent": "Weak patch visibly distinct"
       },
       "risk": {
@@ -951,19 +955,19 @@
         "pressure": "No extra invented enemy"
       },
       "timing": {
-        "start_event": "Not yet implemented",
+        "start_event": "Reach the kennel",
         "feedback_target_ms": 150,
         "forced_lock_seconds": 0,
         "tempo_role": "next_campaign_problem",
-        "trigger": "Not yet implemented",
+        "trigger": "Approach the service parcel or patched joint",
         "hint_policy": "No forced prompts; inspect actual readable spatial evidence before optional contextual hints",
         "lock_seconds": 0
       },
       "accessibility": {
-        "non_audio": "No misleading objective claiming the wall can be opened yet",
+        "non_audio": "Charge, breach, burst and reload captions.",
         "posture": "No softlock; can retreat",
         "color_independent": true,
-        "caption_plan": "No misleading objective claiming the wall can be opened yet; must be evaluated in UE at 720p",
+        "caption_plan": "Verify caption timing in both engines.",
         "control_plan": "No softlock; can retreat; use the existing controller input and physical collision"
       },
       "failure": {

@@ -28,7 +28,7 @@
   ],
   "nonCanonToolRule": "No stun pistol in normal or shipping inventory. Opt-in developer-only, default false; keep source as a test harness.",
   "totalBossSetPieces": 11,
-  "currentlyImplementedBossSetPieces": 1,
+  "currentlyImplementedBossSetPieces": 2,
   "vocab": {
     "design_only": "not code-implemented",
     "partial_source_greybox": "level/mission code exists; not UE verified",
@@ -84,7 +84,7 @@
       "sourceFunction": "continuous machine-gun fire; guards route to parachute",
       "threeDInterpretation": "Sustained suppression, muzzle/cover material reaction, reload/overheat relief, flanking via physically readable ducts",
       "approvedCounterplay": "Handgun/SMG/remote missile; cover should be helpful not invulnerable exploit",
-      "implementationStatus": "design_only",
+      "implementationStatus": "source_prototype",
       "unrealVerified": false,
       "buildRules": [
         "only attacks proven by source or clearly labelled remake interpretation",
@@ -397,7 +397,7 @@
       "bossIds": [
         "machinegun_kid"
       ],
-      "implementationStatus": "partial_source_greybox_then_design_only",
+      "implementationStatus": "partial_source_greybox",
       "unrealVerified": false,
       "real3DNeeds": [
         "connected navigable hallways with unique landmarks and camera clearance",

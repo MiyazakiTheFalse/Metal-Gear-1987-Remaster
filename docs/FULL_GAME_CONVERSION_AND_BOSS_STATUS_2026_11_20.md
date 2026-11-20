@@ -2,8 +2,14 @@
 ## Whole-game conversion, boss treatments and current implementation status
 **Updated:** 20 November 2026 · **Canonical anchor:** the original MSX2 game, not NES alterations · **Repository status:** GitHub C++/asset/data source only; *latest branch not UE5.7 compiled or playtested*.
 
+### Current paired milestone
+
+Both sources connect the infiltration and prison to the west-lift parachute pickup. Browser regression coverage includes the timed service breach, optional log, Machinegun Kid and reward. The Unreal changes require compilation and a matching PIE run. The prototypes compress the original Building 1 geography. The canonical third-floor box pickup, full roof and Hind D encounter are outstanding. Browser and Unreal Shoot Gunner combat timing, art and checkpoint implementations still differ.
+
+Machinegun Kid currently commits to an observed lane, gives a one-second warning, fires for roughly 1.15 seconds, then opens the feed cover for 1.8 seconds. Each hit requires fresh sight. The two lift motors provide readable cover. Defeating him earns access to the parachute. These are prototype timings and staging choices. The relay log is optional and the passage stays open on return. See the [paired direction and adaptation decisions](OUTER_HEAVEN_1995_CONTINUITY_TREATMENT.md#direction-for-the-two-playable-builds).
+
 ### The decision
-We are developing **the entire original game** with an MGS-style third-person presentation, not a permanently isolated prison demo. Existing prison content remains the first integration testbed; next production priorities build backwards to the actual infiltration opening and forward to the rest of the campaign. The ten source-linked workstreams and eleven set-pieces are versioned in [full-game campaign contract](../data/MSX2_FULL_CAMPAIGN_CONVERSION_PLAN_1995.json). The 23 local beat contracts (20 source prototypes, 3 design-only) and 12 area contracts remain the detailed authored-prison source and are **not** a count of fully completed 1987 levels.
+We are developing **the entire original game** with an MGS-style third-person presentation, not a permanently isolated prison demo. Existing prison content remains the first integration testbed; next production priorities build backwards to the actual infiltration opening and forward to the rest of the campaign. The ten source-linked workstreams and eleven set-pieces are versioned in [full-game campaign contract](../data/MSX2_FULL_CAMPAIGN_CONVERSION_PLAN_1995.json). The 23 local beat contracts (22 source prototypes, 1 design-only) and 12 area contracts remain the detailed authored-prison source and are **not** a count of fully completed 1987 levels.
 
 ### Latest status and significant corrections
 
@@ -16,10 +22,10 @@ We are developing **the entire original game** with an MGS-style third-person pr
 | Prison / Gray Fox | Capture/transfer transaction, two breached cell walls, Fox rescue, prison guard search, optional dialogue | Physical capture/transport performance, real Fox rig and recorded VO |
 | Shoot Gunner (revised Shotmaker) | 3-shot spread, pump and shell reload, limited damage, physical cover and gear recovery/card logic | Approved boss model/reload animation, original alternative victory routes, whether defeat must be mandatory in authentic progression |
 | Inventory / transmitter / Card 3 | Confiscation, recovery, planted tracker, Card 2 room and Card 3 | Complete original acquisition progression and all weapon families |
-| Post-Card-3 | Two source-authored sentry dogs, service lane, crawl geometry, optional kennel logs, temporary exit boundary | Dog rig, navigation verification, working bomb breach and downstream Machinegun Kid area |
-| Surveillance CCTV | Two placed, moving analog cameras with physical visibility, acquisition timing, alarm reports, local isolator and gunfire destruction | Polished optical cone/spotlight/audio, persistent disabled state across save, monitored camera feed and balance testing |
+| Post-Card-3 | Two source-authored sentry dogs, service lane, crawl geometry, optional kennel logs, service charge, relay room, Machinegun Kid prototype and parachute pickup | Dog rig, navigation verification, finished boss rig, production staging and roof traversal |
+| Surveillance CCTV | Two placed, moving analog cameras with physical visibility, acquisition timing, alarm reports, local isolator and gunfire destruction | Camera power now restores at checkpoints. Outstanding work includes polished optical cone/spotlight/audio, monitored camera feed and balance testing |
 | Audio / interface | Source transceiver, state-dependent HUD, optional sounds/voice import contracts | Definitive MGS-quality title sequence, UI motion/style, recorded VO and mix |
-| Later campaign | Entire original item, boss, card and POW sequence is documented | No implemented Machinegun Kid/Hind D/tank/bulldozer/Fire Trooper/TX-11/Coward Duck/TX-55/Big Boss fights yet |
+| Later campaign | Entire original item, boss, card and POW sequence is documented | No implemented Hind D/tank/bulldozer/Fire Trooper/TX-11/Coward Duck/TX-55/Big Boss fights yet |
 
 **Meaning of implemented:** authored C++/data and source importers, not a claim of an executable or graphically finished game. The most recent movement/foot/hand IK signals also lack the real AnimBlueprint assets to produce their intended animation.
 

@@ -41,6 +41,8 @@ public:
     float GetEquipmentTimeScale() const { return EquipmentTimeScale; }
     float GetNoiseFactor() const;
     float GetHealth() const { return Health; }
+    bool IsWearingCarton() const;
+    bool IsStillInCarton() const;
     bool IsProne() const { return bIsProne; }
     bool IsInCover() const { return bInCover; }
     FVector GetCoverSurfaceNormal() const { return CoverNormal; }

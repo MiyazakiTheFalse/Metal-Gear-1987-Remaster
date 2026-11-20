@@ -24,7 +24,7 @@ class ExtendedTransactionSourceTests(unittest.TestCase):
         self.assertIn('&& !(Flags & MG_FOX_GEAR_RECOVERED)',MISSION)
         self.assertIn('Inventory->AwardItem(TEXT("CARD3"), 1)',MISSION)
         self.assertIn('FName(TEXT("CARD3"))',EQUIP)
-        self.assertIn('MG_FOX_CARD3_RECOVERED',RUST)
+        self.assertIn('flags | CARD3_RECOVERED',RUST)
     def test_save_migration_remains_explicit(self):
         self.assertIn('const bool bLegacy = Save->SchemaVersion == 1',MISSION)
         self.assertIn('Save->SchemaVersion = 4;',MISSION)
