@@ -86,6 +86,10 @@ def main() -> int:
             raise ValueError(f"Invalid scene ID: {scene_id}")
         for line in scene["lines"]:
             speaker, clip = line["speaker"], line["clip"]
+            if clip is None:
+                if not line.get("continuation_of"):
+                    raise ValueError(f"Unexplained unvoiced continuation: {scene_id}")
+                continue
             if speaker not in data["profiles"] or not ID.fullmatch(speaker) or not CLIP.fullmatch(clip):
                 raise ValueError(f"Unsafe/missing clip/speaker: {speaker} / {clip}")
             key = (speaker, clip)
