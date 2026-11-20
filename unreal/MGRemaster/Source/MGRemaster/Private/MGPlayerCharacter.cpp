@@ -964,7 +964,8 @@ void AMGPlayerCharacter::ItemWindowStart()
 }
 bool AMGPlayerCharacter::IsWearingCarton() const
 {
-    return Equipment && Equipment->IsItemEquipped(TEXT("BOX")) && bIsCrouched
+    return Equipment && (Equipment->IsItemEquipped(TEXT("BOX")) ||
+        Equipment->IsItemEquipped(TEXT("FREIGHT_CARTON"))) && bIsCrouched
         && !bAiming && !bIsProne && !IsMeleeVisualActive() && !bInCover;
 }
 bool AMGPlayerCharacter::IsStillInCarton() const
@@ -980,7 +981,8 @@ void AMGPlayerCharacter::ItemWindowStop()
         Equipment->CloseItemWindow();
         if (Equipment->GetEquippedItemIndex() == Selected)
         {
-            if (Equipment->IsItemEquipped(TEXT("BOX")) && !bIsProne)
+            if ((Equipment->IsItemEquipped(TEXT("BOX")) ||
+                 Equipment->IsItemEquipped(TEXT("FREIGHT_CARTON"))) && !bIsProne)
             {
                 if (bInCover) LeaveCover();
                 Crouch();
