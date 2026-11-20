@@ -247,7 +247,9 @@ const kid={x:62,z:.8,yaw:Math.PI,state:0,hp:180,last:{x:62,z:.8},waypoints:[],ki
  knocked:false,phase:'waiting',clock:0,cadence:0,lane:0,aimTime:0,shotVisual:0,suspicion:0};
 function kidTick(dt){
  if(!service.open||service.kidDown)return;
- if(kid.knocked){service.kidDown=true;popup('The feed belt settles. A parachute hangs by the lift.',3);save();return;}
+ if(kid.knocked){service.kidDown=true;
+  popup('The feed belt settles. A parachute hangs by the lift.',3);
+  tellCharacterStory('P05.kid');save();return;}
  const sees=player.x>52.5&&!lineBlockedSight(kid,player);
  kid.clock-=dt;kid.shotVisual=Math.max(0,kid.shotVisual-dt);
  if(kid.phase==='waiting'&&sees){
@@ -287,7 +289,9 @@ function useService(action){
  if(action==='INSPECT MASONRY')popup('A patched joint. A fist will do nothing here.');
  if(action==='PLACE CHARGE'&&service.fuse<0){service.fuse=2.4;playCue('select');popup('Charge ticking.');}
  if(action==='TAKE PARACHUTE'){service.parachute=true;playCue('card');popup('Parachute recovered. The lift goes to the roof.');}
- if(action==='READ DUTY LOG'){service.intel=true;popup('Duty log · Asked for the west lift back. Machinegun Kid sent the key. Kept the lift.',6);}
+ if(action==='READ DUTY LOG'){service.intel=true;
+  popup('Duty log · Asked for the west lift back. Machinegun Kid sent the key. Kept the lift.',6);
+  tellCharacterStory('P05.log');}
  syncService();save();
 }
 function serviceTick(dt){
@@ -1233,8 +1237,8 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
    }
    if(stage<0&&world.box&&dist(player,bay)<2.8){say('boxCall');return;}
    if(stage<0&&Math.abs(player.x-beamX)<3&&player.z< -1){say('dispatchCall');return;}
-   const mode=stage===0?'cell':stage===2?'rescued':stage>=6?'card3':
-      stage>=4?'gear':null;
+   const mode=stage===0?'cell':stage===2?'rescued':
+      stage===8?'kennel':stage>=6?'card3':stage>=4?'gear':null;
    const personal=mode?window.MGCharacterStory?.radio(mode):null;
    if(personal)dialogueQueue.push(personal);
    else say(stage<0?'schneider':stage===0?'bigBoss':'continueMission');
