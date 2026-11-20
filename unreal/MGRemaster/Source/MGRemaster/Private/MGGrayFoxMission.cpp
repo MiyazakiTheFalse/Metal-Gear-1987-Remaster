@@ -169,6 +169,12 @@ void AMGGrayFoxMission::CreatePrelude()
         FVector(-2870.f, -168.f, -5.f), FVector(.45f, .06f, .50f),
         TEXT("CARGO: FILTERS / DRESSINGS / RATIONS. SIGNATURE MISSING."),
         0u, MG_FOX_CAPTURED);
+    // Source-ranked MSX2 handgun acquisition, with NEW 3D room placement.
+    // Earned by proximity/use, NOT a default loadout or magical reward.
+    EarlyHandgunPickup = SpawnBlock(TEXT("Building1EarlyHandgunCache"),
+        FVector(-3670.f, 180.f, -56.f), FVector(.68f, .50f, .45f), false);
+    SpawnBlock(TEXT("Building1HandgunStorageShelf"),
+        FVector(-3670.f, 230.f, -62.f), FVector(1.45f, .42f, .70f), true);
     SpawnBlock(TEXT("PreludeSecurityBooth"), FVector(-1920.f, 225.f, -15.f),
         FVector(2.6f, 1.8f, 2.1f), true);
     AddWorldTrace(TEXT("DutyRotationSlate"),
@@ -636,7 +642,8 @@ void AMGGrayFoxMission::BeginPlay()
         // Reject unknown bits and structurally impossible checkpoints.
         const uint32 F = Save->MissionFlags;
         const bool bLegacy = Save->SchemaVersion == 1;
-        const bool bRecognizedSchema = bLegacy || Save->SchemaVersion == 2 || Save->SchemaVersion == 3;
+        const bool bRecognizedSchema = bLegacy || Save->SchemaVersion == 2
+            || Save->SchemaVersion == 3 || Save->SchemaVersion == 4;
         const bool bValid = bRecognizedSchema
             && (F & ~(bLegacy ? 63u : 16383u)) == 0
             && (!(F & MG_FOX_CAPTURED) || (F & MG_FOX_CONFISCATED))
@@ -668,13 +675,17 @@ void AMGGrayFoxMission::BeginPlay()
             // Later boss checkpoints cannot appear before the prison exit.
             && ((F & MG_FOX_LEFT_PRISON) || P.X < 1300.f);
         if (bValid && bPositionSafe
-            && ((F & MG_FOX_CAPTURED) || (F & MG_FOX_DETENTION_INTELLIGENCE)))
+            && ((F & MG_FOX_CAPTURED) || (F & MG_FOX_DETENTION_INTELLIGENCE)
+                || (Save->SchemaVersion == 4 && Save->bEarnedHandgun)))
         {
             Flags = F;
             SavedPosition = Save->CheckpointLocation;
             LoadedSchemaVersion = Save->SchemaVersion;
             LoadedHandgunRounds = Save->HandgunRounds;
             LoadedStunRounds = Save->StunRounds;
+            // V1–V3 were prison-slice builds with the handgun pre-owned.
+            bLoadedHandgunAcquired = Save->SchemaVersion < 4 || Save->bEarnedHandgun;
+            bEarlyHandgunAcquired = bLoadedHandgunAcquired;
             bHasLoadedSave = true;
         }
     }
@@ -684,6 +695,8 @@ void AMGGrayFoxMission::BeginPlay()
 
 void AMGGrayFoxMission::RestoreVisualState()
 {
+    if (bEarlyHandgunAcquired && IsValid(EarlyHandgunPickup))
+        EarlyHandgunPickup->SetActorHiddenInGame(true);
     if (((Flags & MG_FOX_DETENTION_INTELLIGENCE) || (Flags & MG_FOX_CAPTURED))
         && IsValid(POWInformant))
         POWInformant->SetActorHiddenInGame(true);
@@ -740,11 +753,17 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
     // Gear usability depends on the distinct actual recovery transaction.
     if (UMGEquipmentComponent* Inventory = Player->GetEquipment())
     {
-        if (bHasLoadedSave && LoadedSchemaVersion >= 3)
+        if (bHasLoadedSave && bLoadedHandgunAcquired)
         {
-            Inventory->RestoreHandgunRounds(LoadedHandgunRounds);
-            Inventory->RestoreStunRounds(LoadedStunRounds);
+            // Ownership and remaining rounds are different facts. Older
+            // V1/V2 checkpoint fields never carried ammunition totals.
+            Inventory->AwardWeapon(TEXT("HANDGUN"),
+                LoadedSchemaVersion >= 3 ? 0 : 24);
+            if (LoadedSchemaVersion >= 3)
+                Inventory->RestoreHandgunRounds(LoadedHandgunRounds);
         }
+        if (bHasLoadedSave && LoadedSchemaVersion >= 3)
+            Inventory->RestoreStunRounds(LoadedStunRounds);
         Inventory->SetConfiscated((Flags & MG_FOX_CAPTURED)
             && !(Flags & MG_FOX_GEAR_RECOVERED));
         if (IsTransmitterActive())
@@ -778,8 +797,9 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
         UGameplayStatics::CreateSaveGameObject(UMGGrayFoxSaveGame::StaticClass()));
     if (!Save) return;
-    Save->SchemaVersion = 3;
+    Save->SchemaVersion = 4;
     Save->MissionFlags = Flags;
+    Save->bEarnedHandgun = bEarlyHandgunAcquired;
     Save->CheckpointLocation = Player ? Player->GetActorLocation() : PreludeStart;
     if (Player && Player->GetEquipment())
     {
@@ -948,6 +968,21 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
     if (!bPlayerInitialised || !Player) return false;
     if (!(Flags & MG_FOX_CAPTURED))
     {
+        if (!bEarlyHandgunAcquired &&
+            CanReach(Player, EarlyHandgunPickup, 185.f))
+        {
+            if (UMGEquipmentComponent* Inventory = Player->GetEquipment())
+                if (Inventory->AwardWeapon(TEXT("HANDGUN"), 24))
+                {
+                    bEarlyHandgunAcquired = true;
+                    if (IsValid(EarlyHandgunPickup))
+                        EarlyHandgunPickup->SetActorHiddenInGame(true);
+                    Dialogue = TEXT("HANDGUN RECOVERED — EQUIP IT IN WEAPONS.");
+                    DialogueTimeRemaining = 3.2f;
+                    SaveProgress(Player); // Independent V4 earned-gun state.
+                    return true;
+                }
+        }
         if (!(Flags & MG_FOX_DETENTION_INTELLIGENCE)
             && CanReach(Player, POWInformant, 225.f))
             return ApplyAction(MG_FOX_LEARN_DETENTION_ROUTE, Player);
