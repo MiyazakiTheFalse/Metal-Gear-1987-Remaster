@@ -123,9 +123,15 @@ void AMGPlayerCharacter::BeginPlay()
     // Optional authored weapon overrides the primitive test prop.
     EnsureRadioSfxLoaded();
     StunGunArt = LoadObject<UStaticMesh>(nullptr,
-        TEXT("/Game/Characters/Shared/Weapons/SM_StunPistol_1995.SM_StunPistol_1995"));
+        TEXT("/Game/Weapons/Testing/SM_StunPistol_Test.SM_StunPistol_Test"));
+    if (!StunGunArt)
+        StunGunArt = LoadObject<UStaticMesh>(nullptr,
+            TEXT("/Game/Characters/Shared/Weapons/SM_StunPistol_1995.SM_StunPistol_1995"));
     HandgunArt = LoadObject<UStaticMesh>(nullptr,
-        TEXT("/Game/Characters/Shared/Weapons/SM_Handgun_1995.SM_Handgun_1995"));
+        TEXT("/Game/Weapons/Snake/SM_Handgun_1995.SM_Handgun_1995"));
+    if (!HandgunArt)
+        HandgunArt = LoadObject<UStaticMesh>(nullptr,
+            TEXT("/Game/Characters/Shared/Weapons/SM_Handgun_1995.SM_Handgun_1995"));
     ProxyWeaponArt = WeaponBodyVisual->GetStaticMesh();
     InfiltrationCharacterArt = GetMesh()->GetSkeletalMeshAsset();
     if (!InfiltrationCharacterArt)
