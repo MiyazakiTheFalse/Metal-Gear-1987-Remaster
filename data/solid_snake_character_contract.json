@@ -36,7 +36,9 @@
       "impact_additive",
       "facial_look_at"
     ],
-    "current_status": "data_bridge_only"
+    "current_status": "C++ source: action transition arbitration and optional hair attachment; no final imported AnimBP",
+    "performance_action_enum": "EMGPerformanceAction",
+    "transition_event": "OnPerformanceActionTransition"
   },
   "animation_sets": {
     "idle": [
@@ -227,5 +229,33 @@
     "pbr_author_art": false,
     "ue_compiled": false,
     "packaged_playtest": false
+  },
+  "hair": {
+    "source_path": "assets/source/snake_hair/snake_1995_hair.obj",
+    "model_path": "/Game/Characters/Snake/Hair/SM_SnakeHair_1995",
+    "head_bone": "head",
+    "source_class": "P",
+    "status": "provisional source geometry; no confirmed skeletal model in editor",
+    "identity_rule": "Same short dark-brown young-Snake hairstyle before and after equipment confiscation; physically follows head socket; if absent, do not float unattached.",
+    "requirements": [
+      "Correct era/source approval of specific hair silhouette",
+      "Fitted hairline with zero scalp penetration",
+      "High-resolution strand normal, roughness and anisotropic material",
+      "Head turn/cover/prone/nape and collar clipping tests",
+      "LOD, motion and anti-aliasing at 720p",
+      "No headband/Old Snake assets silently substituted"
+    ]
+  },
+  "transition_architecture": {
+    "status": "source_only_uncompiled",
+    "action_enum": "EMGPerformanceAction",
+    "logic": "locomotion + highest-priority committed presentation action; radio additive during movement; guard and boss actions sourced from authoritative states",
+    "blend_alpha": "framerate-independent elapsed duration; 0.08s urgent strikes, 0.17s typical, 0.26s low-stance",
+    "known_limitations": [
+      "No authored animation sequences or BlendSpaces",
+      "No actual pelvis/foot/hand IK or additive layers",
+      "No production hair physics or facial lip-sync"
+    ],
+    "presentation_only": true
   }
 }
