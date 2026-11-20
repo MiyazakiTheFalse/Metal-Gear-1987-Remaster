@@ -19,6 +19,7 @@
 #include "Engine/SkeletalMesh.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimSequence.h"
+#include "MGPrototypeAnimationFallback.h"
 #include "CollisionShape.h"
 #include "Engine/Engine.h"
 #include "EngineUtils.h"
@@ -246,6 +247,39 @@ void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
     Super::EndPlay(EndPlayReason);
 }
 
+void AMGPlayerCharacter::UpdatePrototypeFallbackAnimation()
+{
+    if (!GetMesh() || !GetMesh()->GetSkeletalMeshAsset()) return;
+    const float Speed = GetVelocity().Size2D(); // actual travel, not input intent
+    FName Clip = TEXT("Idle");
+    if (Health <= 0.f) Clip = TEXT("Down");
+    else if (HitReactionSeconds > 0.f) Clip = TEXT("Hit");
+    else if (MeleeVisualTimer > 0.f || WallKnockVisualTimer > 0.f)
+        Clip = TEXT("Melee");
+    else if (PhysicalInteractionRemaining > 0.f || DraggedBody.IsValid())
+        Clip = TEXT("Reaching");
+    else if (bCodecOpen) Clip = TEXT("RadioListen");
+    else if (bAiming) Clip = bIsProne ? TEXT("ProneAim") :
+        bIsCrouched ? TEXT("CrouchAim") : TEXT("Aim");
+    else if (bInCover) Clip = TEXT("Cover");
+    else if (bIsProne) Clip = TEXT("Prone");
+    else if (bIsCrouched) Clip = TEXT("Crouch");
+    else if (Speed > 235.f && bSprinting) Clip = TEXT("Run");
+    else if (Speed > 20.f) Clip = TEXT("Walk");
+    else if (GetWorld())
+    {
+        const int32 IdleBeat = FMath::FloorToInt(GetWorld()->GetTimeSeconds() / 9.f) % 7;
+        Clip = IdleBeat == 1 ? TEXT("IdleLook") :
+            IdleBeat == 5 ? TEXT("IdleWary") : TEXT("Idle");
+    }
+    const float Rate = Clip == TEXT("Walk") || Clip == TEXT("Run")
+        ? FMath::Clamp(Speed / (Clip == TEXT("Run") ? 430.f : 250.f), .65f, 1.55f)
+        : 1.f;
+    MGPrototypeAnimationFallback::Apply(GetMesh(),
+        TEXT("/Game/Characters/Snake"), TEXT("Snake"), Clip,
+        PrototypeAnimationRequest, Rate);
+}
+
 void AMGPlayerCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
@@ -316,6 +350,7 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
         {
             GetMesh()->SetSkeletalMeshAsset(bCaptured ? DisarmedCharacterArt : InfiltrationCharacterArt);
             bDisarmedArtApplied = bCaptured;
+            PrototypeAnimationRequest = NAME_None; // outfit swap rebinds the clip
             // Mesh swaps can change socket mappings; refresh attachment and
             // keep the same hair identity across both 1995 outfits.
             UpdateHairPresentation();
@@ -323,12 +358,15 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     }
     PrototypeBody->SetVisibility(GetMesh()->GetSkeletalMeshAsset() == nullptr, true);
     UpdateWeaponPresentation();
+    UpdatePrototypeFallbackAnimation();
 
     // A temporary prone/cover camera uses real collision and interpolated
     // pivot/shoulder geometry. Artists can replace the cylinder with a rig.
     const float TargetLength = bIsProne ? (bAiming ? 170.f : 275.f) :
         (bAiming ? 190.f : (bInCover ? 320.f : 420.f));
-    const float TargetFOV = bAiming ? 65.f : 85.f;
+    // The prior camera loop inadvertently overwrote the binocular UseItem
+    // zoom each frame. The scope now participates in the SAME camera state.
+    const float TargetFOV = bBinocularView ? 34.f : (bAiming ? 65.f : 85.f);
     const float ShoulderWidth = bIsProne ? 24.f : (bInCover ? 46.f : (bAiming ? 58.f : 65.f));
     const float CornerCameraReach = (bInCover && bAiming) ? 18.f * CoverPeekAlpha : 0.f;
     const FVector PivotLocal(0.f, 0.f, bIsProne ? 18.f : (bIsCrouched ? 40.f : 65.f));
