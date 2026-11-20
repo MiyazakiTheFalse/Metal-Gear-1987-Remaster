@@ -859,6 +859,25 @@ void AMGGrayFoxMission::BeginPlay()
                 PrisonCamera->RestoreOfflineState();
             if (Save->bKennelCameraOffline && KennelCamera.IsValid())
                 KennelCamera->RestoreOfflineState();
+            // Additive V4 guard body world snapshots. Bodies are restored
+            // only AFTER the save itself and all story flags pass validation.
+            // Unknown IDs and out-of-world coordinates fail closed; never
+            // spawn new actor identities from untrusted save data.
+            for (const FMGPersistedGuardBody& Body : Save->GuardBodies)
+            {
+                if (Body.Id.IsNone() || Body.WorldPosition.ContainsNaN() ||
+                    Body.WorldPosition.X < -3900.f ||
+                    Body.WorldPosition.X > 7950.f ||
+                    FMath::Abs(Body.WorldPosition.Y) > 980.f ||
+                    Body.WorldPosition.Z < -100.f || Body.WorldPosition.Z > 190.f)
+                    continue;
+                for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
+                {
+                    if (It->GetBodyPersistenceId() != Body.Id) continue;
+                    It->RestoreIncapacitatedBody(Body.WorldPosition, Body.bUnconscious);
+                    break;
+                }
+            }
             bHasLoadedSave = true;
         }
     }
@@ -992,6 +1011,16 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     Save->bPrisonCameraOffline = PrisonCamera.IsValid() && !PrisonCamera->IsOperational();
     Save->bKennelCameraOffline = KennelCamera.IsValid() && !KennelCamera->IsOperational();
     Save->bEarnedHandgun = bEarlyHandgunAcquired;
+    for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
+    {
+        if (!It->IsIncapacitated() || It->GetBodyPersistenceId().IsNone())
+            continue;
+        FMGPersistedGuardBody Body;
+        Body.Id = It->GetBodyPersistenceId();
+        Body.WorldPosition = It->GetActorLocation();
+        Body.bUnconscious = It->IsUnconscious();
+        Save->GuardBodies.Add(Body);
+    }
     Save->CheckpointLocation = Player ? Player->GetActorLocation() : PreludeStart;
     if (Player && Player->GetEquipment())
     {
