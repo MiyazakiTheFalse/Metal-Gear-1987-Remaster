@@ -240,6 +240,62 @@ void AMGGrayFoxMission::CreatePrelude()
     }
 }
 
+void AMGGrayFoxMission::CreateFirstFloorSupplyTrucks()
+{
+    // 1987 MSX2 item order: west truck ration, centre truck Card 1, east
+    // truck binoculars. The 3D footprint here is a deliberate continuous
+    // adaptation of those screens, NOT yet a tile-accurate 1987 floor plan.
+    // Three separate rear openings (toward -Y) let Snake enter each truck,
+    // and their bodies/roofs produce actual obstruction for guards/CCTV.
+    const float TruckX[3] = {-3510.f, -3220.f, -2930.f};
+    for (int32 I = 0; I < 3; ++I)
+    {
+        const float X = TruckX[I];
+        const FString Prefix = FString::Printf(TEXT("B1_1F_SupplyTruck_%d_"), I+1);
+        SpawnBlock(FName(*(Prefix + TEXT("Bed"))),
+            FVector(X, 348.f, -96.f), FVector(2.00f,2.15f,.10f), false);
+        for (const float Side : {-1.f,1.f})
+        {
+            SpawnBlock(FName(*(Prefix + (Side < 0 ? TEXT("WestWall") : TEXT("EastWall")))),
+                FVector(X + Side*100.f, 345.f, 10.f),
+                FVector(.11f, 2.2f, 2.15f), true);
+            for (const float Axle : {283.f,411.f})
+                SpawnBlock(FName(*(Prefix + TEXT("Wheel"))),
+                    FVector(X + Side*107.f,Axle,-55.f),
+                    FVector(.23f,.49f,.72f),false);
+        }
+        SpawnBlock(FName(*(Prefix + TEXT("Cab"))),
+            FVector(X,463.f,18.f), FVector(1.95f,.61f,2.02f),true);
+        SpawnBlock(FName(*(Prefix + TEXT("Roof"))),
+            FVector(X,344.f,130.f), FVector(1.98f,2.15f,.14f),true);
+        SpawnBlock(FName(*(Prefix + TEXT("TailgateLip"))),
+            FVector(X,233.f,-91.f), FVector(1.87f,.09f,.15f),false);
+    }
+    // Small in-world pickups have NO magic radius beyond normal line-of-
+    // sight. The separate props are hidden on acquisition and remain gone
+    // through the arrest/recovery arc, because ownership is saved.
+    FirstFloorRationPickup=SpawnBlock(TEXT("B1_1F_WestTruckRation"),
+        FVector(-3510.f, 349.f, -43.f), FVector(.42f,.32f,.22f),false);
+    FirstFloorCard1Pickup=SpawnBlock(TEXT("B1_1F_CentreTruckCARD1"),
+        FVector(-3220.f, 349.f, -43.f), FVector(.32f,.22f,.11f),false);
+    FirstFloorBinocularsPickup=SpawnBlock(TEXT("B1_1F_EastTruckBinoculars"),
+        FVector(-2930.f, 349.f, -43.f), FVector(.51f,.32f,.19f),false);
+    // Separate labelled approach cover; players can use either side alley
+    // instead of being forced into an eight-metre straight shooting gallery.
+    SpawnBlock(TEXT("B1_1F_TruckApproachCrateA"),
+        FVector(-3370.f, 135.f, -46.f), FVector(1.05f,.79f,1.15f),true);
+    SpawnBlock(TEXT("B1_1F_TruckApproachCrateB"),
+        FVector(-2860.f, 155.f, -52.f), FVector(.84f,.95f,1.0f),true);
+    if (GetWorld())
+        if (AMGGuardActor* Guard=GetWorld()->SpawnActor<AMGGuardActor>(
+            FVector(-3235.f,170.f,-11.f),FRotator(0.f,90.f,0.f)))
+        {
+            Guard->SetRole(EMGGuardRole::Patrol);
+            Guard->SetBodyPersistenceId(TEXT("P01_SupplyTruckWatch"));
+            Guard->ConfigurePatrol(FVector(1.f,0.f,0.f),135.f,67.f);
+        }
+}
+
 namespace
 {
     constexpr float DispatchBeltStart = -3350.f;
@@ -778,6 +834,7 @@ void AMGGrayFoxMission::BeginPlay()
 {
     Super::BeginPlay();
     CreatePrelude();
+    CreateFirstFloorSupplyTrucks();
     CreateDispatchBay();
     CreateGreybox();
     CreateBossWing();
