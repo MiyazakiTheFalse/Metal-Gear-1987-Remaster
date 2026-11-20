@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "updated": "2026-11-19",
+  "updated": "2026-11-20",
   "scope": "Outer Heaven 1995 vertical slice: prelude to Shoot Gunner",
   "repo_branch": "feature/character-art-pipeline-1995",
-  "summary": "Audit grounded in current GitHub tree. No .uasset files were found; code references are not imports.",
+  "summary": "GitHub source audit: original hairstyle mesh + data-driven VO and pose transitions are committed; none is engine-imported, reviewed or production-approved.",
   "available_engine_content_assets": 0,
   "finished_scenes": 0,
   "approved_character_rigs": 0,
@@ -555,12 +555,46 @@
       "production_approved": false,
       "source_licence_check": "not_applicable_until_sourced",
       "risk": "No implemented sequences or audio automation"
+    },
+    {
+      "id": "snake_1995_hair_source",
+      "category": "characters",
+      "description": "Original brown 1995 head-attached layered hair geometry, before author-approved scalp fitting/shaders/groom",
+      "source_paths": [
+        "assets/source/snake_hair/snake_1995_hair.obj",
+        "assets/source/snake_hair/snake_1995_hair.mtl",
+        "unreal/MGRemaster/Content/Python/import_snake_hair.py"
+      ],
+      "engine_path": "/Game/Characters/Snake/Hair/SM_SnakeHair_1995",
+      "status": "prototype_source",
+      "priority": "P0",
+      "imported_into_ue": false,
+      "production_approved": false,
+      "source_licence_check": "authored_original",
+      "risk": "Head joint and exact look/rig still unverified; rigid hair cards cannot simulate strand dynamics"
+    },
+    {
+      "id": "voice_performance_metadata",
+      "category": "voice",
+      "description": "39 radio-caption rows grouped into 35 spoken lines, one Fox rescue, one Shoot Gunner intro and eight guards; 45 pending VO assets; offline voice mastering and UE import source",
+      "source_paths": [
+        "data/voice_performance_manifest.json",
+        "tools/prepare_voice_assets.py",
+        "unreal/MGRemaster/Content/Python/import_character_vo.py"
+      ],
+      "engine_path": "/Game/Audio/VO",
+      "status": "scripted_reference",
+      "priority": "P0",
+      "imported_into_ue": false,
+      "production_approved": false,
+      "source_licence_check": "authorised_recordings_required",
+      "risk": "No spoken WAVs recorded, no voice auditions, sound submix/ducking or UE preview"
     }
   ],
-  "count": 40,
+  "count": 42,
   "status_counts": {
-    "scripted_reference": 9,
+    "scripted_reference": 10,
     "missing": 20,
-    "prototype_source": 11
+    "prototype_source": 12
   }
 }
