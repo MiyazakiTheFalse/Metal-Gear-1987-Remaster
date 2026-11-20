@@ -2289,6 +2289,14 @@ function activateTitleChoice(){
  if(control&&!control.disabled&&typeof control.onclick==='function')
   control.onclick();
 }
+function openTitleBriefing(){
+ const portrait=window.MGCodecPortraits?.faceSvg;
+ if(typeof portrait==='function'){
+  $('briefingSnakePortrait').innerHTML=portrait('snake');
+  $('briefingBossPortrait').innerHTML=portrait('bigBoss');
+ }
+ $('briefing').style.display='flex';
+}
 $('menuOptions').onclick=()=>{
  const panel=$('menuOptionsPanel');
  panel.hidden=!panel.hidden;
@@ -2301,7 +2309,7 @@ for(let i=0;i<titleOptions.length;i++){
   for(let j=0;j<titleOptions.length;j++)
    $(titleOptions[j]).dataset.selected=j===index?'true':'false';});
 }
-$('rehearse').onclick=()=>{location.search='?boss'};$('start').onclick=()=>start(false);$('resume').onclick=()=>start(true);$('brief').onclick=()=>$('briefing').style.display='flex';$('backBrief').onclick=()=>$('briefing').style.display='none';$('unpause').onclick=()=>setPaused(false);$('pauseIntel').onclick=()=>action('intel');$('restart').onclick=reset;$('retry').onclick=reset;$('retryEscort').onclick=()=>location.reload();$('finishIntel').onclick=()=>setPaused(true,'intel');$('returnToGame').onclick=()=>setPaused(false);$('closeIntel').onclick=()=>setPaused(false);$('tipsToggle').onchange=()=>{discovery.showTips=!!tipToggle.checked;save()};
+$('rehearse').onclick=()=>{location.search='?boss'};$('start').onclick=()=>start(false);$('resume').onclick=()=>start(true);$('brief').onclick=openTitleBriefing;$('briefStart').onclick=()=>start(false);$('backBrief').onclick=()=>$('briefing').style.display='none';$('unpause').onclick=()=>setPaused(false);$('pauseIntel').onclick=()=>action('intel');$('restart').onclick=reset;$('retry').onclick=reset;$('retryEscort').onclick=()=>location.reload();$('finishIntel').onclick=()=>setPaused(true,'intel');$('returnToGame').onclick=()=>setPaused(false);$('closeIntel').onclick=()=>setPaused(false);$('tipsToggle').onchange=()=>{discovery.showTips=!!tipToggle.checked;save()};
 canvas.onclick=()=>{if(started&&!paused&&canvas.requestPointerLock)canvas.requestPointerLock().catch(()=>{})};
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('mousemove',e=>{if(document.pointerLockElement===canvas&&!paused){cam.yaw-=e.movementX*.0023;cam.pitch=clamp(cam.pitch+e.movementY*.002,-.74,.78);discovery.looked=true}});
