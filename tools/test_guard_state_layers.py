@@ -80,6 +80,9 @@ class GuardStateLayerSourceTests(unittest.TestCase):
         self.assertIn("bOccluded ? 35.f : 20.f", GUARD)
         self.assertIn("bOccluded ? 260.f : 170.f", GUARD)
         self.assertIn("bOccluded ? 2.2f : 1.2f", GUARD)
+        self.assertIn("if (Suspicion >= .32f)", GUARD)
+        self.assertIn("SearchForLastKnownSeconds = FMath::Max(SearchForLastKnownSeconds, 2.6f)", GUARD)
+        self.assertIn("bRecentFirsthandContact ? 185.f : 115.f", GUARD)
         self.assertEqual(GUARD.count(
             "ObserveApproximateFootstep(Player->GetActorLocation(), !bHasLineOfSight)"), 2)
         self.assertNotIn(
