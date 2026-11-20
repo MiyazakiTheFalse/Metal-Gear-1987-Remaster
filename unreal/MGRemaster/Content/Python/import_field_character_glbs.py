@@ -40,6 +40,29 @@ ROLES = {
     "mercenary_3": ("/Game/Characters/Mercenaries", "SK_Mercenary03_1995"),
     "mercenary_4": ("/Game/Characters/Mercenaries", "SK_Mercenary04_1995"),
 }
+ROLE_PREFIXES = {
+        "snake": "Snake", "fox": "GrayFox",
+        "guard": "Guard", "shoot_gunner": "Shotmaker",
+        "real_big_boss": "RealBigBoss",
+        "venom_snake": "VenomSnake",
+        "kyle_schneider": "KyleSchneider",
+        "diane": "Diane",
+        "steve": "Steve",
+        "jennifer": "Jennifer",
+        "jennifers_brother": "JennifersBrother",
+        "drago_madnar": "DragoMadnar",
+        "ellen_madnar": "EllenMadnar",
+        "machinegun_kid": "MachinegunKid",
+        "fire_trooper": "FireTrooper",
+        "dirty_duck": "DirtyDuck",
+        "pow_informant": "PowInformant",
+        "madnar_decoy": "MadnarDecoy",
+        "mercenary_1": "Mercenary_1",
+        "mercenary_2": "Mercenary_2",
+        "mercenary_3": "Mercenary_3",
+        "mercenary_4": "Mercenary_4",
+}
+
 REQUIRED_JOINTS = {
     "pelvis", "chest", "neck", "head", "jaw", "brow",
     "hand_L", "hand_R", "foot_L", "foot_R",
@@ -49,6 +72,16 @@ REQUIRED_ANIMS = {
     "Cover", "Melee", "Reaching", "Hit", "RadioListen",
     "CrouchAim", "ProneAim",
 }
+
+
+def required_clips(role: str) -> set[str]:
+    expected = set(REQUIRED_ANIMS)
+    expected.update({"IdleAlert", "IdleLook", "IdleWary"})
+    if role == "fox":
+        expected.add("Captive")
+    if role == "shoot_gunner":
+        expected.update({"Address", "Shoulder", "Recoil", "Search"})
+    return expected
 
 
 def validate_glb(source: Path) -> dict:
@@ -86,8 +119,34 @@ def import_prototype(role: str):
         current = unreal.EditorAssetLibrary.load_asset(target)
         if not isinstance(current, unreal.SkeletalMesh):
             raise TypeError(f"Existing target is NOT skeletal: {target}")
-        unreal.log_warning(f"Not overwriting artist-authored asset: {target}")
-        return target
+        if current.get_editor_property("skeleton") is None:
+            raise RuntimeError(f"{role}: existing native mesh has no Skeleton: {target}")
+        # Previously, ANY skeletal asset at target caused early success,
+        # including an interrupted import with zero animations. That made
+        # reruns silently 'succeed' yet shipped frozen, idle-only bosses.
+        expected_names = required_clips(role)
+        existing = {}
+        missing = []
+        for clip in sorted(expected_names):
+            asset_path = f"{destination}/Animations/AS_{ROLE_PREFIXES[role]}_{clip}"
+            anim = unreal.EditorAssetLibrary.load_asset(asset_path)
+            if not isinstance(anim, unreal.AnimSequence):
+                missing.append(asset_path)
+            else:
+                existing[clip] = asset_path
+        if missing:
+            raise RuntimeError(
+                f"{role}: existing skeletal import is incomplete. Missing "
+                f"{len(missing)} native AnimationSequences: {missing}. "
+                "Do NOT overwrite artist work. Resolve the incomplete "
+                "source import in Editor or restore a clean Content/Characters "
+                "copy and re-run the importer."
+            )
+        unreal.log(
+            f"{role}: verified existing skinned mesh and "
+            f"{len(existing)} native clips. No overwrite: {target}"
+        )
+        return {"mesh": target, "animations": existing, "source": "existing"}
 
     task = unreal.AssetImportTask()
     task.set_editor_property("filename", str(source))
@@ -147,34 +206,8 @@ def import_prototype(role: str):
             "AnimationSequence. Install/enable skeletal animation import; "
             "an unanimated character is not acceptable for a playtest."
         )
-    role_prefix = {
-        "snake": "Snake", "fox": "GrayFox",
-        "guard": "Guard", "shoot_gunner": "Shotmaker",
-        "real_big_boss": "RealBigBoss",
-        "venom_snake": "VenomSnake",
-        "kyle_schneider": "KyleSchneider",
-        "diane": "Diane",
-        "steve": "Steve",
-        "jennifer": "Jennifer",
-        "jennifers_brother": "JennifersBrother",
-        "drago_madnar": "DragoMadnar",
-        "ellen_madnar": "EllenMadnar",
-        "machinegun_kid": "MachinegunKid",
-        "fire_trooper": "FireTrooper",
-        "dirty_duck": "DirtyDuck",
-        "pow_informant": "PowInformant",
-        "madnar_decoy": "MadnarDecoy",
-        "mercenary_1": "Mercenary_1",
-        "mercenary_2": "Mercenary_2",
-        "mercenary_3": "Mercenary_3",
-        "mercenary_4": "Mercenary_4",
-    }[role]
-    expected_names = set(REQUIRED_ANIMS)
-    expected_names.update({"IdleAlert", "IdleLook", "IdleWary"})
-    if role == "fox":
-        expected_names.add("Captive")
-    if role == "shoot_gunner":
-        expected_names.update({"Address", "Shoulder", "Recoil", "Search"})
+    role_prefix = ROLE_PREFIXES[role]
+    expected_names = required_clips(role)
     found = set()
     organized = {}
     for source_path in sequences:
