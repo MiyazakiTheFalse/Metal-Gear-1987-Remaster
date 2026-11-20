@@ -138,6 +138,9 @@ public:
     bool HasAuthoredCharacterArt() const;
     UStaticMeshComponent* GetHeldWeaponVisual() const { return SecuritySidearm; }
     USkeletalMeshComponent* GetRigMesh() const { return CharacterMesh; }
+    // Shared 3D cast pipeline: individual elite/boss archetypes replace the
+    // plain guard rig without cloning combat collision or AI.
+    bool TryUseBespokeSkeletalArt(const TCHAR* MeshPath, const TCHAR* AnimClassPath);
     UFUNCTION(BlueprintPure, Category="Security|Weapon")
     bool IsReloadingSidearm() const { return bSidearmReloading; }
     UFUNCTION(BlueprintPure, Category="Security|Weapon")
