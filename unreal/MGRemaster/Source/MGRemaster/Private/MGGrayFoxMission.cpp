@@ -1102,6 +1102,28 @@ FString AMGGrayFoxMission::GetRecentDialogue() const
 }
 
 
+FString AMGGrayFoxMission::GetTransceiverVoiceSceneKey(int32 Channel) const
+{
+    if (!(Flags & MG_FOX_CAPTURED))
+        return Channel == 0 ? TEXT("schneider_prelude")
+            : ((Flags & MG_FOX_DETENTION_INTELLIGENCE)
+                ? TEXT("boss_prelude_intel") : TEXT("boss_n313_opening"));
+    if (Channel == 0)
+    {
+        if (!(Flags & MG_FOX_FIRST_WALL_BREACHED)) return TEXT("schneider_cell");
+        if (!(Flags & MG_FOX_RESCUED)) return TEXT("schneider_fox");
+        if (!(Flags & MG_FOX_EXIT_WALL_BREACHED)) return TEXT("schneider_escape");
+        return TEXT("schneider_unknown");
+    }
+    if (!(Flags & MG_FOX_FIRST_WALL_BREACHED)) return TEXT("boss_cell");
+    if (!(Flags & MG_FOX_RESCUED)) return TEXT("boss_fox");
+    if ((Flags & MG_FOX_LEFT_PRISON) && !(Flags & MG_FOX_GEAR_RECOVERED))
+        return TEXT("boss_equipment");
+    if ((Flags & MG_FOX_GEAR_RECOVERED) && !(Flags & MG_FOX_TRANSMITTER_REMOVED))
+        return TEXT("boss_transmitter");
+    return TEXT("boss_continue");
+}
+
 FString AMGGrayFoxMission::GetTransceiverDialogue(int32 Channel) const
 {
     // Remake-authored dialogue. Opening radio uses the original 120.85
