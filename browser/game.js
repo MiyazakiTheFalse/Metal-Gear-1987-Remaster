@@ -2270,7 +2270,33 @@ function start(resume){
  }
  last=performance.now();cam.eye=cameraSafePosition([player.x,player.stance?1.14:1.56,player.z],[player.x-2.8,2.2,player.z+1.0]);if(canvas.requestPointerLock)Promise.resolve(canvas.requestPointerLock()).catch(()=>{});}
 const titleOptions=['start','resume','brief','rehearse','menuOptions'];
-let titleChoice=0;
+let titleChoice=0,confirmTitleChoice=0;
+function setNewGameConfirmChoice(next){
+ confirmTitleChoice=next===1?1:0; // Cancel is the deliberately safe default.
+ $('cancelNewGame').dataset.selected=confirmTitleChoice===0?'true':'false';
+ $('confirmNewGame').dataset.selected=confirmTitleChoice===1?'true':'false';
+ const chosen=confirmTitleChoice===0?$('cancelNewGame'):$('confirmNewGame');
+ chosen.focus?.();
+}
+function closeNewGameConfirmation(){
+ $('newGameConfirm').hidden=true;
+ $('start').focus?.();
+}
+function confirmNewOperation(){
+ $('newGameConfirm').hidden=true;
+ start(false);
+}
+function requestNewOperation(){
+ let hasCheckpoint=false;
+ try{hasCheckpoint=!!localStorage.getItem(STORAGE)}catch(e){}
+ if(!hasCheckpoint){start(false);return;}
+ $('newGameConfirm').hidden=false;
+ setNewGameConfirmChoice(0);
+}
+function activateNewOperationConfirmation(){
+ if(confirmTitleChoice===1)confirmNewOperation();
+ else closeNewGameConfirmation();
+}
 function selectTitleChoice(delta){
  if(started)return;
  for(let i=0;i<titleOptions.length;i++){
@@ -2297,6 +2323,8 @@ function openTitleBriefing(){
  }
  $('briefing').style.display='flex';
 }
+$('cancelNewGame').onclick=closeNewGameConfirmation;
+$('confirmNewGame').onclick=confirmNewOperation;
 $('menuOptions').onclick=()=>{
  const panel=$('menuOptionsPanel');
  panel.hidden=!panel.hidden;
@@ -2309,13 +2337,22 @@ for(let i=0;i<titleOptions.length;i++){
   for(let j=0;j<titleOptions.length;j++)
    $(titleOptions[j]).dataset.selected=j===index?'true':'false';});
 }
-$('rehearse').onclick=()=>{location.search='?boss'};$('start').onclick=()=>start(false);$('resume').onclick=()=>start(true);$('brief').onclick=openTitleBriefing;$('briefStart').onclick=()=>start(false);$('backBrief').onclick=()=>$('briefing').style.display='none';$('unpause').onclick=()=>setPaused(false);$('pauseIntel').onclick=()=>action('intel');$('restart').onclick=reset;$('retry').onclick=reset;$('retryEscort').onclick=()=>location.reload();$('finishIntel').onclick=()=>setPaused(true,'intel');$('returnToGame').onclick=()=>setPaused(false);$('closeIntel').onclick=()=>setPaused(false);$('tipsToggle').onchange=()=>{discovery.showTips=!!tipToggle.checked;save()};
+$('rehearse').onclick=()=>{location.search='?boss'};$('start').onclick=requestNewOperation;$('resume').onclick=()=>start(true);$('brief').onclick=openTitleBriefing;$('briefStart').onclick=requestNewOperation;$('backBrief').onclick=()=>$('briefing').style.display='none';$('unpause').onclick=()=>setPaused(false);$('pauseIntel').onclick=()=>action('intel');$('restart').onclick=reset;$('retry').onclick=reset;$('retryEscort').onclick=()=>location.reload();$('finishIntel').onclick=()=>setPaused(true,'intel');$('returnToGame').onclick=()=>setPaused(false);$('closeIntel').onclick=()=>setPaused(false);$('tipsToggle').onchange=()=>{discovery.showTips=!!tipToggle.checked;save()};
 canvas.onclick=()=>{if(started&&!paused&&canvas.requestPointerLock)canvas.requestPointerLock().catch(()=>{})};
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('mousemove',e=>{if(document.pointerLockElement===canvas&&!paused){cam.yaw-=e.movementX*.0023;cam.pitch=clamp(cam.pitch+e.movementY*.002,-.74,.78);discovery.looked=true}});
 document.addEventListener('mousedown',e=>{lastInputIsPad=false;if(!started||paused)return;if(e.button===2)key.mouse2=true;if(e.button===0)action('fire')});document.addEventListener('mouseup',e=>{if(e.button===2)key.mouse2=false});
 document.addEventListener('keydown',e=>{lastInputIsPad=false;const k=e.key.toLowerCase();if((started&&['tab',' ','arrowup','arrowdown','arrowleft','arrowright'].includes(k))||
  (!started&&['arrowup','arrowdown'].includes(k)&&e.target?.tagName!=='INPUT'))e.preventDefault();if(key[k])return;key[k]=true;if(!started){
+ // New Game never silently erases a real checkpoint. Dialog navigation uses
+ // a safe Cancel default, keyboard/controller focus and explicit confirmation.
+ if(!$('newGameConfirm').hidden){
+  if(k==='escape'){closeNewGameConfirmation();return;}
+  if(k==='arrowright'||k==='d'){e.preventDefault();setNewGameConfirmChoice(1);return;}
+  if(k==='arrowleft'||k==='a'){e.preventDefault();setNewGameConfirmChoice(0);return;}
+  if(k==='enter'||k===' '){e.preventDefault();activateNewOperationConfirmation();return;}
+  return;
+ }
  // Respect keyboard-accessible checkbox controls: Space must toggle them,
  // not accidentally begin a mission behind the settings drawer.
  if(e.target?.tagName==='INPUT'){
@@ -2333,6 +2370,13 @@ document.addEventListener('keydown',e=>{lastInputIsPad=false;const k=e.key.toLow
  return;
 }if(k==='escape'){action('pause');return}if(paused){if(k==='j'||k==='c')setPaused(false);return}const actions={e:'interact',control:'crouch',z:'prone',v:'cover',f:'melee',n:'knock',j:'intel',c:'codec',t:'tips','[':'previous',']':'next'};if(actions[k])action(actions[k]);if(k==='tab')action('equipitem');if(k==='g')action('equipweapon');if(k==='r')reset();if(k==='q')cam.shoulder*=-1;});document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();key[k]=false;if(k==='tab'||k==='g')action('equipclose')});window.addEventListener('blur',()=>{for(const k of Object.keys(key))key[k]=false;if(equipOpen)action('equipclose')});
 function readGamepad(){const p=pollGamepad();updatePadStatus(p);padUsing=!!p&&(Math.abs(p.axes[0]||0)>.16||Math.abs(p.axes[1]||0)>.16);if(!p){padPrev=[];return;}const now=p.buttons.map(pressed);const previous=padPrev;const down=i=>now[i]&&!previous[i];const up=i=>!now[i]&&previous[i];padPrev=now;if(!started){
+ if(!$('newGameConfirm').hidden){
+  if(down(14))setNewGameConfirmChoice(0);
+  if(down(15))setNewGameConfirmChoice(1);
+  if(down(1))closeNewGameConfirmation();
+  if(down(0)||down(9))activateNewOperationConfirmation();
+  return;
+ }
  if(down(13))selectTitleChoice(1);
  if(down(12))selectTitleChoice(-1);
  if(down(0)||down(9))activateTitleChoice();
