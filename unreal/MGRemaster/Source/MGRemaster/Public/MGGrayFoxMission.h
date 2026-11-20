@@ -149,6 +149,7 @@ private:
     void CreatePrelude();
     void CreateBossWing();
     void CreatePostCard3Service();
+    void CreateConnectiveSpaces();
     void CreateZoneLighting();
     void UpdateZoneLighting(float DeltaSeconds);
     void SpawnPerimeterGuards();
