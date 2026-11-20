@@ -22,4 +22,15 @@ const silent=rig.pose({mouth:0,brow:0,radio:0});
 assert.notEqual(talking.rot[16],silent.rot[16],'jaw should articulate under speech');
 assert.notEqual(talking.rot[17],silent.rot[17],'brow should articulate under acting cues');
 assert.notEqual(talking.rot[2],silent.rot[2],'radio listen posture uses the body rig');
+// Idles are actual looping joint animation, not frozen static stance meshes.
+const idleA=rig.pose({time:0}),idleB=rig.pose({time:1.11});
+assert.ok(Math.abs(idleA.rot[3]-idleB.rot[3])>.001,'idle head should scan');
+assert.ok(Math.abs(idleA.rot[1]-rig.pose({time:.65}).rot[1])>.005,'idle ribcage breathing should animate');
+const alert=rig.pose({time:1.11,idleAlert:1});
+const wary=rig.pose({time:1.11,idleWary:1});
+assert.notEqual(alert.rot[1],idleB.rot[1],'alert breathing varies from relaxed idle');
+assert.notEqual(wary.rot[4],idleB.rot[4],'wary pose raises shoulders');
+const moving=rig.pose({time:1.11,stride:1,phase:1});
+assert.ok(Math.abs(moving.rot[3])<Math.abs(idleB.rot[3]),'movement suppresses gaze fidget');
+assert.ok([...idleA.rot,...idleB.rot,...moving.rot].every(Number.isFinite));
 console.log('PASS: costume layers, joint hierarchy, finite normals, skin bindings and gameplay poses.');
