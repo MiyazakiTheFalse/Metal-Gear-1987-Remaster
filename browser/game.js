@@ -286,7 +286,7 @@ function roofSync(){
  roofFlight.color=roof.defeated?[.19,.20,.21]:color.metal;
 }
 function roofAction(){
- if(!roof.active&&stage===8&&service.parachute&&dist(player,roofLift)<1.55)
+ if(!roof.active&&(stage===8||stage===9)&&service.parachute&&dist(player,roofLift)<1.55)
   return 'TAKE LIFT TO BUILDING 1 ROOF';
  if(!roof.active)return '';
  if(dist(player,roofReturn)<1.55)return 'RETURN TO WEST LIFT';
@@ -891,7 +891,7 @@ function load(){
  firstCardEarned=data.firstCardEarned===true;
  // Version 4 opened the exit on boss defeat. Preserve that earned access.
  if(data.version===4&&stage>=5)stage+=2;
- service.charge=stage===8&&data.service?.charge===true;service.open=service.charge&&data.service?.open===true;
+ service.charge=stage>=8&&data.service?.charge===true;service.open=service.charge&&data.service?.open===true;
  service.intel=service.open&&data.service?.intel===true;service.kidDown=service.open&&data.service?.kidDown===true;
  service.parachute=service.kidDown&&data.service?.parachute===true;syncService();
  if(data.version===9&&stage===9){
