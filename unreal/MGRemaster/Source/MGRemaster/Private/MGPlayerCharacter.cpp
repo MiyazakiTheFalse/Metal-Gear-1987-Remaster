@@ -903,8 +903,17 @@ void AMGPlayerCharacter::FireStun()
             if (const AMGShootGunnerActor* Gunner =
                 Cast<AMGShootGunnerActor>(MuzzleHit.GetActor()))
                 Damage = Gunner->GetHandgunDamagePerHit();
-        UGameplayStatics::ApplyDamage(MuzzleHit.GetActor(), Damage, Controller,
-            this, UDamageType::StaticClass());
+        if (bStun && Cast<AMGSurveillanceCameraActor>(MuzzleHit.GetActor()))
+        {
+            // Conducted-energy dart cartridges are not magic EMP rounds.
+            // The noncanonical test stun tool can hit a camera housing but
+            // must not short, shatter or remotely deactivate its electronics.
+            NotifyFeedback(TEXT("STUN DART HAS NO EFFECT ON CCTV"),
+                TEXT("denied"));
+        }
+        else
+            UGameplayStatics::ApplyDamage(MuzzleHit.GetActor(), Damage, Controller,
+                this, UDamageType::StaticClass());
     }
 }
 
