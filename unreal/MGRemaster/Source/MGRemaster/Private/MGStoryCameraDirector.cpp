@@ -129,7 +129,8 @@ void AMGStoryCameraDirector::UpdateShot(float Dt, bool bSnap)
         ElapsedSeconds >= ShotPlan[Index].EndSeconds)
         ++Index;
     const FAuthoredShot& Shot = ShotPlan[Index];
-    if (CurrentShot != Index)
+    const bool bFirstFrameOfShot = CurrentShot != Index;
+    if (bFirstFrameOfShot)
     {
         CurrentShot = Index;
         const float PriorEnd = Index > 0 ? ShotPlan[Index-1].EndSeconds : 0.f;
@@ -159,7 +160,9 @@ void AMGStoryCameraDirector::UpdateShot(float Dt, bool bSnap)
         FCollisionShape::MakeSphere(19.f), Params) && Impact.bBlockingHit)
         Safe = Impact.Location -
             (Proposed-Focus).GetSafeNormal()*24.f;
-    FVector Next = bSnap || Index != CurrentShot ?
+    // Hard-cut on a new authored shot. A blend between two camera eyes
+    // may slice through the walls even if both final positions are safe.
+    FVector Next = (bSnap || bFirstFrameOfShot) ?
         Safe : FMath::VInterpTo(GetActorLocation(), Safe, Dt, 10.f);
     FHitResult SmoothHit;
     if (!bSnap && GetWorld()->SweepSingleByChannel(
