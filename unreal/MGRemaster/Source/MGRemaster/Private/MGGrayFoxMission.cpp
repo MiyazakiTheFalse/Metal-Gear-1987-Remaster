@@ -1763,6 +1763,36 @@ FString AMGGrayFoxMission::GetPacingHint() const
     return FString();
 }
 
+FName AMGGrayFoxMission::GetSnakeStoryPhase() const
+{
+    // Source gameplay flags only. Not informed by proximity, a loaded cutscene
+    // asset or the operator's real-world knowledge of later Metal Gear plots.
+    if (Flags & MG_FOX_CARD3_RECOVERED) return FName(TEXT("SELF_DIRECTED"));
+    if (Flags & MG_FOX_GEAR_RECOVERED) return FName(TEXT("CAUTIOUS"));
+    if (Flags & MG_FOX_RESCUED) return FName(TEXT("CONNECTED"));
+    if (Flags & MG_FOX_CAPTURED) return FName(TEXT("ISOLATED"));
+    return FName(TEXT("ROOKIE"));
+}
+
+FString AMGGrayFoxMission::GetCharacterStoryText() const
+{
+    // These are short original relationship notes, not a narrated retelling.
+    // Locked future story truths can never leak into the mission log or radio.
+    if (!(Flags & MG_FOX_CAPTURED))
+        return TEXT("SNAKE / BIG BOSS: A new field operative still working from command's limited briefing.");
+    if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
+        return TEXT("SNAKE: Isolated and unarmed. His own observation must replace the missing support.");
+    if (!(Flags & MG_FOX_RESCUED))
+        return TEXT("SCHNEIDER: The old plans may help, but neither of them knows the altered prison.");
+    if (!(Flags & MG_FOX_GEAR_RECOVERED))
+        return TEXT("GRAY FOX / SNAKE: A rescued veteran and a rookie share firsthand knowledge.");
+    if (!(Flags & MG_FOX_TRANSMITTER_REMOVED))
+        return TEXT("SNAKE: His recovered kit was handled. Trust now requires evidence, not a guess.");
+    if (Flags & MG_FOX_CARD3_RECOVERED)
+        return TEXT("SNAKE / SCHNEIDER: New access, uncertain plans. Snake must verify the route himself.");
+    return TEXT("SNAKE: The planted transmitter was real. He chose how to respond.");
+}
+
 FString AMGGrayFoxMission::GetMissionLogText() const
 {
     if (!(Flags & MG_FOX_RESCUED))
@@ -1851,11 +1881,17 @@ FString AMGGrayFoxMission::GetTransceiverDialogue(int32 Channel) const
                         "SCHNEIDER: Keep your bearings. I never saw the\n"
                         "SCHNEIDER: prison plans. I can't map your route.");
         if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
-            return TEXT("SCHNEIDER: If they've modified this area,\n"
-                        "SCHNEIDER: the original structure might show it.\n"
-                        "SCHNEIDER: I can't tell you where.");
-        return TEXT("SCHNEIDER: Stay alert. I don't know this area.\n"
-                    "SCHNEIDER: Use what the building tells you.");
+            return TEXT("SCHNEIDER: You found Fox? Then the old plans were\n"
+                        "SCHNEIDER: useful for something. But I can't\n"
+                        "SCHNEIDER: pretend I know this rebuilt prison.\n"
+                        "SNAKE: You told me what you knew. That helped.");
+        if (Flags & MG_FOX_CARD3_RECOVERED)
+            return TEXT("SCHNEIDER: New clearances and old plans disagree.\n"
+                        "SNAKE: I'll check the doors myself. Stay on the line.\n"
+                        "SCHNEIDER: I can do that.");
+        return TEXT("SCHNEIDER: I don't know this sector. Don't take my\n"
+                    "SCHNEIDER: silence for certainty.\n"
+                    "SNAKE: I'll tell you what I find.");
     }
 
     if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
@@ -1867,14 +1903,20 @@ FString AMGGrayFoxMission::GetTransceiverDialogue(int32 Channel) const
         return TEXT("BIG BOSS: Find Gray Fox. Don't lose sight of\n"
                     "BIG BOSS: the objective.");
     if ((Flags & MG_FOX_LEFT_PRISON) && !(Flags & MG_FOX_GEAR_RECOVERED))
-        return TEXT("BIG BOSS: Recover the equipment they took.\n"
-                    "BIG BOSS: Search the nearby storage doors.");
+        return TEXT("BIG BOSS: You found Fox. Can he tell you where\n"
+                    "BIG BOSS: they moved your equipment?\n"
+                    "SNAKE: He was barely conscious. I'll search myself.");
     if ((Flags & MG_FOX_GEAR_RECOVERED) && !(Flags & MG_FOX_TRANSMITTER_REMOVED))
-        return TEXT("BIG BOSS: Inspect the gear you recovered.\n"
-                    "BIG BOSS: They may have planted a transmitter.\n"
-                    "SNAKE: A transmitter?");
-    return TEXT("BIG BOSS: Continue the mission, Snake.\n"
-                "BIG BOSS: Stay alert.");
+        return TEXT("SNAKE: They've catalogued everything I carried.\n"
+                    "BIG BOSS: Check it for anything that doesn't belong.\n"
+                    "SNAKE: I don't want to be followed again.");
+    if (Flags & MG_FOX_CARD3_RECOVERED)
+        return TEXT("BIG BOSS: You have a way forward. Keep moving.\n"
+                    "SNAKE: Understood. I'll verify the new route first.\n"
+                    "BIG BOSS: Report only what you can confirm.");
+    return TEXT("SNAKE: The transmitter is gone.\n"
+                "BIG BOSS: Good. Continue your mission.\n"
+                "SNAKE: On my own eyes this time.");
 }
 
 bool AMGGrayFoxMission::HasIncomingTransceiverPrompt() const
