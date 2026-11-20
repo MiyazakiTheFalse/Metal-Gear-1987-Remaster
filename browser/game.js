@@ -986,9 +986,55 @@ function updatePadStatus(p){
  $('controller').textContent=p?(lastInputIsPad?'GAMEPAD ACTIVE':'GAMEPAD CONNECTED'):(padIssue?'CONTROLLER ACCESS UNAVAILABLE':'KEYBOARD + MOUSE');
 }
 function inputDown(k){return !!key[k]}
+let draggedGuard=null,dragNoiseAfter=0;
+function releaseGuardBody(){
+ if(!draggedGuard)return false;
+ draggedGuard.dragged=false;draggedGuard=null;
+ popup('BODY RELEASED · GUARDS CAN STILL FIND IT',1.7);
+ save();
+ return true;
+}
+function grabGuardBody(){
+ if(player.stance===2||player.aim||player.cover||world.boxed)return false;
+ const candidate=guards.filter(g=>g.knocked&&!g.boss&&!g.kid&&
+  dist(g,player)<1.6&&!lineBlockedSight(player,g,1.12,.4))
+  .sort((a,b)=>dist(a,player)-dist(b,player))[0];
+ if(!candidate)return false;
+ draggedGuard=candidate;candidate.dragged=true;
+ setPlayerStance(1);player.sprint=false;player.aim=false;
+ popup(candidate.knockedOut?'DRAGGING UNCONSCIOUS GUARD · E TO RELEASE':
+  'MOVING GUARD BODY · E TO RELEASE',2.1);
+ save();return true;
+}
+function tickGuardBodyDrag(dt){
+ if(!draggedGuard)return;
+ const body=draggedGuard;
+ if(!body.knocked||player.stance===2||player.cover||world.boxed||
+    dist(player,body)>1.92||Math.abs(player.x-body.x)>1.85){
+  releaseGuardBody();return;
+ }
+ const target={x:player.x-Math.cos(player.yaw)*.93,
+               z:player.z-Math.sin(player.yaw)*.93};
+ const dx=target.x-body.x,dz=target.z-body.z,
+       length=Math.hypot(dx,dz),step=Math.min(length,2.15*dt);
+ if(length>.03){
+  const x=body.x,z=body.z;
+  moveEntity(body,dx/length*step/dt,dz/length*step/dt,dt,.35);
+  if(Math.hypot(body.x-x,body.z-z)<.001&&dist(player,body)>1.7){
+   releaseGuardBody();return;
+  }
+  body.yaw=player.yaw+Math.PI*.5;
+  // Real local noise evidence, not omniscient threat generation.
+  if(gameTime>=dragNoiseAfter&&Math.hypot(body.x-x,body.z-z)>.005){
+   dragNoiseAfter=gameTime+.85;
+   noiseEvents.push({x:body.x,z:body.z,power:3.2,source:'body_drag',life:.38});
+  }
+ }
+}
 function action(name){if(!started){if(name==='start')start(false);return;}if(paused&&name!=='pause'&&name!=='intel')return;
  if(world.boxed&&['melee','fire','prone','cover','crouch','interact'].includes(name)&&!equipOpen)world.boxed=false;
  if(name==='interact'){
+   if(draggedGuard){releaseGuardBody();return;}
    if(equipOpen){
     if(equipOpen==='items'&&inventories.items[eqIndex]===tagSlot){
      equipOpen=null;setDownTag();eqIndex=0;drawEquipment();
@@ -1049,6 +1095,7 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
      fox.reachAt=gameTime;say('rescue3');playCue('select');return;
    }
    if(stage===2&&faces(breach2)&&dist(player,breach2)<2.1&&player.z>breach2.z){strikePanel(1,breach2,seam2);return}
+   if(grabGuardBody())return;
    // A / E also becomes a contextual cover action when no mission object
    // is interactable. Never replace a wall breach, rescue, or gear recovery.
    if(player.cover){player.cover=false;player.coverNormal=null;popup('LEFT WALL COVER',1.4);playCue('select');return;}
@@ -1060,6 +1107,7 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
    }
    popup('NO ACTION — APPROACH AND FACE A TARGET');playCue('denied');
  }else if(name==='crouch'){
+  if(draggedGuard)return;
   const next=player.stance===1?0:1;
   if(setPlayerStance(next)){
    discovery.crouched=true;
@@ -1068,6 +1116,7 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
   }
  }
  else if(name==='prone'){
+  if(draggedGuard){popup('RELEASE BODY BEFORE CRAWLING');return;}
   const next=player.stance===2?1:2;
   if(setPlayerStance(next)){
    popup(player.stance===2?'PRONE — LOW PROFILE / EXTENDED BODY':'CROUCHED',1.8);
@@ -1075,6 +1124,7 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
   }
  }
  else if(name==='cover'){
+   if(draggedGuard){popup('RELEASE BODY BEFORE USING COVER');return;}
    if(player.cover){player.cover=false;player.coverNormal=null;popup('LEFT WALL COVER');playCue('select');}
    else {const surface=coverWall(player);if(surface&&player.stance!==2){player.cover=true;player.coverNormal=surface;player.yaw=Math.atan2(-surface.z,-surface.x);popup('WALL COVER — X / F KNOCK',2.4);playCue('select');}else{popup('NO SUITABLE WALL WITHIN REACH');playCue('denied');}}
  }
@@ -1092,7 +1142,7 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
    noiseEvents.push(event);
    playCue('knock');popup('KNOCK — GUARDS MAY INVESTIGATE',2.3);
  }
- else if(name==='melee'){if(player.attackUntil>gameTime)return;player.attackUntil=gameTime+.28;if(player.stance===2){popup('CANNOT STRIKE WHILE PRONE');playCue('denied');return;}const g=guards.find(g=>{const d=dist(g,player),toward={x:(g.x-player.x)/(d||1),z:(g.z-player.z)/(d||1)};return !g.knocked&&d<1.5&&Math.cos(player.yaw)*toward.x+Math.sin(player.yaw)*toward.z>.48&&!lineBlocked(player,g)});if(g){g.hp-=35;g.aimTime=0;g.state=3;g.alert=8;g.last={x:player.x,z:player.z};if(g.hp<=0){g.knocked=true;g.state=0;popup(g.boss?'SHOOT GUNNER DOWN':'GUARD INCAPACITATED');}else popup('MELEE IMPACT — GUARD ALERTED');playCue('hit');noiseEvents.push({x:player.x,z:player.z,power:5,life:.8});}else{popup('PUNCH — NO TARGET',1);playCue('whoosh');}}
+ else if(name==='melee'){if(draggedGuard){releaseGuardBody();return;}if(player.attackUntil>gameTime)return;player.attackUntil=gameTime+.28;if(player.stance===2){popup('CANNOT STRIKE WHILE PRONE');playCue('denied');return;}const g=guards.find(g=>{const d=dist(g,player),toward={x:(g.x-player.x)/(d||1),z:(g.z-player.z)/(d||1)};return !g.knocked&&d<1.5&&Math.cos(player.yaw)*toward.x+Math.sin(player.yaw)*toward.z>.48&&!lineBlocked(player,g)});if(g){g.hp-=35;g.aimTime=0;g.state=3;g.alert=8;g.last={x:player.x,z:player.z};if(g.hp<=0){g.knocked=true;g.knockedOut=!g.boss;g.state=0;popup(g.boss?'SHOOT GUNNER DOWN':'GUARD UNCONSCIOUS');}else popup('MELEE IMPACT — GUARD ALERTED');playCue('hit');noiseEvents.push({x:player.x,z:player.z,power:5,life:.8});}else{popup('PUNCH — NO TARGET',1);playCue('whoosh');}}
  else if(name==='fire'){
   if(!kitAvailable()){popup('WEAPON CONFISCATED — UNARMED');playCue('denied');}
   else if(!world.handgun||equippedWeapon!=='HANDGUN'){popup('SELECT HANDGUN IN RIGHT-HAND WINDOW');playCue('denied');}
@@ -1104,7 +1154,7 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
     const target=guards.filter(g=>!g.knocked&&dist(g,player)<11&&!lineBlockedSight(player,g,player.stance===2?.55:player.stance===1?1.0:1.5,1.35))
       .map(g=>({g,range:dist(g,player),dot:aim.x*(g.x-player.x)+aim.z*(g.z-player.z)}))
       .filter(v=>v.dot>0&&v.dot/v.range>.93).sort((a,b)=>a.range-b.range)[0];
-    if(target){const g=target.g;g.hp=Math.max(0,g.hp-100);g.knocked=g.hp===0;g.state=g.knocked?0:3;g.suspicion=g.knocked?0:1;g.aimTime=0;g.shotVisual=0;popup(g.knocked?'TARGET DOWN':'SHOOT GUNNER STAGGERS',2);shots.push({x:player.x,z:player.z,y:1.2,toX:g.x,toZ:g.z,toY:1.3,life:.18});}
+    if(target){const g=target.g;g.hp=Math.max(0,g.hp-100);g.knocked=g.hp===0;if(g.knocked)g.knockedOut=false;g.state=g.knocked?0:3;g.suspicion=g.knocked?0:1;g.aimTime=0;g.shotVisual=0;popup(g.knocked?'TARGET DOWN':'SHOOT GUNNER STAGGERS',2);shots.push({x:player.x,z:player.z,y:1.2,toX:g.x,toZ:g.z,toY:1.3,life:.18});}
     else popup('SHOT MISSED',1.7);
     if(stage<0)save();
   }
@@ -1741,8 +1791,9 @@ function updateGuards(dt){kennelTick(dt);kidTick(dt);const pulse=updatePropertyT
 function lerpAngle(a,b,t){return a+Math.atan2(Math.sin(b-a),Math.cos(b-a))*clamp(t,0,1)}
 function updatePlayer(dt){const oldX=player.x,oldZ=player.z;let mF=(inputDown('w')?1:0)-(inputDown('s')?1:0),mR=(inputDown('d')?1:0)-(inputDown('a')?1:0);const pad=activeGamepad();if(pad){const dz=v=>Math.abs(v)>.16?v:0;mF+=-dz(pad.axes[1]||0);mR+=dz(pad.axes[0]||0)}const m=nrm(mF,mR),moving=hypot(mF,mR)>.08;
  player.sprint=player.stance===0&&(inputDown('shift')||pressed(pad?.buttons[10]));player.aim=inputDown('mouse2')||pressed(pad?.buttons[6]);
+ if(draggedGuard){player.sprint=false;player.aim=false;}
  if(world.boxed){player.aim=false;player.sprint=false;}
- if(moving){let speed=player.stance===2?.95:player.stance===1?1.7:player.sprint?5.6:3.45;if(player.aim)speed*=.63;speed*=Math.min(1,Math.hypot(mF,mR));const f={x:Math.cos(cam.yaw),z:Math.sin(cam.yaw)},r={x:-f.z,z:f.x};let vx=(f.x*m.x+r.x*m.z)*speed,vz=(f.z*m.x+r.z*m.z)*speed;
+ if(moving){let speed=draggedGuard?1.13:player.stance===2?.95:player.stance===1?1.7:player.sprint?5.6:3.45;if(player.aim)speed*=.63;speed*=Math.min(1,Math.hypot(mF,mR));const f={x:Math.cos(cam.yaw),z:Math.sin(cam.yaw)},r={x:-f.z,z:f.x};let vx=(f.x*m.x+r.x*m.z)*speed,vz=(f.z*m.x+r.z*m.z)*speed;
  if(player.cover){
    const tangent={x:-player.coverNormal.z,z:player.coverNormal.x},along=vx*tangent.x+vz*tangent.z;
    vx=tangent.x*along;vz=tangent.z*along;
@@ -1763,6 +1814,7 @@ function updatePlayer(dt){const oldX=player.x,oldZ=player.z;let mF=(inputDown('w
  }
  if(player.cover&&!coverWall(player)){player.cover=false;player.coverNormal=null;}
  if(player.cover&&player.coverNormal)player.yaw=lerpAngle(player.yaw,Math.atan2(-player.coverNormal.z,-player.coverNormal.x),dt*10);
+ tickGuardBodyDrag(dt);
  freightTick(dt,oldX,oldZ);
  updateShutter(dt);
  if(stage===7&&!finalGate.active&&player.x>27.85&&Math.abs(player.z)<1.4){
@@ -2195,6 +2247,8 @@ function updateHUD(dt){
   audible&&stage===4&&tag.state==='carried'?'Two chirps · inside your kit':
   audible&&stage===4&&tag.state==='placed'&&dist(player,tag.point)<6?'Two chirps · loose tag':'';
  let prompt=serviceAction()||freightAction();if(prompt)prompt='E / A · '+prompt;
+ if(draggedGuard)prompt='E / A · RELEASE BODY';
+ else if(!prompt&&guards.some(g=>g.knocked&&!g.boss&&dist(g,player)<1.6&&!lineBlocked(player,g)))prompt='E / A · DRAG GUARD BODY';
  if(stage===-2&&dist(player,informant)<2.2)prompt='E / A · TALK';
  if(stage===-1&&dist(player,post)<2.1)prompt=arrestGuard.knocked?'E / A · CALL THE DUTY GUARD AND SURRENDER':'E / A · SURRENDER';
  if(stage===1&&dist(player,fox)<2.1)prompt='E / A · SPEAK TO FOX';
