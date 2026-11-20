@@ -113,7 +113,7 @@ assert.equal(spentRation.game.state.rationWorld,null,'used ration never respawns
 console.log('PASS: 1987 truck rewards, optics, finite ration use and checkpoint persistence.');
 // Card 1 must remain recoverable after custody; no softlocking a novice
 // who took the optional opening route before inspecting the central truck.
-const lateCardSave=new Map([[slot,JSON.stringify({
+const lateCardSave=new Map([['mg1987.grayfox.browser.v1',JSON.stringify({
  version:10,stage:4,recoveredGear:true,health:100,x:-10.6,z:0,
  firstCardEarned:false,rationEarned:false,binocularsEarned:false
 })]]);
