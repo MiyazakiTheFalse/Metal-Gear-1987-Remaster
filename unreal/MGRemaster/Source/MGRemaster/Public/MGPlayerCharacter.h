@@ -30,6 +30,8 @@ public:
     UFUNCTION(BlueprintPure, Category="Character|Weapon")
     bool IsFiringVisual() const { return HasReadyWeapon() && WeaponRecoilTimer > 0.f; }
     bool IsSprinting() const { return bSprinting && !bIsCrouched && !bAiming; }
+    UFUNCTION(BlueprintPure, Category="Character|Animation")
+    bool IsMeleeVisualActive() const { return MeleeVisualTimer > 0.f; }
     bool IsMissionLogVisible() const { return bShowMissionLog; }
     bool IsCodecOpen() const { return bCodecOpen; }
     FString GetCodecStatus() const { return CodecStatus; }
