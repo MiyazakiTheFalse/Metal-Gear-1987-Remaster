@@ -160,11 +160,16 @@ private:
     UPROPERTY(Transient) AStaticMeshActor* ParachutePack = nullptr;
     float BreachRemaining = -1.f;
     bool TryServiceInteraction(AMGPlayerCharacter* Player);
+    bool TryCollectTruckSupply(AMGPlayerCharacter* Player);
     void CreateDispatchBay();
     void CreateFirstFloorSupplyTrucks();
     void TickDispatch(AMGPlayerCharacter* Player, float Dt);
     UPROPERTY(Transient)
     UStaticMesh* BlockMesh = nullptr;
+    // Opens into the original receiving yard after gear recovery; prevents
+    // missable original Card-1 loot from becoming a permanent dead end.
+    UPROPERTY(Transient)
+    AStaticMeshActor* FreightReturnGate = nullptr;
     UPROPERTY(Transient)
     AStaticMeshActor* WeakWall = nullptr;
     UPROPERTY(Transient)
