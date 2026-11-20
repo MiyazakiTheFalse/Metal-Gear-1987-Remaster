@@ -554,7 +554,20 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         break;
     case MG_FOX_ENTER_SHOTMAKER:
         if (IsValid(Shotmaker)) Shotmaker->SetEncounterActive(true);
-        Dialogue = TEXT("SHOOT GUNNER — THREE SPREAD SHOTS. FIND COVER.");
+        // Remake-authored prison-owner threat. It is a performance cue,
+        // never a magic boss activation event or an uncaptioned voice.
+        Dialogue = TEXT("SHOOT GUNNER: You made it out of your cell. Not out of my prison.");
+        if (IsValid(Shotmaker))
+        {
+            if (USoundBase* Cue = LoadObject<USoundBase>(nullptr,
+                    TEXT("/Game/Audio/VO/shotmaker/VO_shotmaker_intro_01.VO_shotmaker_intro_01")))
+            {
+                UGameplayStatics::PlaySoundAtLocation(this, Cue,
+                    Shotmaker->GetActorLocation(), .76f);
+                OnNarrativeVoiceStarted(TEXT("shotmaker"),
+                    TEXT("VO_shotmaker_intro_01"), Cue->GetDuration());
+            }
+        }
         break;
     case MG_FOX_RECOVER_GEAR:
         if (Player && Player->GetEquipment())
