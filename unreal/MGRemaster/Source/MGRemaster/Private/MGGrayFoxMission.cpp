@@ -252,7 +252,10 @@ void AMGGrayFoxMission::CreateBossWing()
     SpawnBlock(TEXT("BossLowCoverA"), FVector(1960.f, 170.f, -25.f), FVector(2.1f, 1.f, 1.5f), true);
     SpawnBlock(TEXT("BossLowCoverB"), FVector(2610.f, -50.f, -25.f), FVector(1.1f, 1.6f, 1.5f), true);
     SpawnBlock(TEXT("BossLowCoverC"), FVector(3330.f, 230.f, -25.f), FVector(1.4f, .8f, 1.5f), true);
-    ChapterExit = SpawnBlock(TEXT("ChapterExit"), FVector(3610.f, 0.f, 90.f), FVector(.45f, 2.2f, 3.8f), true);
+    // Full corridor width: the later dog wing must never be reachable by
+    // slipping around this door before Card 3 and the exit transaction.
+    ChapterExit = SpawnBlock(TEXT("ChapterExit"), FVector(3610.f, 0.f, 90.f),
+        FVector(.45f, 10.f, 3.8f), true);
     if (GetWorld())
         Shotmaker = GetWorld()->SpawnActor<AMGShootGunnerActor>(
             FVector(3100.f, 55.f, -11.f), FRotator(0.f, 180.f, 0.f));
