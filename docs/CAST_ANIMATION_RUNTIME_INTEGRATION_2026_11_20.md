@@ -26,6 +26,7 @@ These are presentation defects with consequences for perceived identity, readabi
 - Gray Fox: source captive performance until **real** rescue state switches to wary idle. No duplicated Fox actor.
 - Shoot Gunner: shot/shoulder/reload/recovery and down performances triggered by actual boss state.
 - Machinegun Kid: its **independent boss Tick** now runs a distinct rig sequence, rather than silently skipping Guard animation updates.
+- Added right-hand fallback attachment: where an artist-authored `weapon_r` socket is absent from an otherwise valid imported GLB, Snake, guards, Shoot Gunner and Machinegun Kid attach their weapon visuals to the actual `hand_R` bone. This is a **presentation fix**, not an approval of handgrip orientation or shot-source position; align weapon pivots, muzzle/bore and casing ejection in Unreal PIE before shipping.
 - Fixed the binocular scope so `TargetFOV` is actually governed by scope state every Tick. A newly selected non-binocular item exits the scope without a permanent camera override.
 
 ## Executed/validated in this authoring session
@@ -41,8 +42,8 @@ The existing 22 source GLBs are original stylised 18-joint procedurally authored
 
 ## Next acceptance pass for tester
 
-1. Pull this branch, run `scripts/unreal_tester_preflight.ps1`, import source characters with `Content/Python/import_field_character_glbs.py`, then compile Unreal 5.7 and open PIE. Verify the six specific role assets, actual imported clips and correct units. Report import warnings rather than silently accepting static meshes.
-2. Record Snake locomotion-to-aim, crouch-to-prone, cover/movement/drag, and captive-to-rescued Gray Fox; confirm no T-pose and that the motion fits the actual capsule/collisions.
+1. Pull this branch, run `scripts/unreal_tester_preflight.ps1`, import source characters with `Content/Python/import_field_character_glbs.py`, then compile Unreal 5.7 and open PIE. Verify all 22 imported source assets, with five active named actor rig types (Snake, Fox, guards, Shoot Gunner and Machinegun Kid); the POW informant is a role-specific GLB in browser review but still an Unreal gameplay proxy. Confirm actual imported clips and correct units. Report import warnings rather than silently accepting static meshes.
+2. Record Snake locomotion-to-aim, crouch-to-prone, cover/movement/drag, weapon grip on imported `hand_R`, and captive-to-rescued Gray Fox; confirm no T-pose and that the motion fits the actual capsule/collisions.
 3. Film idle guards, search/warning/reload, CQC KO, dragged body and checkpoint re-entry; test Shoot Gunner's three-shot shoulder/shot/recovery and Kid's independent burst/reload.
 4. Test a 10-second binocular view while stationary, walking, crouching and returning to pistol; scope FOV must not revert automatically, with no omniscient guard outlines.
 5. Play the browser on localhost with review mode disabled and enabled; verify **all six** identities render once, real wall occlusion, actual GLB load, compatible controller/keyboard input, frame pacing and no loss of original local offline play when the Three.js CDN is unavailable.
