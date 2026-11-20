@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="mg-codec-portrait-art" viewBox="0 0 200 236" role="img" aria-label="BIG BOSS, original interpretation of the 1987 manual">
+ <style>.mg-codec-eyelids{transform:scaleY(0);transform-origin:100px 110px}</style><defs><linearGradient id="bg_bigBoss" x2="1" y2="1"><stop stop-color="#183835"/><stop offset=".47" stop-color="#0b1e20"/><stop offset="1" stop-color="#020d12"/></linearGradient>
+ <linearGradient id="skin_bigBoss" x1=".05" y1=".2" x2=".97" y2=".8"><stop stop-color="#ead6af"/><stop offset=".33" stop-color="#bc9576"/><stop offset=".65" stop-color="#bc9576"/><stop offset="1" stop-color="#594536"/></linearGradient>
+ <linearGradient id="cloth_bigBoss" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7a9484"/><stop offset=".55" stop-color="#2e5958"/><stop offset="1" stop-color="#1a2e2c"/></linearGradient>
+ <radialGradient id="shine_bigBoss"><stop stop-color="#91c9bd" stop-opacity=".32"/><stop offset="1" stop-color="#91c9bd" stop-opacity="0"/></radialGradient>
+ <clipPath id="cut_bigBoss"><rect width="200" height="236" rx="3"/></clipPath></defs>
+ <g clip-path="url(#cut_bigBoss)"><rect width="200" height="236" fill="url(#bg_bigBoss)"/>
+ <ellipse cx="85" cy="72" rx="124" ry="115" fill="url(#shine_bigBoss)"/>
+ <g stroke="#91d5b7" stroke-opacity=".09" stroke-width=".5">
+ <path d="M0 7 H200"/><path d="M0 25 H200"/><path d="M0 43 H200"/><path d="M0 61 H200"/><path d="M0 79 H200"/><path d="M0 97 H200"/><path d="M0 115 H200"/><path d="M0 133 H200"/><path d="M0 151 H200"/><path d="M0 169 H200"/><path d="M0 187 H200"/><path d="M0 205 H200"/><path d="M0 223 H200"/><path d="M0 241 H200"/></g>
+ <path d="M-5 236 Q15 196 66 186 L84 167 116 168 138 186 Q194 194 207 236Z" fill="url(#cloth_bigBoss)"/>
+ <path d="M86 169 L82 205 101 230 123 204 117 169" fill="#a18870" opacity=".83"/>
+ <path d="M82 176 L101 204 117 177 131 193 101 228 69 192Z" fill="#d4ddce" opacity=".55"/>
+ <path d="M65 95 Q57 82 52 100 Q49 121 67 137 L69 165 Q83 187 102 188 Q127 187 140 162 L145 137 Q162 121 153 98 Q150 91 145 95 Q146 54 104 50 Q56 47 65 95Z" fill="url(#skin_bigBoss)" stroke="#493f36" stroke-width="2"/>
+ <path d="M70 89Q96 80 111 84 L122 95 137 92" stroke="#fff4d6" stroke-opacity=".13" fill="none" stroke-width="5"/>
+ <path d="M66 108 Q80 96 94 109 M109 108 Q123 97 138 108" stroke="#382f2a" stroke-width="4" fill="none"/>
+ <path d="M68 111 Q81 104 94 114 M109 114 Q122 104 136 111" stroke="#d6c6a6" stroke-width="2" fill="none"/>
+ <ellipse cx="83" cy="111" rx="3.4" ry="5.4" fill="#28352f"/><ellipse cx="121" cy="111" rx="3.4" ry="5.4" fill="#28352f"/>
+ <g class="mg-codec-eyelids"><path d="M68 108 Q80 117 95 108" stroke="#bc9576" stroke-width="12" fill="none"/><path d="M107 108 Q121 117 138 108" stroke="#bc9576" stroke-width="12" fill="none"/></g>
+ <path d="M103 111 L99 141 Q101 146 110 144" stroke="#725949" stroke-width="3" fill="none" opacity=".72"/>
+ <path d="M82 154 Q100 146 119 153" stroke="#704b42" stroke-width="2" fill="none"/>
+ <g class="mg-codec-mouth"><ellipse cx="102" cy="155" rx="18" ry="3" fill="#432e2d"/><path d="M87 153 Q102 148 117 153" stroke="#d29a85" stroke-width="2" fill="none"/></g>
+ <path d="M61 125Q66 143 75 152 M141 125Q138 148 128 158" stroke="#58493e" stroke-opacity=".27" stroke-width="4" fill="none"/>
+ <path d="M45 100 Q30 43 76 30 Q108 19 139 38 Q171 58 152 104 L146 78 Q128 58 110 64 Q76 50 61 91Z" fill="#777166"/><path d="M62 52 Q94 30 130 49" stroke="#cbc0a1" stroke-width="9" fill="none" opacity=".35"/><path d="M48 111 Q41 155 69 182 Q92 208 128 183 Q158 151 149 112 L144 157 123 185 Q99 193 70 173 56 145 55 111Z" fill="#544c42"/><path d="M70 147 Q83 173 99 176 Q115 176 133 144 L129 181 Q112 199 94 193 L68 178Z" fill="#5a5046"/><path d="M72 148L90 157 119 158 132 147" stroke="#93887a" stroke-opacity=".6" stroke-width="5"/><path d="M55 82 L129 69" stroke="#353c3a" stroke-width="8" fill="none"/><path d="M61 93 Q72 85 88 91 L86 122 Q74 130 64 116Z" fill="#171f20" stroke="#546561" stroke-width="2"/>
+ <path d="M0 225 L200 225" stroke="#79b2a3" stroke-opacity=".48" stroke-width="1"/>
+ <path d="M11 0V236 M189 0V236" stroke="#7ac8b1" stroke-opacity=".12"/>
+ </g></svg>
