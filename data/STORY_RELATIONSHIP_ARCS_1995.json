@@ -135,7 +135,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "FORMAL_ORDER",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "source_text_prototype"
         },
         {
           "id": "ST.P01.FREIGHT",
@@ -151,7 +154,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "WORKER_LIFE",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "source_text_prototype"
         }
       ]
     },
@@ -181,7 +187,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": null,
+          "isSecondaryOptionalBeat": true,
+          "sourceAuthority": "only_supplementary_written_purpose"
         },
         {
           "id": "ST.P02.DIANE",
@@ -197,7 +206,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "PERSON_NOT_TUTORIAL",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         },
         {
           "id": "ST.P02.RETURN",
@@ -213,7 +225,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "CARTOGRAPHY_TRUST",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         }
       ]
     },
@@ -243,7 +258,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "COMMAND_OUT_OF_RANGE",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "source_text_prototype"
         },
         {
           "id": "ST.P03.FOX",
@@ -259,7 +277,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "RESCUE_FOX_PEER",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "source_text_prototype"
         },
         {
           "id": "ST.P03.LISTEN",
@@ -275,7 +296,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "RESCUE_FOX_PEER",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "source_text_prototype"
         }
       ]
     },
@@ -305,7 +329,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "PERSONAL_EFFECTS",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "source_text_prototype"
         },
         {
           "id": "ST.P04.TRACKER",
@@ -321,7 +348,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "TRANSMITTER_UNEASE",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "source_text_prototype"
         },
         {
           "id": "ST.P04.BOSS",
@@ -337,7 +367,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": null,
+          "isSecondaryOptionalBeat": true,
+          "sourceAuthority": "only_supplementary_written_purpose"
         }
       ]
     },
@@ -367,7 +400,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "COST_OF_CONTACT",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "source_text_prototype"
         },
         {
           "id": "ST.P05.KID",
@@ -383,7 +419,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "ASK_FOR_WEAKNESS",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "source_text_prototype"
         },
         {
           "id": "ST.P05.PARACHUTE",
@@ -399,7 +438,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "ROOF_ON_OWN_TERMS",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         }
       ]
     },
@@ -429,7 +471,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "AIR_THREAT",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         },
         {
           "id": "ST.P06.RETURN",
@@ -445,7 +490,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "REVISIT_A_CHANGED_WORLD",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         }
       ]
     },
@@ -474,7 +522,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "DANGER_HAS_COST",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         },
         {
           "id": "ST.P07.LIFT",
@@ -490,7 +541,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": null,
+          "isSecondaryOptionalBeat": true,
+          "sourceAuthority": "only_supplementary_written_purpose"
         }
       ]
     },
@@ -519,7 +573,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "INSIDER_RULES",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         },
         {
           "id": "ST.P08.MADNAR",
@@ -535,7 +592,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "DEMAND_EVIDENCE",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         },
         {
           "id": "ST.P08.TX11",
@@ -551,7 +611,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "HELP_WITH_LIMITS",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         }
       ]
     },
@@ -581,7 +644,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "PERSON_NOT_ACCESS_CARD",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         },
         {
           "id": "ST.P09.MADNAR",
@@ -597,7 +663,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "EARNED_PATTERN",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         },
         {
           "id": "ST.P09.DUCK",
@@ -613,7 +682,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "BROTHER_NOT_AN_OBJECTIVE",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         }
       ]
     },
@@ -644,7 +716,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "MISSING_CONTEXT",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         },
         {
           "id": "ST.P10.BETRAYAL",
@@ -660,7 +735,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "MENTOR_BECOMES_TARGET",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         },
         {
           "id": "ST.P10.TX55",
@@ -676,7 +754,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "STAND_BY_EVIDENCE",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         },
         {
           "id": "ST.P10.FINALE",
@@ -692,7 +773,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "FINAL_ARGUMENT",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         },
         {
           "id": "ST.P10.CREDITS",
@@ -708,7 +792,10 @@
             "bigBoss_OuterHeaven_identity",
             "future_Snake_relationships",
             "later_game_Fox_history"
-          ]
+          ],
+          "primaryRelationshipKey": "WHAT_CAME_HOME",
+          "isSecondaryOptionalBeat": false,
+          "sourceAuthority": "planned"
         }
       ]
     }
@@ -727,5 +814,9 @@
     "save/skip/revisit checks",
     "player research checks rapport and pacing",
     "final reveal not shown in advance"
-  ]
+  ],
+  "canonicalStatusAuthority": false,
+  "masterRegistry": "data/FULL_CAMPAIGN_STORY_AND_RELATIONSHIP_ARCS_1995.json",
+  "statusIsDerivedFrom": "data/FULL_CAMPAIGN_STORY_AND_RELATIONSHIP_ARCS_1995.json",
+  "implementationStatusNote": "Personality drafting only; canonical relationship completeness lives in FULL_CAMPAIGN_STORY_AND_RELATIONSHIP_ARCS_1995.json. No realistic character bodies or voice-recorded acting."
 }
