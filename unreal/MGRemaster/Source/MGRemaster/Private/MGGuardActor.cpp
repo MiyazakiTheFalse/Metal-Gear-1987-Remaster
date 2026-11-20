@@ -164,6 +164,10 @@ void AMGGuardActor::ObserveApproximateFootstep(const FVector& AudibleSource, boo
         FMath::Cos(Bearing) * EstimatedRange,
         FMath::Sin(Bearing) * EstimatedRange, 0.f);
     ObserveEvidence(EMGGuardEvidenceKind::HeardMovement, ApproximateLocation);
+    // A sustained audible disturbance earns a deliberate walk toward the
+    // approximate sector; one minor footfall merely turns a suspicious head.
+    if (Suspicion >= .32f)
+        SearchForLastKnownSeconds = FMath::Max(SearchForLastKnownSeconds, 2.6f);
     FootstepLocalizationRefreshSeconds = bOccluded ? 2.2f : 1.2f;
 }
 
@@ -736,7 +740,13 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         {
             // Collision-aware pursuit. No teleport, no infinite straight-line
             // wall scraping; try a bounded, alternating flank if blocked.
-            MoveToward(LastKnownPlayerPosition, 185.f, DeltaSeconds);
+            // A recent *direct* sighting earns an urgent pursuit. Secondhand
+            // intel, an audible sector or a body earns a slower search, not a
+            // perfect-speed rush toward a coordinate guessed from sound.
+            const bool bRecentFirsthandContact = bConfirmedVisualNow ||
+                ContactEvidenceAge < 4.5f;
+            MoveToward(LastKnownPlayerPosition,
+                bRecentFirsthandContact ? 185.f : 115.f, DeltaSeconds);
             const float Progress = FVector::Dist2D(Location, GetActorLocation());
             PursuitBlockedSeconds = Progress < 1.f
                 ? PursuitBlockedSeconds + DeltaSeconds : 0.f;
