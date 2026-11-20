@@ -1,5 +1,6 @@
 #include "MGSurveillanceCameraActor.h"
 #include "MGPlayerCharacter.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "MGGrayFoxMission.h"
 #include "MGGuardActor.h"
 #include "Components/SceneComponent.h"
