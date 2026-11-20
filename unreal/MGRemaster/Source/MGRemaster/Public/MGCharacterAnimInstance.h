@@ -7,7 +7,7 @@ UENUM(BlueprintType)
 enum class EMGPerformanceAction : uint8
 {
     Idle, Travel, Crouch, Prone, Aim, Fire, Melee, WallKnock,
-    Cover, CoverPeek, RadioIdle, EnvironmentInteract,
+    Cover, CoverPeek, BodyDrag, RadioIdle, EnvironmentInteract,
     GuardNotice, GuardInvestigate, GuardSearch, GuardChallenge,
     GuardReport, GuardEngage, GuardStrike, Incapacitated,
     GuardSidearmAim, GuardSidearmFire, GuardSidearmReload,
@@ -78,6 +78,10 @@ public:
     bool bSprinting = false;
     UPROPERTY(BlueprintReadOnly, Category="MG|Cover")
     bool bInCover = false;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Body")
+    bool bDraggingBody = false;
+    UPROPERTY(BlueprintReadOnly, Category="MG|Body")
+    float BodyDragAlpha = 0.f;
     UPROPERTY(BlueprintReadOnly, Category="MG|Cover")
     bool bCornerPeeking = false;
     UPROPERTY(BlueprintReadOnly, Category="MG|Cover")
