@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-11-19",
+  "updated": "2026-11-20",
   "status": "committed_source_uncompiled",
   "target": "Outer Heaven 1995 / MSX2 comparative",
   "principle": "Duty determines normal tasks; awareness determines belief; tactics/presentation determine moment-to-moment action; facility condition spreads only actual reports, not exact player location.",
@@ -86,7 +86,15 @@
     "facility_post_alert_caution_seconds": 5,
     "facility_standdown_seconds": 3,
     "patrol_acceleration_interpolation_speed": 6,
-    "muted_occluded_footstep_loudness_multiplier": 0.42
+    "muted_occluded_footstep_loudness_multiplier": 0.42,
+    "occluded_footstep_bearing_quantization_degrees": 35,
+    "clear_footstep_bearing_quantization_degrees": 20,
+    "occluded_footstep_range_quantization_cm": 260,
+    "clear_footstep_range_quantization_cm": 170,
+    "occluded_footstep_refresh_seconds": 2.2,
+    "clear_footstep_refresh_seconds": 1.2,
+    "visual_contact_memory_seconds": 4.5,
+    "interrupted_radio_retry_window_seconds": 1.5
   },
   "examples": [
     {
@@ -150,6 +158,17 @@
       ],
       "facility": "Already Alert/Evasion",
       "attack": "no compliant capture; evidence still required"
+    },
+    {
+      "input": "Running behind concrete without a direct sighting",
+      "local": [
+        "Suspicious",
+        "Investigating",
+        "Searching",
+        "Returning"
+      ],
+      "facility": "No facility Alert until a genuine direct contact report",
+      "attack": "none; hears an uncertain sound sector only, refreshed at bounded intervals"
     }
   ],
   "source_implementation": [
@@ -183,7 +202,11 @@
     "Facility conditions modify attention, not visibility through concrete or invulnerability to stealth.",
     "Exploration pacing never fabricates a reported security incident.",
     "Animation and audio callbacks cannot own combat hits, flags or checkpoint state.",
-    "Only guards within 950cm can show provisional state-driven captions on Snake's HUD; no global omniscient subtitles."
+    "Only guards within 950cm can show provisional state-driven captions on Snake's HUD; no global omniscient subtitles.",
+    "Footsteps use a periodically refreshed coarse sound sector rather than Snake's exact live coordinates as guard search evidence.",
+    "Sound evidence cannot reset the age of direct visual confirmation or indefinitely sustain confirmed combat after sight is lost.",
+    "A fresh visual sighting, reported body, squad sighting or structural impact temporarily takes priority over routine footsteps.",
+    "An injured guard interrupts its pending radio call; only a later directly confirmed sighting can initiate a fresh call."
   ],
   "known_gaps": [
     "No animation-blueprint implementation of these states or authored guard voice barks.",
@@ -192,7 +215,8 @@
     "Navigation remains bounded steering with swept collision, not full NavMesh/path tactical planning.",
     "More nuanced morale, fatigue, chain of command and sector-local radio networks are design work, not committed systems.",
     "Original J2ME encounter geography and patrol assignment have not been source verified.",
-    "Present contextual guard text cues are not recorded acting, final spoken dialogue, sound propagation or time-accurate lip animation."
+    "Present contextual guard text cues are not recorded acting, final spoken dialogue, sound propagation or time-accurate lip animation.",
+    "Footstep sector quantization is a first-pass evidence uncertainty approximation, not a tested spatial-acoustics simulation or measured hearing model."
   ],
   "approved_in_unreal": false
 }
