@@ -271,6 +271,7 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     if (bCodecOpen)
     {
         RadioTranscriptSeconds += FMath::Max(0.f, DeltaSeconds);
+        CodecSpeechSeconds = FMath::Max(0.f, CodecSpeechSeconds - DeltaSeconds);
         UpdateRadioDialogue(DeltaSeconds);
     }
     CombatNoiseTimer = FMath::Max(0.f, CombatNoiseTimer - DeltaSeconds);
@@ -1215,6 +1216,19 @@ void AMGPlayerCharacter::StopRadioDialogue()
     NextVoiceLine = 0;
     RevealedRadioLines = 0;
     VoiceLineAdvanceDelay = 0.f;
+    CodecSpeechSeconds = 0.f;
+    ActiveCodecSpeakerId = NAME_None;
+}
+
+float AMGPlayerCharacter::GetCodecTalkAlpha() const
+{
+    if (!bCodecOpen || CodecSpeechSeconds <= 0.f || !GetWorld())
+        return 0.f;
+    // Estimated visual cadence where final viseme/mocap VO is unavailable.
+    // No invented audio playback. AnimBP can replace this with authored data.
+    const float Phase = GetWorld()->GetTimeSeconds() * 19.f;
+    return FMath::Clamp(0.45f + 0.35f * FMath::Sin(Phase)
+        + 0.15f * FMath::Sin(Phase * .57f), 0.f, 1.f);
 }
 
 float AMGPlayerCharacter::PlayRadioDialogueLine(
@@ -1227,6 +1241,7 @@ float AMGPlayerCharacter::PlayRadioDialogueLine(
     // Performances should follow the identity bible; never impersonate the
     // particular voice of an existing actor. Missing assets remain captions.
     const FString SpeakerId = Speaker.ToLower().Replace(TEXT(" "), TEXT("_"));
+    ActiveCodecSpeakerId = FName(*SpeakerId);
     const FString AssetName = FString::Printf(TEXT("VO_%s_%02d"),
         *SceneKey, Index + 1);
     const FString AssetPath = FString::Printf(TEXT("/Game/Audio/VO/%s/%s.%s"),
@@ -1238,11 +1253,19 @@ float AMGPlayerCharacter::PlayRadioDialogueLine(
         {
             const float Duration = Cue->GetDuration();
             if (FMath::IsFinite(Duration) && Duration > 0.f)
-                return FMath::Clamp(Duration + .22f, 1.65f, 18.f);
+            {
+                const float PerformanceSeconds = FMath::Clamp(Duration + .22f, 1.65f, 18.f);
+                CodecSpeechSeconds = PerformanceSeconds;
+                OnCodecPortraitSpeakerStarted(ActiveCodecSpeakerId, PerformanceSeconds, true);
+                return PerformanceSeconds;
+            }
         }
     }
     // Subtitle duration approximation is NOT generated/recorded speech.
-    return FMath::Clamp(Spoken.Len() / 16.f + .50f, 1.65f, 5.5f);
+    const float ReadingSeconds = FMath::Clamp(Spoken.Len() / 16.f + .50f, 1.65f, 5.5f);
+    CodecSpeechSeconds = ReadingSeconds;
+    OnCodecPortraitSpeakerStarted(ActiveCodecSpeakerId, ReadingSeconds, false);
+    return ReadingSeconds;
 }
 
 void AMGPlayerCharacter::UpdateRadioDialogue(float DeltaSeconds)
