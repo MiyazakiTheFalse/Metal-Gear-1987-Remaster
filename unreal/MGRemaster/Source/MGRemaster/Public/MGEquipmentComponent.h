@@ -41,6 +41,9 @@ public:
     bool IsWeaponWindowOpen() const { return bWeaponWindowOpen; }
     bool IsItemWindowOpen() const { return bItemWindowOpen; }
     bool IsConfiscated() const { return bConfiscated; }
+    // Actor BeginPlay order is unspecified. The mission must not restore
+    // saved ammo before the equipment component has built its slot arrays.
+    bool HasInitializedInventory() const { return bInventorySlotsInitialized; }
     FString GetEquipmentFeedback() const { return FeedbackSeconds > 0.f ? Feedback : FString(); }
 
     void SetConfiscated(bool bSeized);
@@ -87,6 +90,7 @@ private:
     bool bWeaponWindowOpen = false;
     bool bItemWindowOpen = false;
     bool bConfiscated = true;
+    bool bInventorySlotsInitialized = false;
     FString Feedback;
     float FeedbackSeconds = 0.f;
 
