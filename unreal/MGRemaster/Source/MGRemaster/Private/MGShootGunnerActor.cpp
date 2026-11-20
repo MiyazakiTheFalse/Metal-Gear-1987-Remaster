@@ -11,6 +11,7 @@
 #include "Engine/World.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimSequence.h"
+#include "MGPrototypeAnimationFallback.h"
 #include "Sound/SoundBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -165,9 +166,25 @@ bool AMGShootGunnerActor::CanSeePlayer(AMGPlayerCharacter* Player) const
         Hit, Eye, Target, ECC_Visibility, Query) && Hit.GetActor() == Player;
 }
 
+void AMGShootGunnerActor::UpdatePrototypeFallbackAnimation()
+{
+    FName Clip = TEXT("IdleWary");
+    if (bDefeated) Clip = TEXT("Down");
+    else if (MuzzleFlashRemaining > 0.f) Clip = TEXT("Recoil");
+    else if (State == EAttackState::Warning || State == EAttackState::Volley)
+        Clip = TEXT("Shoulder");
+    else if (State == EAttackState::Reloading) Clip = TEXT("Reaching");
+    else if (State == EAttackState::Searching) Clip = TEXT("Search");
+    else if (State == EAttackState::Recovery) Clip = TEXT("IdleAlert");
+    MGPrototypeAnimationFallback::Apply(CharacterMesh,
+        TEXT("/Game/Characters/Bosses/Shotmaker"), TEXT("Shotmaker"),
+        Clip, PrototypeAnimationRequest);
+}
+
 void AMGShootGunnerActor::Tick(float Dt)
 {
     Super::Tick(Dt);
+    UpdatePrototypeFallbackAnimation();
     MuzzleFlashRemaining = FMath::Max(0.f, MuzzleFlashRemaining - FMath::Max(Dt, 0.f));
     if (MuzzleFlash) MuzzleFlash->SetVisibility(MuzzleFlashRemaining > 0.f);
     if (!bActive || bDefeated || !GetWorld()) return;
@@ -401,6 +418,7 @@ void AMGShootGunnerActor::EnterDefeatedState()
     MuzzleFlashRemaining = 0.f;
     if (MuzzleFlash) MuzzleFlash->SetVisibility(false);
     State = EAttackState::Defeated;
+    UpdatePrototypeFallbackAnimation();
     CollisionCapsule->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
     // Production must use an authored physical death performance/ragdoll.
     // Keep source proxy visibly down, not instantly destroyed.
