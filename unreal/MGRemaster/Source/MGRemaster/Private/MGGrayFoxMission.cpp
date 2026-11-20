@@ -370,6 +370,91 @@ void AMGGrayFoxMission::CreatePostCard3Service()
         DogB->ConfigureBeatPatrol(FVector(0.f, 1.f, 0.f), 115.f);
 }
 
+void AMGGrayFoxMission::CreateConnectiveSpaces()
+{
+    // Real-world reference logic: Cold War command bunkers, service corridors,
+    // vehicle logistics and staff support spaces. 1995 Outer Heaven's actual
+    // architecture is NOT depicted in MGSV. These are reversible 3D inventions,
+    // NOT canonical MSX2 room dimensions or copied real-world blueprints.
+    //
+    // 1 Unreal BasicShapes Cube = 100 cm. Existing floor surface is Z=-100.
+    // Functional ducts and cable runs are above standing-player clearance.
+    // Keep the original north/south perimeter and canonical gates untouched.
+
+    // A. Perimeter: a partly roofed service walk and a sheltered tool alcove.
+    // Main route and two existing POW/custody approaches remain continuously
+    // traversable; the new shelf is not a fake blocking mission door.
+    SpawnBlock(TEXT("OuterServiceCableTray"), FVector(-3450.f, -460.f, 240.f),
+        FVector(7.1f, .40f, .18f), false);
+    SpawnBlock(TEXT("OuterServiceDrainRun"), FVector(-3390.f, -428.f, -97.f),
+        FVector(5.0f, .56f, .05f), false);
+    SpawnBlock(TEXT("UtilityAlcovePartialWall"), FVector(-3450.f, 390.f, 25.f),
+        FVector(2.2f, .22f, 2.5f), true);
+    SpawnBlock(TEXT("UtilityToolCart"), FVector(-3325.f, 425.f, -40.f),
+        FVector(.85f, .55f, 1.1f), true);
+    AddWorldTrace(TEXT("ServiceMaintenanceLedger"),
+        FVector(-3330.f, 376.f, 8.f), FVector(.47f, .06f, .43f),
+        TEXT("SERVICE LOG / 1991: WATER PURIFIER REBUILT. ORIGINAL INSTALLATION DATE UNKNOWN."),
+        0u, MG_FOX_CAPTURED);
+
+    // A second, clearly distinct visual landmark before the custody truck.
+    // Freight shelving has a reason to exist: equipment goes in/out through
+    // this service yard, and the receiving clerk's position is readable.
+    SpawnBlock(TEXT("FreightReceivingRack"), FVector(-2450.f, 422.f, 52.f),
+        FVector(2.6f, .75f, 2.5f), true);
+    SpawnBlock(TEXT("FreightRoofCanopy"), FVector(-2500.f, 378.f, 222.f),
+        FVector(5.3f, 1.9f, .22f), false);
+    AddWorldTrace(TEXT("FreightReceivingSlip"),
+        FVector(-2315.f, 420.f, 9.f), FVector(.33f, .06f, .46f),
+        TEXT("RECEIVING: CLEAN LINEN / BULK RATIONS / REPAIR PARTS. ONE CART UNACCOUNTED FOR."),
+        0u, MG_FOX_CAPTURED);
+    // Keep custody visible, rather than hiding the canonical transport
+    // transaction behind maintenance-room keys or a second forced arrest.
+    SpawnBlock(TEXT("TransportRouteFloorStripes"), FVector(-1720.f, 90.f, -98.f),
+        FVector(4.6f, .06f, .03f), false);
+    SpawnBlock(TEXT("CustodyLightingBracket"), FVector(-1730.f, 465.f, 260.f),
+        FVector(1.6f, .28f, .22f), false);
+    AddWorldTrace(TEXT("CustodyTransferDutyCard"),
+        FVector(-1875.f, -405.f, 16.f), FVector(.44f, .06f, .43f),
+        TEXT("TRANSFER ORDER: CHECK EQUIPMENT SEALS BEFORE UNLOADING. HANDOVER SIGNATURE PENDING."),
+        MG_FOX_DETENTION_INTELLIGENCE, MG_FOX_CAPTURED);
+
+    // B. Prison-to-arena threshold: recognizable building services and
+    // an intelligible staging vestibule, never a new gate after rescuing Fox.
+    // The prison's x=1400 opening and Shoot Gunner's existing arena remain free.
+    SpawnBlock(TEXT("PrisonHallCableTray"), FVector(1160.f, -445.f, 235.f),
+        FVector(4.7f, .32f, .24f), false);
+    SpawnBlock(TEXT("SecurityThresholdNorthPier"), FVector(1525.f, 346.f, 45.f),
+        FVector(.63f, .82f, 2.9f), true);
+    SpawnBlock(TEXT("SecurityThresholdSouthPier"), FVector(1525.f, -346.f, 45.f),
+        FVector(.63f, .82f, 2.9f), true);
+    SpawnBlock(TEXT("SecurityThresholdHeader"), FVector(1525.f, 0.f, 245.f),
+        FVector(.68f, 7.8f, .27f), false);
+    // The empty gap between the two piers exceeds 6 metres. Neither pier
+    // covers an authentic keycard, boss-entry flag or crouch-only shortcut.
+    AddWorldTrace(TEXT("SecurityVestibuleInspectionCard"),
+        FVector(1610.f, -410.f, 18.f), FVector(.48f, .07f, .46f),
+        TEXT("SECURITY: QUARTERLY SEAL CHECK OVERDUE. SHIFT SUPERVISOR TO INSPECT."),
+        MG_FOX_LEFT_PRISON, 0u);
+
+    // C. Post-Card-3 kennel: operational service access, not a decorative
+    // tunnel that adds extra enemy placements to meet an arbitrary quota.
+    // The existing real prone crawl and both dogs remain unchanged.
+    SpawnBlock(TEXT("KennelSupplyCableRun"), FVector(5000.f, 443.f, 238.f),
+        FVector(6.8f, .32f, .23f), false);
+    SpawnBlock(TEXT("KennelDrainGrating"), FVector(5105.f, 345.f, -97.f),
+        FVector(2.8f, .44f, .05f), false);
+    SpawnBlock(TEXT("KennelHoseLocker"), FVector(5270.f, 424.f, 20.f),
+        FVector(.70f, .65f, 2.4f), true);
+    AddWorldTrace(TEXT("KennelServiceLog"),
+        FVector(5175.f, 447.f, 10.f), FVector(.46f, .07f, .42f),
+        TEXT("KENNEL: WATER TEST LOGGED. DRAINAGE CONTRACTOR REQUESTED. NO APPOINTMENT SET."),
+        MG_FOX_SLICE_COMPLETED, 0u);
+
+    // Status: service architecture is original source GREYBOX, not an
+    // authored 1995 prefab kit, complete 1987 map or hands-on tested level.
+}
+
 void AMGGrayFoxMission::CreateZoneLighting()
 {
     if (!GetWorld()) return;
@@ -451,6 +536,7 @@ void AMGGrayFoxMission::BeginPlay()
     CreateGreybox();
     CreateBossWing();
     CreatePostCard3Service();
+    CreateConnectiveSpaces();
     CreateZoneLighting();
     SpawnPerimeterGuards();
     if (const UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
