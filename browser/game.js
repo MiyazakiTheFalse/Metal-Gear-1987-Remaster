@@ -552,9 +552,10 @@ let footsteps=[],noiseEvents=[],nextNoiseId=0,particles=[],shots=[],notes=[],mes
 let equipOpen=null,eqIndex=0,activePadIndex=-1,recoveredGear=false,rounds=0,equippedWeapon='BARE HANDS',sectorSecured=false;const inventories={weapons:[{name:'BARE HANDS',usable:true},{name:'HANDGUN',usable:false},{name:'SUPPRESSOR',usable:false}],items:[{name:'NO ITEM',usable:true},{name:'RATION',usable:false},{name:'CARD 3',usable:false}]};
 // This item enters the inventory only when the sealed kit comes back.
 // Optional freight bay in the condensed browser route.
-const boxSlot={name:'CARDBOARD BOX',usable:false};
+const boxSlot={name:'FREIGHT CARTON [TEMPORARY]',usable:false};
 const smokeSlot={name:'CIGARETTES',usable:false};
-inventories.items.push(boxSlot,smokeSlot);
+const canonicalBoxSlot={name:'CARDBOARD BOX [F3 / CARD 2]',usable:false};
+inventories.items.push(boxSlot,smokeSlot,canonicalBoxSlot);
 const bay={x:-26.8,z:-2.3};
 const lens={x:-19.2,z:-4.55};
 const beamX=-21.8;
@@ -693,10 +694,13 @@ bakeFloorShade();
 const scars=[[],[]];
 function kitAvailable(){return stage<0||recoveredGear}
 function syncEquipment(){
- boxSlot.usable=kitAvailable()&&world.box;
+ // Opening cargo is *borrowed* set dressing, not the permanent MSX2 box.
+ // The authentic floor-3 Card-2 pickup is still a distinct locked item.
+ boxSlot.usable=stage<0&&world.box;
+ canonicalBoxSlot.usable=false;
  smokeSlot.usable=kitAvailable();
  parcel.active=tape.active=!world.box;
- if(!kitAvailable())world.boxed=false;
+ if(!boxSlot.usable)world.boxed=false;
  sidearm.active=grip.active=!world.handgun;
  inventories.weapons[1].usable=kitAvailable()&&world.handgun;
  inventories.items[1].usable=kitAvailable();
@@ -987,7 +991,7 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
     playCue('rack',sidearm);syncEquipment();popup('Handgun · 24 rounds');save();return;
    }
    if(freight==='TAKE CARTON'){
-    world.box=true;syncEquipment();playCue('card');popup('Carton folded. Hold Tab / LB to equip.');save();return;
+    world.box=true;syncEquipment();playCue('card');popup('Borrowed freight disguise · lost at capture.');save();return;
    }
    if(freight==='SWITCH OFF CAMERA'){
     world.cameraOff=true;world.lock=0;playCue('select');popup('Dispatch camera offline.');save();return;
