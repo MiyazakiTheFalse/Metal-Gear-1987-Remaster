@@ -60,6 +60,9 @@ public:
     void OnShotFired(int32 ShotIndex);
     UFUNCTION(BlueprintImplementableEvent, Category="Shotmaker|Presentation")
     void OnPumpAction(int32 CompletedShotIndex);
+    // Pump-action casing extraction, unlike the NONCANONICAL test stun pistol.
+    UFUNCTION(BlueprintImplementableEvent, Category="Shotmaker|Presentation")
+    void OnSpentShellEjected(int32 CompletedShotIndex);
     UFUNCTION(BlueprintImplementableEvent, Category="Shotmaker|Presentation")
     void OnBossDefeated();
     // Performance cue only: stage reaction/anger through actual damage, never
@@ -79,6 +82,10 @@ private:
     UStaticMeshComponent* WeaponBody;
     UPROPERTY(VisibleAnywhere)
     UStaticMeshComponent* WeaponBarrel;
+    UPROPERTY(VisibleAnywhere, Category="Shotmaker|Weapon")
+    UStaticMeshComponent* WeaponPump;
+    bool bImportedWeaponGeometry = false;
+    float PumpVisualRemainingSeconds = 0.f;
 
     UPROPERTY(Transient)
     USoundBase* ShotWarningCue = nullptr;
@@ -135,6 +142,7 @@ private:
     float TrackerPingAge = 99.f;
 
     bool CanSeePlayer(AMGPlayerCharacter* Player) const;
+    FVector GetActualMuzzleLocation() const;
     void FireShot(AMGPlayerCharacter* Player);
     void EnterDefeatedState();
 };
