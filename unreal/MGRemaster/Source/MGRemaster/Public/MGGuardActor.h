@@ -105,6 +105,8 @@ public:
     bool IsInvestigatingNoise() const { return DistractionPhase != EDistractionPhase::None; }
     UFUNCTION(BlueprintPure, Category="Character|Art")
     bool HasAuthoredCharacterArt() const;
+    UStaticMeshComponent* GetHeldWeaponVisual() const { return SecuritySidearm; }
+    USkeletalMeshComponent* GetRigMesh() const { return CharacterMesh; }
     UFUNCTION(BlueprintPure, Category="Security|Weapon")
     bool IsReloadingSidearm() const { return bSidearmReloading; }
     UFUNCTION(BlueprintPure, Category="Security|Weapon")
