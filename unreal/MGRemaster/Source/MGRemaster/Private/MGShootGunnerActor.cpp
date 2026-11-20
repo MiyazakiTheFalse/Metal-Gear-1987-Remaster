@@ -127,7 +127,7 @@ void AMGShootGunnerActor::SetEncounterActive(bool bEnabled)
     if (MuzzleFlash) MuzzleFlash->SetVisibility(false);
     StateClock = 0.f;
     ShotsFired = 0;
-    LoadedShells = FMath::Clamp(TubeCapacity, 2, 8);
+    LoadedShells = FMath::Clamp(TubeCapacity, 3, 8);
     ReloadShellClock = 0.f;
     PumpCueRemaining = -1.f;
     PendingPumpShotIndex = INDEX_NONE;
@@ -282,9 +282,9 @@ void AMGShootGunnerActor::Tick(float Dt)
         if (ReloadShellClock >= SecondsPerInsert)
         {
             ReloadShellClock -= SecondsPerInsert;
-            LoadedShells = FMath::Min(LoadedShells + 1, FMath::Clamp(TubeCapacity, 2, 8));
+            LoadedShells = FMath::Min(LoadedShells + 1, FMath::Clamp(TubeCapacity, 3, 8));
             OnReloadShellInserted(LoadedShells);
-            if (LoadedShells >= FMath::Clamp(TubeCapacity, 2, 8))
+            if (LoadedShells >= FMath::Clamp(TubeCapacity, 3, 8))
             {
                 State = EAttackState::Searching;
                 StateClock = 0.f;
