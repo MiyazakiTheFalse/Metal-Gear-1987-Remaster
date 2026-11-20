@@ -191,10 +191,19 @@ bool AMGGuardActor::TryUseBespokeSkeletalArt(
     if (!CharacterMesh || !MeshPath || !*MeshPath) return false;
     USkeletalMesh* Bespoke = LoadObject<USkeletalMesh>(nullptr, MeshPath);
     if (!Bespoke) return false; // Never relabel a default guard as a boss.
+    // Super::BeginPlay already loaded a GUARD skeleton driver. Reusing it
+    // for a boss-specific mesh can freeze the boss in a T-pose or log an
+    // incompatible-skeleton AnimBlueprint failure.
+    CharacterMesh->SetAnimationMode(EAnimationMode::AnimationSingleNode);
     CharacterMesh->SetSkeletalMeshAsset(Bespoke);
+    PrototypeAnimationRequest = NAME_None;
     if (AnimClassPath && *AnimClassPath)
+    {
         if (UClass* Animation = LoadClass<UAnimInstance>(nullptr, AnimClassPath))
             CharacterMesh->SetAnimInstanceClass(Animation);
+    }
+    // Without a dedicated boss AnimBP, the derived actor's Tick may now
+    // select its own source AnimationSequences instead of the guard idle.
     ProxyBody->SetVisibility(false, true);
     ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     CharacterMesh->SetVisibility(true, true);
