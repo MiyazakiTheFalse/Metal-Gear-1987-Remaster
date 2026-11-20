@@ -123,7 +123,7 @@ private:
     UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="0.8", ClampMax="5.0"))
     float RecoverySeconds = 1.85f;
     // Provisional 3D magazine, NOT an established capacity of the 1987 sprite.
-    UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="2", ClampMax="8"))
+    UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="3", ClampMax="8"))
     int32 TubeCapacity = 3;
     UPROPERTY(EditAnywhere, Category="Shotmaker|Combat", meta=(ClampMin="0.25", ClampMax="1.5"))
     float SecondsPerShellInsert = .58f;
