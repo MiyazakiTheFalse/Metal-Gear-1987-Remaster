@@ -44,6 +44,11 @@ AMGPlayerCharacter::AMGPlayerCharacter()
     WeaponGripVisual->SetupAttachment(WeaponBodyVisual);
     WeaponGripVisual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     WeaponGripVisual->SetVisibility(false);
+    HairVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SnakeHair1995"));
+    HairVisual->SetupAttachment(GetMesh(), TEXT("head"));
+    HairVisual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    HairVisual->SetCastShadow(true);
+    HairVisual->SetVisibility(false);
     // Reference height: 178 cm (official MG2 profile; provisional for 1995).
     GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
     GetCharacterMovement()->CrouchedHalfHeight = 55.f;
@@ -146,6 +151,7 @@ void AMGPlayerCharacter::BeginPlay()
     ApplyMenuTimeState();
     UpdateMovementState();
     UpdateWeaponPresentation();
+    UpdateHairPresentation();
 }
 
 bool AMGPlayerCharacter::HasReadyWeapon() const
@@ -170,6 +176,30 @@ void AMGPlayerCharacter::UpdateWeaponPresentation()
     // Weapon rendering is cosmetic and cannot bypass inventory confiscation.
     WeaponBodyVisual->SetVisibility(bCanHoldProp, true);
     WeaponGripVisual->SetVisibility(bCanHoldProp && !bHasAuthoredWeaponMesh, true);
+}
+
+void AMGPlayerCharacter::UpdateHairPresentation()
+{
+    if (!HairVisual || !GetMesh()) return;
+    // The static authored hair-card shell must use a real imported skeleton's
+    // head bone/socket, never the proxy capsule or the camera's location.
+    const bool bHasHead = HasAuthoredCharacterArt() &&
+        GetMesh()->DoesSocketExist(HairAttachmentBone);
+    if (!bHasHead)
+    {
+        HairVisual->SetVisibility(false, true);
+        return;
+    }
+    // Do not silently replace an artist-assigned mesh. If a better licensed
+    // hairstyle is supplied in a Blueprint child it takes priority.
+    if (!HairVisual->GetStaticMesh())
+        HairVisual->SetStaticMesh(LoadObject<UStaticMesh>(nullptr,
+            TEXT("/Game/Characters/Snake/Hair/SM_SnakeHair_1995.SM_SnakeHair_1995")));
+    HairVisual->AttachToComponent(GetMesh(),
+        FAttachmentTransformRules::KeepRelativeTransform, HairAttachmentBone);
+    HairVisual->SetRelativeLocation(HairOffsetCm);
+    HairVisual->SetRelativeRotation(HairRotation);
+    HairVisual->SetVisibility(HairVisual->GetStaticMesh() != nullptr, true);
 }
 
 bool AMGPlayerCharacter::HasAuthoredCharacterArt() const
@@ -226,6 +256,9 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
         {
             GetMesh()->SetSkeletalMeshAsset(bCaptured ? DisarmedCharacterArt : InfiltrationCharacterArt);
             bDisarmedArtApplied = bCaptured;
+            // Mesh swaps can change socket mappings; refresh attachment and
+            // keep the same hair identity across both 1995 outfits.
+            UpdateHairPresentation();
         }
     }
     PrototypeBody->SetVisibility(GetMesh()->GetSkeletalMeshAsset() == nullptr, true);
