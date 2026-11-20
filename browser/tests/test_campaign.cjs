@@ -7,19 +7,23 @@ const vm = require('node:vm');
 
 function boot(storage = new Map(),search = '',getGamepads=()=>[]) {
   const elements = new Map();
+  const documentListeners = new Map();
   const noop = () => {};
   const gl = new Proxy({}, { get(_, name) {
     if (name === 'getShaderParameter' || name === 'getProgramParameter') return () => true;
     return noop;
   }});
   function element(id) {
-    if (!elements.has(id)) elements.set(id, { style:{}, dataset:{}, classList:{add:noop},
+    if (!elements.has(id)) elements.set(id, { style:{}, dataset:{},
+      hidden:id==='menuOptionsPanel',
+      tagName:id==='rigToggle'||id==='tipsToggle'||id==='voiceToggle'?'INPUT':'BUTTON',
+      classList:{add:noop},
       clientWidth:960, clientHeight:540, width:960, height:540,
       addEventListener:noop, getContext:() => gl });
     return elements.get(id);
   }
   const runtime = { console, performance, URLSearchParams, location:{search, hash:''},
-    document:{getElementById:element, addEventListener:noop}, addEventListener:noop,
+    document:{getElementById:element, addEventListener:(id,handler)=>documentListeners.set(id,handler)}, addEventListener:noop,
     navigator:{getGamepads}, requestAnimationFrame:noop, setTimeout:noop,
     localStorage:{getItem:key=>storage.get(key),setItem:(key,value)=>storage.set(key,value)},
     __MG_TEST__:true };
@@ -27,8 +31,34 @@ function boot(storage = new Map(),search = '',getGamepads=()=>[]) {
   vm.createContext(runtime);
   for (const file of ['dialogue.js','tutorial.js','game.js'])
     vm.runInContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),runtime,{filename:file});
-  return {game:runtime.__mgGameDebug,button:id=>element(id).onclick(),element,storage};
+  return {game:runtime.__mgGameDebug,button:id=>element(id).onclick(),element,storage,
+    key:(which,targetId='start')=>documentListeners.get('keydown')?.({
+      key:which,target:element(targetId),preventDefault:noop
+    })};
 }
+
+// Title metagame is a real input path, not a static mock-up.
+const title=boot();
+assert.equal(title.element('resume').disabled,true,
+ 'Continue is unavailable without an actual checkpoint');
+title.key('ArrowDown'); // disabled Continue must be skipped
+assert.equal(title.element('brief').dataset.selected,'true',
+ 'keyboard title navigation skips unavailable saves');
+title.key('Enter');
+assert.equal(title.element('briefing').style.display,'flex',
+ 'briefing is a selectable non-gameplay title option');
+assert.equal(title.game.state.started,false,
+ 'reading briefing never consumes or enters mission state');
+title.button('menuOptions');
+assert.equal(title.element('menuOptionsPanel').hidden,false,
+ 'title Options actually reveals accessibility and audio controls');
+title.key(' ','rigToggle');
+assert.equal(title.game.state.started,false,
+ 'Space on checkbox does not accidentally launch the mission');
+title.button('menuOptions');
+assert.equal(title.element('menuOptionsPanel').hidden,true,
+ 'title Options drawer is dismissible');
+console.log('PASS: title options, keyboard selection, disabled Continue and briefing isolation.');
 
 let run=boot();
 run.button('start');
