@@ -63,7 +63,8 @@ class UnrealPackagingContracts(unittest.TestCase):
 
     def test_game_mode_does_not_spawn_duplicate_mission_writers(self):
         src = read("unreal/MGRemaster/Source/MGRemaster/Private/MGRemasterGameMode.cpp")
-        self.assertIn("GetActorOfClass(this, AMGGrayFoxMission::StaticClass())", src)
+        self.assertIn("UGameplayStatics::GetActorOfClass(", src)
+        self.assertIn("this, AMGGrayFoxMission::StaticClass()", src)
         self.assertIn("SpawnActor<AMGGrayFoxMission>", src)
         self.assertIn("duplicate", src.lower())
 
