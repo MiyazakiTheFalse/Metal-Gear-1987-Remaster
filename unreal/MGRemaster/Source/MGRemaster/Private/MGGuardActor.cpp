@@ -136,6 +136,37 @@ void AMGGuardActor::ObserveEvidence(EMGGuardEvidenceKind Kind, const FVector& Lo
     LastKnownPlayerPosition = Location; // search destination; may be a BODY, not a Snake sighting
 }
 
+void AMGGuardActor::ObserveApproximateFootstep(const FVector& AudibleSource, bool bOccluded)
+{
+    // A continuous movement/noise factor is not a continuous GPS fix.
+    // Sample a rough bearing and distance no more often than the refresh window.
+    if (FootstepLocalizationRefreshSeconds > 0.f) return;
+    // Direct visual proof and urgent concrete discoveries retain priority:
+    // an innocuous footstep cannot erase a confirmed sighting or body report.
+    if ((EvidenceKind == EMGGuardEvidenceKind::ObservedIntruder &&
+         ContactEvidenceAge < 4.5f) ||
+        (EvidenceKind == EMGGuardEvidenceKind::SquadSighting && EvidenceAge < 4.f) ||
+        ((EvidenceKind == EMGGuardEvidenceKind::DiscoveredBody ||
+          EvidenceKind == EMGGuardEvidenceKind::SquadBodyReport) && EvidenceAge < 6.f) ||
+        (EvidenceKind == EMGGuardEvidenceKind::StructuralImpact && EvidenceAge < 3.f))
+        return;
+
+    const FVector Relative = AudibleSource - GetActorLocation();
+    const float Range = Relative.Size2D();
+    if (Range < SMALL_NUMBER) return;
+    const float BearingStep = FMath::DegreesToRadians(bOccluded ? 35.f : 20.f);
+    const float RangeStep = bOccluded ? 260.f : 170.f; // cm, provisional
+    const float Bearing = FMath::RoundToFloat(
+        FMath::Atan2(Relative.Y, Relative.X) / BearingStep) * BearingStep;
+    const float EstimatedRange = FMath::Max(
+        65.f, FMath::RoundToFloat(Range / RangeStep) * RangeStep);
+    const FVector ApproximateLocation = GetActorLocation() + FVector(
+        FMath::Cos(Bearing) * EstimatedRange,
+        FMath::Sin(Bearing) * EstimatedRange, 0.f);
+    ObserveEvidence(EMGGuardEvidenceKind::HeardMovement, ApproximateLocation);
+    FootstepLocalizationRefreshSeconds = bOccluded ? 2.2f : 1.2f;
+}
+
 void AMGGuardActor::SetGuardPosture(EMGGuardPosture Desired)
 {
     if (PresentedPosture == Desired) return;
@@ -364,6 +395,14 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
     if (DamageAmount > 0.f && !bIncapacitated)
     {
         AttackWindupSeconds = 0.f; // A genuine interruption cancels a strike.
+        // Getting hit during the half-second radio procedure cancels the
+        // transmission rather than broadcasting from an interrupted posture.
+        if (bPendingRadioReport)
+        {
+            bPendingRadioReport = false;
+            PendingRadioDelay = 0.f;
+            SquadBroadcastCooldown = FMath::Min(SquadBroadcastCooldown, 1.5f);
+        }
         Health = FMath::Max(0.f, Health - DamageAmount);
         StaggerSeconds = 0.22f;
         // A victim can react and report contact; damage never silently vanishes.
@@ -398,6 +437,8 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     TimeInSecurityState += FMath::Max(0.f, DeltaSeconds);
     CalloutRemaining = FMath::Max(0.f, CalloutRemaining - FMath::Max(0.f, DeltaSeconds));
     EvidenceAge = FMath::Min(120.f, EvidenceAge + FMath::Max(0.f, DeltaSeconds));
+    FootstepLocalizationRefreshSeconds = FMath::Max(
+        0.f, FootstepLocalizationRefreshSeconds - FMath::Max(0.f, DeltaSeconds));
     bConfirmedVisualThisFrame = false;
     StaggerSeconds = FMath::Max(0.f, StaggerSeconds - DeltaSeconds);
     // No movement in this frame unless the state actually produces a step.
@@ -527,14 +568,15 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         Suspicion = Result.suspicion;
         AwarenessState = Result.state;
         bConfirmedVisualNow = Result.sees_player != 0 && bHasLineOfSight;
-        if (Result.sees_player || Result.hears_player)
+        if (bConfirmedVisualNow)
         {
-            // The *cause* of contact is retained. Hearing does not confer
-            // direct sight or permission to strike a target behind cover.
-            ObserveEvidence(Result.sees_player
-                ? EMGGuardEvidenceKind::ObservedIntruder
-                : EMGGuardEvidenceKind::HeardMovement, Player->GetActorLocation());
+            ObserveEvidence(EMGGuardEvidenceKind::ObservedIntruder,
+                Player->GetActorLocation());
             ContactEvidenceAge = 0.f;
+        }
+        else if (Result.hears_player)
+        {
+            ObserveApproximateFootstep(Player->GetActorLocation(), !bHasLineOfSight);
         }
     }
 #else
@@ -554,17 +596,20 @@ void AMGGuardActor::Tick(float DeltaSeconds)
          ((!bVisible && !bAudible) ? 0.12f : 0.f)), 0.f, 1.f);
     AwarenessState = Suspicion >= 0.99f ? 3 : Suspicion >= 0.68f ? 2 : Suspicion >= 0.22f ? 1 : 0;
     bConfirmedVisualNow = bVisible;
-    if (bVisible || bAudible)
+    if (bConfirmedVisualNow)
     {
-        ObserveEvidence(bVisible
-            ? EMGGuardEvidenceKind::ObservedIntruder
-            : EMGGuardEvidenceKind::HeardMovement, Player->GetActorLocation());
+        ObserveEvidence(EMGGuardEvidenceKind::ObservedIntruder,
+            Player->GetActorLocation());
         ContactEvidenceAge = 0.f;
+    }
+    else if (bAudible)
+    {
+        ObserveApproximateFootstep(Player->GetActorLocation(), !bHasLineOfSight);
     }
 #endif
 
-    // Actual sensory evidence expires. A guard can search an old position,
-    // but must reacquire Snake before inflicting harm.
+    // Only actual first-hand sight refreshes contact age. Repeated muffled
+    // footsteps may renew a local search, not extend visual combat privilege.
     ContactEvidenceAge = FMath::Min(ContactEvidenceAge + DeltaSeconds, 100.f);
     bConfirmedVisualThisFrame = bConfirmedVisualNow;
     VisualConfirmationSeconds = bConfirmedVisualNow
@@ -576,7 +621,7 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         AwarenessState = 2;
         Suspicion = FMath::Max(Suspicion, .68f);
     }
-    if (AwarenessState == 3 && ContactEvidenceAge > 4.5f)
+    if (AwarenessState == 3 && !bConfirmedVisualNow && ContactEvidenceAge > 4.5f)
     {
         AwarenessState = 2;
         Suspicion = FMath::Min(Suspicion, .67f);
