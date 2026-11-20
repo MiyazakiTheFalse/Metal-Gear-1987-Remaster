@@ -22,6 +22,12 @@ const SCENES=Object.freeze({
     direction:'Confident enough to answer simply, not boastful.'},
    {speaker:'GRAY FOX',text:'Then listen. I can tell you what I saw. Not what they told me.',duration:4.1,
     direction:'First genuine peer-to-peer trust, cautious and specific.'}]},
+ 'P03.listen':{
+  evidence:'After rescue, Snake chooses to ask Fox what he learned listening to custody shifts.',
+  lines:[{speaker:'GRAY FOX',text:'Listen to the boots. One slows at the junction before turning. The other walks straight past.',duration:5.1,
+    direction:'Competence surviving captivity; describing the actual nearby prison patrol only.'},
+   {speaker:'SNAKE',text:'Then I will wait for the change of watch.',duration:2.5,
+    direction:'Snake learns from a person, not a HUD tutorial.'}]},
  'P04.bag':{
   evidence:'Snake has regained his confiscated equipment.',
   lines:[{speaker:'SNAKE',text:"They inventoried every piece. That doesn't mean they put it back untouched.",duration:3.6,
