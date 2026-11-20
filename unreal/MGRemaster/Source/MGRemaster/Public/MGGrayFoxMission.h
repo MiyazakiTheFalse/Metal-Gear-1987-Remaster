@@ -39,6 +39,7 @@ public:
     // may be credible; a lone carton in a detention corridor is not.
     // This is an authored map query, NOT permission to see Snake through walls.
     bool IsExpectedFreightLocation(const FVector& WorldPosition) const;
+    bool IsWorkingFreightConveyor(const FVector& WorldPosition) const;
     bool HasDetentionIntel() const { return (Flags & MG_FOX_DETENTION_INTELLIGENCE) != 0; }
     bool IsBossTelegraphing() const;
     bool IsTransmitterActive() const;
