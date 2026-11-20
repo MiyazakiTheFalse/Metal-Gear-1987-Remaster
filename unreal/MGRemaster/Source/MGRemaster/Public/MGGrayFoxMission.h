@@ -35,6 +35,10 @@ public:
     bool TryPunchRecoveryDoor(AMGPlayerCharacter* Player);
     bool TryPunchWeakWall(AMGPlayerCharacter* Player);
     bool IsPreludeActive() const { return (Flags & MG_FOX_CAPTURED) == 0; }
+    // Shared spatial truth for packaging: real receiving lane or stored cargo
+    // may be credible; a lone carton in a detention corridor is not.
+    // This is an authored map query, NOT permission to see Snake through walls.
+    bool IsExpectedFreightLocation(const FVector& WorldPosition) const;
     bool HasDetentionIntel() const { return (Flags & MG_FOX_DETENTION_INTELLIGENCE) != 0; }
     bool IsBossTelegraphing() const;
     bool IsTransmitterActive() const;
