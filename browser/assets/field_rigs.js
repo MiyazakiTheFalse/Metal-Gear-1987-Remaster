@@ -16,12 +16,27 @@ for (const side of [-1,1]) {
 // Two independently keyed facial joints permit actual speech/acting deformation.
 const facialBones=[...bones,['jaw',3,.02,1.631,0],['brow',3,.035,1.70,0]];
 const skeleton=role=>facialBones;
+// Core cast extensions: distinct source-authored PROXY characters for full
+// game asset completeness, not recognisable final faces or licensed scans.
+// Vehicles, canine NPCs and TX-11/TX-55 require different mechanical rigs.
+const supportRoles=[
+ 'real_big_boss','venom_snake','kyle_schneider','diane','steve','jennifer',
+ 'jennifers_brother','drago_madnar','ellen_madnar','machinegun_kid',
+ 'fire_trooper','dirty_duck','pow_informant','madnar_decoy',
+ 'mercenary_1','mercenary_2','mercenary_3','mercenary_4'
+];
+const castRoles=['snake','fox','guard','shoot_gunner',...supportRoles];
 const colors={skin:[.72,.53,.40],lip:[.44,.27,.22],eye:[.78,.74,.62],ink:[.07,.076,.068],
  hair:[.14,.105,.084],ash:[.30,.28,.245],sage:[.25,.34,.27],pine:[.14,.22,.19],
  steel:[.25,.30,.27],sand:[.58,.54,.43],stitch:[.44,.42,.34],boot:[.14,.13,.115],
  belt:[.19,.21,.175],buckle:[.47,.48,.40],wrap:[.69,.65,.53],ochre:[.52,.32,.18],oxblood:[.27,.12,.10],jacket:[.32,.35,.25]};
 function model(role) {
- const snake=role==='snake', guard=role==='guard', fox=role==='fox',boss=role==='shoot_gunner';
+ const snake=['snake','real_big_boss','venom_snake'].includes(role);
+ const fox=['fox','pow_informant','jennifers_brother'].includes(role);
+ const guard=['guard','machinegun_kid','fire_trooper', 'dirty_duck',
+   'mercenary_1','mercenary_2','mercenary_3','mercenary_4'].includes(role);
+ const boss=role==='shoot_gunner';
+ const civilian=['kyle_schneider','diane','steve','jennifer','drago_madnar','ellen_madnar','madnar_decoy'].includes(role);
  const parts=[[],[]]; let layer=0;
  // Each ring is [height, forward radius, width radius, optional forward offset].
  function surface(joint,shade,cx,cz,rings,sides=14,blend=false){
@@ -75,7 +90,13 @@ function model(role) {
    for(const index of sign>0?[0,1,2,0,2,3]:[2,1,0,3,2,0])parts[layer].push(corners[index]);
   }
  }
- const shirt=fox?'sand':snake?'sage':boss?'ochre':'jacket',pants=fox?'stitch':snake?'pine':'steel';
+ const medical=['drago_madnar','madnar_decoy'].includes(role);
+ const outfit=role==='jennifer'||role==='diane'||role==='ellen_madnar'?'sand':
+   medical?'wrap':role==='fire_trooper'?'ochre':
+   role==='machinegun_kid'?'steel':role==='venom_snake'?'pine':
+   civilian?'jacket':role==='dirty_duck'?'oxblood':'sage';
+ const shirt=fox?'sand':snake?'sage':boss?'ochre':outfit;
+ const pants=fox?'stitch':snake?'pine':civilian?'sand':'steel';
  surface(0,pants,0,0,[[.76,.09,.14],[.80,.14,.19],[.90,.145,.18],[1,.13,.16]]);
  surface(1,shirt,0,0,[[.91,.15,.18],[.97,.135,.17],[1.06,.14,.167],[1.22,.155,.196],[1.38,.16,.222],[1.44,.13,.211],[1.49,.08,.10]],18,true);
  surface(2,'skin',0,0,[[1.435,.087,.08],[1.52,.079,.076],[1.59,.083,.08]]);
@@ -141,6 +162,48 @@ function model(role) {
   surface(j+3,pants,0,.115*s,[[.465,.076,.077],[.51,.095,.091,.012],[.62,.106,.095],[.77,.124,.102],[.895,.12,.103],[.93,.09,.087]],14,true);
   surface(j+4,pants,-.004,.12*s,[[.145,.073,.069],[.20,.083,.078],[.35,.091,.084,-.015],[.445,.081,.078],[.516,.09,.083,.014]],14,true);
   surface(j+5,'boot',0,.12*s,[[.01,.132,.078,.045],[.037,.141,.081,.045],[.082,.137,.08,.039],[.126,.097,.074,.014],[.19,.076,.073],[.21,.078,.073]],14);
+ }
+ // Distinct broad-profile art passes: visually readable equipment silhouette,
+ // not fabricated final canon identities. Every new cast member inherits live
+ // eyes/jaw/breathing/stance and complete body actions from the shared skeleton.
+ if(role==='machinegun_kid'){
+  box(1,'belt',-.16,1.25,0,.19,.20,.42);
+  for(let t=-2;t<=2;t++)box(1,'buckle',.175,1.23,t*.042,.06,.09,.019);
+  box(6,'steel',.14,.92,-.28,.37,.1,.18);
+ }
+ if(role==='fire_trooper'){
+  for(const z of [-.14,.14])oval(1,'oxblood',-.24,1.14,z,.145,.27,.12);
+  surface(3,'boot',.086,0,[[1.55,.127,.13],[1.65,.14,.14],[1.71,.13,.13]],16);
+  box(1,'ochre',.155,1.22,0,.06,.16,.20);
+ }
+ if(role==='real_big_boss'||role==='venom_snake'){
+  surface(3,'pine',-.018,0,[[1.79,.127,.12],[1.83,.16,.16],[1.86,.06,.10]],18);
+  box(1,'belt',-.205,1.23,0,.08,.21,.36);
+  if(role==='venom_snake')box(3,'boot',.116,1.677,-.048,.02,.017,.065);
+ }
+ if(role==='drago_madnar'||role==='madnar_decoy'){
+  for(const z of [-.048,.048])oval(3,'steel',.118,1.679,z,.012,.032,.038);
+  box(1,'wrap',.15,1.32,0,.03,.23,.27);
+  box(0,'wrap',-.08,.9,0,.24,.24,.32);
+ }
+ if(['diane','jennifer','ellen_madnar'].includes(role)){
+  for(const z of [-.10,.10])surface(3,'hair',-.05,z,
+    [[1.47,.032,.032],[1.69,.06,.07],[1.8,.044,.054]],10);
+  panel(1,'sand',[.08,1.44,-.12],[.14,1.05,-.15],.05);
+ }
+ if(role==='kyle_schneider'||role==='steve'){
+  box(1,'belt',-.13,1.24,0,.08,.18,.22);
+  surface(3,'ash',-.03,0,[[1.77,.115,.11],[1.81,.11,.10]],14);
+ }
+ if(role==='dirty_duck'){
+  box(1,'oxblood',.155,1.24,0,.045,.25,.3);
+  box(0,'belt',.15,.98,0,.035,.07,.22);
+ }
+ if(role.startsWith('mercenary_')){
+  const n=Number(role.slice(-1));
+  box(1,n%2?'steel':'pine',-.14,1.26,0,.16,.35,.26);
+  box(3,n%2?'jacket':'boot',-.08,1.75,0,.19,.12,.29);
+  if(n>=3)oval(1,'belt',-.19,1.16,0,.06,.17,.22);
  }
  if(snake){
   // Tread blocks sit below the welt so the soles read from the prone camera.
@@ -278,5 +341,5 @@ function pose(state) {
  const offset=[0,grounded*(1-prone)*(1-down)-.74*prone-.685*down + .003*Math.sin(time*2.4)*Math.max(0,1-stride)*(1-down)*(1-prone),0];
  return {rot,offset};
 }
-root.FieldRigs={bones:facialBones,skeleton,model,pose};
+root.FieldRigs={bones:facialBones,skeleton,model,pose,castRoles,supportRoles};
 })(typeof module==='object'?module.exports:window);
