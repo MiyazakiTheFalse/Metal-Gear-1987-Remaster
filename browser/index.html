@@ -98,12 +98,77 @@ h1{font-size:clamp(26px,4.8vw,42px);line-height:1.08;letter-spacing:-.03em;margi
 @media(max-height:650px){#endPanel{padding:15px 22px}#secureSequence{height:88px}#endPanel p{margin:6px 0}}
 .padReadout{font:11px/1.5 ui-monospace,monospace;color:#b7d0bd;margin:8px 0;overflow-wrap:anywhere}#intro .panel{max-height:92vh;overflow:auto}
 </style>
+<link rel="stylesheet" href="title_screen.css">
 </head><body>
 <canvas id="gl" aria-label="Real-time third person 3D prison infiltration game"></canvas><div id="grain"></div><div id="damageFlash" aria-hidden="true"></div>
 <div id="hud"><div id="top"><div id="brand"><small>OUTER HEAVEN • 1995</small><strong>METAL GEAR <span style="color:#84cfaa">//</span> GRAY FOX</strong></div><div id="meta"><span id="controller">KEYBOARD + MOUSE</span><span id="quality">PERFORMANCE</span><span id="fps">60 FPS TARGET</span></div></div>
 <div id="objective"><div class="kicker" id="phase">INFILTRATION</div><div class="detail" id="obj">Contact the prisoner.</div><div id="hint"></div><div id="propertyCaption" class="detail"></div><div id="meters"></div></div><div id="alert">ENEMY ALERT</div><div id="radarBox"><div id="radarTitle">FIELD MAP</div><canvas id="radar" width="182" height="140" aria-label="Guard facing directions, obstacle-clipped visual ranges, Snake and Gray Fox positions; radar becomes unavailable during enemy alert"></canvas><div id="radarLegend" aria-hidden="true">◢ GUARD FOV &nbsp; △ FACING &nbsp; · NEAR DETECTION</div></div><div id="reticle"></div><div id="coverFeedback" aria-live="off"></div><div id="subtitle"></div><div id="prompt"></div><div id="tutorial" role="status" aria-live="polite"><strong id="tutorialTitle"></strong><span id="tutorialBody"></span></div><div id="equip"></div><div id="foxBox" style="display:none" aria-label="Gray Fox escort health"><div class="foxTop"><span>GRAY FOX // LIFE</span><span id="foxHP">100 / 100</span></div><div id="foxTrack"><div id="foxFill"></div></div><div id="foxTactics">FOLLOWING</div></div><div id="lifeBox"><div id="lifeTop"><span>FOXHOUND // LIFE</span><span id="lifeHP">100 / 100</span></div><div id="lifeTrack"><div id="lifeFill"></div></div></div><div id="bottom"><div id="status">EQUIPMENT: CONFISCATED<br>STANCE: STANDING<br>CHECKPOINT: AUTO</div><div id="controls">WASD MOVE · MOUSE LOOK · E CONTEXT COVER · V COVER · F/N KNOCK · CTRL CROUCH<br>RMB AIM · F TAKEDOWN · J INTEL · ESC PAUSE · R RESET<br>XBOX: LS MOVE · RS CAMERA · A CONTEXT COVER · B CROUCH · X KNOCK/CQC</div></div></div>
 <div id="fail"></div>
-<div id="intro"><div class="panel"><div class="tag">Browser proof-of-play • not a final remaster</div><div class="eyebrow">OPERATION INTRUDE N313 // PRISON RESCUE</div><h1>Some walls<br>weren't built to last.</h1><p>A prisoner knows where Gray Fox is being held. Reach him before the patrol doubles back.</p><p><strong>Free third-person camera.</strong> Authentic 1995-inspired military atmosphere, player-led pacing, dynamic guards, procedural animation, generated original sounds, and checkpoints. Xbox controller support is included.</p><p style="font-size:12px"><em>Prototype reconstruction:</em> the original J2ME cell dimensions, final textures, character likeness and dialogue have not been verified. This browser playtest uses independently authored provisional art.</p><div class="rule"></div><label class="checklabel"><input id="rigToggle" type="checkbox"> Compare with the streamed soldier model (internet required)</label><div id="rigStatus" style="font:10px ui-monospace,monospace;color:#9cc7a2;margin:5px 0 11px">LOCAL CHARACTER RIGS</div><label class="checklabel"><input id="tipsToggle" type="checkbox" checked> Show contextual training prompts (toggle with T)</label><label class="checklabel"><input id="voiceToggle" type="checkbox"> Read dialogue aloud with a local device voice</label><button class="secondary" id="brief">MISSION BRIEFING</button><button id="start">START INFILTRATION</button><button class="secondary" id="rehearse">REHEARSE SHOOT GUNNER</button><button class="secondary" id="resume">CONTINUE CHECKPOINT</button><div id="padReadout" class="padReadout"></div><p id="support" style="font-size:11px;opacity:.75">Desktop Chrome / Edge / Firefox. Controller: connect before or after starting, then press a button.</p></div></div>
+<div id="intro" class="mg-title" role="dialog" aria-label="Metal Gear 1995 title screen" aria-modal="true">
+ <div class="mg-title__grid" aria-hidden="true"></div><div class="mg-title__noise" aria-hidden="true"></div><div class="mg-title__scan" aria-hidden="true"></div>
+ <main class="mg-title__composition">
+  <section class="mg-title__left" aria-label="Game start menu">
+   <div class="mg-title__label">TACTICAL ESPIONAGE ACTION &nbsp; // &nbsp; OUTER HEAVEN 1995</div>
+   <h1 class="mg-title__logo" aria-label="Metal Gear"><em>METAL</em><em>GEAR</em></h1>
+   <div class="mg-title__divider" aria-hidden="true"></div>
+   <div class="mg-title__sub">OPERATION INTRUDE N313</div>
+   <div class="mg-title__chapter">FIRST MISSION &nbsp; / &nbsp; FIND GRAY FOX</div>
+   <nav class="mg-title__menu" aria-label="Main menu">
+    <button id="start" class="mg-title__action" data-selected="true">NEW GAME <small>BEGIN INFILTRATION</small></button>
+    <button id="resume" class="mg-title__action" disabled>CONTINUE <small>LAST CHECKPOINT</small></button>
+    <button id="brief" class="mg-title__action">BRIEFING <small>MISSION INTELLIGENCE</small></button>
+    <button id="rehearse" class="mg-title__action">VR TRAINING <small>SHOOT GUNNER · NONCANON</small></button>
+    <button id="menuOptions" class="mg-title__action" aria-expanded="false" aria-controls="menuOptionsPanel">OPTIONS <small>ACCESSIBILITY / AUDIO</small></button>
+   </nav>
+   <div id="menuOptionsPanel" class="mg-title__options" hidden>
+    <label class="checklabel"><input id="rigToggle" type="checkbox"> Stream optional comparison soldier model (internet required)</label>
+    <div id="rigStatus" class="mg-title__menu-status">LOCAL CHARACTER RIGS</div>
+    <label class="checklabel"><input id="tipsToggle" type="checkbox" checked> Show contextual training prompts (T)</label>
+    <label class="checklabel"><input id="voiceToggle" type="checkbox"> Read dialogue aloud with a local device voice</label>
+    <div class="mg-title__menu-status">Reduced motion follows your device settings. Gameplay and text remain available without voice audio.</div>
+   </div>
+   <p class="mg-title__foot"><strong>ENTER / A</strong> SELECT &nbsp; • &nbsp; <strong>↑ / ↓ / D-PAD</strong> NAVIGATE<br>
+   Unofficial independently authored prototype. Character fidelity, original floorplans and Unreal builds are not final.</p>
+   <div id="padReadout" class="padReadout" aria-live="off"></div>
+   <p id="support" class="mg-title__foot">DESKTOP: Chrome / Edge / Firefox &nbsp; • &nbsp; CONTROLLER SUPPORTED</p>
+  </section>
+  <div class="mg-title__visual" aria-hidden="true">
+   <div class="mg-title__ring"></div><div class="mg-title__sweep"></div>
+   <svg viewBox="0 0 430 540" xmlns="http://www.w3.org/2000/svg" role="presentation" focusable="false">
+    <defs><linearGradient id="mgMenuSteel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#769a88" stop-opacity=".72"/><stop offset="1" stop-color="#0e292a" stop-opacity=".3"/></linearGradient></defs>
+    <g stroke="#b6d6bc" fill="none" stroke-opacity=".12">
+      <circle cx="218" cy="256" r="178"/><circle cx="218" cy="256" r="135"/>
+      <path d="M218 22V514M5 256H425M25 90L400 420M410 86L25 426" stroke-dasharray="3 10"/>
+    </g>
+    <!-- Original abstract Outer Heaven radar display, not a geographical canon map. -->
+    <g stroke="url(#mgMenuSteel)" fill="none" stroke-width="1.9" transform="translate(10 25)">
+     <path d="M56 352V151L110 119 110 82 150 66 150 22 236 22 236 66 285 80V130L342 152V352"/>
+     <path d="M110 120H285M150 67H236M110 170H286M91 208H304M92 270H307M98 323H301"/>
+     <path d="M133 171V323M194 67V352M259 171V323"/>
+     <path d="M96 354H311L335 384H71Z"/>
+     <path d="M122 121L122 169M277 120V169"/>
+     <path d="M149 22H237M55 352H342"/>
+     <path d="M71 383V409H339V383M100 409V437H311V409"/>
+    </g>
+    <g fill="#91bb9a" opacity=".30">
+      <path d="M189 210h54v30h-54zM194 250h44v28h-44zM184 300h64v17h-64z"/>
+      <rect x="169" y="355" width="90" height="8" rx="2"/>
+    </g>
+    <g stroke="#9ad2b1" stroke-width="2" stroke-opacity=".78" fill="none">
+     <path d="M215 170V154M215 363V385M127 275H111M303 275H319"/>
+     <circle cx="215" cy="275" r="10"/><circle cx="215" cy="275" r="3" fill="#bbd5a9"/>
+    </g>
+    <g fill="#9fd3b0" font-family="monospace" font-size="10" letter-spacing="2.5" opacity=".63">
+     <text x="30" y="38">TAC SYS // N313</text><text x="308" y="38">1995</text>
+     <text x="31" y="506">SEARCH GRID</text><text x="285" y="506">VER. 0.1</text>
+    </g>
+   </svg>
+   <div class="mg-title__corner">SIGNAL INTERCEPT<br>LINK: INACTIVE</div>
+   <div class="mg-title__visual-text">OUTER HEAVEN / 1995
+    <span>UNVERIFIED TACTICAL VISUALIZATION</span></div>
+  </div>
+ </main>
+</div>
 <div id="briefing" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;z-index:9;background:#030e10f5;padding:24px"><div class="panel"><div class="eyebrow">FOXHOUND // OPERATION INTRUDE N313</div><h2>Infiltrate Outer Heaven</h2><p>Gray Fox has vanished during reconnaissance. Snake, a new FOXHOUND operative, must locate him and investigate a suspected new weapon.</p><p>This slice begins at the final intelligence contact before Snake enters solitary. The mission briefing does not change the original game’s progression, and the prison geometry is provisional.</p><p>Use this space to learn free-look, stealth, wall interaction, the inventory controls and the radio archive through play. All instructions are optional.</p><button id="backBrief">BACK</button></div></div><div id="pause"><div class="panel"><div class="eyebrow">PAUSED</div><h2>Infiltration suspended</h2><p>Use the mouse or Xbox right stick to control the camera. Continue from your latest position, review intel, or restart the sequence.</p><div id="pausePadReadout" class="padReadout"></div><button id="unpause">RESUME</button><button class="secondary" id="pauseIntel">INTEL</button><button class="secondary" id="restart">RESTART</button></div></div>
 <div id="intel"><div class="panel"><div class="eyebrow">MISSION ARCHIVE</div><h2>Rescue intelligence</h2><p id="intelText">No intelligence recovered yet. Find Gray Fox first.</p><p style="font-size:12px">This is a paraphrased gameplay placeholder, not final source-authentic dialogue.</p><button id="closeIntel">CLOSE</button></div></div>
 <div id="missionFail"><div class="panel"><div class="eyebrow">OPERATION INTRUDE N313 // FAILED</div><h2>GRAY FOX DOWN</h2><p>The prisoner did not survive the extraction. Protect him, use cover, and make sure he reaches the exit with Snake.</p><p id="failStats">GRAY FOX KIA — ESCORT FAILED</p><button id="retryEscort">Retry from last checkpoint</button></div></div><div id="complete"><div class="panel" id="endPanel"><div class="eyebrow">OPERATION INTRUDE N313 // SECTOR OBJECTIVE CLEARED</div>
