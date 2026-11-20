@@ -575,8 +575,39 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     const FVector Eye = GetActorLocation() + FVector(0.f, 0.f, 55.f);
     const FVector Target = Player->GetActorLocation() + FVector(0.f, 0.f, 55.f);
     const bool bTraceHit = GetWorld()->LineTraceSingleByChannel(Hit, Eye, Target, ECC_Visibility, Params);
-    const bool bHasLineOfSight = (!bTraceHit || Hit.GetActor() == Player)
-        && (AwarenessState >= 3 || !Player->IsStillInCarton());
+    const bool bRealSightline = !bTraceHit || Hit.GetActor() == Player;
+    // A stationary carton reads as ordinary freight at a distance, but it
+    // is not an all-purpose invisibility cloak. Close inspection requires a
+    // real unblocked view from the guard's FRONT; no magical 360-degree ID.
+    // Staged parcels on the working conveyor are expected, so the same
+    // close look does not create a contrived alert at that position.
+    const FVector GuardForward = GetActorForwardVector().GetSafeNormal2D();
+    const bool bLegitimateReceivingParcel =
+        Player->GetActorLocation().X >= -3400.f
+        && Player->GetActorLocation().X <= -2200.f
+        && FMath::Abs(Player->GetActorLocation().Y + 370.f) < 65.f;
+    const bool bCloseUnusualCarton = Player->IsStillInCarton()
+        && !bLegitimateReceivingParcel && bRealSightline
+        && Distance < 165.f
+        && FVector::DotProduct(GuardForward,
+            ToPlayer.GetSafeNormal2D()) > 0.50f;
+    const bool bHasLineOfSight = bRealSightline
+        && (AwarenessState >= 3 || !Player->IsStillInCarton()
+            || bCloseUnusualCarton);
+    if (bCloseUnusualCarton && AwarenessState < 3)
+    {
+        // Evidence is the *visible object*, not an omniscient identification
+        // of Snake. The solver still needs time to confirm the intruder.
+        if (!bCartonInspectionAnnounced)
+        {
+            EmitGuardCallout(TEXT("ContainerInspection"),
+                TEXT("GUARD: WHO LEFT THIS CARTON HERE?"));
+            bCartonInspectionAnnounced = true;
+        }
+        Suspicion = FMath::Max(Suspicion, .25f);
+    }
+    else if (!bCloseUnusualCarton)
+        bCartonInspectionAnnounced = false;
     const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
     const EMGFacilitySecurityState BaseState = Mission
