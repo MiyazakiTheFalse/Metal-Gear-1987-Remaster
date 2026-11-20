@@ -40,6 +40,13 @@ AMGGuardActor::AMGGuardActor()
     CharacterMesh->SetupAttachment(RootComponent);
     CharacterMesh->SetRelativeLocation(FVector(0.f, 0.f, -89.f));
     CharacterMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    SecuritySidearm = CreateDefaultSubobject<UStaticMeshComponent>(
+        TEXT("Guard1995SecuritySidearm"));
+    SecuritySidearm->SetupAttachment(RootComponent);
+    SecuritySidearm->SetRelativeLocation(FVector(27.f, 13.f, 49.f));
+    SecuritySidearm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    SecuritySidearm->SetCastShadow(true);
+    SecuritySidearm->SetVisibility(false);
 }
 
 void AMGGuardActor::BeginPlay()
@@ -47,6 +54,13 @@ void AMGGuardActor::BeginPlay()
     Super::BeginPlay();
     PatrolOrigin = GetActorLocation();
     StationFacing = GetActorRotation();
+    SidearmRounds = FMath::Clamp(SidearmMagazineCapacity, 4, 16);
+    // A missing licensed art asset cannot become a fake successful import.
+    // When present, the new original handgun source can serve security roles
+    // until approved, distinct guard-specific service arms are supplied.
+    if (UStaticMesh* Sidearm = LoadObject<UStaticMesh>(nullptr,
+            TEXT("/Game/Weapons/Snake/SM_Handgun_1995.SM_Handgun_1995")))
+        SecuritySidearm->SetStaticMesh(Sidearm);
     if (!CharacterMesh->GetSkeletalMeshAsset())
         if (USkeletalMesh* Asset = LoadObject<USkeletalMesh>(nullptr,
                 TEXT("/Game/Characters/Guard/SK_Guard_1995.SK_Guard_1995")))
@@ -62,6 +76,14 @@ void AMGGuardActor::BeginPlay()
         CharacterMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
         CharacterMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
         CharacterMesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+        if (CharacterMesh->DoesSocketExist(TEXT("weapon_r")))
+        {
+            SecuritySidearm->AttachToComponent(CharacterMesh,
+                FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+                TEXT("weapon_r"));
+            SecuritySidearm->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+            SecuritySidearm->SetVisibility(SecuritySidearm->GetStaticMesh() != nullptr);
+        }
     }
 }
 
@@ -406,6 +428,15 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
     if (DamageAmount > 0.f && !bIncapacitated)
     {
         AttackWindupSeconds = 0.f; // A genuine interruption cancels a strike.
+        SidearmWindupSeconds = 0.f;
+        bSidearmAiming = false;
+        if (bSidearmReloading)
+        {
+            bSidearmReloading = false;
+            SidearmReloadSeconds = 0.f;
+            OnSidearmReloadInterrupted();
+            // No free ammunition for an interrupted magazine exchange.
+        }
         // Getting hit during the half-second radio procedure cancels the
         // transmission rather than broadcasting from an interrupted posture.
         if (bPendingRadioReport)
@@ -458,6 +489,17 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     ActualGroundSpeedCmPerSec = FMath::FInterpTo(
         ActualGroundSpeedCmPerSec, 0.f, DeltaSeconds, 8.f);
     AttackCooldown = FMath::Max(0.f, AttackCooldown - DeltaSeconds);
+    SidearmShotCooldown = FMath::Max(0.f, SidearmShotCooldown - DeltaSeconds);
+    if (bSidearmReloading && StaggerSeconds <= 0.f)
+    {
+        SidearmReloadSeconds -= FMath::Max(0.f, DeltaSeconds);
+        if (SidearmReloadSeconds <= 0.f)
+        {
+            SidearmRounds = FMath::Clamp(SidearmMagazineCapacity, 4, 16);
+            bSidearmReloading = false;
+            OnSidearmReloadFinished();
+        }
+    }
     SquadBroadcastCooldown = FMath::Max(0.f, SquadBroadcastCooldown - DeltaSeconds);
     CustodyThreatMemorySeconds = FMath::Max(0.f,
         CustodyThreatMemorySeconds - DeltaSeconds);
@@ -696,6 +738,73 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     }
     else AttackWindupSeconds = 0.f;
 
+    // A security guard, unlike a scripted bullet emitter, carries real finite
+    // ammunition. Only actual fresh sight grants a sidearm shot; noise, squad
+    // messages and a last-known position may initiate a SEARCH, never a hit.
+    // Compact handgun and reload intervals are modern 3D tuning hypotheses.
+    const bool bLegitimateRangedTarget = AwarenessState == 3
+        && bConfirmedVisualNow && VisualConfirmationSeconds >= .35f
+        && Distance > 180.f && Distance < 800.f && FacingDot >= .90f
+        && StaggerSeconds <= 0.f && !bPendingRadioReport
+        && (Role != EMGGuardRole::Custody ||
+            Player->IsAiming() || Player->IsSprinting());
+    if (bLegitimateRangedTarget && !bSidearmReloading
+        && SidearmRounds <= 0 && SpareSidearmMagazines > 0)
+    {
+        --SpareSidearmMagazines; // Reserve magazine committed, no free resupply.
+        bSidearmReloading = true;
+        SidearmReloadSeconds = FMath::Clamp(
+            SidearmReloadDuration, .8f, 3.f);
+        SidearmWindupSeconds = 0.f;
+        bSidearmAiming = false;
+        OnSidearmReloadStarted();
+    }
+    if (bLegitimateRangedTarget && !bSidearmReloading
+        && SidearmRounds > 0 && SidearmShotCooldown <= 0.f
+        && AttackWindupSeconds <= 0.f)
+    {
+        if (!bSidearmAiming)
+        {
+            bSidearmAiming = true;
+            SidearmWindupSeconds = .31f;
+            OnSidearmAimStarted();
+        }
+        else
+        {
+            SidearmWindupSeconds -= FMath::Max(0.f, DeltaSeconds);
+            if (SidearmWindupSeconds <= 0.f)
+            {
+                --SidearmRounds;
+                SidearmShotCooldown = .72f;
+                bSidearmAiming = false;
+                // A camera may see around a barrel obstruction. Only a
+                // muzzle-origin physical trace may authorise real damage.
+                const FVector Muzzle = (SecuritySidearm->IsVisible() &&
+                    SecuritySidearm->DoesSocketExist(TEXT("muzzle")))
+                    ? SecuritySidearm->GetSocketLocation(TEXT("muzzle"))
+                    : GetActorLocation() + FVector(0.f, 0.f, 62.f);
+                const FVector ActualTarget =
+                    Player->GetActorLocation() + FVector(0.f, 0.f, 48.f);
+                FHitResult ShotHit;
+                FCollisionQueryParams ShotQuery(
+                    SCENE_QUERY_STAT(MGGuardActualSidearmShot), false, this);
+                const bool bHitPlayer = GetWorld()->LineTraceSingleByChannel(
+                    ShotHit, Muzzle, ActualTarget, ECC_Visibility, ShotQuery)
+                    && ShotHit.GetActor() == Player;
+                if (bHitPlayer)
+                    UGameplayStatics::ApplyDamage(
+                        const_cast<AMGPlayerCharacter*>(Player),
+                        7.f, nullptr, this, UDamageType::StaticClass());
+                OnSidearmFired(SidearmRounds, bHitPlayer);
+            }
+        }
+    }
+    else if (!bSidearmReloading)
+    {
+        bSidearmAiming = false;
+        SidearmWindupSeconds = 0.f;
+    }
+
     if (StaggerSeconds > 0.f) return;
     // Local awareness stays distinct from duty and acting. Combat needs
     // actual visual proof; a body/noise/radio report creates investigation,
@@ -722,6 +831,12 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     // truthful collision and AI behavior; art cannot change these states.
     if (AttackWindupSeconds > 0.f)
         SetGuardPosture(EMGGuardPosture::Strike);
+    else if (bSidearmReloading)
+        SetGuardPosture(EMGGuardPosture::SidearmReload);
+    else if (bSidearmAiming)
+        SetGuardPosture(EMGGuardPosture::SidearmAim);
+    else if (SidearmShotCooldown > .55f)
+        SetGuardPosture(EMGGuardPosture::SidearmFire);
     else if (bPendingRadioReport)
         SetGuardPosture(EMGGuardPosture::Report);
     else if (AwarenessState >= 3)
@@ -733,6 +848,10 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     else if (AwarenessState == 1 || bFacilityLockdown)
         SetGuardPosture(EMGGuardPosture::Notice);
     else SetGuardPosture(EMGGuardPosture::Patrol);
+    // Reload and aim are physically committed hand/posture transactions.
+    // Standing vulnerable is a readable risk/reward window, not an
+    // instant mag swap during a full-speed, two-handed sprint.
+    if (bSidearmReloading || bSidearmAiming) return;
     // Noise investigations are interruptible by real detection/alert.
     if (AdvanceNoiseInvestigation(DeltaSeconds))
     {
