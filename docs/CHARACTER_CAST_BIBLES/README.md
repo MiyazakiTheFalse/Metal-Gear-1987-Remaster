@@ -9,3 +9,5 @@ This catalogue covers all named 1987 mission-critical allies and human/robot bos
 Evidence leads: https://www.konami.com/mg/archive/mg/chara.html ; https://tcrf.tiago.zip/wiki/Metal_Gear_(MSX2) ; https://thesnakesoup.org/metal-gear-msx-walkthrough/ ; https://www.youtube.com/watch?v=ehlAMTh42Ko .
 
 All files are **pending** exact J2ME edition cross-check, artwork rights check, 1995 continuity review, Unreal compilation, animation/face/camera/voice integration and unfamiliar-player validation.
+
+The [cast model and rig register](CAST_MODEL_AND_RIG_REGISTER.md) maps the cast to sourced dimensions, mission abilities, equipment, current models and the next performance requirement. It includes measured GLB bounds and identifies shared stand-ins.
