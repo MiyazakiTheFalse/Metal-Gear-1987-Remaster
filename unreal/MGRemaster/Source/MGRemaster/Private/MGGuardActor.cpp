@@ -114,6 +114,25 @@ bool AMGGuardActor::HasAuthoredCharacterArt() const
     return CharacterMesh && CharacterMesh->GetSkeletalMeshAsset() != nullptr;
 }
 
+bool AMGGuardActor::TryUseBespokeSkeletalArt(
+    const TCHAR* MeshPath, const TCHAR* AnimClassPath)
+{
+    if (!CharacterMesh || !MeshPath || !*MeshPath) return false;
+    USkeletalMesh* Bespoke = LoadObject<USkeletalMesh>(nullptr, MeshPath);
+    if (!Bespoke) return false; // Never relabel a default guard as a boss.
+    CharacterMesh->SetSkeletalMeshAsset(Bespoke);
+    if (AnimClassPath && *AnimClassPath)
+        if (UClass* Animation = LoadClass<UAnimInstance>(nullptr, AnimClassPath))
+            CharacterMesh->SetAnimInstanceClass(Animation);
+    ProxyBody->SetVisibility(false, true);
+    ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    CharacterMesh->SetVisibility(true, true);
+    CharacterMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    CharacterMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+    CharacterMesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+    return true;
+}
+
 bool AMGGuardActor::CanAcceptDetention(const AMGPlayerCharacter* Suspect) const
 {
     if (Role != EMGGuardRole::Custody || bIncapacitated || !bCustodyChallenge ||
