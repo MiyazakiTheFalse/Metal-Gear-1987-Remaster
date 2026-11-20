@@ -63,6 +63,8 @@ public:
         AController* EventInstigator, AActor* DamageCauser) override;
     void NotifyFeedback(const FString& Message, FName CueName = NAME_None);
     void OpenIncomingMissionBriefing();
+    UFUNCTION(BlueprintImplementableEvent, Category="Character|Weapon")
+    void OnHandgunCasingEjected(); // Never called for the non-canonical stun test prop.
 
     float GetVisibilityFactor() const;
 
@@ -101,6 +103,7 @@ private:
     UPROPERTY(Transient)
     UStaticMesh* ProxyWeaponArt = nullptr;
     float WeaponRecoilTimer = 0.f;
+    float PendingHandgunCasingSeconds = -1.f;
 
     UPROPERTY(Transient)
     USkeletalMesh* InfiltrationCharacterArt = nullptr;
