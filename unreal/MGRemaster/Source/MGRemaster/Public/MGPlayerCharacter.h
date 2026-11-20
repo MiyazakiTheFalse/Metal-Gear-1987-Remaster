@@ -11,6 +11,7 @@ class UMGEquipmentComponent;
 class USkeletalMesh;
 class USoundBase;
 class UAudioComponent;
+class UPointLightComponent;
 
 UCLASS()
 class MGREMASTER_API AMGPlayerCharacter : public ACharacter
@@ -41,6 +42,13 @@ public:
     float GetEquipmentTimeScale() const { return EquipmentTimeScale; }
     float GetNoiseFactor() const;
     float GetHealth() const { return Health; }
+    // Source-timed player reaction, consumed by AnimBP, hit sound and HUD.
+    UFUNCTION(BlueprintPure, Category="Character|Damage")
+    float GetHitReactionAlpha() const { return FMath::Clamp(HitReactionSeconds / 0.48f, 0.f, 1.f); }
+    UFUNCTION(BlueprintPure, Category="Character|Damage")
+    FVector GetLastDamageDirection() const { return LastDamageDirection; }
+    UFUNCTION(BlueprintImplementableEvent, Category="Character|Damage")
+    void OnSnakeDamaged(float ActualDamage, FVector WorldDamageDirection);
     bool IsWearingCarton() const;
     bool IsStillInCarton() const;
     bool IsProne() const { return bIsProne; }
@@ -96,6 +104,10 @@ private:
     UStaticMeshComponent* WeaponBodyVisual;
     UPROPERTY(VisibleAnywhere, Category="Character|Weapon")
     UStaticMeshComponent* WeaponGripVisual;
+    // Existing weapons are hitscan. This short physical flash is only
+    // rendered when an authorised shot actually fires.
+    UPROPERTY(VisibleAnywhere, Category="Character|Weapon")
+    UPointLightComponent* PlayerMuzzleFlashLight;
     // Original removable scalp/hair geometry follows the actual head joint,
     // including infiltration -> disarmed mesh variants. No free-floating hair.
     UPROPERTY(VisibleAnywhere, Category="Character|Hair")
@@ -115,6 +127,8 @@ private:
     UPROPERTY(Transient)
     UStaticMesh* ProxyWeaponArt = nullptr;
     float WeaponRecoilTimer = 0.f;
+    float HitReactionSeconds = 0.f;
+    FVector LastDamageDirection = FVector::ZeroVector;
     float PendingHandgunCasingSeconds = -1.f;
 
     UPROPERTY(Transient)
