@@ -91,3 +91,15 @@ On draft PR #3 the Rust-backed and C++ fallback guard paths no longer save Snake
 A meaningful sound suspicion now causes a **measured walk** toward the imprecise sector for a limited interval, rather than remaining stationary or charging at full confirmed-contact speed. The 185 cm/s pursuit gait is reserved for a recent firsthand sighting; an evidence-only investigation uses 115 cm/s. These thresholds and times are provisional hypotheses, not original-MSX2 numeric facts.
 
 Structural source assertions and machine-contract updates are committed in `tools/test_guard_state_layers.py` and `data/guard_ai_behavior_contract.json`. No UE5.7 compile, headset listening study, acoustics simulation, final character animation, hardware/controller test, or user playtest was performed. Prior art/VO/NavMesh gaps remain.
+
+## 20 November — young-Snake hair, animation crossfades and human VO source routing
+
+**Committed to the existing PR #3 draft branch:**
+- An original, editable 1995 brown hairstyle OBJ/MTL, non-overwriting Unreal Editor importer and actual C++ head-bone attachment. The attachment is reapplied after disarmed/infiltration mesh swapping; missing rig/stock head socket hides the object rather than producing a floating haircut. **Final hero mesh/face, skin weights, groom and hair dynamics do not exist in this source branch.**
+- Shared `UMGCharacterAnimInstance` performance-action arbitration and transition events for Snake, guards, prisoner Fox and Shoot Gunner; expose interruption and elapsed-duration crossfade hints, and keep transceiver listening additive to locomotion. **No authored AnimBP graphs/montages or tested IK are shipped.**
+- Optional per-line VO clip loading and lifetime-aware transceiver speech. The opening line reveal now follows the duration of real clips if imported; manual contact reveals the whole transcript. Retuning or closing immediately stops pending VO. Four display-only caption wraps are grouped as continuous spoken sentences.
+- Diegetic optional Gray Fox rescue, Shoot Gunner introduction and eight physical guard callouts, with matching subtitles already shown through the mission or guard system. The default remains audio-free and accessible.
+- Six speaker profiles and a 45-clip production manifest; offline ffmpeg two-pass loudness matching script and non-destructive Editor importer. All clips are **pending actual voice actor recordings**; no false voice synthesis, actor cloning or imported SoundWaves.
+- Asset inventory now records new source items without claiming approval; animation/voice/hair quality gates remain open.
+
+**Verification boundary:** source contract/manifest and mesh topology can be structurally inspected; only real Unreal engine import, compiler and novice level playtesting can validate actual smoothness, hand-head integration, performance, character likeness and final dialogue quality. Keep PR in draft.
