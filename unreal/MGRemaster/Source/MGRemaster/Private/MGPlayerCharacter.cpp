@@ -289,6 +289,7 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     // base position. Never fake a prone pose with a standing collision capsule.
     if (bPendingProne && bIsCrouched && !bIsProne)
         EnterProneAfterCrouch();
+    UpdateDraggedBody(DeltaSeconds);
 
     // Prison state chooses the unarmed outfit without respawning Snake or
     // resetting aim/locomotion/camera. Swaps happen once per state change.
@@ -472,6 +473,11 @@ void AMGPlayerCharacter::LookUpRate(float Value)
 
 void AMGPlayerCharacter::AimStart()
 {
+    if (DraggedBody.IsValid())
+    {
+        NotifyFeedback(TEXT("RELEASE BODY BEFORE AIMING"), TEXT("denied"));
+        return;
+    }
     bAiming = true;
     bSprinting = false;
     UpdateMovementState();
@@ -479,6 +485,7 @@ void AMGPlayerCharacter::AimStart()
 void AMGPlayerCharacter::AimStop() { bAiming = false; UpdateMovementState(); }
 void AMGPlayerCharacter::SprintStart()
 {
+    if (DraggedBody.IsValid()) return;
     if (!bAiming && !bIsCrouched && !bIsProne)
     {
         if (bInCover) LeaveCover();
@@ -489,6 +496,7 @@ void AMGPlayerCharacter::SprintStart()
 void AMGPlayerCharacter::SprintStop() { bSprinting = false; UpdateMovementState(); }
 void AMGPlayerCharacter::CrouchToggle()
 {
+    if (DraggedBody.IsValid()) return; // Remain crouched while pulling.
     bSprinting = false;
     if (bIsProne)
     {
@@ -528,17 +536,18 @@ void AMGPlayerCharacter::UpdateMovementState()
     UCharacterMovementComponent* Movement = GetCharacterMovement();
     Movement->bOrientRotationToMovement = !bAiming && !bInCover;
     Movement->bUseControllerDesiredRotation = bAiming && !bInCover;
-    Movement->MaxWalkSpeed = bIsProne ? 95.f :
+    Movement->MaxWalkSpeed = DraggedBody.IsValid() ? 118.f : bIsProne ? 95.f :
         (bInCover ? 120.f : (bIsCrouched ? 170.f :
             (bAiming ? 210.f : (bSprinting ? 600.f : 350.f))));
     // Crouched/prone cover must not bypass the current slow movement cap.
-    Movement->MaxWalkSpeedCrouched = bIsProne ? 95.f : (bInCover ? 120.f : 170.f);
+    Movement->MaxWalkSpeedCrouched = DraggedBody.IsValid() ? 118.f : bIsProne ? 95.f : (bInCover ? 120.f : 170.f);
 }
 float AMGPlayerCharacter::GetNoiseFactor() const
 {
     const float Speed = GetVelocity().Size2D();
     if (CombatNoiseTimer > 0.f) return 0.95f;
     if (Speed < 15.f) return 0.f;
+    if (DraggedBody.IsValid()) return 0.38f; // Scrape/fabric: louder than ordinary crouch.
     if (bIsProne) return 0.035f;
     if (bInCover) return 0.10f;
     if (bIsCrouched) return 0.08f;
@@ -564,8 +573,85 @@ void AMGPlayerCharacter::BeginPhysicalInteraction(
     OnPhysicalInteractionStarted(InteractionKind, WorldTarget);
 }
 
+void AMGPlayerCharacter::StopDraggingBody()
+{
+    AMGGuardActor* Body = DraggedBody.Get();
+    if (IsValid(Body)) Body->SetBodyBeingDragged(false);
+    DraggedBody.Reset();
+    UpdateMovementState();
+    OnBodyDragChanged(false, Body);
+    NotifyFeedback(TEXT("BODY RELEASED"), TEXT("select"));
+}
+
+bool AMGPlayerCharacter::TryToggleBodyDrag()
+{
+    if (DraggedBody.IsValid()) { StopDraggingBody(); return true; }
+    if (!GetWorld() || bIsProne || bInCover || bAiming || bSprinting)
+        return false;
+    AMGGuardActor* Nearest = nullptr;
+    float Distance = 145.f;
+    for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
+    {
+        AMGGuardActor* Candidate = *It;
+        if (!IsValid(Candidate) || !Candidate->IsIncapacitated() ||
+            Candidate->IsBodyBeingDragged()) continue;
+        const float D = FVector::Dist2D(
+            GetActorLocation(), Candidate->GetActorLocation());
+        if (D >= Distance || FMath::Abs(
+            GetActorLocation().Z - Candidate->GetActorLocation().Z) > 85.f)
+            continue;
+        // A body behind a locked door is not reachable; surface checks
+        // respect the same world visibility as melee and cover.
+        FHitResult Hit;
+        FCollisionQueryParams Query(SCENE_QUERY_STAT(MGBeginBodyDrag), false, this);
+        if (GetWorld()->LineTraceSingleByChannel(
+            Hit, GetActorLocation() + FVector(0,0,32),
+            Candidate->GetActorLocation() + FVector(0,0,32), ECC_Visibility, Query)
+            && Hit.GetActor() != Candidate) continue;
+        Nearest = Candidate; Distance = D;
+    }
+    if (!Nearest) return false;
+    DraggedBody = Nearest;
+    Nearest->SetBodyBeingDragged(true);
+    bSprinting = bAiming = false;
+    if (!bIsCrouched) Crouch();
+    UpdateMovementState();
+    BeginPhysicalInteraction(Nearest->GetActorLocation() + FVector(0,0,35),
+        TEXT("BodyDragGrab"), .55f);
+    OnBodyDragChanged(true, Nearest);
+    NotifyFeedback(Nearest->IsUnconscious() ?
+        TEXT("DRAGGING UNCONSCIOUS GUARD — E TO DROP") :
+        TEXT("MOVING GUARD BODY — E TO DROP"), TEXT("select"));
+    return true;
+}
+
+void AMGPlayerCharacter::UpdateDraggedBody(float Dt)
+{
+    AMGGuardActor* Body = DraggedBody.Get();
+    if (!Body) { DraggedBody.Reset(); return; }
+    if (Dt <= 0.f) return;
+    if (bIsProne || bInCover || bSprinting || bAiming ||
+        FVector::Dist2D(GetActorLocation(), Body->GetActorLocation()) > 195.f ||
+        FMath::Abs(GetActorLocation().Z - Body->GetActorLocation().Z) > 70.f)
+    {
+        StopDraggingBody();
+        return;
+    }
+    FVector Target = GetActorLocation() - GetActorForwardVector().GetSafeNormal2D()*102.f;
+    Target.Z = Body->GetActorLocation().Z;
+    const FVector Next = FMath::VInterpConstantTo(
+        Body->GetActorLocation(), Target, Dt, 220.f);
+    if (FVector::DistSquared2D(Next, Body->GetActorLocation()) > 1.f &&
+        !Body->TryMoveBodyTo(Next, this))
+    {
+        StopDraggingBody();
+        NotifyFeedback(TEXT("BODY CANNOT PASS THROUGH OBSTACLE"), TEXT("denied"));
+    }
+}
+
 void AMGPlayerCharacter::Interact()
 {
+    if (DraggedBody.IsValid()) { StopDraggingBody(); return; }
     if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
     {
@@ -599,6 +685,7 @@ void AMGPlayerCharacter::Interact()
             }
             if (!bHandledControl)
             {
+                if (TryToggleBodyDrag()) return;
                 if (bInCover)
                 {
                     LeaveCover();
@@ -629,6 +716,7 @@ void AMGPlayerCharacter::RestartRescue()
 
 FString AMGPlayerCharacter::GetPostureText() const
 {
+    if (DraggedBody.IsValid()) return TEXT("DRAGGING BODY");
     if (bIsProne) return TEXT("PRONE");
     if (bInCover) return TEXT("WALL COVER");
     if (bIsCrouched) return TEXT("CROUCHED");
@@ -722,6 +810,11 @@ bool AMGPlayerCharacter::ExitProneSafely()
 }
 void AMGPlayerCharacter::ToggleProne()
 {
+    if (DraggedBody.IsValid())
+    {
+        NotifyFeedback(TEXT("RELEASE BODY TO CRAWL"), TEXT("denied"));
+        return;
+    }
     if (bIsProne) { ExitProneSafely(); return; }
     if (bPendingProne) return;
     bSprinting = false;
@@ -758,7 +851,7 @@ bool AMGPlayerCharacter::FindContactWall(const FVector& Direction, float Reach, 
 
 bool AMGPlayerCharacter::TryAutoEnterCover(const FVector& WorldDirection)
 {
-    if (bInCover || bIsProne || bAiming || bSprinting || bCodecOpen ||
+    if (DraggedBody.IsValid() || bInCover || bIsProne || bAiming || bSprinting || bCodecOpen ||
         CoverReattachCooldown > 0.f || !GetCharacterMovement()->IsMovingOnGround())
         return false;
     FHitResult Hit;
@@ -1056,6 +1149,7 @@ void AMGPlayerCharacter::UseItem()
 }
 void AMGPlayerCharacter::MeleeAttack()
 {
+    if (DraggedBody.IsValid()) { StopDraggingBody(); return; }
     if (!GetWorld() || !Controller) return;
     if (bInCover) { KnockOnWall(); return; }
     if (bIsProne)
