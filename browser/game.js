@@ -2480,6 +2480,48 @@ function cameraPlanes(m){
  }
  return planes;
 }
+// Named GLB counterparts of the ACTUAL actors. AI and mission state never
+// depend on this presentation path; no duplicated Snake/Fox/boss proxies.
+function activeCastForRig(t){
+ const activeDialogue=String(dialogueQueue[0]?.speaker||'').toLowerCase();
+ const snakeSpeaking=activeDialogue.includes('snake');
+ const foxSpeaking=activeDialogue.includes('fox');
+ const guardSpeaking=/guard|security/.test(activeDialogue);
+ const cast=[
+  {id:'snake',kind:'player',x:player.x,z:player.z,yaw:player.yaw||0,
+   stance:player.stance,cover:!!player.cover,knocking:player.knockUntil>t,
+   melee:player.attackUntil>t,hit:player.hitTimer>0,down:health<=0,
+   aiming:!!player.aim,radio:!!dialogueQueue.length&&!snakeSpeaking,
+   talking:snakeSpeaking,alert:awareness,
+   visible:!world.boxed&&Math.hypot(cam.eye[0]-player.x,cam.eye[2]-player.z)>.75},
+  {id:'fox',kind:'fox',x:fox.x,z:fox.z,yaw:fox.yaw||0,
+   stance:fox.stance||0,hit:fox.hitTimer>0,down:!fox.alive,
+   captive:stage<2,talking:foxSpeaking,reaching:fox.reachAt!=null&&t-fox.reachAt<.8,
+   alert:awareness,visible:true}
+ ];
+ if(stage<0)cast.push({id:'informant',kind:'pow_informant',x:informant.x,
+  z:informant.z,yaw:informant.yaw||0,stance:0,
+  talking:/prisoner|informant/.test(activeDialogue),visible:true});
+ if(stage>=3)cast.push({id:'shotmaker',kind:'shoot_gunner',
+  x:boss.x,z:boss.z,yaw:boss.yaw||0,stance:0,
+  down:!!boss.knocked,hit:boss.hitTimer>0,firing:boss.shotVisual>0,
+  telegraph:duel.phase==='shoulder',addressing:duel.phase==='address',
+  reloading:duel.phase==='reload',searching:['search','trace','cross'].includes(duel.phase),
+  talking:duel.voice>t,alert:boss.state||0,visible:true});
+ for(let i=0;i<guards.length;i++){
+  const g=guards[i];if(g===boss)continue;
+  const machinegun=g===kid;
+  cast.push({id:machinegun?'machinegun_kid':'guard'+i,
+   kind:machinegun?'machinegun_kid':'guard',x:g.x,z:g.z,yaw:g.yaw||0,
+   stance:0,hit:g.hitTimer>0,down:!!g.knocked,
+   aiming:g.aimTime>0&&g.state===3,firing:g.shotVisual>0,
+   reloading:machinegun&&g.phase==='reload',
+   searching:g.state===2||machinegun&&g.phase==='waiting'&&stage>=8,
+   talking:guardSpeaking&&g.state>=1,
+   alert:g.state||0,visible:true});
+ }
+ return cast;
+}
 function drawFrame(t,dt){let w=canvas.clientWidth,h=canvas.clientHeight,scale=window.devicePixelRatio>1?Math.min(1.5,window.devicePixelRatio):1;let ww=Math.max(2,Math.floor(w*scale)),hh=Math.max(2,Math.floor(h*scale));if(canvas.width!==ww||canvas.height!==hh){canvas.width=ww;canvas.height=hh;gl.viewport(0,0,ww,hh)}const target=updateCamera(dt);const pv=m4.mul(m4.persp(Math.PI/(world.scouting?5.6:player.aim?3.6:3.1),ww/hh,.075,120),m4.look(cam.eye,target));gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(program);gl.uniformMatrix4fv(loc.pv,false,new Float32Array(pv));gl.uniform3f(loc.eye,...cam.eye);gl.uniform1f(loc.time,t);drawn=0;
  const planes=cameraPlanes(pv);
  for(const o of geometry)if(o.active){
@@ -2503,15 +2545,14 @@ function drawFrame(t,dt){let w=canvas.clientWidth,h=canvas.clientHeight,scale=wi
  }
  if(stage<0)drawPropertyTag(-14.55,1.032,-1.12,t);
  if(tag.point)drawPropertyTag(tag.point.x,.029,tag.point.z,t);
- if(stage<0){
+ if(stage<0&&!window.__MG_RIG_READY){
    human(informant,'fox',t,dt);
-
  }
  if(stage===3&&!world.hallOpen){
   // A quiet shift routine, outside the combat AI. The same actor takes over in the duel.
   const travel=(1+Math.sin(t*.58))*.5;
   boss.yaw=Math.PI-.65*travel;
-  human(boss,'guard',t,dt);
+  if(!window.__MG_RIG_READY)human(boss,'guard',t,dt);
   const z=-1.75+3.2*travel;
   drawCube([24.1,.30,z],[.74,.13,.92],color.metal,0,mat.steel);
   drawCube([24.1,.64,z],[.61,.55,.73],[.60,.43,.25],0,mat.fabric);
@@ -2541,7 +2582,7 @@ function drawFrame(t,dt){let w=canvas.clientWidth,h=canvas.clientHeight,scale=wi
    if(remaining>.001)drawCube([fox.x-.52+remaining*.52,2.07,fox.z-.064],
      [remaining*1.04,.047,.075],remaining<.36?[.94,.35,.28]:[.42,.83,.90],0,3);
  }
- for(const g of guards)if(g.boss||!window.__MG_RIG_READY)human(g,'guard',t,dt);
+ for(const g of guards)if(!window.__MG_RIG_READY)human(g,'guard',t,dt);
  // Ordinary sidearms use muzzle bursts + character reaction; only a real
  // tracer-enabled weapon (e.g. suppressive machine gun) draws a trajectory.
  // Damage and collisions were decided by combat logic, never this artwork.
@@ -2560,18 +2601,11 @@ function drawFrame(t,dt){let w=canvas.clientWidth,h=canvas.clientHeight,scale=wi
  // Render actual GLB skinned models in an optional transparent Three.js pass.
  // The original renderer and all gameplay systems remain authoritative.
  if(window.__MG_RIG_READY){
-   const a=[{id:'snake',kind:'player',x:player.x,z:player.z,yaw:player.yaw||0,
-     stance:player.stance,cover:player.cover,knocking:player.knockUntil>t,hit:player.hitTimer>0,down:health<=0,visible:!world.boxed&&Math.hypot(cam.eye[0]-player.x,cam.eye[2]-player.z)>.75},
-     {id:'fox',kind:'fox',x:fox.x,z:fox.z,yaw:fox.yaw||0,
-       stance:fox.stance||0,hit:fox.hitTimer>0,down:!fox.alive,visible:true}];
-   for(let i=0;i<guards.length;i++){
-     const g=guards[i];if(g.boss)continue;a.push({id:'guard'+i,kind:'guard',x:g.x,z:g.z,yaw:g.yaw||0,
-       stance:0,hit:!!g.hitTimer,down:!!g.knocked,visible:true});
-   }
+   const a=activeCastForRig(t);
    const solids=[...obstacles.filter(o=>o.active),
     ...cameraOnlySolids.filter(o=>o.active)];
    window.dispatchEvent(new CustomEvent('mg:rig-frame',{detail:{
-     dt,camera:{eye:[...cam.eye],target:[...target],fov:Math.PI/(world.scouting?5.6:player.aim?3.6:3.1)},
+     dt,time:t,camera:{eye:[...cam.eye],target:[...target],fov:Math.PI/(world.scouting?5.6:player.aim?3.6:3.1)},
      actors:a,solids:solids.map((o,i)=>({id:o.name+'-'+i,x:o.x,y:o.y,z:o.z,
        w:o.w,h:o.h,d:o.d,solid:obstacles.includes(o),cameraSolid:cameraOnlySolids.includes(o),active:o.active,yaw:o.yaw||0}))
    }}));
@@ -2843,7 +2877,7 @@ function frame(now){requestAnimationFrame(frame);const real=clamp((now-last)/100
  updatePlayer(dt);updateFox(dt);updateGuards(dt);
 }ambience(dt);for(const f of footsteps)f.life-=dt;footsteps=footsteps.filter(f=>f.life>0);shots.forEach(s=>s.life-=dt);shots=shots.filter(s=>s.life>0);for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy-=4.4*dt;p.life-=dt}particles=particles.filter(p=>p.life>0);noiseEvents.forEach(n=>n.life-=dt);noiseEvents=noiseEvents.filter(n=>n.life>0);if(awareness===0&&stage!==4&&Math.floor(gameTime/12)!==Math.floor((gameTime-dt)/12))save();if(awareness!==prevAlert)record('awareness.'+awareness);if(awareness===3&&prevAlert!==3)achievement.push({time:gameTime});prevAlert=awareness;}drawFrame(gameTime,dt);if(started)updateHUD(dt);frameCount++;if(now-frameStart>1000){$('fps').textContent=Math.round(frameCount*1000/(now-frameStart))+' FPS';frameStart=now;frameCount=0}}
 // Console contract for deterministic browser tests, never elevated to source fidelity.
-window.__mgGameDebug={get state(){return {stage,service:{...service},roof:{...roof},b2:{...b2,armed:[...b2.armed]},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
+window.__mgGameDebug={previewRigActors:(time=gameTime)=>activeCastForRig(time),get state(){return {stage,service:{...service},roof:{...roof},b2:{...b2,armed:[...b2.armed]},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
  firstCardEarned,rationEarned,rationRemaining,binocularsEarned,
  rationWorld:originalRationProp.active?{...originalRationTarget}:null,
  binocularsWorld:originalBinocularsProp.active?{...originalBinocularsTarget}:null,
