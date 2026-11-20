@@ -165,14 +165,14 @@ void AMGGrayFoxMission::CreatePrelude()
     SpawnBlock(TEXT("PreludeCargoB"), FVector(-2340.f, 30.f, -15.f),
         FVector(2.4f, .85f, 1.7f), true);
     AddWorldTrace(TEXT("CargoTransferManifest"),
-        FVector(-2780.f, -100.f, -50.f), FVector(.55f, .25f, .34f),
-        TEXT("CARGO CHIT: FILTERS, DRESSINGS, FIELD RATIONS. RECEIVED; COUNTERSIGNATURE BLANK."),
+        FVector(-2870.f, -168.f, -5.f), FVector(.45f, .06f, .50f),
+        TEXT("CARGO: FILTERS / DRESSINGS / RATIONS. SIGNATURE MISSING."),
         0u, MG_FOX_CAPTURED);
     SpawnBlock(TEXT("PreludeSecurityBooth"), FVector(-1920.f, 225.f, -15.f),
         FVector(2.6f, 1.8f, 2.1f), true);
     AddWorldTrace(TEXT("DutyRotationSlate"),
-        FVector(-2110.f, 335.f, -50.f), FVector(.62f, .24f, .46f),
-        TEXT("DUTY SLATE: TRANSPORT ESCORT 02. SHIFT CHANGE DELAYED. NO REASON LISTED."),
+        FVector(-2056.f, 260.f, 15.f), FVector(.06f, .50f, .50f),
+        TEXT("DUTY SLATE: TRANSPORT 02. SHIFT OVERDUE. NO REASON GIVEN."),
         0u, MG_FOX_CAPTURED);
     // The POW cannot be accidentally mistaken for Fox; bespoke POW human art
     // is a separate import target; this is a non-colliding readable proxy.
@@ -243,8 +243,8 @@ void AMGGrayFoxMission::CreateGreybox()
     SpawnBlock(TEXT("Bed"), FVector(-900.f, 240.f, -62.f),
                FVector(1.8f, 0.9f, 0.75f), true);
     AddWorldTrace(TEXT("CellRepairReceipt"),
-        FVector(-865.f, -212.f, -51.f), FVector(.38f, .08f, .52f),
-        TEXT("REPAIR SLIP: LOWER WALL PATCHED. INSPECTION DEFERRED UNTIL NEXT SHIFT."),
+        FVector(-865.f, -474.f, 25.f), FVector(.44f, .06f, .50f),
+        TEXT("REPAIR SLIP: LOWER WALL PATCHED. INSPECTION DEFERRED."),
         MG_FOX_CAPTURED, 0u);
     SpawnBlock(TEXT("Bed"), FVector(110.f, 240.f, -62.f),
                FVector(1.8f, 0.9f, 0.75f), true);
@@ -291,8 +291,8 @@ void AMGGrayFoxMission::CreateBossWing()
     SpawnBlock(TEXT("GearRoomSouth"), FVector(2775.f, -1085.f, 90.f), FVector(10.2f, .4f, 3.8f), true);
     GearBag = SpawnBlock(TEXT("GearBag"), FVector(2700.f, -830.f, -68.f), FVector(.65f, .7f, .55f), false);
     AddWorldTrace(TEXT("PropertyCustodyReceipt"),
-        FVector(2480.f, -970.f, -57.f), FVector(.52f, .13f, .45f),
-        TEXT("PROPERTY REGISTER: ONE SEALED EQUIPMENT BAG. CLAIMANT FIELD UNCOMPLETED."),
+        FVector(2290.f, -850.f, 25.f), FVector(.06f, .44f, .50f),
+        TEXT("PROPERTY REGISTER: SEALED GEAR BAG. CLAIMANT FIELD EMPTY."),
         MG_FOX_CAPTURED, 0u);
     PlantedTransmitter = SpawnBlock(TEXT("PlantedTransmitter"), FVector(2790.f, -833.f, -30.f), FVector(.2f, .2f, .16f), false);
     if (IsValid(PlantedTransmitter)) PlantedTransmitter->SetActorHiddenInGame(true);
@@ -334,8 +334,8 @@ void AMGGrayFoxMission::CreatePostCard3Service()
     SpawnBlock(TEXT("DogCareSupply"), FVector(4720.f, 280.f, -30.f),
         FVector(1.8f, 1.2f, 1.4f), true);
     AddWorldTrace(TEXT("KennelDutyBoard"),
-        FVector(4680.f, 100.f, -51.f), FVector(.55f, .12f, .48f),
-        TEXT("KENNEL ROSTER: FEED / WATER / NIGHT WALK. SECOND HANDLER NOT SIGNED."),
+        FVector(4720.f, 213.f, 20.f), FVector(.55f, .08f, .48f),
+        TEXT("KENNEL: FEED / WATER / NIGHT WALK. SECOND HANDLER ABSENT."),
         MG_FOX_SLICE_COMPLETED, 0u);
     SpawnBlock(TEXT("ServiceJunctionCover"), FVector(4980.f, -105.f, -25.f),
         FVector(1.6f, 1.0f, 1.5f), true);
