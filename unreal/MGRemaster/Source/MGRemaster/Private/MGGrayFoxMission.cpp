@@ -390,7 +390,7 @@ void AMGGrayFoxMission::CreateConnectiveSpaces()
         FVector(5.0f, .56f, .05f), false);
     SpawnBlock(TEXT("UtilityAlcovePartialWall"), FVector(-3450.f, 390.f, 25.f),
         FVector(2.2f, .22f, 2.5f), true);
-    SpawnBlock(TEXT("UtilityToolCart"), FVector(-3325.f, 425.f, -40.f),
+    SpawnBlock(TEXT("UtilityToolCart"), FVector(-3280.f, 425.f, -40.f),
         FVector(.85f, .55f, 1.1f), true);
     AddWorldTrace(TEXT("ServiceMaintenanceLedger"),
         FVector(-3330.f, 376.f, 8.f), FVector(.47f, .06f, .43f),
