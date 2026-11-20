@@ -911,18 +911,17 @@ function displayNextDialogue(dt){
  $('subtitle').style.opacity='1';
  if(line.remaining<=0&&(!line.speaking||line.remaining < -12))dialogueQueue.shift();
 }
-function startCinematic(id){
+function startCinematic(id,extra={}){
  const director=window.MGCinematicDirector;
  if(!director||!started||paused)return false;
- return director.start(id,{snake:player,player,fox,boss},{
+ return director.start(id,{snake:player,player,fox,boss,post},{
   combatAlert:awareness>=3&&!(id==='shotmaker'&&duel.phase==='duty'),
-  playerAiming:player.aim,inVr:rehearsal});
+  playerAiming:player.aim,inVr:rehearsal,...extra});
 }
 function progress(s){
  if(s!==stage+1)return false;
  stage=s;elapsedStage=0;quietSince=gameTime;syncEquipment();syncBoss();record('stage.'+s);save();
- if(s===0)startCinematic('capture');
- else if(s===2)startCinematic('fox');
+ if(s===2)startCinematic('fox',{blocking:true});
  else if(s===6)startCinematic('card3');
  return true;
 }
@@ -1111,9 +1110,22 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
    }
    if(stage===-1&&dist(player,post)<2.1){
      if(player.aim){popup('Lower your weapon to surrender.');return}
-     sealedWeapon=equippedWeapon;equippedWeapon='BARE HANDS';
-     player.x=-10.6;player.z=0;player.cover=false;player.stance=0;cam.yaw=0;
-     window.speechSynthesis?.cancel();dialogueQueue=[];document.getElementById('gl').animate?.([{filter:'brightness(.40)'},{filter:'brightness(1)'}],380);progress(0);say('capture');playCue('seal');return;
+     // Film the arrest AT the physically present custody post before the
+     // transfer. Gameplay is safely held for this short, skippable beat.
+     // Only gameplay commits the transfer, once, whether watched or skipped.
+     const commitCapture=skipped=>{
+       if(stage!==-1)return;
+       sealedWeapon=equippedWeapon;equippedWeapon='BARE HANDS';
+       player.x=-10.6;player.z=0;player.cover=false;player.stance=0;cam.yaw=0;
+       window.speechSynthesis?.cancel();dialogueQueue=[];
+       document.getElementById('gl').animate?.([
+        {filter:'brightness(.40)'},{filter:'brightness(1)'}],380);
+       progress(0);say('capture');playCue('seal');
+       if(!skipped)startCinematic('wake',{blocking:true});
+     };
+     if(!startCinematic('capture',{blocking:true,onDone:commitCapture}))
+       commitCapture(true);
+     return;
    }
    if(stage===3&&dist(player,gearLocker)<gearLocker.r&&
       !lineBlocked(player,{x:gearLocker.x,z:gearLocker.z+(player.z<gearLocker.z?-.44:.44)})){
@@ -1817,6 +1829,7 @@ function updateGuards(dt){kennelTick(dt);kidTick(dt);const pulse=updatePropertyT
    cardDrop={...cardHome};dropTime=-10;
    dialogueQueue=dialogueQueue.filter(line=>!line.id.startsWith('boss'));
    progress(5);popup('Property hall quiet. The records stores are accessible.');
+   startCinematic('down',{blocking:true});
  }
 
 }
@@ -1915,8 +1928,13 @@ function updateCamera(dt){const pad=activeGamepad();if(pad&&started&&!paused){co
  // position instead of interpolating through a surface to return indoors.
  if(cameraPositionPenetrates(cam.eye))cam.eye=safeDesired;
  cam.eye[1]=clamp(cam.eye[1],.30,3.36-.24-.04);
+ const filmMoving=!!(inputDown('w')||inputDown('a')||inputDown('s')||
+  inputDown('d')||activeGamepad()?.axes?.some?.((axis,i)=>
+    i<2&&Math.abs(axis)>.18));
  const cine=window.MGCinematicDirector?.update(dt,{
   paused,playerAiming:player.aim,playerHit:player.hitTimer>.08,
+  playerMoving:filmMoving,
+  reducedMotion:!!window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches,
   combatAlert:awareness>=3 && window.MGCinematicDirector?.active!=='shotmaker'
  });
  if(cine){
@@ -2471,7 +2489,8 @@ document.addEventListener('keydown',e=>{lastInputIsPad=false;const k=e.key.toLow
  return;
 }if(window.MGCinematicDirector?.active&&(k===' '||k==='escape')){
  e.preventDefault();window.MGCinematicDirector.skip();return;
-}if(k==='escape'){action('pause');return}if(paused){if(k==='j'||k==='c')setPaused(false);return}const actions={e:'interact',control:'crouch',z:'prone',v:'cover',f:'melee',n:'knock',j:'intel',c:'codec',t:'tips','[':'previous',']':'next'};if(actions[k])action(actions[k]);if(k==='tab')action('equipitem');if(k==='g')action('equipweapon');if(k==='r')reset();if(k==='q')cam.shoulder*=-1;});document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();key[k]=false;if(k==='tab'||k==='g')action('equipclose')});window.addEventListener('blur',()=>{for(const k of Object.keys(key))key[k]=false;if(equipOpen)action('equipclose')});
+}if(window.MGCinematicDirector?.blocking)return;
+if(k==='escape'){action('pause');return}if(paused){if(k==='j'||k==='c')setPaused(false);return}const actions={e:'interact',control:'crouch',z:'prone',v:'cover',f:'melee',n:'knock',j:'intel',c:'codec',t:'tips','[':'previous',']':'next'};if(actions[k])action(actions[k]);if(k==='tab')action('equipitem');if(k==='g')action('equipweapon');if(k==='r')reset();if(k==='q')cam.shoulder*=-1;});document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();key[k]=false;if(k==='tab'||k==='g')action('equipclose')});window.addEventListener('blur',()=>{for(const k of Object.keys(key))key[k]=false;if(equipOpen)action('equipclose')});
 function readGamepad(){const p=pollGamepad();updatePadStatus(p);padUsing=!!p&&(Math.abs(p.axes[0]||0)>.16||Math.abs(p.axes[1]||0)>.16);if(!p){padPrev=[];return;}const now=p.buttons.map(pressed);const previous=padPrev;const down=i=>now[i]&&!previous[i];const up=i=>!now[i]&&previous[i];padPrev=now;if(!started){
  if(!$('newGameConfirm').hidden){
   if(down(14))setNewGameConfirmChoice(0);
@@ -2486,16 +2505,19 @@ function readGamepad(){const p=pollGamepad();updatePadStatus(p);padUsing=!!p&&(M
  return;
 }if(window.MGCinematicDirector?.active&&down(1)){
  window.MGCinematicDirector.skip();return;
-}if(down(9)){action('pause');return}if(paused){if(down(1)||down(0)){setPaused(false)}return}if(down(0))action('interact');if(down(1)){action('crouch');}if(down(2))action('melee');if(down(3))action('prone');if(down(12))action('intel');if(down(8))action('codec');if(down(11))cam.shoulder*=-1;if(down(4))action('equipitem');if(down(5))action('equipweapon');if(up(4)||up(5))action('equipclose');if(down(14))action('previous');if(down(15))action('next');if(down(7)){player.aim=inputDown('mouse2')||pressed(p.buttons[6]);action('fire');}}
+}if(window.MGCinematicDirector?.blocking)return;
+if(down(9)){action('pause');return}if(paused){if(down(1)||down(0)){setPaused(false)}return}if(down(0))action('interact');if(down(1)){action('crouch');}if(down(2))action('melee');if(down(3))action('prone');if(down(12))action('intel');if(down(8))action('codec');if(down(11))cam.shoulder*=-1;if(down(4))action('equipitem');if(down(5))action('equipweapon');if(up(4)||up(5))action('equipclose');if(down(14))action('previous');if(down(15))action('next');if(down(7)){player.aim=inputDown('mouse2')||pressed(p.buttons[6]);action('fire');}}
 function frame(now){requestAnimationFrame(frame);const real=clamp((now-last)/1000,0,.06);last=now;readGamepad();
  damagePulse=Math.max(0,damagePulse-real*1.85);
  player.hitTimer=Math.max(0,(player.hitTimer||0)-real);
  if($('damageFlash')){
   $('damageFlash').style.opacity=String(Math.min(.78,damagePulse));
   $('damageFlash').style.transform=`rotate(${Math.round(damageDirection*180/Math.PI)}deg)`;
- }const dt=started&&!paused?real*(equipOpen?.2:1):0;if(started&&!paused){gameTime+=dt;levelTime+=dt;elapsedStage+=dt;updatePlayer(dt);updateFox(dt);updateGuards(dt);ambience(dt);for(const f of footsteps)f.life-=dt;footsteps=footsteps.filter(f=>f.life>0);shots.forEach(s=>s.life-=dt);shots=shots.filter(s=>s.life>0);for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy-=4.4*dt;p.life-=dt}particles=particles.filter(p=>p.life>0);noiseEvents.forEach(n=>n.life-=dt);noiseEvents=noiseEvents.filter(n=>n.life>0);if(awareness===0&&stage!==4&&Math.floor(gameTime/12)!==Math.floor((gameTime-dt)/12))save();if(awareness!==prevAlert)record('awareness.'+awareness);if(awareness===3&&prevAlert!==3)achievement.push({time:gameTime});prevAlert=awareness;}drawFrame(gameTime,dt);if(started)updateHUD(dt);frameCount++;if(now-frameStart>1000){$('fps').textContent=Math.round(frameCount*1000/(now-frameStart))+' FPS';frameStart=now;frameCount=0}}
+ }const dt=started&&!paused?real*(equipOpen?.2:1):0;if(started&&!paused){gameTime+=dt;levelTime+=dt;elapsedStage+=dt;if(!window.MGCinematicDirector?.blocking){
+ updatePlayer(dt);updateFox(dt);updateGuards(dt);
+}ambience(dt);for(const f of footsteps)f.life-=dt;footsteps=footsteps.filter(f=>f.life>0);shots.forEach(s=>s.life-=dt);shots=shots.filter(s=>s.life>0);for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy-=4.4*dt;p.life-=dt}particles=particles.filter(p=>p.life>0);noiseEvents.forEach(n=>n.life-=dt);noiseEvents=noiseEvents.filter(n=>n.life>0);if(awareness===0&&stage!==4&&Math.floor(gameTime/12)!==Math.floor((gameTime-dt)/12))save();if(awareness!==prevAlert)record('awareness.'+awareness);if(awareness===3&&prevAlert!==3)achievement.push({time:gameTime});prevAlert=awareness;}drawFrame(gameTime,dt);if(started)updateHUD(dt);frameCount++;if(now-frameStart>1000){$('fps').textContent=Math.round(frameCount*1000/(now-frameStart))+' FPS';frameStart=now;frameCount=0}}
 // Console contract for deterministic browser tests, never elevated to source fidelity.
-window.__mgGameDebug={get state(){return {stage,service:{...service},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,cinematic:window.MGCinematicDirector?.active||null,cinematicSeen:window.MGCinematicDirector?.seen||[],itemSlots:inventories.items.map(i=>({name:i.name,usable:i.usable})),safeLift:{...safeLift},player:{...player},bodyCollider:{...bodyShape(),orientation:player.stance===2?'horizontal':'vertical',samples:bodySamples(player.x,player.z,player.stance,player.yaw)},awareness,paused,equipOpen,noiseEvents:noiseEvents.map(n=>({...n})),guards:guards.map(g=>({state:g.state,x:g.x,z:g.z,yaw:g.yaw,last:{...g.last},investigateUntil:g.investigateUntil||0,lastKnockId:g.lastKnockId||0,boxInspectionAge:g.boxInspectionAge||0,boxIdentitySpoken:!!g.boxIdentitySpoken,knocked:g.knocked,unconscious:!!g.knockedOut,dragged:!!g.dragged,aimSubject:g.aimSubject,aimTime:g.aimTime,fireCooldown:g.fireCooldown,shotVisual:g.shotVisual})),fox:{x:fox.x,z:fox.z,hp:fox.hp,alive:fox.alive,mode:fox.mode,stance:fox.stance,moveSpeed:fox.moveSpeed},missionFailed,coverAssets:coverAssets.map(c=>({...c})),activeTracers:shots.filter(s=>s.tracer).length,damagePulse,damageDirection,originalMapVerified:false,renderedFrames:drawn,visualVersion:'original_humanoid_mk4_escort_armed_guards',meshKinds:Object.keys(meshLibrary),materialAtlas:{...materialAtlas},environmentModelCounts:{bedParts:sceneDetail.filter(o=>o.name.startsWith('cot ')||o.name.startsWith('blanket ')||o.name.startsWith('pillow ')||o.name==='folded wool blanket').length,lockerDetails:sceneDetail.filter(o=>o.name.startsWith('locker ')).length,cabinetDetails:sceneDetail.filter(o=>o.name.includes('front trim')||o.name.includes('bolt head')).length,ceilingsBlockCamera:cameraOnlySolids.some(o=>o.name==='ceiling'&&o.active)},camEye:[...cam.eye],cameraBlocked:cameraPositionPenetrates(cam.eye),cameraBelowFloor:cam.eye[1]<.28,activePadIndex,padPrev:[...padPrev],started}},readPad:()=>readGamepad(),start:()=>start(false),act:action,teleport:(x,z)=>{player.x=x;player.z=z},setCamera:(yaw,pitch=0)=>{cam.yaw=yaw;cam.pitch=pitch},stepCamera:(dt=.016)=>updateCamera(dt),canOccupy:(x,z,stance,yaw=player.yaw)=>canOccupyBody(x,z,stance,yaw),moveBody:(vx,vz,dt)=>movePlayer(vx,vz,dt),step:(dt)=>{gameTime+=dt;updatePlayer(dt);updateFox(dt);updateGuards(dt)},damageFox:(n)=>damageFox(n),stepFox:(dt)=>updateFox(dt),sightBlocked:(a,b,fromY=1.58,toY=1.52)=>lineBlockedSight(a,b,fromY,toY),radarVisionDistance:(index,angle,range=10)=>radarVisionDistance(guards[index],angle,range),findPath:(a,b)=>pathfind(a,b),foxRouteRisk:(p)=>foxRouteRisk(p),guardSeesPosition:(index,pos)=>guardSeesPosition(guards[index],pos),reset};
+window.__mgGameDebug={get state(){return {stage,service:{...service},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,cinematic:window.MGCinematicDirector?.active||null,cinematicSeen:window.MGCinematicDirector?.seen||[],itemSlots:inventories.items.map(i=>({name:i.name,usable:i.usable})),safeLift:{...safeLift},player:{...player},bodyCollider:{...bodyShape(),orientation:player.stance===2?'horizontal':'vertical',samples:bodySamples(player.x,player.z,player.stance,player.yaw)},awareness,paused,equipOpen,noiseEvents:noiseEvents.map(n=>({...n})),guards:guards.map(g=>({state:g.state,x:g.x,z:g.z,yaw:g.yaw,last:{...g.last},investigateUntil:g.investigateUntil||0,lastKnockId:g.lastKnockId||0,boxInspectionAge:g.boxInspectionAge||0,boxIdentitySpoken:!!g.boxIdentitySpoken,knocked:g.knocked,unconscious:!!g.knockedOut,dragged:!!g.dragged,aimSubject:g.aimSubject,aimTime:g.aimTime,fireCooldown:g.fireCooldown,shotVisual:g.shotVisual})),fox:{x:fox.x,z:fox.z,hp:fox.hp,alive:fox.alive,mode:fox.mode,stance:fox.stance,moveSpeed:fox.moveSpeed},missionFailed,coverAssets:coverAssets.map(c=>({...c})),activeTracers:shots.filter(s=>s.tracer).length,damagePulse,damageDirection,cinematic:window.MGCinematicDirector?.active||null,cinematicBlocking:!!window.MGCinematicDirector?.blocking,originalMapVerified:false,renderedFrames:drawn,visualVersion:'original_humanoid_mk4_escort_armed_guards',meshKinds:Object.keys(meshLibrary),materialAtlas:{...materialAtlas},environmentModelCounts:{bedParts:sceneDetail.filter(o=>o.name.startsWith('cot ')||o.name.startsWith('blanket ')||o.name.startsWith('pillow ')||o.name==='folded wool blanket').length,lockerDetails:sceneDetail.filter(o=>o.name.startsWith('locker ')).length,cabinetDetails:sceneDetail.filter(o=>o.name.includes('front trim')||o.name.includes('bolt head')).length,ceilingsBlockCamera:cameraOnlySolids.some(o=>o.name==='ceiling'&&o.active)},camEye:[...cam.eye],cameraBlocked:cameraPositionPenetrates(cam.eye),cameraBelowFloor:cam.eye[1]<.28,activePadIndex,padPrev:[...padPrev],started}},readPad:()=>readGamepad(),start:()=>start(false),act:action,teleport:(x,z)=>{player.x=x;player.z=z},setCamera:(yaw,pitch=0)=>{cam.yaw=yaw;cam.pitch=pitch},stepCamera:(dt=.016)=>updateCamera(dt),canOccupy:(x,z,stance,yaw=player.yaw)=>canOccupyBody(x,z,stance,yaw),moveBody:(vx,vz,dt)=>movePlayer(vx,vz,dt),step:(dt)=>{gameTime+=dt;updatePlayer(dt);updateFox(dt);updateGuards(dt)},damageFox:(n)=>damageFox(n),stepFox:(dt)=>updateFox(dt),sightBlocked:(a,b,fromY=1.58,toY=1.52)=>lineBlockedSight(a,b,fromY,toY),radarVisionDistance:(index,angle,range=10)=>radarVisionDistance(guards[index],angle,range),findPath:(a,b)=>pathfind(a,b),foxRouteRisk:(p)=>foxRouteRisk(p),guardSeesPosition:(index,pos)=>guardSeesPosition(guards[index],pos),reset};
 // Deterministic development-only combat hook (absent unless tests opt in).
 if(window.__MG_TEST__){
  window.__mgGameDebug.testSetGuard=(index,settings)=>{
