@@ -564,7 +564,7 @@ detail('dispatch belt', (belt.from+belt.to)/2,.035,belt.z,belt.to-belt.from,.07,
 for(let x=belt.from;x<=belt.to;x+=.75)
  detail('packing belt cleat',x,.08,belt.z,.04,.035,belt.width,color.metal,mat.steel);
 const nearBelt=()=>stage<0&&Math.abs(player.z-belt.z)<belt.width/2&&player.x>=belt.from&&player.x<belt.to;
-const world={handgun:false,box:false,boxed:false,moved:false,smokeUntil:-10,smokeX:0,smokeZ:0,
+const world={handgun:false,box:false,boxed:false,freightAmbientHeard:false,moved:false,smokeUntil:-10,smokeX:0,smokeZ:0,
  hallOpen:false,cameraOff:false,lock:0,reported:false,foxFollowup:false,preview:false};
 const parcel=detail('dispatch carton',bay.x,.46,bay.z,1.08,.9,.84,[.60,.43,.25],mat.fabric);
 const sidearm=detail('handgun slide',-28.65,.74,1.8,.33,.085,.058,color.metal,mat.steel);
@@ -590,6 +590,13 @@ function freightTick(dt,oldX,oldZ){
  if(stage>=0)return;
  const riding=world.boxed&&nearBelt();
  if(riding)movePlayer(Math.min(1.65,(belt.to-player.x)/Math.max(dt,.001)),0,dt);
+ // Forward travel is deliberately quiet: an optional observational beat,
+ // not an arrest, enemy spawn, mission flag or mandatory cinematic pause.
+ if(riding&&!world.freightAmbientHeard&&player.x>=-22.25){
+  world.freightAmbientHeard=true;
+  say('freightShift');
+  save();
+ }
  const yaw=1.95+.70*Math.sin(gameTime*.73);
  const dx=player.x-lens.x,dz=player.z-lens.z,d=Math.hypot(dx,dz);
  const visible=!world.cameraOff&&d<7&&dx*Math.cos(yaw)+dz*Math.sin(yaw)>d*.95&&
@@ -750,7 +757,7 @@ function record(event){
 function save(){
  if(missionFailed||health<=0)return;
  try{
-  localStorage.setItem(STORAGE,JSON.stringify({version:8,service:{charge:service.charge,open:service.open,intel:service.intel,kidDown:service.kidDown,parachute:service.parachute},storesOpen,legacyFloorCard,freight:{handgun:world.handgun,box:world.box,cameraOff:world.cameraOff,foxFollowup:world.foxFollowup,preview:world.preview,hallOpen:world.hallOpen},propertyTag:{state:tag.state,point:tag.point},stage,cardDrop,x:player.x,z:player.z,
+  localStorage.setItem(STORAGE,JSON.stringify({version:8,service:{charge:service.charge,open:service.open,intel:service.intel,kidDown:service.kidDown,parachute:service.parachute},storesOpen,legacyFloorCard,freight:{handgun:world.handgun,box:world.box,freightAmbientHeard:world.freightAmbientHeard,cameraOff:world.cameraOff,foxFollowup:world.foxFollowup,preview:world.preview,hallOpen:world.hallOpen},propertyTag:{state:tag.state,point:tag.point},stage,cardDrop,x:player.x,z:player.z,
    rounds,equippedWeapon,sealedWeapon,recoveredGear,wallHits,health,
    bossHP:boss.hp,bossRest:stage>=5?{x:boss.x,z:boss.z,yaw:boss.yaw}:null,showTips:discovery.showTips,foxX:fox.x,foxZ:fox.z,foxHP:fox.hp}));
  }catch(e){}
@@ -759,7 +766,7 @@ function load(){
  let data;
  try{data=JSON.parse(localStorage.getItem(STORAGE))}catch(e){return false}
  if(!data||![1,2,3,4,5,6,7,8].includes(data.version)||!Number.isInteger(data.stage))return false;
- for(const key of ['box','cameraOff','foxFollowup','preview','hallOpen'])world[key]=data.freight?.[key]===true;
+ for(const key of ['box','cameraOff','foxFollowup','preview','hallOpen','freightAmbientHeard'])world[key]=data.freight?.[key]===true;
  world.handgun=data.version<7||data.freight?.handgun===true;
  const legacy=data.version<4;
  if(data.stage<(legacy?0:-2)||data.stage>(legacy?4:data.version===4?6:8))return false;
