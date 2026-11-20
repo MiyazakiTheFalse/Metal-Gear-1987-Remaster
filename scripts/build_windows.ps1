@@ -24,6 +24,14 @@ if ($LASTEXITCODE -ne 0) { throw "Source contract tests failed: $LASTEXITCODE" }
 if ($LASTEXITCODE -ne 0) { throw "Beat contract validation failed: $LASTEXITCODE" }
 & python (Join-Path $Repo 'tools\validate_area_contracts.py')
 if ($LASTEXITCODE -ne 0) { throw "Area contract validation failed: $LASTEXITCODE" }
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw 'Node.js is required to validate the browser/GLB parity inputs' }
+Write-Host 'Checking browser campaign and actual rig binaries...'
+& node (Join-Path $Repo 'browser\\tests\\test_campaign.cjs')
+if ($LASTEXITCODE -ne 0) { throw "Browser campaign tests failed: $LASTEXITCODE" }
+& node (Join-Path $Repo 'browser\\tests\\test_field_rigs.cjs')
+if ($LASTEXITCODE -ne 0) { throw "Rig geometry tests failed: $LASTEXITCODE" }
+& node (Join-Path $Repo 'browser\\tools\\audit_field_glbs.cjs')
+if ($LASTEXITCODE -ne 0) { throw "Committed GLB binary audit failed: $LASTEXITCODE" }
 Write-Host 'Building Rust gameplay core...'
 & cargo build --release --manifest-path $Manifest
 if ($LASTEXITCODE -ne 0) { throw "Rust build failed: $LASTEXITCODE" }
