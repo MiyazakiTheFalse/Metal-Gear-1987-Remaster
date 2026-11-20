@@ -89,6 +89,16 @@ class CastAnimationSourceTests(unittest.TestCase):
         self.assertIn('GetBoneIndex(TEXT("hand_R")) != INDEX_NONE', PLAYER)
         self.assertIn('"hand_R"', IMPORTER)
 
+    def test_packaging_requires_bespoke_kid_and_real_native_animation_sequences(self):
+        builder = content("scripts/build_windows.ps1")
+        self.assertIn('SK_MachinegunKid_1995.uasset', builder)
+        for token in ('AS_Snake_Walk.uasset', 'AS_Snake_Prone.uasset',
+                      'AS_GrayFox_Captive.uasset', 'AS_Guard_Down.uasset',
+                      'AS_Shotmaker_Shoulder.uasset', 'AS_MachinegunKid_Reaching.uasset'):
+            self.assertIn(token, builder)
+        self.assertIn('RequiredAnimations', builder)
+        self.assertIn('Missing native gameplay AnimationSequence', builder)
+
     def test_unreal_importer_remains_valid_python_and_not_fake_asset_manifest(self):
         ast.parse(IMPORTER)
         self.assertIn("unreal.SkeletalMesh", IMPORTER)
