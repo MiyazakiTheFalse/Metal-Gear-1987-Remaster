@@ -93,6 +93,8 @@ public:
     UFUNCTION(BlueprintPure, Category="Mission|Story")
     FName GetActiveStoryCinematic() const;
     void NotifyBodyRelocated(AMGPlayerCharacter* Player);
+    // Consuming a supply ration commits the finite resource immediately.
+    void NotifyItemConsumed(AMGPlayerCharacter* Player);
 
 private:
     UPROPERTY(Transient) AMGStoryCameraDirector* StoryCamera = nullptr;
@@ -179,6 +181,7 @@ private:
     bool bFirstFloorCard1Earned = false;
     bool bFirstFloorRationEarned = false;
     bool bFirstFloorBinocularsEarned = false;
+    int32 LoadedTruckRationsRemaining = 0; // V7 save; never replenish consumed supply
     bool bEarlyHandgunAcquired = false;
     UPROPERTY(Transient) AStaticMeshActor* CustodyMarker = nullptr;
     UPROPERTY(Transient) AMGGuardActor* CustodyOfficerA = nullptr;
