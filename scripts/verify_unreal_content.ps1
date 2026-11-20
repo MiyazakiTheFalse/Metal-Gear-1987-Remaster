@@ -24,9 +24,18 @@ $EditorArgs = @(
     '-log'
 )
 Write-Host 'Checking all 22 native character meshes, skeletal compatibility, animation tracks and imported scale...'
-& $Editor @EditorArgs 2>&1 | Tee-Object -FilePath $LogPath
-if ($LASTEXITCODE -ne 0) {
-    throw "Unreal native character audit exited $LASTEXITCODE. See $LogPath"
+# PowerShell 5.1 can surface benign Unreal stderr as a terminating native
+# error under Stop. Capture first, then evaluate BOTH exit and success marker.
+$OldPreference = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+try {
+    & $Editor @EditorArgs 2>&1 | Tee-Object -FilePath $LogPath
+    $EditorExitCode = $LASTEXITCODE
+} finally {
+    $ErrorActionPreference = $OldPreference
+}
+if ($EditorExitCode -ne 0) {
+    throw "Unreal native character audit exited $EditorExitCode. See $LogPath"
 }
 # UE Python commandlets can log an exception without a process failure.
 # Require an affirmative marker emitted AFTER all 22 assets are validated.
