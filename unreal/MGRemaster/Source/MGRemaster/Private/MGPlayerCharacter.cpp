@@ -18,6 +18,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
 #include "Animation/AnimInstance.h"
+#include "Animation/AnimSequence.h"
 #include "CollisionShape.h"
 #include "Engine/Engine.h"
 #include "EngineUtils.h"
@@ -165,6 +166,13 @@ void AMGPlayerCharacter::BeginPlay()
             if (UClass* Class = LoadClass<UAnimInstance>(nullptr,
                     TEXT("/Game/Characters/Snake/ABP_Snake_1995.ABP_Snake_1995_C")))
                 GetMesh()->SetAnimInstanceClass(Class);
+        // While the production AnimationBlueprint is still missing, use the
+        // checked-in, actually animated breathing Idle source. Never leave a
+        // successful skeletal import frozen in its reference T-pose.
+        if (!GetMesh()->GetAnimClass())
+            if (UAnimSequence* LivingIdle = LoadObject<UAnimSequence>(nullptr,
+                    TEXT("/Game/Characters/Snake/Animations/AS_Snake_Idle.AS_Snake_Idle")))
+                GetMesh()->PlayAnimation(LivingIdle, true);
     }
     ApplyMenuTimeState();
     UpdateMovementState();
