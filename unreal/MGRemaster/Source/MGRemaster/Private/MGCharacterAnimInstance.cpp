@@ -181,6 +181,14 @@ void UMGCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
                    Desired == EMGPerformanceAction::GuardStrike) ? .08f : .17f);
     PerformanceTransitionAlpha = FMath::Clamp(
         PerformanceActionElapsedSeconds / BlendSeconds, 0.f, 1.f);
+    // Secondary channels let authored blend graphs interpolate into stances
+    // without ever replacing the movement capsule's real clearance checks.
+    CrouchTransitionAlpha = FMath::FInterpTo(
+        CrouchTransitionAlpha, bCrouched ? 1.f : 0.f, DeltaSeconds, 8.f);
+    ProneTransitionAlpha = FMath::FInterpTo(
+        ProneTransitionAlpha, bProne ? 1.f : 0.f, DeltaSeconds, 5.5f);
+    CoverTransitionAlpha = FMath::FInterpTo(
+        CoverTransitionAlpha, bInCover ? 1.f : 0.f, DeltaSeconds, 10.f);
     RadioListenOverlayAlpha = FMath::FInterpTo(
         RadioListenOverlayAlpha, bRadioListeningOverlay ? 1.f : 0.f, DeltaSeconds, 8.f);
     ImpactPoseAlpha = FMath::FInterpTo(
