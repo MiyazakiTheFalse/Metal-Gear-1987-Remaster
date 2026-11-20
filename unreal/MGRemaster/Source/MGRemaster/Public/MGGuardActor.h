@@ -173,6 +173,7 @@ private:
     EMGGuardRole Role = EMGGuardRole::Patrol;
     FVector PatrolOrigin = FVector::ZeroVector;
     bool bCustodyChallenge = false;
+    bool bCartonInspectionAnnounced = false; // Resets when box leaves eye-level range.
     bool bPendingRadioReport = false;
     float ChallengeAge = 0.f;
     float CustodyThreatMemorySeconds = 0.f;
