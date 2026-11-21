@@ -11,8 +11,21 @@ void UMGCampaignState::Initialize(FSubsystemCollectionBase& Collection)
     Super::Initialize(Collection);
     Progress = Cast<UMGCampaignSaveGame>(
         UGameplayStatics::LoadGameFromSlot(CampaignSlot, 0));
-    if (!Progress || Progress->Version != 1 ||
-        Progress->Chapter < 0 || Progress->Chapter > 2)
+    if (Progress && Progress->Version == 1)
+    {
+        // Zero-based v1 campaign saves are migrated in place: 0->1, 1->2, 2->3.
+        // Preserve the rescue/POW/intel ledger; never silently reset progress.
+        if (Progress->Chapter >= 0 && Progress->Chapter <= 2)
+        {
+            Progress->MissionNumber = Progress->Chapter + 1;
+            Progress->Version = 2;
+            if (!Commit())
+                UE_LOG(LogTemp, Warning, TEXT("Could not persist mission-number migration"));
+        }
+        else Progress = nullptr;
+    }
+    if (!Progress || Progress->Version != 2 ||
+        Progress->MissionNumber < 1 || Progress->MissionNumber > 3)
         Progress = Cast<UMGCampaignSaveGame>(
             UGameplayStatics::CreateSaveGameObject(UMGCampaignSaveGame::StaticClass()));
 }
@@ -21,9 +34,9 @@ bool UMGCampaignState::Commit()
     return Progress &&
         UGameplayStatics::SaveGameToSlot(Progress, CampaignSlot, 0);
 }
-int32 UMGCampaignState::GetChapter() const
+int32 UMGCampaignState::GetMissionNumber() const
 {
-    return Progress ? Progress->Chapter : 0;
+    return Progress ? Progress->MissionNumber : 1;
 }
 bool UMGCampaignState::HasBeat(FName Id) const
 {
@@ -52,24 +65,25 @@ bool UMGCampaignState::RecordBeat(FName Id, const FString& Intel)
     }
     return true;
 }
-bool UMGCampaignState::AdvanceChapter(int32 NextChapter)
+bool UMGCampaignState::AdvanceMission(int32 NextMissionNumber)
 {
-    if (!Progress || NextChapter != Progress->Chapter + 1 || NextChapter > 2)
+    if (!Progress || NextMissionNumber != Progress->MissionNumber + 1 ||
+        NextMissionNumber > 3)
         return false;
     // A prisoner clue, not a radio selection, unlocks the voluntary capture.
-    if (NextChapter == 1 && !HasBeat(TEXT("snake.early_pow"))) return false;
+    if (NextMissionNumber == 2 && !HasBeat(TEXT("snake.early_pow"))) return false;
     // Only a completed Gray Fox prison escape unlocks returning to Building One.
-    if (NextChapter == 2 &&
+    if (NextMissionNumber == 3 &&
         (!HasBeat(TEXT("fox.revelation")) ||
          !HasBeat(TEXT("snake.gear_recovery")) ||
          !HasBeat(TEXT("fox.intel_persists"))))
         return false;
-    const int32 PreviousChapter = Progress->Chapter;
-    Progress->Chapter = NextChapter;
+    const int32 PreviousMissionNumber = Progress->MissionNumber;
+    Progress->MissionNumber = NextMissionNumber;
     if (!Commit())
     {
-        Progress->Chapter = PreviousChapter;
-        UE_LOG(LogTemp, Warning, TEXT("Failed to persist chapter %d"), NextChapter);
+        Progress->MissionNumber = PreviousMissionNumber;
+        UE_LOG(LogTemp, Warning, TEXT("Failed to persist mission %d"), NextMissionNumber);
         return false;
     }
     return true;
@@ -88,11 +102,11 @@ FString UMGCampaignState::GetIntelLog() const
 }
 FString UMGCampaignState::GetCurrentObjective() const
 {
-    if (GetChapter() == 1) return
+    if (GetMissionNumber() == 2) return
         HasBeat(TEXT("fox.revelation"))
             ? TEXT("ESCAPE THE SECRET PRISON / KEEP FOX'S INTEL")
             : TEXT("FIND GRAY FOX IN THE SECRET CELLS");
-    if (GetChapter() == 2)
+    if (GetMissionNumber() == 3)
         return TEXT("GRAY FOX RESCUED / FIND DR. PETTROVICH");
     if (HasBeat(TEXT("snake.early_pow")))
         return TEXT("PRISONER CLUE: LOCATE THE DETENTION TRANSFER");
@@ -109,7 +123,7 @@ FString UMGCampaignState::GetOpeningRadio(int32 Channel) const
             TEXT("SCHNEIDER: Outer Heaven has been rebuilt in stages.\n"
                  "SCHNEIDER: Trust the physical layout, not assumptions.\n"
                  "SNAKE: Understood.");
-    return GetChapter() == 2 ?
+    return GetMissionNumber() == 3 ?
         TEXT("BIG BOSS: You found Gray Fox. Good.\n"
              "BIG BOSS: Find the scientist behind Metal Gear.\n"
              "SNAKE: I'm following the lead.") :
