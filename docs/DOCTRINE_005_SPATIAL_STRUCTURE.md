@@ -40,6 +40,14 @@ Every playable area gets an entry in `data/area_contracts.json` with a unique ID
 
 The current straight-line prison actors are a **functional test**, not an approved final level. Exact J2ME map geometry and story-event placement must be compared before building production art; section topology above represents intent only.
 
+## Binding guard assignments and prison occupancy
+
+**A guard must have an authored job, not merely a convenient spawn point.** Every active guard needs a unique post identifier, an actual protected object or route, a credible purpose, a reachable work path, meaningful inspection facing/dwell, local sensing and a justified reaction/return after an event. The same holds for detention guards, vehicle guards, elevator posts, laboratories and the TX-55 final security. Empty periods and low-pressure corridors are valid design choices. A resumed mission does not silently respawn another copy of the guard.
+
+**Mission 2 secret prison:** four currently visible detainees are Snake, Gray Fox and two optional ambient figures in an adjoining barred holding wing; only Fox is a source-anchored nonplayer captive in this secret-cell segment. The two anonymous figures cannot be rescued for rank or used to introduce invented history. The two corridor guards work cell-block observation and confiscated-property/exit duty. **The appended wing, positions and NPC silhouettes are provisional and not source verified.**
+
+All area builds must conform to [Guard Duty and Prison Occupancy Policy](GUARD_DUTY_AND_PRISON_OCCUPANCY_POLICY.md), authored [guard duty contract](../data/1995_guard_duty_and_prison_occupancy_contract.json), and `tools/test_guard_duty_contract.py`. A passing source check is not proof of navigability or gameplay quality.
+
 ## Enforced workflow
 
 - Before building a new area, write its area contract and link relevant Doctrine 004 beat IDs; add at least one first-time and one expert route walkthrough.
