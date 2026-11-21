@@ -33,6 +33,20 @@ public:
     // A confirmed sighting shared by a local, functioning CCTV system.
     void ReceiveCameraAlert(const FVector& SightLocation, float DurationSeconds);
     bool IsIncapacitated() const { return bIncapacitated; }
+    bool IsBeingChoked() const { return bBeingChoked; }
+    bool IsDiscoverableBody() const { return bIncapacitated && !bBodyConcealed; }
+    bool IsBodyDragged() const { return bBodyDragged; }
+    bool BeginChoke(AActor* Instigator);
+    void ReleaseChoke(bool bAlertOnRelease);
+    void CompleteChoke();
+    void SetBodyDragged(bool bDragging);
+    bool MoveDraggedBody(const FVector& DesiredLocation, float DeltaSeconds);
+    void ConcealBody(AActor* Container);
+    // Optional skeletal actors can consume these authored animation states.
+    UFUNCTION(BlueprintPure, Category="Stealth|Body")
+    bool IsInStealthChokePose() const { return bBeingChoked; }
+    UFUNCTION(BlueprintPure, Category="Stealth|Body")
+    bool IsBodyCarriedBySnake() const { return bBodyDragged; }
     uint32 GetAwarenessState() const { return AwarenessState; }
     float GetSuspicion() const { return Suspicion; }
     // Sound stimulus carries a world location, never Snake's position.
@@ -73,6 +87,11 @@ private:
     FVector LastKnownPlayerPosition = FVector::ZeroVector;
     bool bPatrolForward = true;
     bool bIncapacitated = false;
+    bool bBeingChoked = false;
+    bool bBodyDragged = false;
+    bool bBodyConcealed = false;
+    float BodyDiscoveryCooldown = 0.f;
+    TWeakObjectPtr<AActor> ChokeInstigator;
     float Suspicion = 0.f;
     float CameraAlertSeconds = 0.f;
     float Health = 100.f;
