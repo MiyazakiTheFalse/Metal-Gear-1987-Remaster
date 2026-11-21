@@ -115,7 +115,13 @@
         "snake.ellen_return_route",
         "snake.disobeys_abort",
         "snake.tx55_detonation",
-        "snake.left_ladder_escape"
+        "snake.left_ladder_escape",
+        "m03.route.manifest",
+        "m03.route.survey",
+        "m03.route.archive",
+        "m03.route.confirmed",
+        "m03.cache.claimed",
+        "m03.security.power_disabled"
       ],
       "status": "partial_start_source"
     },
@@ -2728,6 +2734,138 @@
       "implementation": "design_only",
       "provenance": "remake_optional_proposal",
       "source_target": "J2ME 3.3.0 comparison pending",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "m03.route.manifest",
+      "character": "solid_snake",
+      "stage": "S03",
+      "anchor": "building_one.1f.second_truck_docket",
+      "trigger": "Read original-logistics documents on return; no optional gear needed",
+      "dramatic_effect": "A prior mundane truck yard becomes a real research-route clue",
+      "depends_on": [
+        "fox.revelation"
+      ],
+      "implementation": "unreal_source_only_not_compiled",
+      "provenance": "remake_optional_proposal",
+      "source_target": "J2ME 3.3.0 not verified: optional revisit additions must be reviewed before release",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "m03.route.survey",
+      "character": "solid_snake",
+      "stage": "S03",
+      "anchor": "building_one.2f.survey",
+      "trigger": "Equip previously acquired binoculars and observe research traffic",
+      "dramatic_effect": "An optional item obtained in Mission 1 becomes another way to progress",
+      "depends_on": [
+        "fox.revelation"
+      ],
+      "implementation": "unreal_source_only_not_compiled",
+      "provenance": "remake_optional_proposal",
+      "source_target": "J2ME 3.3.0 not verified: optional revisit additions must be reviewed before release",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "m03.route.archive",
+      "character": "solid_snake",
+      "stage": "S03",
+      "anchor": "building_one.3f.gas_archive",
+      "trigger": "Enter hazardous gas section and retrieve a service-map duplicate",
+      "dramatic_effect": "Previously discovered gas mask rewards preparedness without becoming a hard gate",
+      "depends_on": [
+        "fox.revelation"
+      ],
+      "implementation": "unreal_source_only_not_compiled",
+      "provenance": "remake_optional_proposal",
+      "source_target": "J2ME 3.3.0 not verified: optional revisit additions must be reviewed before release",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "m03.route.confirmed",
+      "character": "solid_snake",
+      "stage": "S03",
+      "anchor": "building_one.1f_2f_3f",
+      "trigger": "Obtain any one of three independent leads",
+      "dramatic_effect": "A single discovery suffices; corroboration is optional",
+      "depends_on": [
+        "fox.revelation"
+      ],
+      "implementation": "unreal_source_only_not_compiled",
+      "provenance": "remake_optional_proposal",
+      "source_target": "J2ME 3.3.0 not verified: optional revisit additions must be reviewed before release",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "m03.cache.claimed",
+      "character": "solid_snake",
+      "stage": "S03",
+      "anchor": "building_one.2f.supply_cabinet",
+      "trigger": "Verify two independent leads to unlock ammunition and a ration",
+      "dramatic_effect": "Exploration investment yields persistent real resources rather than filler",
+      "depends_on": [
+        "fox.revelation"
+      ],
+      "implementation": "unreal_source_only_not_compiled",
+      "provenance": "remake_optional_proposal",
+      "source_target": "J2ME 3.3.0 not verified: optional revisit additions must be reviewed before release",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "m03.security.power_disabled",
+      "character": "solid_snake",
+      "stage": "S03",
+      "anchor": "building_one.2f.maintenance_breaker",
+      "trigger": "Isolate camera circuit without firing a weapon",
+      "dramatic_effect": "A noncombat route suppresses cameras but guards continue their duties",
+      "depends_on": [
+        "fox.revelation"
+      ],
+      "implementation": "unreal_source_only_not_compiled",
+      "provenance": "remake_optional_proposal",
+      "source_target": "J2ME 3.3.0 not verified: optional revisit additions must be reviewed before release",
       "production_gates": [
         "world_location",
         "event_state",
