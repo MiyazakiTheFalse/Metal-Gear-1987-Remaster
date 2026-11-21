@@ -190,6 +190,15 @@ void AMGAdaptiveAudioDirector::Tick(float Dt)
     if (Desired!=ActiveMusic) TransitionTo(Desired);
     if (Snake)
     {
+        int32 MaxAwareness=0;
+        for (TActorIterator<AMGGuardActor> Guard(GetWorld());Guard;++Guard)
+            if (!Guard->IsIncapacitated() &&
+                FMath::Abs(Guard->GetActorLocation().Z-
+                           Snake->GetActorLocation().Z)<260.f)
+                MaxAwareness=FMath::Max(MaxAwareness,(int32)Guard->GetAwarenessState());
+        if (MaxAwareness>=3 && PreviousAwareness<3)
+            PlayCue(TEXT("alarm"),Snake->GetActorLocation(),false);
+        PreviousAwareness=MaxAwareness;
         if (bHasHealthSnapshot && Snake->GetHealth()<LastHealth-.01f &&
             !Snake->IsGameOver())
             PlayCue(TEXT("hit"),Snake->GetActorLocation(),true);
@@ -204,6 +213,15 @@ void AMGAdaptiveAudioDirector::Tick(float Dt)
         if (Snake->IsGameOver()&&!bPreviousGameOver)
             PlayCue(TEXT("game_over_sting"),FVector::ZeroVector,false);
         bPreviousGameOver=Snake->IsGameOver();
+        // Actual mix duck when opening the non-pausing codec: readable
+        // dialogue takes precedence without restarting the music loop.
+        const float Target=Snake->IsCodecOpen()?MusicGain*.29f:MusicGain;
+        if (IsValid(MusicA) && MusicA->IsPlaying())
+            MusicA->SetVolumeMultiplier(FMath::FInterpTo(
+                MusicA->VolumeMultiplier,Target,Dt,5.f));
+        if (IsValid(MusicB) && MusicB->IsPlaying())
+            MusicB->SetVolumeMultiplier(FMath::FInterpTo(
+                MusicB->VolumeMultiplier,Target,Dt,5.f));
         ProcessPlayerFoley(Dt,Snake);
     }
 }
