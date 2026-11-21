@@ -321,6 +321,16 @@ void AMGMissionOne::RestoreSavedEquipment(AMGPlayerCharacter* Player)
         Equipment->RestoreItemQuantity(TEXT("RATION"), SavedRationsRemaining);
     if (SavedRCRounds >= 0)
         Equipment->RestoreWeaponAmmo(TEXT("RC_MISSILE"), SavedRCRounds);
+    // Retain spent supplies when revisiting after rescue; no loadout reset.
+    const UMGMissionOneSaveGame* Saved = Cast<UMGMissionOneSaveGame>(
+        UGameplayStatics::LoadGameFromSlot(TEXT("MissionOneV1"), 0));
+    if (Saved && Saved->Version >= 6)
+    {
+        for (const TPair<FName, int32>& Entry : Saved->WeaponRounds)
+            Equipment->RestoreWeaponAmmo(Entry.Key, Entry.Value);
+        for (const TPair<FName, int32>& Entry : Saved->ItemQuantities)
+            Equipment->RestoreItemQuantity(Entry.Key, Entry.Value);
+    }
     if (SavedMineCount >= 0)
         Equipment->RestoreItemQuantity(TEXT("MINES"), SavedMineCount);
 }
