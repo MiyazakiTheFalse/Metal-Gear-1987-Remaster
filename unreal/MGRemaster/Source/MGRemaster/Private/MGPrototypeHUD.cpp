@@ -379,9 +379,12 @@ void AMGPrototypeHUD::DrawHUD()
         DrawLine(X, Y + 3.f, X, Y + 11.f, FLinearColor::White, 1.f);
     }
 
-    const FString CoverHelp = Player->IsInCover() ?
-        TEXT("WALL: F / A KNOCK   AIM + SLIDE: CORNER PEEK   MOVE AWAY: RELEASE") :
-        TEXT("E / X: BREACH / INTERACT   MOVE INTO WALL: COVER   F / A: MELEE");
+    const FString StealthPrompt = Player->GetStealthInteractionPrompt();
+    const FString CoverHelp = !StealthPrompt.IsEmpty() ? StealthPrompt :
+        (Player->IsInCover() ?
+         TEXT("BACK TO WALL: F KNOCK / AIM + SLIDE TO PEEK / MOVE AWAY TO EXIT") :
+         TEXT("E: INTERACT / HOLD E: CHOKE / F: MELEE / MOVE INTO WALL: COVER"));
     DrawText(CoverHelp,
-             HudMuted, Margin, Height - 27.f * UiScale, nullptr, 0.69f * UiScale, false);
+             StealthPrompt.IsEmpty() ? HudMuted : HudGreen,
+             Margin, Height - 27.f * UiScale, nullptr, 0.69f * UiScale, false);
 }
