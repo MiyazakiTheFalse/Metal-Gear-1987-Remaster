@@ -55,6 +55,9 @@ public:
                                         EMGFacilitySecurityState Current);
     uint32 GetMissionFlags() const { return Flags; }
     FString GetObjectiveText() const;
+    // Real locally available actions for the HUD, using the same CanReach
+    // and mission-flag gates as actual interaction. No through-wall markers.
+    FString GetContextActionPrompt(const AMGPlayerCharacter* Player) const;
     FString GetPacingHint() const;
     FString GetRecentDialogue() const;
     // Optional 1995-era transceiver: dialogue is remake-authored, not original transcription.
