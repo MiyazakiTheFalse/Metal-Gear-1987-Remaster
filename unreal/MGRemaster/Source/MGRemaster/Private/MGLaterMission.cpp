@@ -91,6 +91,9 @@ void AMGLaterMission::BeginPlay()
     if (Mission==3) BuildExterior();
     else if (Mission==4) BuildBuildingTwo();
     else if (Mission==5) BuildEllenReturn();
+    else if (Mission==6) BuildDesertAndCowardDuck();
+    else if (Mission==7) BuildDeepBunker();
+    else if (Mission==8) BuildTX55Finale();
     RemoveDefeatedGates();
     if (AMGPlayerCharacter* Player=Cast<AMGPlayerCharacter>(
         UGameplayStatics::GetPlayerCharacter(this,0)))
@@ -271,6 +274,10 @@ void AMGLaterMission::BuildEllenReturn()
               FVector(9200,1000,95),1);
     // Same passage is traversed back to Madnar, whose dialogue now reacts
     // to Ellen's rescue. No invented in-person reunion scene is forced.
+    // An actual exit post, not a silent story transition: Madnar must
+    // provide the weapon weakness after Ellen is physically rescued.
+    TransitionMarker=Block(TEXT("M05_ResearchToDesertPassage"),
+                           FVector(3350,1800,90),FVector(.75f,.75f,1.6f),false);
     SpawnPoint=FVector(650,1800,90);
     if (Story() && Story()->HasBeat(TEXT("m05.ellen_wall_breached")) &&
         IsValid(WeakWall))
@@ -289,6 +296,13 @@ void AMGLaterMission::RemoveDefeatedGates()
             PassageGateB->Destroy();
         if (Story()->HasBeat(TEXT("m03.tank_defeated")) && IsValid(PassageGateC))
             PassageGateC->Destroy();
+    }
+    if (Mission==6)
+    {
+        if (Story()->HasBeat(TEXT("m06.card7_gate_open"))&&IsValid(PassageGateA))
+            PassageGateA->Destroy();
+        if (Story()->HasBeat(TEXT("m06.hostage_wing_open"))&&IsValid(PassageGateB))
+            PassageGateB->Destroy();
     }
     if (Mission==4)
     {
@@ -311,6 +325,11 @@ void AMGLaterMission::OnBossDefeated(FName Id)
     UMGCampaignState* State=Story();
     if (!State) return;
     State->RecordBeat(Id,FString::Printf(TEXT("ENCOUNTER CLEARED: %s"),*Id.ToString()));
+    if (Id==TEXT("m06.coward_duck_defeated"))
+    {
+        SetSubtitle(TEXT("SNAKE: The hostages are alive. Check each cell."));
+        AddPickup(TEXT("L06_CARD8"),TEXT("CARD8"),FVector(14300,900,90),1);
+    }
     if (Id==TEXT("M04_TX11_A") || Id==TEXT("M04_TX11_B"))
         if (State->HasBeat(TEXT("M04_TX11_A")) && State->HasBeat(TEXT("M04_TX11_B")))
         {
@@ -356,10 +375,16 @@ bool AMGLaterMission::SavePickupState(FName Id,AMGPlayerCharacter* Player)
     {
         for (const FMGEquipmentEntry& Entry:Player->GetEquipment()->GetWeapons())
             if (Entry.Id!=TEXT("NONE"))
+            {
                 Save->WeaponRounds.Add(Entry.Id,Entry.Quantity);
+                if (Entry.bOwned) Save->ExtraOwnedWeapons.AddUnique(Entry.Id);
+            }
         for (const FMGEquipmentEntry& Entry:Player->GetEquipment()->GetItems())
             if (Entry.Id!=TEXT("NONE"))
+            {
                 Save->ItemQuantities.Add(Entry.Id,Entry.Quantity);
+                if (Entry.bOwned) Save->ExtraOwnedItems.AddUnique(Entry.Id);
+            }
         Save->HandgunRounds=Player->GetEquipment()->GetHandgunRounds();
         Save->RationsRemaining=Player->GetEquipment()->GetItemQuantity(TEXT("RATION"));
     }
@@ -413,6 +438,8 @@ void AMGLaterMission::RestorePlayerEquipment(AMGPlayerCharacter* Player)
         else if (Id==TEXT("L03_RATION") || Id==TEXT("L04_RATION") ||
                  Id==TEXT("L05_RATION")) E->AwardItem(TEXT("RATION"),1);
     }
+    // Source artefacts owned in prior missions cannot be recreated from their
+    // pickup IDs alone; this generic owned-item ledger remains authoritative.
     if (Save->Version>=6)
     {
         for (const TPair<FName,int32>& Entry:Save->WeaponRounds)
@@ -461,6 +488,23 @@ bool AMGLaterMission::ClaimPickup(FWorldPickup& Pickup,AMGPlayerCharacter* Playe
                                TEXT("denied"));
     Pickup.bTaken=true;
     Pickup.Marker->Destroy();
+    // Finding a physical card has narrative consequences and opens the
+    // next architectural gate. Older builds missed this card-7 event.
+    if (UMGCampaignState* State=Story())
+    {
+        if (Pickup.Kind==TEXT("CARD7"))
+            State->RecordBeat(TEXT("m04.card7_claimed"),
+                TEXT("TX-11 SECURITY CABINET: Snake recovered access Card 7."));
+        else if (Pickup.Kind==TEXT("CARD8"))
+            State->RecordBeat(TEXT("m06.card8_acquired"),
+                TEXT("COWARD DUCK ARMORY: Snake recovered the final access card."));
+        else if (Pickup.Kind==TEXT("COMPASS"))
+            State->RecordBeat(TEXT("m06.compass_acquired"),
+                TEXT("Snake acquired the desert compass, making later travel reliable."));
+        else if (Pickup.Kind==TEXT("OXYGEN_TANK"))
+            State->RecordBeat(TEXT("m06.oxygen_acquired"),
+                TEXT("Breathing equipment recovered at the service intake."));
+    }
     Player->NotifyFeedback(FString::Printf(TEXT("%s / +%d"),
         *Pickup.Kind.ToString(),Pickup.Quantity),TEXT("select"));
     return true;
@@ -569,7 +613,7 @@ bool AMGLaterMission::TryInteract(AMGPlayerCharacter* Player)
             }
             else Player->NotifyFeedback(
                 State->HasBeat(TEXT("madnar.weakness")) ?
-                TEXT("TECHNICAL INTELLIGENCE ARCHIVED / MISSION 06 NOT YET BUILT") :
+                TEXT("TX-55 INTEL ARCHIVED / PASSAGE TO BUILDING THREE OPEN") :
                 TEXT("MADNAR WILL TALK ONLY AFTER ELLEN IS SAFE"),TEXT("denied"));
             return true;
         }
