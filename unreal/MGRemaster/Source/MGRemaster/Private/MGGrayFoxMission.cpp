@@ -295,14 +295,16 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         break;
     case MG_FOX_RESCUE:
         // Placeholder original prose, not a published game-script transcription.
-        Dialogue = TEXT("GRAY FOX: Metal Gear is real. Find the scientist behind it.");
+        Dialogue = TEXT("GRAY FOX: Metal Gear is nuclear-armed. Find Pettrovich.");
+        // The recorded objective does not depend on watching this dialogue.
+        // Fox remains a vulnerable captive, not an all-knowing AI companion.
         break;
     case MG_FOX_BREACH_EXIT_WALL:
         if (IsValid(EscapeWall)) EscapeWall->Destroy();
         Dialogue = TEXT("The outer passage is open. Stay low. Guards are nearby.");
         break;
     case MG_FOX_ESCAPE:
-        Dialogue = TEXT("PRISON ESCAPED — Gray Fox rescued. Checkpoint secured.");
+        Dialogue = TEXT("GRAY FOX RESCUED — FIND THE SCIENTIST");
         break;
     default: break;
     }
@@ -513,7 +515,14 @@ FString AMGGrayFoxMission::GetRecentDialogue() const
 
 FString AMGGrayFoxMission::GetTransceiverDialogue(int32 Channel) const
 {
-    // Remake-authored dialogue; Schneider knows architecture, not this prison layout.
+    // Remake-authored dialogue; Diane can be reached if her contact was
+    // learned from the rescued POW, but she has no magical prison blueprint.
+    if (Channel == 2)
+        return TEXT("DIANE: I heard one of your people may be inside.\n"
+                    "DIANE: I don't know this detention wing.\n"
+                    "SNAKE: Then I'll have to find him myself.\n"
+                    "DIANE: Be careful.");
+    // Schneider knows architecture, not this prison layout.
     if (Channel == 0)
     {
         if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
