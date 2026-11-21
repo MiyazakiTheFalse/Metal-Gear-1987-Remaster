@@ -6,6 +6,7 @@
 #include "MGPlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "Engine/StaticMeshActor.h"
 #include "GameFramework/DamageType.h"
 #include "MGEquipmentComponent.h"
 #include "MGSetpieceBoss.h"
