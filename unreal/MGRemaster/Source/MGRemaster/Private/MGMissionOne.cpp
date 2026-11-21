@@ -334,6 +334,9 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
             Player->NotifyFeedback(TEXT("TRANSFER NOT READY — CHECK INTEL"), TEXT("denied"));
             return true;
         }
+        // The older isolated slice checkpoint must never pre-complete a new
+        // campaign attempt. Capture opens a fresh dedicated prison checkpoint.
+        UGameplayStatics::DeleteGameInSlot(TEXT("GrayFoxSliceV1"), 0);
         Story->RecordBeat(TEXT("snake.capture"),
             TEXT("CAPTURED: Snake allows himself to be transferred into the secret prison. Equipment confiscated."));
         Player->LeaveCover();
