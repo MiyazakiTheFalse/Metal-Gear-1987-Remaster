@@ -36,7 +36,7 @@ void AMGGuardActor::BeginPlay()
 
 void AMGGuardActor::ConfigureDuty(FName DutyId, FName DutyName,
                                  FName ProtectedObject, const FVector& Assignment,
-                                 float StopSeconds)
+                                 float StopSeconds, const FVector& AssetFocusPoint)
 {
     if (DutyId.IsNone() || DutyName.IsNone() || ProtectedObject.IsNone())
     {
@@ -48,6 +48,7 @@ void AMGGuardActor::ConfigureDuty(FName DutyId, FName DutyName,
     AssignedDutyName = DutyName;
     AssignedObject = ProtectedObject;
     AssignmentAnchor = Assignment;
+    DutyFocusPoint = AssetFocusPoint;
     DutyPauseSeconds = FMath::Clamp(StopSeconds, 0.f, 6.f);
     Tags.AddUnique(DutyId);
     Tags.AddUnique(DutyName);
@@ -67,8 +68,16 @@ void AMGGuardActor::AdvanceAssignedRoutine(float DeltaSeconds)
     if (DutyPauseRemaining > 0.f)
     {
         DutyPauseRemaining = FMath::Max(0.f, DutyPauseRemaining - DeltaSeconds);
-        const float Scan = 12.f * FMath::Sin(GetWorld()->GetTimeSeconds() * 1.1f);
-        SetActorRotation(FRotator(0.f, GetActorRotation().Yaw + Scan * DeltaSeconds, 0.f));
+        // The inspection pause faces the actual protected object or gateway.
+        // A subtle scan is layered on top of that duty, not arbitrary spinning.
+        const FVector Look = (DutyFocusPoint - GetActorLocation()).GetSafeNormal2D();
+        if (!Look.IsNearlyZero())
+        {
+            const float Scan = 9.f * FMath::Sin(GetWorld()->GetTimeSeconds() * 1.1f);
+            SetActorRotation(FMath::RInterpTo(
+                GetActorRotation(), FRotator(0.f, Look.Rotation().Yaw + Scan, 0.f),
+                DeltaSeconds, 2.5f));
+        }
         return;
     }
     const FVector Point = PatrolWaypoints.IsEmpty() ? AssignmentAnchor :
