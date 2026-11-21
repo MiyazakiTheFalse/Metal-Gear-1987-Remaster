@@ -20,6 +20,10 @@ public:
     int32 GetMissionNumber() const;
     bool IsMissionThreeExteriorActive() const;
     bool SetMissionThreeExteriorActive(bool bExterior);
+    int32 GetTX55CorrectCharges() const;
+    bool RecordTX55Charge(bool bRightFoot);
+    float GetEscapeTimeRemaining() const;
+    bool SetEscapeTimeRemaining(float Seconds);
     FString GetMissionTitle() const;
     FString GetCharacterThread() const;
     int32 GetRadioContactCount() const;
