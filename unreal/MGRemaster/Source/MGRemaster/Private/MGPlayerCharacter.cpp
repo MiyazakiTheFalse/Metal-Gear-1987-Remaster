@@ -226,7 +226,7 @@ void AMGPlayerCharacter::MoveForward(float Value)
 {
     if (ControlledMissile.IsValid())
     {
-        ControlledMissile->SetSteering(0.f, Value);
+        ControlledMissile->SetPitchInput(Value);
         return;
     }
     if (Controller && !FMath::IsNearlyZero(Value))
@@ -255,7 +255,7 @@ void AMGPlayerCharacter::MoveRight(float Value)
 {
     if (ControlledMissile.IsValid())
     {
-        ControlledMissile->SetSteering(Value, 0.f);
+        ControlledMissile->SetYawInput(Value);
         return;
     }
     if (Controller && !FMath::IsNearlyZero(Value))
