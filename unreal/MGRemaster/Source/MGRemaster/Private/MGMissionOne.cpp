@@ -141,25 +141,25 @@ void AMGMissionOne::SpawnGuards()
     };
     // Waypoints authored in provisional remake metres, all within their zones.
     const TArray<FGuardRoute> Routes = {
-        {TEXT("G01_Approach"), TEXT("PERIMETER_RECON"), TEXT("INSERTION_ACCESS"), 1.6f,
+        {TEXT("G01_Approach"), FName(TEXT("PERIMETER_RECON")), FName(TEXT("INSERTION_ACCESS")), 1.6f,
          CM(11,3),
          {CM(11,12),CM(17,12),CM(17,15),CM(11,15)}},
-        {TEXT("G02_Trucks"), TEXT("LOGISTICS_SENTINEL"), TEXT("FIRST_TRUCK_LOADING_ZONE"), 1.2f,
+        {TEXT("G02_Trucks"), FName(TEXT("LOGISTICS_SENTINEL")), FName(TEXT("FIRST_TRUCK_LOADING_ZONE")), 1.2f,
          CM(12,23),
          {CM(8,27),CM(19,27),CM(19,31),CM(8,31)}},
-        {TEXT("G03_TruckDeparture"), TEXT("LOADING_SHIFT"), TEXT("CARD1_TRUCK"), 2.5f,
+        {TEXT("G03_TruckDeparture"), FName(TEXT("LOADING_SHIFT")), FName(TEXT("CARD1_TRUCK")), 2.5f,
          CM(12,23),
          {CM(18,33),CM(13,33),CM(13,29)}},
-        {TEXT("G04_SecondYard"), TEXT("VEHICLE_INSPECTION"), TEXT("SECOND_TRUCK_COMPOUND"), 1.4f,
+        {TEXT("G04_SecondYard"), FName(TEXT("VEHICLE_INSPECTION")), FName(TEXT("SECOND_TRUCK_COMPOUND")), 1.4f,
          CM(61,33),
          {CM(53,29),CM(65,29),CM(65,34),CM(53,34)}},
-        {TEXT("G05_Lift"), TEXT("ELEVATOR_ACCESS_CONTROL"), TEXT("BUILDING_ONE_LIFT"), 2.0f,
+        {TEXT("G05_Lift"), FName(TEXT("ELEVATOR_ACCESS_CONTROL")), FName(TEXT("BUILDING_ONE_LIFT")), 2.0f,
          CM(92,26),
          {CM(70,24),CM(70,36)}},
-        {TEXT("G07_SecondFloorCorridor"), TEXT("SERVICE_SECURITY"), TEXT("2F_MAINTENANCE_ACCESS"), 1.8f,
+        {TEXT("G07_SecondFloorCorridor"), FName(TEXT("SERVICE_SECURITY")), FName(TEXT("2F_MAINTENANCE_ACCESS")), 1.8f,
          CM(61,34,690),
          {CM(58,29,690),CM(69,29,690),CM(69,35,690)}},
-        {TEXT("G08_ThirdFloorCameraGallery"), TEXT("SURVEILLANCE_MAINTENANCE"), TEXT("3F_CCTV_GALLERY"), 1.7f,
+        {TEXT("G08_ThirdFloorCameraGallery"), FName(TEXT("SURVEILLANCE_MAINTENANCE")), FName(TEXT("3F_CCTV_GALLERY")), 1.7f,
          CM(79,39,1290),
          {CM(65,28,1290),CM(76,28,1290),CM(76,30,1290),CM(65,30,1290)}}
         // G06's optional maintenance wing is sealed in source-fidelity mode.
