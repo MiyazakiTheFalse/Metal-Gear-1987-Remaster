@@ -33,7 +33,7 @@ class GuardDutyContractTests(unittest.TestCase):
         ids = [x["id"] for x in CONTRACT["current_implemented_posts"] if x["mission"] == 1]
         self.assertEqual(7, len(ids))
         for name in ids:
-            self.assertIn(f'TEXT("{name}"), TEXT(', OPENING)
+            self.assertIn(f'TEXT("{name}"), FName(TEXT(', OPENING)
         self.assertIn('Guard->ConfigureDuty(FName(Route.Name)', OPENING)
         self.assertIn('Guard->ConfigurePatrol(Route.Nodes)', OPENING)
         self.assertIn('Route.AssetFocus', OPENING)
@@ -51,7 +51,7 @@ class GuardDutyContractTests(unittest.TestCase):
                 self.assertFalse(prisoner["interactive"])
                 self.assertIn(prisoner["id"], PRISON)
         for duty in ("CELL_BLOCK_WATCH", "PROPERTY_CUSTODY"):
-            self.assertIn(f'TEXT("{duty}")', PRISON)
+            self.assertIn(f'FName(TEXT("{duty}"))', PRISON)
         self.assertEqual(2, PRISON.count("GetWorld()->SpawnActor<AMGGuardActor>"))
 
     def test_background_cells_have_colliding_containment(self):
