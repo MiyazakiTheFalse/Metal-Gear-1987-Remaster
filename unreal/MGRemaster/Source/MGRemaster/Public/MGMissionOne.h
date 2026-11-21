@@ -22,6 +22,8 @@ public:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaSeconds) override;
     bool TryInteract(AMGPlayerCharacter* Player);
+    /** Called only when a physical remote missile strikes the actual panel. */
+    bool DisableElectricalSupply();
     // Called after ammunition use/consumable use to persist spent stock.
     void PersistInventory(AMGPlayerCharacter* Player) { SaveProgress(Player); }
     void RestoreSavedEquipment(AMGPlayerCharacter* Player);
@@ -52,6 +54,35 @@ private:
     bool bCardDoorOpened = false;
     bool bElevatorReached = false;
     bool bPOWRescued = false;
+    bool bDianePOWRescued = false;
+    bool bFoxLocationPOWRescued = false;
+    bool bCaptureMethodPOWRescued = false;
+    bool bRCStoreDoorOpened = false;
+    bool bCardTwoDoorOpened = false;
+    bool bFoxLocationDoorOpened = false;
+    bool bCaptureMethodDoorOpened = false;
+    bool bDianeDoorOpened = false;
+    bool bElectricPanelDisabled = false;
+    float ElectricDamageAccum = 0.f;
+    float ElectricWarningCooldown = 0.f;
+    UPROPERTY()
+    AStaticMeshActor* CardTwoDoor = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* RCStoreDoor = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* FoxLocationDoor = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* CaptureMethodDoor = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* DianeDoor = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* ElectricPanel = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* DianePrisoner = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* FoxLocationPrisoner = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* CaptureMethodPrisoner = nullptr;
     float BeatSubtitleTime = 0.f;
     FString BeatSubtitle;
     bool bPrisonerDoorOpened = false;
@@ -65,6 +96,8 @@ private:
     float GasWarningCooldown = 0.f;
     float GasDamageAccum = 0.f;
     int32 SavedHandgunRounds = -1;
+    int32 SavedRCRounds = -1;
+    int32 SavedMineCount = -1;
     int32 SavedRationsRemaining = -1;
     bool bMissionThreeCacheClaimed = false;
     UPROPERTY()
