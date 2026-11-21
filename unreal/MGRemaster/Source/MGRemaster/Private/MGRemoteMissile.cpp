@@ -17,10 +17,13 @@ AMGRemoteMissile::AMGRemoteMissile()
     Body->SetCollisionProfileName(TEXT("BlockAll"));
     Body->SetGenerateOverlapEvents(false);
 }
-void AMGRemoteMissile::SetSteering(float YawAxis, float PitchAxis)
+void AMGRemoteMissile::SetYawInput(float Axis)
 {
-    YawSteer = FMath::Clamp(YawAxis, -1.f, 1.f);
-    PitchSteer = FMath::Clamp(PitchAxis, -1.f, 1.f);
+    YawSteer = FMath::Clamp(Axis, -1.f, 1.f);
+}
+void AMGRemoteMissile::SetPitchInput(float Axis)
+{
+    PitchSteer = FMath::Clamp(Axis, -1.f, 1.f);
 }
 void AMGRemoteMissile::Tick(float DeltaSeconds)
 {
