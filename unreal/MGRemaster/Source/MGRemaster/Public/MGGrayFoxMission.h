@@ -49,6 +49,12 @@ private:
     AStaticMeshActor* ExitMarker = nullptr;
     UPROPERTY(Transient)
     AStaticMeshActor* GearLocker = nullptr;
+    UPROPERTY(Transient)
+    AStaticMeshActor* ShootGunnerAmmo = nullptr;
+    UPROPERTY(Transient)
+    AStaticMeshActor* ShootGunnerCard = nullptr;
+    bool bShootGunnerSpawned = false;
+    void SpawnShootGunnerWhenArmed();
 
     uint32 Flags = 0;
     bool bGearRecovered = false;
