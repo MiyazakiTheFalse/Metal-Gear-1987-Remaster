@@ -193,3 +193,16 @@ void UMGEquipmentComponent::InitialiseMissionOneLoadout()
     }
     SetFeedback(TEXT("MISSION START — NO WEAPONS OR EQUIPMENT"));
 }
+
+bool UMGEquipmentComponent::AwardAmmunition(FName WeaponId, int32 Count)
+{
+    if (Count <= 0) return false;
+    for (FMGEquipmentEntry& Entry : Weapons)
+        if (Entry.Id == WeaponId)
+        {
+            // Ammunition is stored even if the actual firearm is not yet owned.
+            Entry.Quantity = FMath::Clamp(Entry.Quantity + Count, 0, 999);
+            return true;
+        }
+    return false;
+}
