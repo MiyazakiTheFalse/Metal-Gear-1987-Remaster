@@ -12,13 +12,21 @@ void UMGEquipmentComponent::BeginPlay()
         {FName(TEXT("NONE")), TEXT("NO WEAPON"), 0, true, false},
         {FName(TEXT("STUN")), TEXT("STUN PISTOL [TEST]"), 8, true, false},
         {FName(TEXT("HANDGUN")), TEXT("HANDGUN"), 0, false, false},
-        {FName(TEXT("RC_MISSILE")), TEXT("REMOTE-CONTROLLED MISSILE"), 0, false, false}
+        {FName(TEXT("RC_MISSILE")), TEXT("REMOTE-CONTROLLED MISSILE"), 0, false, false},
+        {FName(TEXT("ROCKET_LAUNCHER")), TEXT("ROCKET LAUNCHER"), 0, false, false},
+        {FName(TEXT("GRENADE_LAUNCHER")), TEXT("GRENADE LAUNCHER"), 0, false, false}
     };
     Items = {
         {FName(TEXT("NONE")), TEXT("NO ITEM"), 0, true, false},
         {FName(TEXT("RATION")), TEXT("RATION [TEST]"), 1, true, true},
         {FName(TEXT("CARD1")), TEXT("CARD 1"), 0, false, false},
         {FName(TEXT("CARD2")), TEXT("CARD 2"), 0, false, false},
+        {FName(TEXT("CARD3")), TEXT("CARD 3"), 0, false, false},
+        {FName(TEXT("CARD4")), TEXT("CARD 4"), 0, false, false},
+        {FName(TEXT("CARD5")), TEXT("CARD 5"), 0, false, false},
+        {FName(TEXT("CARD6")), TEXT("CARD 6"), 0, false, false},
+        {FName(TEXT("CARD7")), TEXT("CARD 7"), 0, false, false},
+        {FName(TEXT("PLASTIC_EXPLOSIVE")), TEXT("PLASTIC EXPLOSIVE"), 0, false, true},
         {FName(TEXT("BINOCULARS")), TEXT("BINOCULARS"), 0, false, false},
         {FName(TEXT("GASMASK")), TEXT("GAS MASK"), 0, false, false},
         {FName(TEXT("MINES")), TEXT("LAND MINES"), 0, false, true}
