@@ -132,13 +132,16 @@ void AMGPrototypeHUD::DrawHUD()
     if (Opening)
     {
         DrawRect(HudPanel, Margin, Margin + 113.f * UiScale,
-                 FMath::Min(590.f * UiScale, Width - 2.f * Margin), 88.f * UiScale);
-        DrawText(TEXT("MISSION 01 / OPERATION INTRUDE N313"), HudGreen,
+                 FMath::Min(590.f * UiScale, Width - 2.f * Margin), 108.f * UiScale);
+        DrawText(FString::Printf(TEXT("MISSION 01 / BUILDING ONE / %dF"), Opening->GetCurrentFloor()), HudGreen,
                  Margin + 12.f * UiScale, Margin + 120.f * UiScale,
                  nullptr, 0.75f * UiScale, false);
         DrawText(Opening->GetObjectiveText(), FLinearColor::White,
                  Margin + 12.f * UiScale, Margin + 149.f * UiScale,
                  nullptr, 0.79f * UiScale, false);
+        DrawText(FString::Printf(TEXT("LIFT: Q CYCLE / E TRAVEL / TARGET %dF"), Opening->GetSelectedFloor()),
+                 HudMuted, Margin + 12.f * UiScale, Margin + 179.f * UiScale,
+                 nullptr, 0.67f * UiScale, false);
     }
     if (Mission)
     {
