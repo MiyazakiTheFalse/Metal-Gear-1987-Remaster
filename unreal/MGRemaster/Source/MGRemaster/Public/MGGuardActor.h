@@ -23,6 +23,12 @@ public:
         PatrolWaypoints = WorldWaypoints;
         PatrolWaypointIndex = PatrolWaypoints.Num() > 1 ? 1 : 0;
     }
+    /** Every deployed sentry has an authored duty, an actual protected object
+     * and a local route, rather than a random enemy spawn. */
+    void ConfigureDuty(FName DutyId, FName DutyName, FName ProtectedObject,
+                       const FVector& AssignmentAnchor, float StopSeconds);
+    FName GetDutyId() const { return AssignedDutyId; }
+    FName GetProtectedObject() const { return AssignedObject; }
     // A confirmed sighting shared by a local, functioning CCTV system.
     void ReceiveCameraAlert(const FVector& SightLocation, float DurationSeconds);
     bool IsIncapacitated() const { return bIncapacitated; }
@@ -42,6 +48,7 @@ private:
     int32 ConsecutiveKnocks = 0;
     bool AdvanceNoiseInvestigation(float DeltaSeconds);
     void MoveToward(const FVector& Destination, float Speed, float DeltaSeconds);
+    void AdvanceAssignedRoutine(float DeltaSeconds);
 
     UPROPERTY(VisibleAnywhere, Category="Prototype")
     UCapsuleComponent* CollisionCapsule;
@@ -49,6 +56,15 @@ private:
     UPROPERTY(VisibleAnywhere, Category="Prototype")
     UStaticMeshComponent* ProxyBody;
 
+    // Contract is shared across the opening, detention, upper floors and
+    // future mission encounter authoring.
+    FName AssignedDutyId = NAME_None;
+    FName AssignedDutyName = NAME_None;
+    FName AssignedObject = NAME_None;
+    FVector AssignmentAnchor = FVector::ZeroVector;
+    float DutyPauseSeconds = 0.8f;
+    float DutyPauseRemaining = 0.f;
+    float DutyBlockedSeconds = 0.f;
     TArray<FVector> PatrolWaypoints;
     int32 PatrolWaypointIndex = 0;
     FVector PatrolOrigin = FVector::ZeroVector;
