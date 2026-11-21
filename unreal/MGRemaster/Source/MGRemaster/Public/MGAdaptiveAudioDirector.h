@@ -4,6 +4,7 @@
 #include "MGAdaptiveAudioDirector.generated.h"
 class UAudioComponent;
 class USoundBase;
+class USoundAttenuation;
 class AMGPlayerCharacter;
 
 /**
@@ -28,6 +29,8 @@ public:
     void SetBusLevels(float NewMusic, float NewEffects);
     FString GetCurrentCueName() const { return ActiveMusic.ToString(); }
 private:
+    UPROPERTY(Transient)
+    USoundAttenuation* SpatialAttenuation = nullptr;
     UPROPERTY()
     UAudioComponent* MusicA = nullptr;
     UPROPERTY()
