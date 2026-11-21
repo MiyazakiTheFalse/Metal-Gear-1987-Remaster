@@ -465,6 +465,7 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
     Super::SetupPlayerInputComponent(Input);
     Input->BindAxis("MoveForward", this, &AMGPlayerCharacter::MoveForward);
     Input->BindAxis("MoveRight", this, &AMGPlayerCharacter::MoveRight);
+    Input->BindAxis("EquipmentScroll", this, &AMGPlayerCharacter::EquipmentScroll);
     Input->BindAxis("Turn", this, &AMGPlayerCharacter::Turn);
     Input->BindAxis("LookUp", this, &AMGPlayerCharacter::LookUp);
     Input->BindAxis("TurnRate", this, &AMGPlayerCharacter::TurnRate);
@@ -497,6 +498,9 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
 }
 void AMGPlayerCharacter::MoveForward(float Value)
 {
+    // During a held inventory window, left stick scrolls the strip; it must
+    // not accidentally walk Snake out of cover or into a live mine field.
+    if (Equipment && (Equipment->IsItemWindowOpen() || Equipment->IsWeaponWindowOpen())) return;
     if (Controller && !FMath::IsNearlyZero(Value))
     {
         const FRotator Yaw(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -521,6 +525,7 @@ void AMGPlayerCharacter::MoveForward(float Value)
 }
 void AMGPlayerCharacter::MoveRight(float Value)
 {
+    if (Equipment && (Equipment->IsItemWindowOpen() || Equipment->IsWeaponWindowOpen())) return;
     if (Controller && !FMath::IsNearlyZero(Value))
     {
         const FRotator Yaw(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -1146,12 +1151,25 @@ void AMGPlayerCharacter::NotifyFeedback(const FString& Message, FName CueName)
     if (USoundBase* Sound = LoadObject<USoundBase>(nullptr, *ObjectRef))
         UGameplayStatics::PlaySound2D(this, Sound, 0.65f);
 }
+void AMGPlayerCharacter::EquipmentScroll(float Value)
+{
+    if (!Equipment || (!Equipment->IsItemWindowOpen() && !Equipment->IsWeaponWindowOpen()) ||
+        !GetWorld() || FMath::Abs(Value) < .62f) return;
+    const float Now = GetWorld()->GetRealTimeSeconds();
+    if (Now < NextEquipmentScrollAt) return;
+    // A modest 180ms held-stick repeat feels like stepped MGS scrolling,
+    // without input spam or any change to authoritative inventory.
+    if (Value > 0.f) SelectionPrevious();
+    else SelectionNext();
+    NextEquipmentScrollAt = Now + .18f;
+}
 void AMGPlayerCharacter::WeaponWindowStart()
 {
     if (bCodecOpen) return;
     if (Equipment)
     {
         Equipment->OpenWeaponWindow();
+        NextEquipmentScrollAt = 0.f;
         ApplyMenuTimeState();
         NotifyFeedback(TEXT("WEAPON SELECTION — TIME SLOWED"), TEXT("menu"));
     }
@@ -1174,6 +1192,7 @@ void AMGPlayerCharacter::ItemWindowStart()
     if (Equipment)
     {
         Equipment->OpenItemWindow();
+        NextEquipmentScrollAt = 0.f;
         ApplyMenuTimeState();
         NotifyFeedback(TEXT("ITEM SELECTION — TIME SLOWED"), TEXT("menu"));
     }
