@@ -19,9 +19,13 @@ class MGREMASTER_API AMGMissionOne : public AActor
 public:
     AMGMissionOne();
     virtual void BeginPlay() override;
+    virtual void Tick(float DeltaSeconds) override;
     bool TryInteract(AMGPlayerCharacter* Player);
     void RestoreSavedEquipment(AMGPlayerCharacter* Player);
     FString GetObjectiveText() const;
+    bool CycleLiftDestination(AMGPlayerCharacter* Player);
+    int32 GetCurrentFloor() const { return CurrentFloor; }
+    bool IsLiftTravelling() const { return bLiftTravelling; }
     bool HasReachedElevator() const { return bElevatorReached; }
     FVector EntryLocation() const { return FVector(700.f, 700.f, 90.f); }
 private:
@@ -41,6 +45,18 @@ private:
     AStaticMeshActor* CardDoor = nullptr;
     bool bCardDoorOpened = false;
     bool bElevatorReached = false;
+    bool bPOWRescued = false;
+    bool bLiftTravelling = false;
+    float LiftTravelRemaining = 0.f;
+    int32 CurrentFloor = 1;
+    int32 SelectedFloor = 3;
+    int32 DestinationFloor = 1;
+    TWeakObjectPtr<AMGPlayerCharacter> LiftPassenger;
+    static FVector FloorLiftLocation(int32 Floor);
+    bool StartLift(AMGPlayerCharacter* Player);
+    void FinishLift();
+    bool IsNearLift(const AMGPlayerCharacter* Player) const;
+    void BuildUpperFloors();
     FVector SavedCheckpoint = FVector(700.f, 700.f, 90.f);
     void SaveProgress(AMGPlayerCharacter* Player);
     AStaticMeshActor* Block(FName Tag, FVector Position, FVector Scale, bool bCollision = true);
