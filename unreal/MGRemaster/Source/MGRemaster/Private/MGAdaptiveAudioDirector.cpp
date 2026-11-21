@@ -71,7 +71,15 @@ bool AMGAdaptiveAudioDirector::PlayCue(FName CueId,FVector Origin,bool bSpatial)
     if (Prev && Now-*Prev<MinSpacing) return true;
     CueLastPlayed.Add(Resolved,Now);
     if (bSpatial)
-        UGameplayStatics::PlaySoundAtLocation(this,Sound,Origin,EffectsGain);
+    {
+        float Gain=EffectsGain;
+        if (const AActor* Listener=UGameplayStatics::GetPlayerPawn(this,0))
+        {
+            const float Dist=FVector::Dist(Listener->GetActorLocation(),Origin);
+            Gain*=FMath::Clamp(1.f/(1.f+FMath::Square(Dist/850.f)),.025f,1.f);
+        }
+        UGameplayStatics::PlaySoundAtLocation(this,Sound,Origin,Gain);
+    }
     else UGameplayStatics::PlaySound2D(this,Sound,EffectsGain*.64f);
     return true;
 }
