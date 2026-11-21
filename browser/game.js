@@ -1092,7 +1092,18 @@ function strikePanel(i,wall,seam){
  noiseEvents.push({x:wall.x,z:wall.z,power:wallHits[i]===3?9:4,life:.65});
  save();
 }
-function reset(){try{localStorage.removeItem(STORAGE)}catch(e){} location.reload()}
+// A retry must NEVER delete earned Card 1, finite ammunition, world bodies,
+// boss progress or later checkpoint routes. Fresh-game deletion lives only in
+// the title's explicit and safely defaulted confirmation dialog.
+function retryCheckpoint(){
+ let checkpoint=null;
+ try{checkpoint=localStorage.getItem(STORAGE)}catch(e){}
+ if(!checkpoint){popup('NO CHECKPOINT AVAILABLE',2);playCue('denied');return false;}
+ location.hash='#retry-checkpoint';
+ location.reload();
+ return true;
+}
+
 function activateBreach(wall,crack,scatter=true){
  if(!wall.active)return;
  wall.active=false;crack.active=false;
@@ -2816,7 +2827,7 @@ for(let i=0;i<titleOptions.length;i++){
   for(let j=0;j<titleOptions.length;j++)
    $(titleOptions[j]).dataset.selected=j===index?'true':'false';});
 }
-$('rehearse').onclick=()=>{location.search='?boss'};$('start').onclick=requestNewOperation;$('resume').onclick=()=>start(true);$('brief').onclick=openTitleBriefing;$('briefStart').onclick=requestNewOperation;$('backBrief').onclick=()=>$('briefing').style.display='none';$('unpause').onclick=()=>setPaused(false);$('pauseIntel').onclick=()=>action('intel');$('restart').onclick=reset;$('retry').onclick=reset;$('retryEscort').onclick=()=>location.reload();$('finishIntel').onclick=()=>setPaused(true,'intel');$('returnToGame').onclick=()=>setPaused(false);$('closeIntel').onclick=()=>setPaused(false);$('tipsToggle').onchange=()=>{discovery.showTips=!!tipToggle.checked;save()};
+$('rehearse').onclick=()=>{location.search='?boss'};$('start').onclick=requestNewOperation;$('resume').onclick=()=>start(true);$('brief').onclick=openTitleBriefing;$('briefStart').onclick=requestNewOperation;$('backBrief').onclick=()=>$('briefing').style.display='none';$('unpause').onclick=()=>setPaused(false);$('pauseIntel').onclick=()=>action('intel');$('restart').onclick=retryCheckpoint;$('retry').onclick=retryCheckpoint;$('retryEscort').onclick=retryCheckpoint;$('finishIntel').onclick=()=>setPaused(true,'intel');$('returnToGame').onclick=()=>setPaused(false);$('closeIntel').onclick=()=>setPaused(false);$('tipsToggle').onchange=()=>{discovery.showTips=!!tipToggle.checked;save()};
 canvas.onclick=()=>{if(started&&!paused&&canvas.requestPointerLock)canvas.requestPointerLock().catch(()=>{})};
 canvas.addEventListener('contextmenu',e=>e.preventDefault());
 document.addEventListener('mousemove',e=>{if(document.pointerLockElement===canvas&&!paused){cam.yaw-=e.movementX*.0023;cam.pitch=clamp(cam.pitch+e.movementY*.002,-.74,.78);discovery.looked=true}});
@@ -2850,7 +2861,7 @@ document.addEventListener('keydown',e=>{lastInputIsPad=false;const k=e.key.toLow
 }if(window.MGCinematicDirector?.active&&(k===' '||k==='escape')){
  e.preventDefault();window.MGCinematicDirector.skip();return;
 }if(window.MGCinematicDirector?.blocking)return;
-if(k==='escape'){action('pause');return}if(paused){if(k==='j'||k==='c')setPaused(false);return}const actions={e:'interact',control:'crouch',z:'prone',v:'cover',f:'melee',n:'knock',j:'intel',c:'codec',t:'tips','[':'previous',']':'next'};if(actions[k])action(actions[k]);if(k==='tab')action('equipitem');if(k==='g')action('equipweapon');if(k==='r')reset();if(k==='q')cam.shoulder*=-1;});document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();key[k]=false;if(k==='tab'||k==='g')action('equipclose')});window.addEventListener('blur',()=>{for(const k of Object.keys(key))key[k]=false;if(equipOpen)action('equipclose')});
+if(k==='escape'){action('pause');return}if(paused){if(k==='j'||k==='c')setPaused(false);return}const actions={e:'interact',control:'crouch',z:'prone',v:'cover',f:'melee',n:'knock',j:'intel',c:'codec',t:'tips','[':'previous',']':'next'};if(actions[k])action(actions[k]);if(k==='tab')action('equipitem');if(k==='g')action('equipweapon');if(k==='r')retryCheckpoint();if(k==='q')cam.shoulder*=-1;});document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();key[k]=false;if(k==='tab'||k==='g')action('equipclose')});window.addEventListener('blur',()=>{for(const k of Object.keys(key))key[k]=false;if(equipOpen)action('equipclose')});
 function readGamepad(){const p=pollGamepad();updatePadStatus(p);padUsing=!!p&&(Math.abs(p.axes[0]||0)>.16||Math.abs(p.axes[1]||0)>.16);if(!p){padPrev=[];return;}const now=p.buttons.map(pressed);const previous=padPrev;const down=i=>now[i]&&!previous[i];const up=i=>!now[i]&&previous[i];padPrev=now;if(!started){
  if(!$('newGameConfirm').hidden){
   if(down(14))setNewGameConfirmChoice(0);
@@ -2876,6 +2887,15 @@ function frame(now){requestAnimationFrame(frame);const real=clamp((now-last)/100
  }const dt=started&&!paused?real*(equipOpen?.2:1):0;if(started&&!paused){gameTime+=dt;levelTime+=dt;elapsedStage+=dt;if(!window.MGCinematicDirector?.blocking){
  updatePlayer(dt);updateFox(dt);updateGuards(dt);
 }ambience(dt);for(const f of footsteps)f.life-=dt;footsteps=footsteps.filter(f=>f.life>0);shots.forEach(s=>s.life-=dt);shots=shots.filter(s=>s.life>0);for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.z+=p.vz*dt;p.vy-=4.4*dt;p.life-=dt}particles=particles.filter(p=>p.life>0);noiseEvents.forEach(n=>n.life-=dt);noiseEvents=noiseEvents.filter(n=>n.life>0);if(awareness===0&&stage!==4&&Math.floor(gameTime/12)!==Math.floor((gameTime-dt)/12))save();if(awareness!==prevAlert)record('awareness.'+awareness);if(awareness===3&&prevAlert!==3)achievement.push({time:gameTime});prevAlert=awareness;}drawFrame(gameTime,dt);if(started)updateHUD(dt);frameCount++;if(now-frameStart>1000){$('fps').textContent=Math.round(frameCount*1000/(now-frameStart))+' FPS';frameStart=now;frameCount=0}}
+// An explicit retry request resumes a persisted checkpoint after the browser
+// has reset ALL transient combat, guard and animation state with a clean page.
+// Do not replay an old save when the player simply opens the title normally.
+if(location.hash==='#retry-checkpoint'){
+ location.hash='';
+ let available=false;
+ try{available=!!localStorage.getItem(STORAGE)}catch(e){}
+ if(available)start(true);
+}
 // Console contract for deterministic browser tests, never elevated to source fidelity.
 window.__mgGameDebug={previewRigActors:(time=gameTime)=>activeCastForRig(time),get state(){return {stage,service:{...service},roof:{...roof},b2:{...b2,armed:[...b2.armed]},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
  firstCardEarned,rationEarned,rationRemaining,binocularsEarned,
