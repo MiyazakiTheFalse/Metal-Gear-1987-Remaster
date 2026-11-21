@@ -31,6 +31,7 @@
 #include "GameFramework/GameUserSettings.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 
 AMGPlayerCharacter::AMGPlayerCharacter()
@@ -155,6 +156,20 @@ void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AMGPlayerCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    if (bGameOver)
+    {
+        GameOverElapsed += FMath::Max(0.f, DeltaSeconds);
+        if (!bFailureRadioCuePlayed && GameOverElapsed >= .43f)
+        {
+            bFailureRadioCuePlayed = true;
+            // Completely new, optional sound: never include extracted MGS VO.
+            if (USoundBase* Radio = LoadObject<USoundBase>(
+                    nullptr, TEXT("/Game/Feedback/game_over_radio.game_over_radio")))
+                UGameplayStatics::PlaySound2D(this, Radio, .65f);
+        }
+        return; // Death no longer runs stealth, combat or movement systems.
+    }
+    if (IsTitleScreenActive()) return;
     UpdateStealthInteractions(DeltaSeconds);
     CombatNoiseTimer = FMath::Max(0.f, CombatNoiseTimer - DeltaSeconds);
     AdvanceMeleeCombo(DeltaSeconds);
@@ -269,6 +284,9 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
     Input->BindAction("Interact", IE_Pressed, this, &AMGPlayerCharacter::Interact);
     Input->BindAction("Interact", IE_Released, this, &AMGPlayerCharacter::ReleaseInteract);
     Input->BindAction("RestartRescue", IE_Pressed, this, &AMGPlayerCharacter::RestartRescue);
+    Input->BindAction("FailurePrevious", IE_Pressed, this, &AMGPlayerCharacter::FailureMenuPrevious);
+    Input->BindAction("FailureNext", IE_Pressed, this, &AMGPlayerCharacter::FailureMenuNext);
+    Input->BindAction("FailureConfirm", IE_Pressed, this, &AMGPlayerCharacter::FailureMenuConfirm);
     Input->BindAction("MissionLog", IE_Pressed, this, &AMGPlayerCharacter::ToggleMissionLog);
     Input->BindAction("WeaponWindow", IE_Pressed, this, &AMGPlayerCharacter::WeaponWindowStart);
     Input->BindAction("WeaponWindow", IE_Released, this, &AMGPlayerCharacter::WeaponWindowStop);
@@ -286,6 +304,7 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
 }
 void AMGPlayerCharacter::MoveForward(float Value)
 {
+    if (bGameOver || IsTitleScreenActive()) return;
     if (ControlledMissile.IsValid())
     {
         ControlledMissile->SetPitchInput(Value);
@@ -315,6 +334,7 @@ void AMGPlayerCharacter::MoveForward(float Value)
 }
 void AMGPlayerCharacter::MoveRight(float Value)
 {
+    if (bGameOver || IsTitleScreenActive()) return;
     if (ControlledMissile.IsValid())
     {
         ControlledMissile->SetYawInput(Value);
@@ -340,21 +360,29 @@ void AMGPlayerCharacter::MoveRight(float Value)
             AddMovementInput(Direction, Value);
     }
 }
-void AMGPlayerCharacter::Turn(float Value) { AddControllerYawInput(Value); }
-void AMGPlayerCharacter::LookUp(float Value) { AddControllerPitchInput(Value); }
+void AMGPlayerCharacter::Turn(float Value)
+{
+    if (!bGameOver && !IsTitleScreenActive()) AddControllerYawInput(Value);
+}
+void AMGPlayerCharacter::LookUp(float Value)
+{
+    if (!bGameOver && !IsTitleScreenActive()) AddControllerPitchInput(Value);
+}
 // Unlike raw mouse deltas, gamepad sticks represent velocity and require delta time.
 void AMGPlayerCharacter::TurnRate(float Value)
 {
-    if (GetWorld()) AddControllerYawInput(Value * 100.f * GetWorld()->GetDeltaSeconds());
+    if (GetWorld() && !bGameOver && !IsTitleScreenActive())
+        AddControllerYawInput(Value * 100.f * GetWorld()->GetDeltaSeconds());
 }
 void AMGPlayerCharacter::LookUpRate(float Value)
 {
-    if (GetWorld()) AddControllerPitchInput(Value * 80.f * GetWorld()->GetDeltaSeconds());
+    if (GetWorld() && !bGameOver && !IsTitleScreenActive())
+        AddControllerPitchInput(Value * 80.f * GetWorld()->GetDeltaSeconds());
 }
 
 void AMGPlayerCharacter::AimStart()
 {
-    if (bMeleeInProgress) return;
+    if (bMeleeInProgress || bGameOver || IsTitleScreenActive()) return;
     bAiming = true;
     bSprinting = false;
     UpdateMovementState();
@@ -362,6 +390,7 @@ void AMGPlayerCharacter::AimStart()
 void AMGPlayerCharacter::AimStop() { bAiming = false; UpdateMovementState(); }
 void AMGPlayerCharacter::SprintStart()
 {
+    if (bGameOver || IsTitleScreenActive()) return;
     if (!bAiming && !bIsCrouched && !bIsProne &&
         !bMeleeInProgress && !ChokedGuard.IsValid() && !DraggedGuard.IsValid())
     {
@@ -373,6 +402,7 @@ void AMGPlayerCharacter::SprintStart()
 void AMGPlayerCharacter::SprintStop() { bSprinting = false; UpdateMovementState(); }
 void AMGPlayerCharacter::CrouchToggle()
 {
+    if (bGameOver || IsTitleScreenActive()) return;
     bSprinting = false;
     if (bIsProne)
     {
@@ -452,6 +482,11 @@ float AMGPlayerCharacter::GetVisibilityFactor() const
 
 void AMGPlayerCharacter::Interact()
 {
+    if (bGameOver || IsTitleScreenActive())
+    {
+        FailureMenuConfirm();
+        return;
+    }
     if (bMeleeInProgress) return; // No simultaneous grapple/loot mid-strike.
     bInteractHeld = true;
     if (ChokedGuard.IsValid()) return; // E held: maintain grip
@@ -698,6 +733,7 @@ void AMGPlayerCharacter::UpdateStealthInteractions(float DeltaSeconds)
 
 void AMGPlayerCharacter::RestartRescue()
 {
+    if (bGameOver || IsTitleScreenActive()) return; // F9 cannot erase progress
 #if !UE_BUILD_SHIPPING
     // Deliberately developer-only: F9 in the opening/return area starts a
     // genuinely fresh 1995 campaign, including clearing old slice checkpoints.
@@ -963,6 +999,7 @@ void AMGPlayerCharacter::ToggleCover()
 
 void AMGPlayerCharacter::FireStun()
 {
+    if (bGameOver || IsTitleScreenActive()) return;
     if (!GetWorld() || !Controller || bMeleeInProgress) return;
     if (!bAiming)
     {
@@ -1139,6 +1176,7 @@ void AMGPlayerCharacter::NotifyFeedback(const FString& Message, FName CueName)
 }
 void AMGPlayerCharacter::WeaponWindowStart()
 {
+    if (bGameOver || IsTitleScreenActive()) return;
     if (bCodecOpen) return;
     if (Equipment)
     {
@@ -1161,6 +1199,7 @@ void AMGPlayerCharacter::WeaponWindowStop()
 }
 void AMGPlayerCharacter::ItemWindowStart()
 {
+    if (bGameOver || IsTitleScreenActive()) return;
     if (bCodecOpen) return;
     if (Equipment)
     {
@@ -1183,16 +1222,27 @@ void AMGPlayerCharacter::ItemWindowStop()
 }
 void AMGPlayerCharacter::SelectionPrevious()
 {
+    if (bGameOver || IsTitleScreenActive())
+    {
+        FailureMenuPrevious();
+        return;
+    }
     if (Equipment && (Equipment->IsItemWindowOpen() || Equipment->IsWeaponWindowOpen()))
     { Equipment->SelectionPrevious(); NotifyFeedback(TEXT("SELECTION MOVED"), TEXT("menu")); }
 }
 void AMGPlayerCharacter::SelectionNext()
 {
+    if (bGameOver || IsTitleScreenActive())
+    {
+        FailureMenuNext();
+        return;
+    }
     if (Equipment && (Equipment->IsItemWindowOpen() || Equipment->IsWeaponWindowOpen()))
     { Equipment->SelectionNext(); NotifyFeedback(TEXT("SELECTION MOVED"), TEXT("menu")); }
 }
 void AMGPlayerCharacter::UseItem()
 {
+    if (bGameOver || IsTitleScreenActive()) return;
     if (!Equipment || Equipment->IsConfiscated())
     { NotifyFeedback(TEXT("ITEMS CONFISCATED"), TEXT("denied")); return; }
     if (Health >= 100.f)
@@ -1249,6 +1299,11 @@ void AMGPlayerCharacter::StartMeleeStrike(int32 Strike)
 }
 void AMGPlayerCharacter::MeleeAttack()
 {
+    if (bGameOver || IsTitleScreenActive())
+    {
+        FailureMenuConfirm(); // controller face-button bottom = confirm
+        return;
+    }
     if (!GetWorld() || !Controller) return;
     // In wall cover the original contextual button knocks, rather than
     // punching an invisible target through the solid surface.
@@ -1385,20 +1440,123 @@ void AMGPlayerCharacter::UpdateMeleePresentation(float DeltaSeconds)
         FVector(bKick ? 20.f*Arc : 0.f,0.f,
                 -35.f+(bKick ? 20.f*Arc : 0.f)),DeltaSeconds,17.f));
 }
+bool AMGPlayerCharacter::IsTitleScreenActive() const
+{
+    return GetWorld() && GetWorld()->GetGameInstance() &&
+        GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() &&
+        GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>()->
+            IsTitleScreenActive();
+}
+void AMGPlayerCharacter::EnterGameOver()
+{
+    if (bGameOver || !GetWorld()) return;
+    bGameOver = true;
+    GameOverElapsed = 0.f;
+    FailureMenuSelection = 0; // always default to non-destructive Continue
+    bFailureRadioCuePlayed = false;
+    if (UMGCampaignState* Story = GetWorld()->GetGameInstance() ?
+            GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr)
+    {
+        DeathRadioLine = Story->GetMissionNumber() >= 7 ?
+            TEXT("RADIO / NO RESPONSE") :
+            Story->HasBeat(TEXT("diane.contact")) ?
+            TEXT("DIANE: Snake? Come in. Please respond.") :
+            TEXT("BIG BOSS: Snake! Report your status.");
+    }
+    else DeathRadioLine=TEXT("RADIO / SIGNAL LOST");
+
+    // Close optional UI and stop gameplay, without modifying a single save.
+    if (ChokedGuard.IsValid()) ChokedGuard->ReleaseChoke(false);
+    if (DraggedGuard.IsValid()) DraggedGuard->SetBodyDragged(false);
+    ChokedGuard.Reset();
+    DraggedGuard.Reset();
+    ControlledMissile.Reset();
+    bCodecOpen = false;
+    CloseEquipmentWindows();
+    bAiming = false;
+    bSprinting = false;
+    bMeleeInProgress = false;
+    bInteractHeld = false;
+    UGameplayStatics::SetGamePaused(this,false);
+    UGameplayStatics::SetGlobalTimeDilation(this,1.f);
+    if (UCharacterMovementComponent* Movement=GetCharacterMovement())
+    {
+        Movement->StopMovementImmediately();
+        Movement->DisableMovement();
+    }
+    NotifyFeedback(TEXT("SNAKE IS DOWN — RADIO CONTACT LOST"),
+                   TEXT("game_over_sting"));
+}
+void AMGPlayerCharacter::FailureMenuPrevious()
+{
+    FailureMenuMove(-1);
+}
+void AMGPlayerCharacter::FailureMenuNext()
+{
+    FailureMenuMove(1);
+}
+void AMGPlayerCharacter::FailureMenuMove(int32 Direction)
+{
+    if (!IsTitleScreenActive() && !IsGameOverMenuReady()) return;
+    FailureMenuSelection=FMath::Clamp(FailureMenuSelection +
+        (Direction>=0 ? 1 : -1),0,1);
+    NotifyFeedback(FailureMenuSelection==0 ?
+        TEXT("CONTINUE SELECTED") : TEXT("EXIT SELECTED"),TEXT("menu"));
+}
+void AMGPlayerCharacter::RestartFromCheckpoint()
+{
+    if (!GetWorld()) return;
+    // This is intentionally a level reload, NOT ResetForDevelopment and NOT
+    // a delete-save. The campaign, POWs, weapons, rooms and current mission
+    // come from their existing checkpoints. Before the first checkpoint,
+    // Mission 1 naturally starts at insertion.
+    UGameplayStatics::SetGamePaused(this,false);
+    UGameplayStatics::SetGlobalTimeDilation(this,1.f);
+    UGameplayStatics::OpenLevel(this,FName(*GetWorld()->GetName()));
+}
+void AMGPlayerCharacter::FailureMenuConfirm()
+{
+    if (!IsTitleScreenActive() && !IsGameOverMenuReady()) return;
+    if (IsTitleScreenActive())
+    {
+        if (FailureMenuSelection==0)
+        {
+            if (GetWorld() && GetWorld()->GetGameInstance())
+                if (UMGCampaignState* Story=GetWorld()->GetGameInstance()->
+                    GetSubsystem<UMGCampaignState>())
+                    Story->SetTitleScreenActive(false);
+            RestartFromCheckpoint();
+        }
+        else
+        {
+            if (APlayerController* PC=Cast<APlayerController>(GetController()))
+                UKismetSystemLibrary::QuitGame(this,PC,EQuitPreference::Quit,false);
+        }
+        return;
+    }
+    if (FailureMenuSelection==0)
+        RestartFromCheckpoint();
+    else if (GetWorld() && GetWorld()->GetGameInstance())
+    {
+        if (UMGCampaignState* Story=GetWorld()->GetGameInstance()->
+            GetSubsystem<UMGCampaignState>())
+        {
+            Story->SetTitleScreenActive(true);
+            RestartFromCheckpoint();
+        }
+    }
+}
+
 float AMGPlayerCharacter::TakeDamage(float Amount, const FDamageEvent& Event,
                                      AController* Instigator, AActor* Causer)
 {
     const float Accepted = Super::TakeDamage(Amount, Event, Instigator, Causer);
     if (Amount <= 0.f || Health <= 0.f) return Accepted;
     Health = FMath::Max(0.f, Health - Amount);
-    NotifyFeedback(Health <= 0.f ? TEXT("SNAKE DOWN — RELOADING CHECKPOINT")
-                                  : TEXT("INJURED — TAKE COVER"), TEXT("hurt"));
-    if (Health <= 0.f && GetWorld())
-    {
-        // A full failure flow will add death animation/AI reset; checkpoint
-        // reload retains the versioned mission save.
-        UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
-    }
+    if (Health <= 0.f)
+        EnterGameOver();
+    else
+        NotifyFeedback(TEXT("INJURED — TAKE COVER"),TEXT("hurt"));
     return Accepted;
 }
 
@@ -1422,6 +1580,12 @@ void AMGPlayerCharacter::CloseEquipmentWindows()
 void AMGPlayerCharacter::ApplyMenuTimeState()
 {
     if (!GetWorld()) return;
+    if (bGameOver || IsTitleScreenActive())
+    {
+        UGameplayStatics::SetGlobalTimeDilation(this,1.f);
+        return;
+    }
+
     const bool bSelecting = Equipment &&
         (Equipment->IsWeaponWindowOpen() || Equipment->IsItemWindowOpen());
     const float Desired = (!bCodecOpen && bSelecting) ?
@@ -1433,6 +1597,7 @@ void AMGPlayerCharacter::ApplyMenuTimeState()
 
 void AMGPlayerCharacter::ToggleCodec()
 {
+    if (bGameOver || IsTitleScreenActive()) return;
     if (!GetWorld()) return;
     if (bCodecOpen)
     {
