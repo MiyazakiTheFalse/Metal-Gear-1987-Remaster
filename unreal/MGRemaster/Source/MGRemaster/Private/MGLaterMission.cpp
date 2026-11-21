@@ -203,8 +203,10 @@ void AMGLaterMission::BuildEllenReturn()
           FVector(85,.5f,3.5f));
     // No arbitrary guard stationed inside the daughter's hidden room.
     Block(TEXT("M05_ServiceObstacles"),FVector(6600,1350,90),FVector(2.0f,2.f,2.8f));
-    Block(TEXT("M05_HiddenCellPartition"),FVector(11800,1100,165),
-          FVector(.4f,11.f,3.7f));
+    Block(TEXT("M05_HiddenCellPartitionLower"),FVector(11800,825,165),
+          FVector(.4f,16.5f,3.7f));
+    Block(TEXT("M05_HiddenCellPartitionUpper"),FVector(11800,2475,165),
+          FVector(.4f,10.5f,3.7f));
     WeakWall=Block(TEXT("M05_WeakWall_Ellen"),FVector(11800,1800,155),
                    FVector(.5f,3.f,3.3f));
     EllenProxy=Block(TEXT("M05_EllenPrisoner"),FVector(12800,1800,90),
