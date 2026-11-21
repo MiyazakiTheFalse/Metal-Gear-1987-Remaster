@@ -2856,11 +2856,11 @@ function drawEquipment(){
   '</span><span>HOLD · SCROLL · RELEASE</span></div>'+
   '<div class="mg-strip-track">'+models.map(m=>
     '<div class="mg-strip-card" data-current="'+m.centered+
-    '" data-offset="'+m.offset+'" data-unavailable="'+!m.available+
-    '" aria-selected="'+m.centered+'">'+
-    '<div class="mg-strip-icon">'+(m.available?m.icon:'□')+'</div>'+
+    '" data-offset="'+m.offset+'" data-empty="'+m.blank+
+    '" data-unavailable="'+!m.available+'" aria-selected="'+m.centered+'">'+
+    '<div class="mg-strip-icon">'+(m.blank?'':m.available?m.icon:'□')+'</div>'+
     '<div class="mg-strip-name">'+window.MGEquipmentStrip.inventoryLabel(m)+'</div>'+
-    '<div class="mg-strip-count">'+(m.count===null?' ':m.count)+'</div>'+
+    '<div class="mg-strip-count">'+(m.blank||m.count===null?' ':m.count)+'</div>'+
     '</div>').join('')+'</div>'+
   '<div class="mg-strip-current">'+(selected?.usable?selected.name:'UNAVAILABLE')+
   (equipOpen==='items'&&selected===rationSlot?' · '+rationRemaining+' REMAIN':'')+
