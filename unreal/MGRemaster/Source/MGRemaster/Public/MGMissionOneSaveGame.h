@@ -11,9 +11,13 @@ class MGREMASTER_API UMGMissionOneSaveGame : public USaveGame
     GENERATED_BODY()
 public:
     UPROPERTY()
-    int32 Version = 6;
+    int32 Version = 7;
     UPROPERTY()
     TArray<FName> CollectedPickupIds;
+    // Added pickups across the same physical Outer Heaven inventory; nothing
+    // is silently regenerated on crossing into Building Two.
+    UPROPERTY()
+    TArray<FName> LaterCollectedPickupIds;
     UPROPERTY()
     bool bCardDoorOpened = false;
     UPROPERTY()
