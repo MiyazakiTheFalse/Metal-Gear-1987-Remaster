@@ -277,7 +277,7 @@ void AMGPrototypeHUD::DrawHUD()
                 Width * .30f, Margin + 150.f * UiScale,
                 nullptr, .9f * UiScale, false);
         DrawRect(HudPanel, Margin, Margin + 113.f * UiScale,
-                 FMath::Min(540.f * UiScale, Width - 2.f * Margin), 112.f * UiScale);
+                 FMath::Min(600.f * UiScale, Width - 2.f * Margin), 164.f * UiScale);
         DrawText(FString::Printf(TEXT("MISSION / %s"), *Mission->GetPhaseText()),
                  HudGreen, Margin + 12.f * UiScale,
                  Margin + 120.f * UiScale, nullptr, 0.75f * UiScale, false);
@@ -289,21 +289,28 @@ void AMGPrototypeHUD::DrawHUD()
         DrawText(Mission->GetObjectiveText(), FLinearColor::White,
                  Margin + 12.f * UiScale, Margin + 149.f * UiScale,
                  nullptr, 0.88f * UiScale, false);
+        // Spatially truthful interaction affordance. The player can approach,
+        // turn away or retreat and see the prompt appear/disappear as reach
+        // and physical occlusion change. Hidden story flags grant no hints.
+        const FString Context = Mission->GetContextActionPrompt(Player);
+        if (!Context.IsEmpty() && !Mission->IsBossTelegraphing())
+            DrawText(Context, HudAmber, Margin + 12.f * UiScale,
+                     Margin + 179.f * UiScale, nullptr, .77f * UiScale, false);
         const FString Hint = Mission->GetPacingHint();
         if (!Hint.IsEmpty())
             DrawText(Hint, HudAmber, Margin + 12.f * UiScale,
-                     Margin + 187.f * UiScale, nullptr, 0.78f * UiScale, false);
+                     Margin + 211.f * UiScale, nullptr, 0.75f * UiScale, false);
         // A personal lesson from Gray Fox has a measurable gameplay
         // benefit only when a real guard's footsteps can be heard nearby.
         // This cue respects the ordinary guard hearing/occlusion geometry.
         const FString FoxBoots = Mission->GetFoxPatrolListeningCue();
         if (!FoxBoots.IsEmpty() && !Player->IsCodecOpen())
             DrawText(FoxBoots, HudGreen, Margin + 12.f * UiScale,
-                     Margin + 229.f * UiScale, nullptr, .70f * UiScale, false);
+                     Margin + 241.f * UiScale, nullptr, .70f * UiScale, false);
         // Never seize the player's camera just to deliver an optional clue.
         if (Mission->HasIncomingTransceiverPrompt() && !Player->IsCodecOpen())
             DrawText(TEXT("OPTIONAL RADIO CONTACT: C / START"), HudGreen,
-                Margin + 12.f * UiScale, Margin + 210.f * UiScale,
+                Margin + 12.f * UiScale, Margin + 266.f * UiScale,
                 nullptr, 0.70f * UiScale, false);
         const FString Intel = Mission->GetMissionLogText();
         if (Player->IsMissionLogVisible() && !Intel.IsEmpty())
