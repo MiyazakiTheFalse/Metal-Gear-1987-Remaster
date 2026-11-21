@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "asOf": "2026-11-20",
+  "asOf": "2026-11-21",
   "canonicalAuthority": "Original Metal Gear 1987 MSX2, NOT NES",
   "sourceReferences": [
     "https://thesnakesoup.org/metal-gear-msx-walkthrough/",
@@ -7285,7 +7285,7 @@
     {
       "id": "SYS.WORLD",
       "name": "Physical connected Outer Heaven master architecture: 1F/2F/3F/B1/B2/Roof/Deserts/B2/Building3-B100/tunnels",
-      "status": "not_started",
+      "status": "design_only",
       "acceptance": [
         "source implemented",
         "authored assets imported",
@@ -7293,7 +7293,16 @@
         "saved and revisited",
         "input, caption and performance tested",
         "professional art and audio approved"
-      ]
+      ],
+      "sourceEvidence": [
+        "browser/atlas/outer_heaven_1995.json",
+        "browser/atlas.html",
+        "browser/atlas/map.js",
+        "browser/atlas/map.css",
+        "docs/OUTER_HEAVEN_MASTER_ARCHITECTURE_1995.md",
+        "tools/test_outer_heaven_master_atlas.py"
+      ],
+      "knownLimitation": "52/114/11 proposed complete design graph with unverified 1987 source coordinates; actual browser/Unreal levels have NOT been rebuilt to match. Two brand-new provisional links bridge previously disconnected sections; no source verification or collision proof."
     },
     {
       "id": "SYS.ENEMIES",
@@ -7443,7 +7452,11 @@
       "sourceEvidence": [
         "browser/index.html",
         "browser/game.js",
-        "unreal/MGRemaster/Source/MGRemaster/Private/MGPrototypeHUD.cpp"
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGPrototypeHUD.cpp",
+        "browser/equipment_strip.js",
+        "browser/tests/test_equipment_strip.cjs",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGPlayerCharacter.cpp",
+        "docs/MGS_HUD_EQUIPMENT_CONTRACT.md"
       ]
     },
     {
@@ -7473,7 +7486,11 @@
         "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp",
         "unreal/MGRemaster/Config/DefaultInput.ini",
         "tools/test_cross_engine_playability_source.py",
-        "docs/CROSS_ENGINE_PLAYABILITY_PASS_2026_11_21.md"
+        "docs/CROSS_ENGINE_PLAYABILITY_PASS_2026_11_21.md",
+        "tools/test_mgs_scrolling_menu_source.py",
+        "tools/test_outer_heaven_master_atlas.py",
+        "browser/tests/test_equipment_strip.cjs",
+        "browser/tools/serve_playtest.py"
       ],
       "unverifiedGates": [
         "Unreal 5.7 C++ UBT successful compile",
@@ -7491,7 +7508,7 @@
     "sourcePrototypes": 27,
     "actualUnrealVerified": 0,
     "productionReady": 0,
-    "mandatoryNextAction": "Real UE5.7 compile/PIE and browser localhost smoke-test side by side: verify A/X/B/Y/Down controller parity, precise context prompts, lossless death/F9/R retry, finite item use and post-Card3 paths; then original first-floor map/Card1 gates and final art. No actual Unreal-verified or production-ready beats yet.",
+    "mandatoryNextAction": "Play full source-only browser ZIP and Unreal 5.7 PIE side by side: test MGS scroll window input, counts/use, controller and remount; review proposed 52-area / 114-beat whole-campus atlas against original 1987 MSX2 actual room map and resolve disputed Duck/extra BF; then author real connected geometry with collision and traversal. UE verified 0; production-ready 0.",
     "unmappedCoordinates": 52,
     "prototypeEnemyActorsMapped": 14,
     "prototypeEnemyAreasMapped": 5,
