@@ -5,6 +5,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 #include "mg_legacy_core.h"
@@ -144,6 +145,88 @@ void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, const FVector& W
     AwarenessState = FMath::Max(AwarenessState, 1u);
 }
 
+bool AMGGuardActor::BeginChoke(AActor* Instigator)
+{
+    if (!IsValid(Instigator) || bIncapacitated || bBeingChoked ||
+        AwarenessState >= 2) return false;
+    bBeingChoked = true;
+    ChokeInstigator = Instigator;
+    DistractionPhase = EDistractionPhase::None;
+    StaggerSeconds = 0.f;
+    return true;
+}
+void AMGGuardActor::ReleaseChoke(bool bAlertOnRelease)
+{
+    if (!bBeingChoked) return;
+    bBeingChoked = false;
+    AActor* FormerInstigator = ChokeInstigator.Get();
+    ChokeInstigator.Reset();
+    if (!bAlertOnRelease || bIncapacitated) return;
+    // Snake gave up his grip: the released guard has a real reason to report.
+    AwarenessState = 3;
+    Suspicion = 1.f;
+    if (IsValid(FormerInstigator))
+        LastKnownPlayerPosition = FormerInstigator->GetActorLocation();
+    else if (GetWorld())
+        LastKnownPlayerPosition = GetActorLocation() - GetActorForwardVector() * 80.f;
+    CameraAlertSeconds = FMath::Max(CameraAlertSeconds, 1.8f);
+}
+void AMGGuardActor::CompleteChoke()
+{
+    if (!bBeingChoked || bIncapacitated) return;
+    bBeingChoked = false;
+    ChokeInstigator.Reset();
+    bIncapacitated = true;
+    bBodyConcealed = false;
+    bBodyDragged = false;
+    Suspicion = 0.f;
+    AwarenessState = 0;
+    CameraAlertSeconds = 0.f;
+    // Do not remove the body from sight queries: other guards can notice it.
+    CollisionCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    ProxyBody->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    ProxyBody->SetCollisionResponseToAllChannels(ECR_Ignore);
+    ProxyBody->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+    ProxyBody->SetRelativeLocation(FVector(0.f,0.f,-58.f));
+    ProxyBody->SetRelativeRotation(FRotator(0.f,0.f,80.f));
+}
+void AMGGuardActor::SetBodyDragged(bool bDragging)
+{
+    if (!bIncapacitated || bBodyConcealed) return;
+    bBodyDragged = bDragging;
+    // Placeholder body position; animated skeletal guard can replace proxy.
+    ProxyBody->SetRelativeRotation(FRotator(0.f,0.f,bDragging ? 66.f : 80.f));
+}
+bool AMGGuardActor::MoveDraggedBody(const FVector& DesiredLocation, float DeltaSeconds)
+{
+    if (!bBodyDragged || !bIncapacitated || bBodyConcealed || !GetWorld())
+        return false;
+    const FVector From = GetActorLocation();
+    const FVector Delta = DesiredLocation - From;
+    if (Delta.Size2D() > 245.f || FMath::Abs(Delta.Z) > 85.f)
+        return false;
+    FHitResult Hit;
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(MGBodyDragGeometry), false, this);
+    // The player's actor is non-static; the sweep tests the world geometry.
+    const FVector To = From + Delta.GetClampedToMaxSize(165.f * DeltaSeconds);
+    if (GetWorld()->SweepSingleByChannel(
+        Hit, From, To, FQuat::Identity, ECC_WorldStatic,
+        FCollisionShape::MakeBox(FVector(45.f,26.f,27.f)), Params) &&
+        Hit.bBlockingHit)
+        return false;
+    SetActorLocation(To, false);
+    return true;
+}
+void AMGGuardActor::ConcealBody(AActor* Container)
+{
+    if (!bIncapacitated || !IsValid(Container)) return;
+    bBodyDragged = false;
+    bBodyConcealed = true;
+    AttachToActor(Container, FAttachmentTransformRules::KeepWorldTransform);
+    SetActorHiddenInGame(true);
+    ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
 void AMGGuardActor::ReceiveCameraAlert(const FVector& SightLocation, float DurationSeconds)
 {
     if (bIncapacitated || DurationSeconds <= 0.f) return;
@@ -241,13 +324,8 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
         if (DamageCauser) LastKnownPlayerPosition = DamageCauser->GetActorLocation();
         if (Health <= 0.f)
         {
-            bIncapacitated = true;
-            Suspicion = 0.f;
-            AwarenessState = 0;
-            ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-            CollisionCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-            ProxyBody->SetRelativeRotation(FRotator(0.f, 0.f, 80.f));
-            SetActorTickEnabled(false);
+            bBeingChoked = true;
+            CompleteChoke();
         }
     }
     return Accepted;
@@ -257,6 +335,14 @@ void AMGGuardActor::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     if (bIncapacitated || !GetWorld()) return;
+    if (bBeingChoked)
+    {
+        // A live guard still struggles visibly while Snake must maintain grip.
+        const float Time = GetWorld()->GetTimeSeconds();
+        ProxyBody->SetRelativeRotation(FRotator(0.f,0.f,
+            8.f * FMath::Sin(Time * 14.f)));
+        return;
+    }
     StaggerSeconds = FMath::Max(0.f, StaggerSeconds - DeltaSeconds);
     CameraAlertSeconds = FMath::Max(0.f, CameraAlertSeconds - DeltaSeconds);
     AttackCooldown = FMath::Max(0.f, AttackCooldown - DeltaSeconds);
@@ -349,6 +435,34 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     {
         AwarenessState = 3;
         Suspicion = FMath::Max(Suspicion, 0.99f);
+    }
+
+    // Persistent bodies are readable consequences. The observer needs a real
+    // same-floor sightline and viewing cone; no alarm through a closed wall.
+    BodyDiscoveryCooldown = FMath::Max(0.f, BodyDiscoveryCooldown - DeltaSeconds);
+    if (BodyDiscoveryCooldown <= 0.f && AwarenessState < 3)
+    {
+        for (TActorIterator<AMGGuardActor> Other(GetWorld()); Other; ++Other)
+        {
+            if (*Other == this || !Other->IsDiscoverableBody()) continue;
+            const FVector TowardBody = Other->GetActorLocation() - GetActorLocation();
+            if (FMath::Abs(TowardBody.Z) > 180.f ||
+                TowardBody.Size2D() > 800.f ||
+                FVector::DotProduct(GetActorForwardVector().GetSafeNormal2D(),
+                                    TowardBody.GetSafeNormal2D()) < 0.48f) continue;
+            FHitResult BodyHit;
+            FCollisionQueryParams BodyQuery(SCENE_QUERY_STAT(MGBodyDiscovery), false, this);
+            const bool Occluded = GetWorld()->LineTraceSingleByChannel(
+                BodyHit, GetActorLocation()+FVector(0.f,0.f,45.f),
+                Other->GetActorLocation()+FVector(0.f,0.f,18.f),
+                ECC_Visibility, BodyQuery);
+            if (Occluded && BodyHit.GetActor() != *Other) continue;
+            LastKnownPlayerPosition = Other->GetActorLocation();
+            Suspicion = FMath::Max(Suspicion, 0.82f);
+            AwarenessState = FMath::Max(AwarenessState, 2u);
+            BodyDiscoveryCooldown = 4.5f;
+            break;
+        }
     }
 
     // Enemy attack only after an actual alert and physical approach.
