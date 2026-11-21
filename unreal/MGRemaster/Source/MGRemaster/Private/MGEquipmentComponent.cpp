@@ -10,12 +10,16 @@ void UMGEquipmentComponent::BeginPlay()
     Super::BeginPlay();
     Weapons = {
         {FName(TEXT("NONE")), TEXT("NO WEAPON"), 0, true, false},
-        {FName(TEXT("STUN")), TEXT("STUN PISTOL [TEST]"), 8, true, false}
+        {FName(TEXT("STUN")), TEXT("STUN PISTOL [TEST]"), 8, true, false},
+        {FName(TEXT("HANDGUN")), TEXT("HANDGUN"), 0, false, false}
     };
     Items = {
         {FName(TEXT("NONE")), TEXT("NO ITEM"), 0, true, false},
         {FName(TEXT("RATION")), TEXT("RATION [TEST]"), 1, true, true},
-        {FName(TEXT("CARD1")), TEXT("KEYCARD 1 [TEST]"), 0, false, false}
+        {FName(TEXT("CARD1")), TEXT("CARD 1"), 0, false, false},
+        {FName(TEXT("BINOCULARS")), TEXT("BINOCULARS"), 0, false, false},
+        {FName(TEXT("GASMASK")), TEXT("GAS MASK"), 0, false, false},
+        {FName(TEXT("MINES")), TEXT("LAND MINES"), 0, false, true}
     };
     // A captured Snake cannot use pre-capture weapons or items. Test entries are
     // deliberately marked provisional rather than claims about J2ME inventory.
@@ -159,5 +163,13 @@ bool UMGEquipmentComponent::AwardWeapon(FName Id, int32 Ammo)
             E.Quantity = FMath::Clamp(E.Quantity + Ammo, 0, 999);
             return true;
         }
+    return false;
+}
+
+bool UMGEquipmentComponent::HasItem(FName ItemId) const
+{
+    for (const FMGEquipmentEntry& Entry : Items)
+        if (Entry.Id == ItemId && Entry.bOwned && (!Entry.bConsumable || Entry.Quantity > 0))
+            return true;
     return false;
 }
