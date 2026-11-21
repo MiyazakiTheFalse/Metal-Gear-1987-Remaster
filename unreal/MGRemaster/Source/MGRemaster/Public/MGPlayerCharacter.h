@@ -127,6 +127,8 @@ private:
     UStaticMeshComponent* ProxyRightArm = nullptr;
     UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
     UStaticMeshComponent* ProxyRightLeg = nullptr;
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    UStaticMeshComponent* ProxyLeftLeg = nullptr;
     UPROPERTY(EditDefaultsOnly, Category="Animation|Melee")
     UAnimMontage* LeftPunchMontage = nullptr;
     UPROPERTY(EditDefaultsOnly, Category="Animation|Melee")
