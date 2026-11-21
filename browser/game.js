@@ -972,11 +972,14 @@ function load(){
  let data;
  try{data=JSON.parse(localStorage.getItem(STORAGE))}catch(e){return false}
  if(!data||![1,2,3,4,5,6,7,8,9,10].includes(data.version)||!Number.isInteger(data.stage))return false;
+ const legacy=data.version<4;
+ // Validate the checkpoint before changing a SINGLE persistent world fact.
+ // A corrupted/out-of-range Continue must not wipe the player's only save
+ // by falling through into a fresh New Game transaction.
+ if(data.stage<(legacy?0:-2)||data.stage>(legacy?4:data.version===4?6:data.version>=10?10:data.version>=9?9:8))return false;
  window.MGCharacterStory?.restore(data.storySeen);
  for(const key of ['box','cameraOff','foxFollowup','preview','hallOpen','freightAmbientHeard'])world[key]=data.freight?.[key]===true;
  world.handgun=data.version<7||data.freight?.handgun===true;
- const legacy=data.version<4;
- if(data.stage<(legacy?0:-2)||data.stage>(legacy?4:data.version===4?6:data.version>=10?10:data.version>=9?9:8))return false;
  stage=legacy?Math.min(3,data.stage):data.stage;
  firstCardEarned=data.firstCardEarned===true;
  rationEarned=data.rationEarned===true;
@@ -2781,7 +2784,16 @@ function showIntel(){
 }
 function start(resume){
  $('intro').style.display='none';showIntro=false;started=true;initAudio();
- if(!resume||!load()){
+ if(resume&&!load()){
+  // Never silently turn a failed Continue into New Game. Keep the original
+  // bytes for manual recovery; a new operation still needs confirmation.
+  started=false;showIntro=true;$('intro').style.display='flex';
+  $('resume').disabled=true;
+  $('resume').textContent='CHECKPOINT UNREADABLE';
+  $('rigStatus').textContent='SAVE PRESERVED — START NEW OPERATION ONLY IF YOU CHOOSE';
+  return;
+ }
+ if(!resume){
   const cellStart=new URLSearchParams(location.search).has('cell');
   stage=cellStart?0:-2;player.x=cellStart?-10.6:-27;player.z=0;elapsedStage=0;
   world.handgun=cellStart;rounds=cellStart?24:0;equippedWeapon='BARE HANDS';syncEquipment();
