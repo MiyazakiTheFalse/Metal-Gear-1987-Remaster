@@ -18,6 +18,8 @@ class MGREMASTER_API UMGCampaignState : public UGameInstanceSubsystem
 public:
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
     int32 GetMissionNumber() const;
+    bool IsMissionThreeExteriorActive() const;
+    bool SetMissionThreeExteriorActive(bool bExterior);
     FString GetMissionTitle() const;
     FString GetCharacterThread() const;
     int32 GetRadioContactCount() const;
