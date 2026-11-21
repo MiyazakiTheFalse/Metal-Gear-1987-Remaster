@@ -91,6 +91,11 @@ private:
     AStaticMeshActor* RightEscapeLadder = nullptr;
     float ChargePlacementRecovery = 0.f;
     float EscapeSaveAccumulator = 0.f;
+    float WaterDamageAccumulator = 0.f;
+    bool bFinaleBossSpawned = false;
+    void HandleMissionHazards(float DeltaSeconds);
+    bool TryFinaleInteraction(AMGPlayerCharacter* Player);
+
     TArray<FWorldPickup> Pickups;
     int32 Mission = 3;
     float DialogueSeconds = 0.f;
