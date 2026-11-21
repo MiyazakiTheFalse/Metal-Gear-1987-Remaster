@@ -53,7 +53,7 @@ void AMGRemasterGameMode::StartPlay()
         if (AMGPlayerCharacter* Snake = Cast<AMGPlayerCharacter>(
                 UGameplayStatics::GetPlayerCharacter(this, 0)))
         {
-            Snake->SetActorLocation(Mission->EntryLocation(), false, nullptr,
+            Snake->SetActorLocation(Mission->ResumeLocation(), false, nullptr,
                                     ETeleportType::TeleportPhysics);
             if (UMGEquipmentComponent* Inventory = Snake->GetEquipment())
                 Inventory->InitialiseMissionOneLoadout();
