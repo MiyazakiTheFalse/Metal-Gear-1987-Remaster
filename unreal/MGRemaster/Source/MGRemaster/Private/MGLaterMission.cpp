@@ -394,6 +394,8 @@ void AMGLaterMission::RestorePlayerEquipment(AMGPlayerCharacter* Player)
     }
     for (const FName Item:Save->ExtraOwnedItems)
         E->AwardItem(Item,1);
+    for (const FName Weapon:Save->ExtraOwnedWeapons)
+        E->AwardWeapon(Weapon,0);
     for (const FName Id:Save->LaterCollectedPickupIds)
     {
         if (Id==TEXT("L03_GRENADE_LAUNCHER"))
