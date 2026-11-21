@@ -54,7 +54,9 @@ FString UMGCampaignState::GetCharacterThread() const
     // A quiet story-state cue rather than a cutscene interrupt. Do not disclose
     // Big Boss's secret or the Venom retrospective before earned story events.
     if (GetMissionNumber() == 3)
-        return TEXT("SNAKE / FOX'S WARNING CHANGES THE MISSION");
+        return FString::Printf(
+            TEXT("SNAKE / FOX'S LEAD VERIFIED BY %d OF 3 SOURCES"),
+            GetMissionThreeIntelCount());
     if (GetMissionNumber() == 2)
         return HasBeat(TEXT("fox.revelation"))
             ? TEXT("FOX / SEEK THE ENGINEER WHO KNOWS THE MACHINE")
@@ -80,6 +82,14 @@ FString UMGCampaignState::GetRadioContactLabel(int32 Channel) const
     return TEXT("NO SIGNAL");
 }
 
+int32 UMGCampaignState::GetMissionThreeIntelCount() const
+{
+    int32 Leads = 0;
+    if (HasBeat(TEXT("m03.route.manifest"))) ++Leads;
+    if (HasBeat(TEXT("m03.route.survey"))) ++Leads;
+    if (HasBeat(TEXT("m03.route.archive"))) ++Leads;
+    return Leads;
+}
 bool UMGCampaignState::HasBeat(FName Id) const
 {
     return Progress && Progress->CompletedBeatIds.Contains(Id);
@@ -149,7 +159,9 @@ FString UMGCampaignState::GetCurrentObjective() const
             ? TEXT("ESCAPE THE SECRET PRISON / KEEP FOX'S INTEL")
             : TEXT("FIND GRAY FOX IN THE SECRET CELLS");
     if (GetMissionNumber() == 3)
-        return TEXT("GRAY FOX RESCUED / FIND DR. PETTROVICH");
+        return GetMissionThreeIntelCount() > 0 ?
+            TEXT("SERVICE ROUTE ESTABLISHED / SEEK BUILDING TWO") :
+            TEXT("FOLLOW FOX: INVESTIGATE THREE BUILDING ONE LEADS");
     if (HasBeat(TEXT("snake.early_pow")))
         return TEXT("PRISONER CLUE: LOCATE THE DETENTION TRANSFER");
     return TEXT("INFILTRATE BUILDING ONE / RESCUE PRISONERS");
@@ -158,6 +170,12 @@ FString UMGCampaignState::GetOpeningRadio(int32 Channel) const
 {
     // Original 1995 characters, remake-authored paraphrase. Dialogue responds
     // to earned first-hand events, not a prewritten mission-completion timer.
+    if (Channel == 2 && GetMissionNumber() == 3 &&
+        GetMissionThreeIntelCount() >= 2)
+        return TEXT("DIANE: You've confirmed that route twice.\n"
+                    "DIANE: You may have missed what the service store kept.\n"
+                    "SNAKE: Where?\n"
+                    "DIANE: The second-floor supply bay is worth another look.");
     if (Channel == 2)
         return HasBeat(TEXT("diane.contact")) ?
             (GetMissionNumber() == 3 ?
@@ -172,6 +190,16 @@ FString UMGCampaignState::GetOpeningRadio(int32 Channel) const
             TEXT("CHANNEL NOT YET AVAILABLE");
     if (Channel == 0)
     {
+        if (GetMissionNumber() == 3 && HasBeat(TEXT("m03.route.survey")))
+            return TEXT("SNAKE: The service road is visible from the upper floor.\n"
+                        "SCHNEIDER: Then it survived the rebuilding.\n"
+                        "SNAKE: You weren't certain?\n"
+                        "SCHNEIDER: Not until you saw it yourself.");
+        if (GetMissionNumber() == 3 && HasBeat(TEXT("m03.route.archive")))
+            return TEXT("SNAKE: An old gas-wing diagram shows a service approach.\n"
+                        "SCHNEIDER: That's a dangerous place to leave records.\n"
+                        "SNAKE: But it confirms a route.\n"
+                        "SCHNEIDER: Check the road itself before trusting it.");
         if (GetMissionNumber() == 3)
             return TEXT("SCHNEIDER: The scientist will be in the secured areas.\n"
                         "SCHNEIDER: Those routes have changed since I drew them.\n"
@@ -185,6 +213,11 @@ FString UMGCampaignState::GetOpeningRadio(int32 Channel) const
                  "SCHNEIDER: Look for repairs that don't fit the structure.\n"
                  "SNAKE: Understood. I'll check the walls.");
     }
+    if (Channel == 1 && GetMissionNumber() == 3 &&
+        GetMissionThreeIntelCount() > 0)
+        return TEXT("SNAKE: The research service approach is marked.\n"
+                    "BIG BOSS: Good. Confirm the building before entering.\n"
+                    "SNAKE: The report checks out against Fox's lead.");
     if (Channel == 1)
         return GetMissionNumber() == 3 ?
             TEXT("BIG BOSS: Gray Fox gave you a lead. Follow it.\n"
