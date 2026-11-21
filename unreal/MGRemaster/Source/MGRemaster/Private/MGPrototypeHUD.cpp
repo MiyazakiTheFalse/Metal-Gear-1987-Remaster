@@ -397,6 +397,19 @@ void AMGPrototypeHUD::DrawHUD()
                 for (int32 Offset = -2; Offset <= 2; ++Offset)
                 {
                     const int32 Index = ((Selection + Offset) % Count + Count) % Count;
+                    // Early game has only three weapon slots. Display no
+                    // repeated cards at the two outer offsets; cursor still
+                    // wraps across the actual array on input.
+                    const int32 Priority[5] = {0, -1, 1, -2, 2};
+                    bool bRepeated = false;
+                    for (const int32 PriorOffset : Priority)
+                    {
+                        if (PriorOffset == Offset) break;
+                        const int32 PriorIndex =
+                            ((Selection + PriorOffset) % Count + Count) % Count;
+                        if (PriorIndex == Index) { bRepeated = true; break; }
+                    }
+                    if (bRepeated) continue;
                     const FMGEquipmentEntry& Entry = Entries[Index];
                     const bool bAvailable = Entry.bOwned &&
                         (!Equip->IsConfiscated() || Entry.Id == FName(TEXT("NONE"))) &&
