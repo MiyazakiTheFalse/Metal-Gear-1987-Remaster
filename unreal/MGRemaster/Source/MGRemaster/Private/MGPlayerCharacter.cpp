@@ -499,7 +499,7 @@ void AMGPlayerCharacter::Interact()
             {
                 DraggedGuard.Reset();
                 UpdateMovementState();
-                NotifyFeedback(TEXT("BODY STOWED — CLOSE THE LOCKER"), TEXT("select"));
+                NotifyFeedback(TEXT("BODY STOWED — CLOSE THE LOCKER"), TEXT("locker"));
                 return;
             }
         }
@@ -518,7 +518,7 @@ void AMGPlayerCharacter::Interact()
         if (Guard->BeginChoke(this))
         {
             UpdateMovementState();
-            NotifyFeedback(TEXT("HOLD E — RESTRAIN GUARD / DO NOT RELEASE"), TEXT("select"));
+            NotifyFeedback(TEXT("HOLD E — RESTRAIN GUARD / DO NOT RELEASE"), TEXT("choke"));
             return;
         }
         ChokedGuard.Reset();
@@ -531,7 +531,7 @@ void AMGPlayerCharacter::Interact()
         DraggedGuard = Body;
         Body->SetBodyDragged(true);
         UpdateMovementState();
-        NotifyFeedback(TEXT("DRAG BODY — WALK SLOWLY / E TO RELEASE"), TEXT("select"));
+        NotifyFeedback(TEXT("DRAG BODY — WALK SLOWLY / E TO RELEASE"), TEXT("body_drag"));
         return;
     }
     if (AMGLaterMission* Later = Cast<AMGLaterMission>(
@@ -1037,7 +1037,7 @@ void AMGPlayerCharacter::FireStun()
             return;
         }
         Mine->Configure(TEXT("MINE"),FVector::ZeroVector,this);
-        NotifyFeedback(TEXT("MINE PLACED / ARMING IN 0.8 SEC"),TEXT("select"));
+        NotifyFeedback(TEXT("MINE PLACED / ARMING IN 0.8 SEC"),TEXT("mine"));
         if (AMGLaterMission* Later=Cast<AMGLaterMission>(
             UGameplayStatics::GetActorOfClass(this,AMGLaterMission::StaticClass())))
             Later->PersistPlayerEquipment(this);
@@ -1073,7 +1073,8 @@ void AMGPlayerCharacter::FireStun()
         Shot->Configure(Weapon,Direction*(bRocket ? 2200.f : 1450.f),this);
         CombatNoiseTimer=1.25f;
         NotifyFeedback(bRocket ? TEXT("ROCKET FIRED") :
-                                 TEXT("GRENADE LAUNCHED"),TEXT("gunshot"));
+                                 TEXT("GRENADE LAUNCHED"),bRocket ?
+                                 TEXT("rocket") : TEXT("grenade"));
         if (AMGLaterMission* Later=Cast<AMGLaterMission>(
             UGameplayStatics::GetActorOfClass(this,AMGLaterMission::StaticClass())))
             Later->PersistPlayerEquipment(this);
@@ -1412,7 +1413,9 @@ void AMGPlayerCharacter::ResolveMeleeContact()
     NotifyFeedback(Target->IsIncapacitated() ?
         TEXT("GUARD INCAPACITATED") :
         (bKick ? TEXT("FINISHING KICK — KNOCKDOWN") :
-                 TEXT("PUNCH CONNECTED")),TEXT("impact"));
+                 TEXT("PUNCH CONNECTED")),
+        bKick ? TEXT("kick") :
+        (MeleeStrikeIndex == 1 ? TEXT("punch1") : TEXT("punch2")));
 }
 void AMGPlayerCharacter::UpdateMeleePresentation(float DeltaSeconds)
 {
