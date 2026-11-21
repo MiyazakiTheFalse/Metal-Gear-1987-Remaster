@@ -1,6 +1,8 @@
 #include "MGRemasterGameMode.h"
 
 #include "MGGrayFoxMission.h"
+#include "MGCampaignState.h"
+#include "Engine/GameInstance.h"
 #include "MGMissionOne.h"
 #include "MGEquipmentComponent.h"
 #include "MGPlayerCharacter.h"
@@ -36,8 +38,20 @@ void AMGRemasterGameMode::StartPlay()
     Super::StartPlay();
     if (!GetWorld()) return;
 
-    // Start with the Outer Heaven arrival. The Gray Fox prison prototype remains
-    // available as a separate source actor and is not erased by this pass.
+    // Campaign GameInstance state survives a reload between separate mission
+    // spaces. Do not spawn both prototypes: their collision would overlap.
+    UMGCampaignState* Story = GetWorld()->GetGameInstance() ?
+        GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
+    const int32 Chapter = Story ? Story->GetChapter() : 0;
+    if (Story && Chapter == 0)
+    {
+        Story->RecordBeat(TEXT("snake.mission_start"),
+            TEXT("OPERATION INTRUDE N313: Locate the missing operative Gray Fox."));
+        Story->RecordBeat(TEXT("fox.missing"),
+            TEXT("GRAY FOX: Previous FOXHOUND infiltration ended after a Metal Gear report."));
+    }
+    // Launch from the insertion unless the player has deliberately entered
+    // the secret prison. Reloading after a completed rescue returns to 3F.
     if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
     {
         if (!PC->GetPawn())
@@ -46,6 +60,14 @@ void AMGRemasterGameMode::StartPlay()
                 FVector(700.f, 700.f, 90.f), FRotator::ZeroRotator);
             if (Pawn) PC->Possess(Pawn);
         }
+    }
+    if (Chapter == 1)
+    {
+        // The prison actor restores the dedicated capture checkpoint and
+        // initializes confiscated inventory. It is never spawned alongside 1F.
+        GetWorld()->SpawnActor<AMGGrayFoxMission>(
+            AMGGrayFoxMission::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+        return;
     }
     if (AMGMissionOne* Mission = GetWorld()->SpawnActor<AMGMissionOne>(
             AMGMissionOne::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator))
