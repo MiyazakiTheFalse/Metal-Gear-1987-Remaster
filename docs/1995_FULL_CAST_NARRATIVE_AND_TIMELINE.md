@@ -31,6 +31,8 @@
 
 **Critical spatial correction:** Ellen's secret cell is in **Building One's basement**, reached on a later revisit after Dr. Pettrovich in Building Two. The escape path revisits Gray Fox and Shoot Gunner's earlier spaces; physical memories of earlier threats become legible progression. A prior registry incorrectly placed Ellen in Building Three. The original TX-55 sabotage begins the countdown **before** the Big Boss final confrontation. [Evidence: MSX2 walkthrough, Ellen and endgame sections](https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/12398).
 
+**Player-character performance rule:** [Solid Snake's distinct 1995 playable identity](SOLID_SNAKE_1995_PLAYABLE_IDENTITY.md) and [machine-readable mission/trait mapping](../data/solid_snake_1995_playstyle_contract.json) govern his movement, radio voice, equipment response and moral autonomy. He is a well-trained rookie, not an incompetent version of Big Boss; later *MGS3* survival systems are not default progression mechanics.
+
 ## Individually fleshed 1995 narrative arcs
 
 ### Solid Snake — novice, witness, disobedient survivor
