@@ -25,7 +25,7 @@ These features are unverified source implementation, not finished gameplay or pr
 
 ## Character stories — 1995 campaign
 
-The [complete 1995 campaign narrative and cast timeline](docs/1995_FULL_CAST_NARRATIVE_AND_TIMELINE.md), [40-sequence storyboard](data/1995_campaign_sequence.json) and [22-character / 105-beat planning registry](data/character_arc_registry.json) now map the core ensemble from first radio contact through Outer Heaven's finale, including individual boss encounters. This is **narrative design only**, except the separate source-level Gray Fox prison prototype and opening radio/mission code. All character beats remain unverified against the target Connect2Media J2ME edition. Narrative `depends_on` links are *not* hard mission gates. Check with `python tools/validate_character_arcs.py` and `python tools/validate_1995_sequence.py`.
+The [complete 1995 campaign narrative and cast timeline](docs/1995_FULL_CAST_NARRATIVE_AND_TIMELINE.md), [40-sequence storyboard](data/1995_campaign_sequence.json) and [22-character/group / 105-beat planning registry](data/character_arc_registry.json) now map the core ensemble from first radio contact through Outer Heaven's finale, including individual boss encounters. This is **narrative design only**, except the separate source-level Gray Fox prison prototype and opening radio/mission code. All character beats remain unverified against the target Connect2Media J2ME edition. Narrative `depends_on` links are *not* hard mission gates. Check with `python tools/validate_character_arcs.py` and `python tools/validate_1995_sequence.py`.
 
 ## Global production doctrine — binding
 
