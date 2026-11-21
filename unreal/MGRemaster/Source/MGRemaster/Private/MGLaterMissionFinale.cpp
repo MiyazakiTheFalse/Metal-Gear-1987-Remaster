@@ -14,6 +14,7 @@
 // Later 1995 mission shells share the same spatial scale and item economy.
 // Geometry and exact timings are source-comparative prototypes, NOT verified
 // room-by-room against the target Connect2Media J2ME v3.3.0 a1 build.
+// All geometry, animations, AI and mission timings remain provisional until PIE testing.
 void AMGLaterMission::BuildDesertAndCowardDuck()
 {
     // Mission 6: outer desert -> guarded Building 3 approach -> water/air
