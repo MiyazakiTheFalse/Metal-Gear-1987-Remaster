@@ -335,6 +335,10 @@ void AMGGrayFoxMission::PersistRecoveredInventory(AMGPlayerCharacter* Player)
     for (const FMGEquipmentEntry& Entry:Player->GetEquipment()->GetItems())
         if (Entry.bOwned && Entry.Id == TEXT("CARD3"))
             OpeningSave->ExtraOwnedItems.AddUnique(Entry.Id);
+    for (const FMGEquipmentEntry& Entry:Player->GetEquipment()->GetWeapons())
+        if (Entry.bOwned && Entry.Id == TEXT("HANDGUN") &&
+            !OpeningSave->CollectedPickupIds.Contains(TEXT("P05")))
+            OpeningSave->ExtraOwnedWeapons.AddUnique(Entry.Id);
     if (OpeningSave->Version >= 6)
     {
         for (const FMGEquipmentEntry& Entry : Player->GetEquipment()->GetWeapons())
@@ -372,6 +376,8 @@ void AMGGrayFoxMission::RestoreCapturedGear(AMGPlayerCharacter* Player)
     }
     for (const FName Item : OpeningSave->ExtraOwnedItems)
         Equipment->AwardItem(Item,1);
+    for (const FName Weapon:OpeningSave->ExtraOwnedWeapons)
+        Equipment->AwardWeapon(Weapon,0);
     if (OpeningSave->Version >= 4)
     {
         Equipment->RestoreHandgunRounds(FMath::Max(0, OpeningSave->HandgunRounds));
@@ -523,7 +529,20 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
                     TEXT("DETENTION PROPERTY: Additional handgun rounds available before Shoot Gunner.")))
                 {
                     if (Player->GetEquipment())
+                    {
+                        bool bHasHandgun=false;
+                        for (const FMGEquipmentEntry& Entry:Player->GetEquipment()->GetWeapons())
+                            if (Entry.Id==TEXT("HANDGUN") && Entry.bOwned)
+                                bHasHandgun=true;
+                        if (!bHasHandgun)
+                        {
+                            // Greybox fallback: custody/property post logically
+                            // also contains a service pistol. Do not mark it
+                            // as source-exact until the original map is traced.
+                            Player->GetEquipment()->AwardWeapon(TEXT("HANDGUN"),0);
+                        }
                         Player->GetEquipment()->AwardAmmunition(TEXT("HANDGUN"),22);
+                    }
                     PersistRecoveredInventory(Player);
                     ShootGunnerAmmo->Destroy();
                     Dialogue=TEXT("ADDITIONAL HANDGUN AMMO / SHOTGUN DEFENDER AHEAD");
