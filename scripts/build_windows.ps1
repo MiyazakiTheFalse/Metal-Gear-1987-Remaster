@@ -29,6 +29,8 @@ if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw 'Node.js is r
 Write-Host 'Checking browser campaign and actual rig binaries...'
 & node (Join-Path $Repo 'browser\\tests\\test_campaign.cjs')
 if ($LASTEXITCODE -ne 0) { throw "Browser campaign tests failed: $LASTEXITCODE" }
+& node (Join-Path $Repo 'browser\\tests\\test_equipment_strip.cjs')
+if ($LASTEXITCODE -ne 0) { throw "MGS equipment strip tests failed: $LASTEXITCODE" }
 & node (Join-Path $Repo 'browser\\tests\\test_field_rigs.cjs')
 if ($LASTEXITCODE -ne 0) { throw "Rig geometry tests failed: $LASTEXITCODE" }
 & node (Join-Path $Repo 'browser\\tests\\test_animation_intent.cjs')
