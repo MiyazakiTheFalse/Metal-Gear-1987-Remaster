@@ -169,6 +169,9 @@ void AMGGrayFoxMission::BeginPlay()
         {
             Story->RecordBeat(TEXT("fox.revelation"),
                 TEXT("GRAY FOX: Metal Gear is nuclear-capable. Find Dr. Pettrovich."));
+            if (bGearRecovered)
+                Story->RecordBeat(TEXT("snake.gear_recovery"),
+                    TEXT("GEAR RECLAIMED: Confiscated equipment was recovered."));
             Story->RecordBeat(TEXT("fox.intel_persists"),
                 TEXT("PRISON ESCAPED: Gray Fox's report remains in the mission log."));
             Story->AdvanceChapter(2);
