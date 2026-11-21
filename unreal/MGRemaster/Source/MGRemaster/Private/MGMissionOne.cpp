@@ -1,4 +1,6 @@
 #include "MGMissionOne.h"
+#include "MGMissionOneSaveGame.h"
+#include "Kismet/GameplayStatics.h"
 #include "MGGuardActor.h"
 #include "MGPlayerCharacter.h"
 #include "MGEquipmentComponent.h"
@@ -155,6 +157,47 @@ void AMGMissionOne::BeginPlay()
     Super::BeginPlay();
     Build();
     SpawnGuards();
+    const UMGMissionOneSaveGame* Save = Cast<UMGMissionOneSaveGame>(
+        UGameplayStatics::LoadGameFromSlot(TEXT("MissionOneV1"), 0));
+    if (Save && Save->Version == 1)
+    {
+        for (FPickup& P : Pickups)
+            if (Save->CollectedPickupIds.Contains(P.Id))
+            {
+                P.bTaken = true;
+                if (IsValid(P.Marker)) P.Marker->Destroy();
+            }
+        bCardDoorOpened = Save->bCardDoorOpened;
+        if (bCardDoorOpened && IsValid(CardDoor)) CardDoor->Destroy();
+        bElevatorReached = Save->bElevatorReached;
+        // Checkpoint is kept at the fixed start until source-verified safe
+        // positions are authored; no restart into a solid door or enemy.
+    }
+}
+
+void AMGMissionOne::RestoreSavedEquipment(AMGPlayerCharacter* Player)
+{
+    if (!Player || !Player->GetEquipment()) return;
+    UMGEquipmentComponent* Equipment = Player->GetEquipment();
+    for (const FPickup& P : Pickups)
+        if (P.bTaken)
+        {
+            if (P.bWeapon) Equipment->AwardWeapon(P.Item, 0);
+            else Equipment->AwardItem(P.Item, 1);
+        }
+}
+
+void AMGMissionOne::SaveProgress(AMGPlayerCharacter* Player)
+{
+    UMGMissionOneSaveGame* Save = Cast<UMGMissionOneSaveGame>(
+        UGameplayStatics::CreateSaveGameObject(UMGMissionOneSaveGame::StaticClass()));
+    if (!Save) return;
+    for (const FPickup& P : Pickups)
+        if (P.bTaken) Save->CollectedPickupIds.Add(P.Id);
+    Save->bCardDoorOpened = bCardDoorOpened;
+    Save->bElevatorReached = bElevatorReached;
+    if (!UGameplayStatics::SaveGameToSlot(Save, TEXT("MissionOneV1"), 0))
+        UE_LOG(LogTemp, Warning, TEXT("Mission One checkpoint save failed"));
 }
 
 bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
@@ -176,6 +219,7 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
         if (!bAwarded) return false;
         P.bTaken = true;
         if (IsValid(P.Marker)) P.Marker->Destroy();
+        SaveProgress(Player);
         Player->NotifyFeedback(FString::Printf(TEXT("%s ACQUIRED"), *P.Item.ToString()), TEXT("select"));
         return true;
     }
@@ -188,6 +232,7 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
         {
             bCardDoorOpened = true;
             CardDoor->Destroy();
+            SaveProgress(Player);
             Player->NotifyFeedback(TEXT("CARD 1 DOOR OPEN"), TEXT("select"));
         }
         return true;
@@ -196,6 +241,7 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
         FVector::Dist2D(Player->GetActorLocation(), CM(92.f, 26.f)) < 230.f)
     {
         bElevatorReached = true;
+        SaveProgress(Player);
         Player->NotifyFeedback(TEXT("BUILDING ONE — UPPER FLOORS NOT YET AUTHOR-VERIFIED"), TEXT("select"));
         return true;
     }
