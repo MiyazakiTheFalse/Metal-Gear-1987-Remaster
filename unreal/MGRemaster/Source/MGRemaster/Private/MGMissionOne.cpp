@@ -2,6 +2,7 @@
 #include "MGMissionOneSaveGame.h"
 #include "Kismet/GameplayStatics.h"
 #include "MGGuardActor.h"
+#include "MGSecurityCamera.h"
 #include "MGPlayerCharacter.h"
 #include "MGEquipmentComponent.h"
 #include "Components/SceneComponent.h"
@@ -140,7 +141,7 @@ void AMGMissionOne::SpawnGuards()
         {TEXT("G04_SecondYard"), {CM(53,29),CM(65,29),CM(65,34),CM(53,34)}},
         {TEXT("G05_Lift"), {CM(70,24),CM(70,36)}},
         {TEXT("G07_SecondFloorCorridor"), {CM(58,29,690),CM(69,29,690),CM(69,35,690)}},
-        {TEXT("G08_ThirdFloorCameraGallery"), {CM(65,28,1290),CM(76,28,1290),CM(76,36,1290)}}
+        {TEXT("G08_ThirdFloorCameraGallery"), {CM(65,28,1290),CM(76,28,1290),CM(76,30,1290),CM(65,30,1290)}}
         // G06's optional maintenance wing is sealed in source-fidelity mode.
         // It remains authored in the JSON contract but must not spawn here.
     };
@@ -164,7 +165,7 @@ void AMGMissionOne::BeginPlay()
     SpawnGuards();
     const UMGMissionOneSaveGame* Save = Cast<UMGMissionOneSaveGame>(
         UGameplayStatics::LoadGameFromSlot(TEXT("MissionOneV1"), 0));
-    if (Save && (Save->Version == 1 || Save->Version == 2))
+    if (Save && (Save->Version == 1 || Save->Version == 2 || Save->Version == 3))
     {
         for (FPickup& P : Pickups)
             if (Save->CollectedPickupIds.Contains(P.Id))
@@ -176,6 +177,10 @@ void AMGMissionOne::BeginPlay()
         if (bCardDoorOpened && IsValid(CardDoor)) CardDoor->Destroy();
         bElevatorReached = Save->bElevatorReached;
         bPOWRescued = Save->Version >= 2 && Save->bPOWRescued;
+        bPrisonerDoorOpened = Save->Version >= 3 && Save->bPrisonerDoorOpened;
+        bGasDoorOpened = Save->Version >= 3 && Save->bGasDoorOpened;
+        if (bPrisonerDoorOpened && IsValid(PrisonerDoor)) PrisonerDoor->Destroy();
+        if (bGasDoorOpened && IsValid(GasDoor)) GasDoor->Destroy();
         CurrentFloor = Save->Version >= 2 ? FMath::Clamp(Save->CurrentFloor, 1, 3) : 1;
         SelectedFloor = CurrentFloor == 1 ? 3 : (CurrentFloor == 3 ? 2 : 1);
         // Checkpoint is kept at the fixed start until source-verified safe
@@ -207,8 +212,10 @@ void AMGMissionOne::SaveProgress(AMGPlayerCharacter* Player)
     Save->bCardDoorOpened = bCardDoorOpened;
     Save->bElevatorReached = bElevatorReached;
     Save->bPOWRescued = bPOWRescued;
+    Save->bPrisonerDoorOpened = bPrisonerDoorOpened;
+    Save->bGasDoorOpened = bGasDoorOpened;
     Save->CurrentFloor = CurrentFloor;
-    Save->Version = 2;
+    Save->Version = 3;
     if (!UGameplayStatics::SaveGameToSlot(Save, TEXT("MissionOneV1"), 0))
         UE_LOG(LogTemp, Warning, TEXT("Mission One checkpoint save failed"));
 }
@@ -299,26 +306,60 @@ void AMGMissionOne::BuildUpperFloors()
         Perimeter(100.f,30.f,.35f,24.f);
         Perimeter(71.f,18.f,58.f,.35f);
         Perimeter(71.f,42.f,58.f,.35f);
-        // Distinct visual landmarks: service crates on 2F and monitored
-        // gallery / prisoner threshold on 3F. Cameras are visual proxies
-        // until they have actual detection/traversal behaviour.
+        // Adjacent elevator foyer and recognizable cover anchor. 3F cameras
+        // are independent, rotating LOS sensors; not part of guard patrol AI.
         if (Floor == 2)
         {
             Block(TEXT("2F_ServiceCrates"), CM(61.f, 34.f, DeckZ + 85.f),
                   FVector(2.2f, 1.4f, 1.7f));
             Block(TEXT("2F_PatrolCover"), CM(76.f, 23.f, DeckZ + 65.f),
                   FVector(2.0f, 1.1f, 1.3f));
+            if (AMGSecurityCamera* Cam = GetWorld()->SpawnActor<AMGSecurityCamera>(
+                    CM(77.f,39.f,DeckZ+265.f), FRotator(0.f,-90.f,0.f)))
+                Cam->Configure(TEXT("CCTV_2F_SECURITY"),2,40.f);
         }
         else
         {
-            Block(TEXT("3F_CameraProxy"), CM(79.f, 39.f, DeckZ + 265.f),
-                  FVector(.7f,.7f,.4f), false);
-            Block(TEXT("3F_CameraProxy"), CM(68.f, 39.f, DeckZ + 265.f),
-                  FVector(.7f,.7f,.4f), false);
+            // Original-comparative 3F: north cameras, western opening, Card 1
+            // prisoner cell, and a gas-filled connecting room. The 3D meters
+            // and exact shapes remain provisional pending J2ME map recovery.
             Block(TEXT("3F_PrisonerContact"), CM(54.f, 33.f, DeckZ + 90.f),
                   FVector(.6f,.6f,1.8f), false);
-            Block(TEXT("3F_CrateCover"), CM(73.f, 34.f, DeckZ + 70.f),
+            Block(TEXT("3F_CrateCover"), CM(83.f, 27.f, DeckZ + 70.f),
                   FVector(1.8f,1.3f,1.4f));
+            Block(TEXT("3F_CameraBlindCover"), CM(73.f, 23.f, DeckZ + 70.f),
+                  FVector(1.8f,1.3f,1.4f));
+            auto WallX = [this,DeckZ](float X,float Y1,float Y2)
+            {
+                Block(TEXT("3F_Partition"), CM(X, (Y1+Y2)/2.f, DeckZ+165.f),
+                      FVector(.30f,Y2-Y1,3.3f));
+            };
+            auto WallY = [this,DeckZ](float Y,float X1,float X2)
+            {
+                Block(TEXT("3F_Partition"), CM((X1+X2)/2.f, Y, DeckZ+165.f),
+                      FVector(X2-X1,.30f,3.3f));
+            };
+            // Contained prisoner room: the player must approach its 3m east door.
+            WallX(49.f,29.f,39.f);
+            WallY(29.f,49.f,60.f);
+            WallY(39.f,49.f,60.f);
+            WallX(60.f,29.f,31.5f); WallX(60.f,34.5f,39.f);
+            PrisonerDoor = Block(TEXT("3F_PrisonerDoor_Card1"),
+                CM(60.f,33.f,DeckZ+135.f), FVector(.35f,3.f,2.7f));
+            // The optional hazardous side passage is physically bounded.
+            WallX(62.f,33.f,35.f); WallX(62.f,38.f,41.f);
+            WallY(41.f,62.f,80.f);
+            WallY(33.f,62.f,68.f); WallY(33.f,72.f,80.f);
+            WallX(80.f,33.f,35.f); WallX(80.f,38.f,41.f);
+            GasDoor = Block(TEXT("3F_GasDoor_Card1"),
+                CM(62.f,36.5f,DeckZ+135.f), FVector(.35f,3.f,2.7f));
+            // 2.7m-high mounted cameras sweep toward the main 3F corridor.
+            for (float X : {68.f,79.f})
+            {
+                if (AMGSecurityCamera* Cam = GetWorld()->SpawnActor<AMGSecurityCamera>(
+                        CM(X,39.f,DeckZ+265.f), FRotator(0.f,-90.f,0.f)))
+                    Cam->Configure(X<70.f?TEXT("CCTV_3F_WEST"):TEXT("CCTV_3F_EAST"),3,50.f);
+            }
         }
         Block(FName(*FString::Printf(TEXT("B1_%dF_Lift"), Floor)),
               CM(92.f, 26.f, DeckZ + 90.f), FVector(1.f,1.f,1.8f), false);
