@@ -29,6 +29,12 @@ The [Building One → Gray Fox prison → Building One runtime bridge](docs/1995
 
 **Current truth:** Unreal and Rust source committed, **not compiled** or playtested; physical detention approach and missing building connections remain provisional until J2ME verification. Do not call this a complete playable game or a verified source level. A developer-only F9 reset from the Building One area clears test checkpoints and restarts at the beginning.
 
+## Audio and failure-screen readiness
+
+**Soundtrack status:** the source edition archive contains 56 original MIDIs (10 BGM, 4 intros, 42 sound effects); **there are no upgraded MIDI, WAV, OGG or other rendered music/sound files in this Unreal branch**. The separate expanded browser playtest has 19 procedural SFX cues and 3 ambient drone layers, but no audio file pack or adaptive MIDI score. See the [eight-mission audio inventory and coverage audit](data/1995_audio_coverage_audit.json). Sourcing, producing, mixing and importing appropriately licensed music/SFX remains unfinished.
+
+The [Game Over / Continue / Exit-to-title implementation](docs/GAME_OVER_AUDIO_AND_MENU_CONTRACT.md) is added in Unreal source with a radio-loss overlay and preserved checkpoints, but its sound assets and finished animation are *not* present. Unreal compilation and audio playback tests remain outstanding.
+
 ## Three-strike Metal Gear Solid melee pass
 
 The [MGS-style melee implementation contract](docs/THREE_STRIKE_MELEE_IMPLEMENTATION.md) is reflected in Unreal source: **left punch → right punch → right roundhouse kick**, with two rapid queued presses, physically timed hit windows, alternate guard flinches and a finishing knockdown. Current prototype shoulder/hip joints show separate moves; real skeletal animation clips can be assigned to the three exposed montage slots. No actual licensed attack montages or high-resolution character rigs are included yet. Source and timing regressions: `python -m unittest tools/test_three_strike_melee_contract.py` (not run as a UE build).
