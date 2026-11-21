@@ -23,6 +23,8 @@ public:
         PatrolWaypoints = WorldWaypoints;
         PatrolWaypointIndex = PatrolWaypoints.Num() > 1 ? 1 : 0;
     }
+    // A confirmed sighting shared by a local, functioning CCTV system.
+    void ReceiveCameraAlert(const FVector& SightLocation, float DurationSeconds);
     bool IsIncapacitated() const { return bIncapacitated; }
     uint32 GetAwarenessState() const { return AwarenessState; }
     float GetSuspicion() const { return Suspicion; }
@@ -54,6 +56,7 @@ private:
     bool bPatrolForward = true;
     bool bIncapacitated = false;
     float Suspicion = 0.f;
+    float CameraAlertSeconds = 0.f;
     float Health = 100.f;
     float StaggerSeconds = 0.f;
     float AttackCooldown = 0.f;
