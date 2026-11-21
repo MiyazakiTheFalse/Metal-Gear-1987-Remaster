@@ -68,7 +68,12 @@ float AMGSetpieceBoss::TakeDamage(float Damage, const FDamageEvent& Event,
         if (Director.IsValid()) Director->NotifyWrongWeapon(Id, WeaponRequirement);
         return 0.f;
     }
-    Health = FMath::Max(0.f, Health - Damage);
+    // Snake's existing hitscan prototype emits 100 damage for incapacitating
+    // guards. Human bosses need a separate multi-shot endurance profile,
+    // including Coward Duck's ten careful pistol shots.
+    const float EffectiveDamage=Source==TEXT("HANDGUN") ?
+        FMath::Min(Damage,18.f) : Damage;
+    Health = FMath::Max(0.f, Health - EffectiveDamage);
     if (Health <= 0.f)
     {
         bDefeated = true;
@@ -84,7 +89,7 @@ float AMGSetpieceBoss::TakeDamage(float Damage, const FDamageEvent& Event,
         Destroy();
     }
     else Windup = -1.f;
-    return Damage;
+    return EffectiveDamage;
 }
 void AMGSetpieceBoss::Tick(float DeltaSeconds)
 {
