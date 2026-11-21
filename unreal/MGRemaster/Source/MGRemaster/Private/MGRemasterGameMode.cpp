@@ -4,6 +4,7 @@
 #include "MGCampaignState.h"
 #include "Engine/GameInstance.h"
 #include "MGMissionOne.h"
+#include "MGLaterMission.h"
 #include "MGEquipmentComponent.h"
 #include "MGPlayerCharacter.h"
 #include "MGPrototypeHUD.h"
@@ -67,6 +68,17 @@ void AMGRemasterGameMode::StartPlay()
         // initializes confiscated inventory. It is never spawned alongside 1F.
         GetWorld()->SpawnActor<AMGGrayFoxMission>(
             AMGGrayFoxMission::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+        return;
+    }
+    if (MissionNumber >= 4 ||
+        (MissionNumber == 3 && Story && Story->HasBeat(TEXT("m03.exterior_started"))))
+    {
+        if (AMGLaterMission* Later = GetWorld()->SpawnActor<AMGLaterMission>(
+            AMGLaterMission::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator))
+        {
+            Later->RestorePlayerEquipment(Cast<AMGPlayerCharacter>(
+                UGameplayStatics::GetPlayerCharacter(this, 0)));
+        }
         return;
     }
     if (AMGMissionOne* Mission = GetWorld()->SpawnActor<AMGMissionOne>(
