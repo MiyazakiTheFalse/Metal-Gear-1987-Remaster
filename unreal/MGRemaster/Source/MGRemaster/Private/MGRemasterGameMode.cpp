@@ -62,6 +62,12 @@ void AMGRemasterGameMode::StartPlay()
             if (Pawn) PC->Possess(Pawn);
         }
     }
+    if (Story && Story->IsTitleScreenActive())
+    {
+        // Exit on Game Over returns to an actual in-session title, not
+        // a shell quit. No mission actors or enemies spawn behind the menu.
+        return;
+    }
     if (MissionNumber == 2)
     {
         // The prison actor restores the dedicated capture checkpoint and
