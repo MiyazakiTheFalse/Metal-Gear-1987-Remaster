@@ -29,6 +29,14 @@ The [Building One → Gray Fox prison → Building One runtime bridge](docs/1995
 
 **Current truth:** Unreal and Rust source committed, **not compiled** or playtested; physical detention approach and missing building connections remain provisional until J2ME verification. Do not call this a complete playable game or a verified source level. A developer-only F9 reset from the Building One area clears test checkpoints and restarts at the beginning.
 
+## Original Adaptive Audio — multi-engine integration pass
+
+A **new original** sound bank now exists in the current conversation as separate downloadable bundles: 14 editable new MIDI compositions, 14 rendered music WAV loops, and 46 original WAV effects (**60 rendered WAV files**). The source game's 56 original J2ME MIDI files are **not** being redistributed. [Audio integration, cue IDs and instructions](docs/ORIGINAL_ADAPTIVE_AUDIO_IMPLEMENTATION.md) detail how to copy the same WAVs into Unreal and the browser.
+
+**Unreal:** `MGAdaptiveAudioDirector` is spawned on title and all missions; it crossfades from actual mission/guard/boss/gameover state and routes movement, three-hit melee, choking, dragging, guns, rockets, mines, radio and menu effects through SoundWave assets. The Python editor importer checks SHA-256 before turning the WAV files into `/Game/Audio` assets. **Actual files are in the downloadable overlay ZIP, not Git-tracked binaries, and Unreal compilation/import/playback remains unverified.**
+
+**Browser:** the expanded Gray Fox playtest ZIP includes WAVs, `audio_manager.js` for adaptive cues, positional effects, volume sliders and procedural fallback. The browser campaign and audio-bus source tests passed. The browser slice is not the eight-mission Unreal prototype; no full-game audio coverage should be claimed.
+
 ## Audio and failure-screen readiness
 
 **Soundtrack status:** the source edition archive contains 56 original MIDIs (10 BGM, 4 intros, 42 sound effects); **there are no upgraded MIDI, WAV, OGG or other rendered music/sound files in this Unreal branch**. The separate expanded browser playtest has 19 procedural SFX cues and 3 ambient drone layers, but no audio file pack or adaptive MIDI score. See the [eight-mission audio inventory and coverage audit](data/1995_audio_coverage_audit.json). Sourcing, producing, mixing and importing appropriately licensed music/SFX remains unfinished.
