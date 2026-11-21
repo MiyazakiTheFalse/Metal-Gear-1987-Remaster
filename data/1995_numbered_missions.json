@@ -4,12 +4,8 @@
   "campaign_name": "Operation Intrude N313",
   "year": 1995,
   "mission_count": 8,
-  "currently_in_runtime": [
-    1,
-    2,
-    3
-  ],
-  "mission_progression": "One-based labels. Missions are story arcs inside one connected Outer Heaven; prior rooms are revisited with persistent world state. No false claim that 4–8 are playable.",
+  "currently_in_runtime": [],
+  "mission_progression": "Numbered mission actors and transition source are now present for 1–8. No UE 5.7 compile/PIE/cooked-game proof exists; J2ME original room atlas is still untraced. Persistent item and event ledger carries through source-level transitions.",
   "mapping_note": "Mission boundaries are proposed remake pacing divisions, not official original 1987 mission numbering",
   "missions": [
     {
@@ -41,7 +37,7 @@
         "N05_UPPER_FLOOR",
         "N06_DEEPENED_INFO"
       ],
-      "playable_in_repo": true,
+      "playable_in_repo": false,
       "story_threads": [
         {
           "between": [
@@ -84,7 +80,9 @@
           ]
         }
       ],
-      "guard_assignment_required": true
+      "guard_assignment_required": true,
+      "source_world_builder_present": true,
+      "validation": "source_only_UE57_uncompiled"
     },
     {
       "number": 2,
@@ -112,7 +110,7 @@
         "N09_FOX_TRUTH",
         "N10_RECOVER_AND_SHOTMAKER"
       ],
-      "playable_in_repo": true,
+      "playable_in_repo": false,
       "story_threads": [
         {
           "between": [
@@ -156,7 +154,9 @@
         }
       ],
       "guard_assignment_required": true,
-      "provisional_prison_detainee_count": 4
+      "provisional_prison_detainee_count": 4,
+      "source_world_builder_present": true,
+      "validation": "source_only_UE57_uncompiled"
     },
     {
       "number": 3,
@@ -166,7 +166,8 @@
       "first": "N11_FIRST_REVISIT",
       "last": "N14_TANK_CHECKPOINT",
       "world": [
-        "Building One revisit, roof and exterior checkpoint; latter unimplemented"
+        "Building One 1F–3F revisit with bidirectional service exit",
+        "Provisional road/Hind/tank exterior arena"
       ],
       "return_purpose": "Areas first explored for gear now support independent searching and source-based backtracking",
       "signature_character_scene": "On returning to Building One, the mission status reflects Fox's warning and the resistance calls change",
@@ -176,14 +177,14 @@
         "guard occupancy can later react to an escape"
       ],
       "required_gate": "m03.route.confirmed",
-      "next_transition": "Building Two approach is known after any one clue, but Mission 4 level does not yet exist; optional clue/cache/security revisits remain available",
+      "next_transition": "Physical checkpoint after Machinegun Kid, Hind D and tank; Building Two mission actor source is present",
       "scenes": [
         "N11_FIRST_REVISIT",
         "N12_MACHINEGUN_KID",
         "N13_AIR_AND_ROOF",
         "N14_TANK_CHECKPOINT"
       ],
-      "playable_in_repo": true,
+      "playable_in_repo": false,
       "story_threads": [
         {
           "between": [
@@ -288,13 +289,15 @@
           "effect": "Disable camera by spending ammunition, without using service breaker",
           "status": "existing_source_uncompiled"
         }
-      ]
+      ],
+      "source_world_builder_present": true,
+      "validation": "source_only_UE57_uncompiled"
     },
     {
       "number": 4,
       "id": "M04",
       "title": "The Outer Defences",
-      "status": "planned_not_runtime",
+      "status": "unreal_source_partial_uncompiled",
       "first": "N15_BULLDOZER",
       "last": "N19_ROCKET_AND_TX11",
       "world": [
@@ -308,7 +311,7 @@
         "opened protected doors remain accessible"
       ],
       "required_gate": "jennifer.rocket_help",
-      "next_transition": "Find actual Dr. Pettrovich",
+      "next_transition": "Physical research-security checkpoint after defeating TX-11 and collecting actual Card 7",
       "scenes": [
         "N15_BULLDOZER",
         "N16_FIRE_TROOPER",
@@ -358,13 +361,15 @@
           ]
         }
       ],
-      "guard_assignment_required": true
+      "guard_assignment_required": true,
+      "source_world_builder_present": true,
+      "validation": "source_only_UE57_uncompiled"
     },
     {
       "number": 5,
       "id": "M05",
       "title": "The Price of Metal Gear",
-      "status": "planned_not_runtime",
+      "status": "unreal_source_partial_uncompiled",
       "first": "N20_ACTUAL_MADNAR",
       "last": "N25_TECHNICAL_CODE",
       "world": [
@@ -379,7 +384,7 @@
         "no arbitrary resets to earlier rooms"
       ],
       "required_gate": "ellen.rescue",
-      "next_transition": "Building Three and TX-55 route",
+      "next_transition": "After Ellen's rescue and Madnar's weakness intel, interact with physical research service exit to Mission 6",
       "scenes": [
         "N20_ACTUAL_MADNAR",
         "N21_ELLEN_RETRACE",
@@ -432,17 +437,21 @@
           ]
         }
       ],
-      "guard_assignment_required": true
+      "guard_assignment_required": true,
+      "source_world_builder_present": true,
+      "validation": "source_only_UE57_uncompiled"
     },
     {
       "number": 6,
       "id": "M06",
       "title": "The Cost of Loyalty",
-      "status": "planned_not_runtime",
+      "status": "unreal_source_partial_uncompiled",
       "first": "N26_DESERT_REENTRY",
       "last": "N31_BROTHER_FREED",
       "world": [
-        "Desert return, Building Three, Coward Duck hostages"
+        "Provisional desert approach and Card 7 checkpoint",
+        "Water/oxygen passage",
+        "Building Three/Coward Duck chamber with three physical captives"
       ],
       "return_purpose": "Earlier advice becomes suspect, and a personal rescue becomes crucial escape knowledge",
       "signature_character_scene": "Hostage-safe Coward Duck victory carries Jennifer's family story into the ending",
@@ -451,8 +460,8 @@
         "Card 8 and radio clues persist",
         "trapped routes reflect Big Boss's misinformation"
       ],
-      "required_gate": "brother.safe_rescue",
-      "next_transition": "Search deep bunker for the real commander",
+      "required_gate": "m06.coward_duck_defeated + brother.escape_ladder + both other POW rescues + m06.card8_acquired",
+      "next_transition": "Rescue all three hostages and recover Card 8 to enter the deep bunker",
       "scenes": [
         "N26_DESERT_REENTRY",
         "N27_BIG_BOSS_TRUCK_TRAP",
@@ -505,17 +514,21 @@
           ]
         }
       ],
-      "guard_assignment_required": true
+      "guard_assignment_required": true,
+      "source_world_builder_present": true,
+      "validation": "source_only_UE57_uncompiled"
     },
     {
       "number": 7,
       "id": "M07",
       "title": "Orders and Evidence",
-      "status": "planned_not_runtime",
+      "status": "unreal_source_partial_uncompiled",
       "first": "N32_OWNERSHIP_REVEALED",
       "last": "N34_FINAL_SECURITY",
       "world": [
-        "Building Three deep basement, prisoner witness, final security"
+        "Building Three inner detention and command relay",
+        "Card 8 reader and optional service-wall demolition path",
+        "Final secure access to TX-55 chamber"
       ],
       "return_purpose": "A person previously rescued supplies proof that changes how command radio is understood",
       "signature_character_scene": "Big Boss's command to stop follows witness evidence, not a premature cinematic spoiler",
@@ -523,8 +536,8 @@
         "previous trust cues reframe as possible deception",
         "final-access equipment remains earned"
       ],
-      "required_gate": "snake.disobeys_abort",
-      "next_transition": "Reach and destroy TX-55",
+      "required_gate": "pow.final_reveal + snake.disobeys_abort + m07.final_security_cleared",
+      "next_transition": "After witness, contradicted abort order, and one of two security routes, reach Mission 8",
       "scenes": [
         "N32_OWNERSHIP_REVEALED",
         "N33_ABORT_ORDER",
@@ -561,17 +574,21 @@
           ]
         }
       ],
-      "guard_assignment_required": true
+      "guard_assignment_required": true,
+      "source_world_builder_present": true,
+      "validation": "source_only_UE57_uncompiled"
     },
     {
       "number": 8,
       "id": "M08",
       "title": "Outer Heaven",
-      "status": "planned_not_runtime",
+      "status": "unreal_source_partial_uncompiled",
       "first": "N35_TX55_SABOTAGE",
       "last": "N39_CLOSING_BROADCAST",
       "world": [
-        "TX-55 chamber, commander's final room, escape shafts, exterior"
+        "TX-55 chamber with two camera sentries and left/right foot interaction",
+        "Final commander pressure arena",
+        "Two escape ladders, left one pays off Jennifer brother intel"
       ],
       "return_purpose": "All earlier choices and relationships pay off under self-destruct pressure",
       "signature_character_scene": "TX-55 destruction precedes final commander fight, then physical escape under countdown",
@@ -579,8 +596,8 @@
         "fortress shifts to collapse/evacuation state",
         "mission-ending survival flags and original closing message remain durable"
       ],
-      "required_gate": "tx55.destruction",
-      "next_transition": "1995 mission complete; later-series context not inserted",
+      "required_gate": "16 sequenced TX-55 charges -> self-destruct -> defeat final commander with rockets -> left escape ladder",
+      "next_transition": "End-of-campaign escape beat; no 1995 hero is told later Venom lore",
       "scenes": [
         "N35_TX55_SABOTAGE",
         "N36_SELF_DESTRUCT",
@@ -636,7 +653,9 @@
           ]
         }
       ],
-      "guard_assignment_required": true
+      "guard_assignment_required": true,
+      "source_world_builder_present": true,
+      "validation": "source_only_UE57_uncompiled"
     }
   ],
   "required_character_dynamics": [
@@ -650,5 +669,17 @@
     "SCENES_UPDATE_REVISITED_WORLD"
   ],
   "guard_duty_contract": "data/1995_guard_duty_and_prison_occupancy_contract.json",
-  "prisoner_visibility_contract": "Mission 02 secret prison: four visible including Snake and Fox, plus two noncanonical ambient visual-only detainees in adjacent barred wing"
+  "prisoner_visibility_contract": "Mission 02 secret prison: four visible including Snake and Fox, plus two noncanonical ambient visual-only detainees in adjacent barred wing",
+  "source_world_builders_present": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "engine_compilation_verified": false,
+  "full_campaign_playability_verified": false
 }
