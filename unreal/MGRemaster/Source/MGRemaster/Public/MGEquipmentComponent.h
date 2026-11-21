@@ -53,6 +53,7 @@ public:
     bool IsStunEquipped() const;
     bool ConsumeStunRound();
     bool ConsumeRation();
+    bool ConsumeItem(FName ItemId, int32 Amount);
     int32 GetStunRounds() const;
 
     // Designed for eventual room/item pickup and mission SaveGame integration.
