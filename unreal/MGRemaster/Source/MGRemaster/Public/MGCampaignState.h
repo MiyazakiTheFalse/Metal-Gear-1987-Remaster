@@ -18,6 +18,10 @@ class MGREMASTER_API UMGCampaignState : public UGameInstanceSubsystem
 public:
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
     int32 GetMissionNumber() const;
+    FString GetMissionTitle() const;
+    FString GetCharacterThread() const;
+    int32 GetRadioContactCount() const;
+    FString GetRadioContactLabel(int32 Channel) const;
     bool HasBeat(FName Id) const;
     bool RecordBeat(FName Id, const FString& Intel);
     bool AdvanceMission(int32 NextMissionNumber);
