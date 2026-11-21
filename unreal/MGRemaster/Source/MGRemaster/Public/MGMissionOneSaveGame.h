@@ -11,7 +11,7 @@ class MGREMASTER_API UMGMissionOneSaveGame : public USaveGame
     GENERATED_BODY()
 public:
     UPROPERTY()
-    int32 Version = 3;
+    int32 Version = 4;
     UPROPERTY()
     TArray<FName> CollectedPickupIds;
     UPROPERTY()
@@ -26,6 +26,10 @@ public:
     bool bGasDoorOpened = false;
     UPROPERTY()
     int32 CurrentFloor = 1;
+    UPROPERTY()
+    int32 HandgunRounds = -1;
+    UPROPERTY()
+    int32 RationsRemaining = -1;
     UPROPERTY()
     FVector LastCheckpoint = FVector(700.f, 700.f, 90.f);
 };
