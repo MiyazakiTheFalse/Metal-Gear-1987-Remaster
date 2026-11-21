@@ -34,6 +34,13 @@ public:
     float GetEquipmentTimeScale() const { return EquipmentTimeScale; }
     float GetNoiseFactor() const;
     float GetHealth() const { return Health; }
+    // 1998-MGS-style fail screen, with a separate continue choice.
+    bool IsGameOver() const { return bGameOver; }
+    bool IsGameOverMenuReady() const { return bGameOver && GameOverElapsed >= 1.65f; }
+    bool IsTitleScreenActive() const;
+    float GetGameOverElapsed() const { return GameOverElapsed; }
+    int32 GetFailureMenuSelection() const { return FailureMenuSelection; }
+    const FString& GetDeathRadioLine() const { return DeathRadioLine; }
     bool IsProne() const { return bIsProne; }
     bool IsInCover() const { return bInCover; }
     UFUNCTION(BlueprintPure, Category="Stealth|Interaction")
@@ -111,6 +118,11 @@ private:
     float ChokeStruggleTime = 0.f;
     bool bInteractHeld = false;
     float Health = 100.f;
+    bool bGameOver = false;
+    float GameOverElapsed = 0.f;
+    int32 FailureMenuSelection = 0;  // 0=Continue/Start, 1=Exit/Quit
+    FString DeathRadioLine;
+    bool bFailureRadioCuePlayed = false;
     // Authoritative melee state runs on real seconds and applies hit damage
     // only at the active frame, never at the initial button press.
     bool bMeleeInProgress = false;
@@ -165,6 +177,12 @@ private:
     AMGBodyHidingSpot* FindBodyLocker() const;
     void StopBodyDrag();
     void UpdateStealthInteractions(float DeltaSeconds);
+    void EnterGameOver();
+    void FailureMenuPrevious();
+    void FailureMenuNext();
+    void FailureMenuConfirm();
+    void FailureMenuMove(int32 Direction);
+    void RestartFromCheckpoint();
     void RestartRescue();
     void ToggleMissionLog();
     void CycleGraphicsQuality();
