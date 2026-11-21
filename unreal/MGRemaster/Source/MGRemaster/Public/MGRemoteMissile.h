@@ -16,7 +16,8 @@ class MGREMASTER_API AMGRemoteMissile : public AActor
 public:
     AMGRemoteMissile();
     virtual void Tick(float DeltaSeconds) override;
-    void SetSteering(float YawAxis, float PitchAxis);
+    void SetYawInput(float Axis);
+    void SetPitchInput(float Axis);
 private:
     UPROPERTY(VisibleAnywhere)
     UStaticMeshComponent* Body = nullptr;
