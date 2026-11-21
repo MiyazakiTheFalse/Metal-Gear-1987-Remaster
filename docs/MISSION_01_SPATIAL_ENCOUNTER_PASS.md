@@ -1,65 +1,62 @@
-# Mission 01: Insertion to Outer Heaven — spatial encounter pass
+# Mission 01 — source-first spatial encounters (revision 2)
 
-**Status:** authored spatial contract and static checker only. **NOT spawned in the browser or Unreal yet.** Source fidelity is pending the J2ME room/event trace. Every coordinate below is a remake-blockout hypothesis in metres, not a recovered original measurement.
+**Production status: design contract, NOT a playable level.** This supersedes the first speculative layout and must be read alongside `data/mission_01_spatial_blueprint.json`. Current area rectangles and guard waypoint coordinates are placeholders for remaster collision/blockout only. They are not reconstructed J2ME geometry or militarily prescribed patrol locations.
 
-## Spatial spine and route logic
+## Authoritative source hierarchy
+1. Supplied Connect2Media J2ME 3.3.0 game and its actual room/event/item data — target game, decoding still incomplete.
+2. Original 1987 MSX2 Metal Gear manuals and gameplay — historical comparison, not presumed interchangeable with the J2ME edition.
+3. Community MSX2 floor maps and walkthroughs — explicit cross-checking aids, not primary proof.
+4. Modern military public doctrine — reference for believable job assignments and behavior, **not** a mandate to replace canonical enemy choreography.
+5. New transition architecture — clearly labelled remake-only, introduced solely for spatial continuity, camera clearance, stealth affordances, or comprehensible navigation.
 
-```text
-                       [M01-A Insertion]
-                          |          \
-                   low drainage     lit checkpoint
-                          |          /
-                       [M01-D Service]
-                              |
-                       [M01-E Security]--------[M01-G Facility]
-                              |                       /
-                       [M01-F Maintenance]----------/
-```
+Official story: Snake enters alone with a transceiver, searching for Gray Fox and ultimately Metal Gear. Do not insert starting combat equipment. https://metalgear.konami.net/manual/mc1/mg1_msx/pc/en/page02.html
 
-The drainage is an alternative route around the gatehouse, not a bypass of the equipment tutorial. Security offers a dangerous direct gate and a longer audible maintenance path. Both reconnect at the facility. Backtracking works without a loading-screen topology swap. An expert can cross without picking up a gun; first-time players get observation and recovery space.
+## Canonical-comparative opening chain (MSX2, J2ME verification outstanding)
 
-## Placement rationale
+1. Initial approach: proceed past guards and crates, preserving the opening's observation and infiltration emphasis.
+2. First three-truck area: **west = ration; centre = Card 1 after its guard emerges; east = binoculars**. The guard's exit/inspection is a memorable source beat. Make that visible and interruptible; never simply hand Card 1 to the player.
+3. Card 1 room: opening requires Card 1, resting/sleeping guard and Gas Mask pickup. Keep the room physically navigable with 3D camera.
+4. Second truck and elevator vicinity: separate later **handgun truck** (no starting ammo), **guard-heavy truck**, and **land-mine truck**. Guarded elevator is a major vertical circulation anchor. Do not collapse both truck clusters into one invented supply depot.
+5. Building One upper floors: cameras and ammo on the third floor (and POW, hazardous-room progression) must be designed as a continuation, not replaced by an invented Mission 1 completion checkpoint.
 
-| ID | Physical role | Guard/pickup intention |
-|---|---|---|
-| M01-A | Exterior insertion / safe cover | G01 teaches patrol rhythm. P01 ration is optional and safe. |
-| M01-B | Drain and grate | No guard in the narrow pipe; locomotion teaches prone/crawl and audibility. |
-| M01-C | Lit checkpoint and truck | G02 holds barrier, G03 roves out of phase; P02 medkit rewards reading their rhythm. |
-| M01-D | Storage / service door | P03 handgun is plainly visible from cover, P04 ammo tucked behind shelves. No gun is mandatory. |
-| M01-E | Internal security hall | G04 hall route, G05 elevated booth create overlapping but avoidable cones. Terminal gate is one legitimate route. |
-| M01-F | Generator bypass | G06 inspects generator, P05 ration compensates for noise and detour. |
-| M01-G | Main facility antechamber | P06 intel is the mission exit transaction and durable checkpoint, not yet asserted as a canonical keycard. |
+Cross-check sources:
+- https://thesnakesoup.org/metal-gear-msx-walkthrough/
+- https://www.vgmaps.com/Atlas/MSX/
+- https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/7524
 
-## Guard sensing and tactical readability
+## Guard placement doctrine for a Metal Gear game
 
-All patrol coordinates live in `data/mission_01_spatial_blueprint.json`. Guard start points and patrol nodes are inside authored room bounds, but **collision and cones are not yet physically evaluated**. Implement these states in both runtimes using a shared declarative encounter adapter: relaxed patrol → suspicious orientation → move to last audible location → localized investigation → search → return. Confirmed line-of-sight can escalate to squad radio only with plausible comms; a noise stimulus gives its source, not Snake's coordinates. Stun/drag and unconscious-body discovery should be implemented and tested against those states before production signoff.
+Public references: US Army *TC 3-22.6 Guard Duty* (2017), and *ATTP 3-39.32 Physical Security*. These describe guard duty, assigned posts, patrol and communication responsibilities. They **do not** validate exact fictional coordinates and should never be used to claim a real base-security plan. Interpret them for atmospheric credibility:
 
-No room-entry spawn waves. Existing enemies persist, and doors/glass/shelves must occlude sensor rays while sound attenuation depends on material and openings. Keep guard awareness across room boundaries when in audible/visible range. Make a direct route possible with zero pickups and zero alerts; nonlethal takedowns are optional, not required.
+- Assign each actor a comprehensible duty: crate-route observation (G01), truck-yard watch (G02), original centre-truck departure beat (G03), later vehicle-route inspection (G04), elevator access duty (G05), optional maintenance watch (G06).
+- Give each a believable routine: checking a truck, monitoring an access point, inspecting damaged equipment, pausing to communicate. Avoid identical looping robots unless a source pattern requires it.
+- Use coherent guard states with diegetic tells: idle duty, observation, mild suspicion, investigate, confirmed alert, localized search, resume/report. A guard knowing a suspicious noise's source is **not** the same as knowing Snake's position.
+- Communication is believable and imperfect: a sighting should matter, while an unverified sound must not instantly inform every soldier.
+- Preserve source-specific moments even when they look less than tactically optimal. Make original routines clear enough for stealth timing without forcing a wait or a fight.
+- Protect player enjoyment: offer an observation position before threats, legible guard intentions and more than one escape/recovery choice. Optimize for fairness rather than creating an unbeatably efficient security system.
+- No fabricated spawn waves, alarm resets, or guards appearing through solid geometry. Avoid tracking the player through walls without sensor evidence.
 
-## First-time walkthrough
+Public historical doctrine reference is especially useful for period-inspired posture but the modern texts are **not proof of Outer Heaven's own 1995 orders**. No invented radio channels or squad deployments are asserted as canon.
 
-1. Establish distant Outer Heaven silhouette, give immediate player control and optional short radio context, show G01 crossing the approach before the player is in danger.
-2. Player sees two credible routes: an exposed checkpoint and a darker drainage mouth. Neither uses a giant glowing arrow. Separate ingress landmarks by silhouette and environmental noise.
-3. At checkpoint, G02 faces the barrier while G03 returns to desk. A shadowed truck edge is the waiting place; line-of-sight and footstep audio tell the same story.
-4. Through either route, enter service store. First firearm can be found without being forcibly equipped. A container label and table silhouette support colourblind readability.
-5. Reveal security booth and hall guard from a safe lip. Player may use terminal, distract one guard, or seek the generator detour.
-6. Facility entry persists mission state. Codec provides next objective while the player retains control; no arbitrary cutscene lock.
+## Architecture policy
 
-## Expert and failure routes
+The currently proposed drainage and maintenance connectors are **optional remake-only candidates**. The default source-fidelity route must remain viable without them; no optional transition may bypass required original item, boss, rescue or elevator gates. Their exact existence should be revisited after the J2ME map trace.
 
-- Expert: insertion → drainage → service → security → maintenance → facility; no pickup or forced combat.
-- Direct: insertion → checkpoint → service → security terminal → facility.
-- Detected: retreat through service into checkpoint or drainage; radio updates only guards who can receive it; no teleported reinforcement behind Snake.
-- Return: facility → service path, previously opened passages stay open, collected items stay collected, guard investigation state survives allowed loading transitions.
-- Low resources: do not gate a story objective behind a finite round count or a weapon acquisition.
+A true three-dimensional adaptation must represent vehicle bays, truck interiors, guard stations, functional loading doors, stair and lift shafts, secure rooms, backtracking corridors, ceiling clearance, and usable cover. Transition rooms exist to explain buildings physically, not to increase walking time. Distances and angles must be tuned by first-playthrough metrics and verified geometry rather than invented original dimensions.
 
-## Shared source contract / implementation gates
+## Required test routes
 
-1. **Verify** original source-map connectivity, source item coordinates and mission beat order from J2ME a1; annotate MSX2 differences. Rework contract before claiming canon.
-2. **Geometry adapters**: browser and Unreal consume the same IDs, portals and spawn transforms; preserve a 2D local XY source, explicitly map to engine 3D axes, and keep stable IDs in save data.
-3. **Placement adapters**: G01–G06 use actual NavMesh/waypoints and line-of-sight traces; P01–P06 use pickup interactables, inventory effects and persistence.
-4. **Encounter tests**: at least two stealth solutions and one alarm recovery per guarded room; tests for bodies, door occlusion, no duplicated pickup, zero-weapon clear.
-5. **Camera/crawl**: verify left/right shoulder in every portal at 30/60/120 FPS; ladder and crawl transitions cannot bypass locked gates.
-6. **Evidence**: record scene traversal, AI path traces and video from both builds before marking any area `playable`. Static-data passing is not Unreal compilation or browser parity.
+- First-run no-combat arrival → first truck yard → collect Card 1 → Gas Mask room → second truck yard → lift.
+- Expert route preserving original progression but minimizing unnecessary stops.
+- Alarm triggered at either truck yard: no unavoidable checkpoint trap, guards investigate plausible locations, no arbitrary reinforcements.
+- First truck departure guard interrupted, distracted and allowed to complete routine; Card 1 never despawns or duplicates.
+- Handgun pickup grants gun with no automatic ammo. No ammo soft-lock on the elevator route.
+- Both shoulder cameras clear truck doors and corridor turns, including prone/crouch and alert retreat.
+- Door/card, lift, item, guard awareness and opened connectors persist through save/load and revisit.
+- Side transitions removed: full critical route and source items remain reachable.
 
-Run `python tools/validate_mission_01_layout.py` for data integrity. This does not yet establish runtime integration. Document any J2ME disagreement as a revision rather than quietly treating a speculative remake passage as an authentic 1987 route.
+## Execution status and next work
+
+Spatial JSON and static coordinate validation are committed on a draft PR. Build-time importers, functional guard AI, source geometry reconciliation, browser/Unreal content spawning, weapon pickup inventory and UE compilation **are not yet done**. Do not claim that a document or a coordinate graph is playable.
+
+Source-based annotation should next begin at the first-truck area and extend through the upper-floor security/camera layout. Each source screen needs an ID, screenshot reference, original actors/items/events, adjacency, 3D transition treatment and fidelity decision before converting it to production geometry.
