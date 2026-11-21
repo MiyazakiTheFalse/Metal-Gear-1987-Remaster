@@ -669,6 +669,9 @@ void AMGPlayerCharacter::FireStun()
     CombatNoiseTimer = bHandgun ? 1.0f : 0.55f;
     if (Opening)
         const_cast<AMGMissionOne*>(Opening)->PersistInventory(this);
+    else if (AMGGrayFoxMission* Prison = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+        Prison->PersistRecoveredInventory(this);
     // Camera ray determines crosshair target; a second ray enforces obstruction
     // between the character and target. Prototype nonlethal incapacitation only.
     const FVector CameraStart = FollowCamera->GetComponentLocation();
@@ -766,6 +769,9 @@ void AMGPlayerCharacter::UseItem()
         if (AMGMissionOne* Opening = Cast<AMGMissionOne>(
                 UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass())))
             Opening->PersistInventory(this);
+        else if (AMGGrayFoxMission* Prison = Cast<AMGGrayFoxMission>(
+                UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+            Prison->PersistRecoveredInventory(this);
     }
     else NotifyFeedback(TEXT("EQUIP A RATION FIRST"), TEXT("denied"));
 }
