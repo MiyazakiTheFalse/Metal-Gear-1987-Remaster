@@ -5,6 +5,7 @@
 #include "Engine/GameInstance.h"
 #include "MGGuardActor.h"
 #include "MGEquipmentComponent.h"
+#include "MGRemoteMissile.h"
 
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
@@ -223,6 +224,11 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
 }
 void AMGPlayerCharacter::MoveForward(float Value)
 {
+    if (ControlledMissile.IsValid())
+    {
+        ControlledMissile->SetSteering(0.f, Value);
+        return;
+    }
     if (Controller && !FMath::IsNearlyZero(Value))
     {
         const FRotator Yaw(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -247,6 +253,11 @@ void AMGPlayerCharacter::MoveForward(float Value)
 }
 void AMGPlayerCharacter::MoveRight(float Value)
 {
+    if (ControlledMissile.IsValid())
+    {
+        ControlledMissile->SetSteering(Value, 0.f);
+        return;
+    }
     if (Controller && !FMath::IsNearlyZero(Value))
     {
         const FRotator Yaw(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -669,6 +680,41 @@ void AMGPlayerCharacter::FireStun()
     const AMGMissionOne* Opening = Cast<AMGMissionOne>(
         UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass()));
     if (Opening && Opening->IsLiftTravelling()) return;
+    if (ControlledMissile.IsValid())
+    {
+        NotifyFeedback(TEXT("MISSILE ACTIVE — STEER WITH MOVEMENT CONTROLS"),
+                       TEXT("select"));
+        return;
+    }
+    if (Equipment && Equipment->IsWeaponEquipped(TEXT("RC_MISSILE")))
+    {
+        if (!Equipment->ConsumeWeaponAmmo(TEXT("RC_MISSILE")))
+        {
+            NotifyFeedback(TEXT("OUT OF REMOTE MISSILES"), TEXT("denied"));
+            return;
+        }
+        const FVector LaunchForward = FollowCamera->GetForwardVector();
+        const FVector SpawnPoint = GetActorLocation() +
+            LaunchForward * 125.f + FVector(0.f,0.f,50.f);
+        AMGRemoteMissile* Missile = GetWorld()->SpawnActor<AMGRemoteMissile>(
+            SpawnPoint, LaunchForward.Rotation());
+        if (!Missile)
+        {
+            Equipment->AwardAmmunition(TEXT("RC_MISSILE"), 1);
+            NotifyFeedback(TEXT("MISSILE COULD NOT LAUNCH"), TEXT("denied"));
+            return;
+        }
+        ControlledMissile = Missile;
+        Missile->SetOwner(this);
+        NotifyFeedback(TEXT("REMOTE MISSILE — STEER / SNAKE STAYS PUT"),
+                       TEXT("gunshot"));
+        CombatNoiseTimer = 1.f;
+        if (Opening) const_cast<AMGMissionOne*>(Opening)->PersistInventory(this);
+        else if (AMGGrayFoxMission* Prison = Cast<AMGGrayFoxMission>(
+                UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+            Prison->PersistRecoveredInventory(this);
+        return;
+    }
     const bool bHandgun = Equipment && Equipment->IsHandgunEquipped();
     const bool bStun = Equipment && Equipment->IsStunEquipped();
     if (!bHandgun && !bStun)
