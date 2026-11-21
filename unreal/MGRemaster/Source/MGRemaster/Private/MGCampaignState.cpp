@@ -30,7 +30,7 @@ void UMGCampaignState::Initialize(FSubsystemCollectionBase& Collection)
         Commit(); // backward-compatible, same ledger; no old saves discarded
     }
     if (!Progress || Progress->Version != 3 ||
-        Progress->MissionNumber < 1 || Progress->MissionNumber > 5)
+        Progress->MissionNumber < 1 || Progress->MissionNumber > 8)
         Progress = Cast<UMGCampaignSaveGame>(
             UGameplayStatics::CreateSaveGameObject(UMGCampaignSaveGame::StaticClass()));
 }
@@ -52,6 +52,9 @@ FString UMGCampaignState::GetMissionTitle() const
     case 3: return TEXT("MISSION 03 / THE SCIENTIST TRAIL");
     case 4: return TEXT("MISSION 04 / THE OUTER DEFENCES");
     case 5: return TEXT("MISSION 05 / THE PRICE OF METAL GEAR");
+    case 6: return TEXT("MISSION 06 / THE COST OF LOYALTY");
+    case 7: return TEXT("MISSION 07 / ORDERS AND EVIDENCE");
+    case 8: return TEXT("MISSION 08 / OUTER HEAVEN");
     default: return TEXT("MISSION / OUTER HEAVEN");
     }
 }
@@ -60,6 +63,26 @@ FString UMGCampaignState::GetCharacterThread() const
 {
     // A quiet story-state cue rather than a cutscene interrupt. Do not disclose
     // Big Boss's secret or the Venom retrospective before earned story events.
+    if (GetMissionNumber() == 8)
+        return HasBeat(TEXT("snake.escaped_outer_heaven")) ?
+            TEXT("SNAKE / HE SURVIVED ON HIS OWN TERMS") :
+            TEXT("SNAKE / METAL GEAR AND HIS COMMANDER ARE THE FINAL TEST");
+    if (GetMissionNumber() == 7)
+        return TEXT("BIG BOSS / SNAKE MUST CHOOSE EVIDENCE OVER ORDERS");
+    if (GetMissionNumber() == 6)
+        return HasBeat(TEXT("brother.escape_ladder")) ?
+            TEXT("JENNIFER / HER BROTHER'S LEFT-LADDER CLUE MATTERS") :
+            TEXT("SNAKE / FALSE COMMAND INTELLIGENCE IS NOW A THREAT");
+    if (GetMissionNumber() == 8)
+        return HasBeat(TEXT("snake.escaped_outer_heaven")) ?
+            TEXT("OUTER HEAVEN ESCAPED / OPERATION INTRUDE N313 COMPLETE") :
+            HasBeat(TEXT("tx55.destruction")) ?
+            TEXT("ESCAPE BEFORE DETONATION / LEFT LADDER CLUE") :
+            TEXT("PLANT THE 16-CHARGE TX-55 FOOT DEMOLITION SEQUENCE");
+    if (GetMissionNumber() == 7)
+        return TEXT("FIND THE WITNESS / CHALLENGE BIG BOSS / CLEAR SECURITY");
+    if (GetMissionNumber() == 6)
+        return TEXT("CROSS THE DESERT / RESCUE JENNIFER'S BROTHER");
     if (GetMissionNumber() == 5)
         return HasBeat(TEXT("ellen.rescue")) ?
             TEXT("ELLEN / RESCUED — RETURN TO HER FATHER") :
@@ -131,6 +154,47 @@ bool UMGCampaignState::SetMissionThreeExteriorActive(bool bExterior)
     }
     return true;
 }
+int32 UMGCampaignState::GetTX55CorrectCharges() const
+{
+    return Progress ? Progress->TX55CorrectCharges : 0;
+}
+bool UMGCampaignState::RecordTX55Charge(bool bRightFoot)
+{
+    if (!Progress || Progress->MissionNumber != 8 ||
+        !HasBeat(TEXT("madnar.tx55_sequence"))) return false;
+    // MSX2 source comparative: R R L R L L R L L R R L R L R R.
+    static const bool RightFootSequence[]={
+        true,true,false,true,false,false,true,false,
+        false,true,true,false,true,false,true,true};
+    if (Progress->TX55CorrectCharges >= UE_ARRAY_COUNT(RightFootSequence))
+        return false;
+    if (bRightFoot != RightFootSequence[Progress->TX55CorrectCharges])
+        return false; // Wrong-side input is not an invisible softlock.
+    ++Progress->TX55CorrectCharges;
+    if (!Commit())
+    {
+        --Progress->TX55CorrectCharges;
+        return false;
+    }
+    return true;
+}
+float UMGCampaignState::GetEscapeTimeRemaining() const
+{
+    return Progress ? Progress->EscapeSecondsRemaining : 120.f;
+}
+bool UMGCampaignState::SetEscapeTimeRemaining(float Seconds)
+{
+    if (!Progress || Progress->MissionNumber != 8 ||
+        !HasBeat(TEXT("tx55.destruction"))) return false;
+    const float Old=Progress->EscapeSecondsRemaining;
+    Progress->EscapeSecondsRemaining=FMath::Clamp(Seconds,0.f,120.f);
+    if (!Commit())
+    {
+        Progress->EscapeSecondsRemaining=Old;
+        return false;
+    }
+    return true;
+}
 bool UMGCampaignState::HasBeat(FName Id) const
 {
     return Progress && Progress->CompletedBeatIds.Contains(Id);
@@ -177,7 +241,7 @@ void UMGCampaignState::RevokeMisplacedDianeContact()
 bool UMGCampaignState::AdvanceMission(int32 NextMissionNumber)
 {
     if (!Progress || NextMissionNumber != Progress->MissionNumber + 1 ||
-        NextMissionNumber > 5)
+        NextMissionNumber > 8)
         return false;
     // The source route is back to 1F: one prisoner identifies Fox's hidden
     // cell; a second explains the capture route. Neither an optional radio
@@ -205,6 +269,17 @@ bool UMGCampaignState::AdvanceMission(int32 NextMissionNumber)
         (!HasBeat(TEXT("m04.bulldozer_defeated")) ||
          !HasBeat(TEXT("m04.fire_trooper_defeated")) ||
          !HasBeat(TEXT("tx11.rocket_defeat")))) return false;
+    if (NextMissionNumber == 6 &&
+        (!HasBeat(TEXT("ellen.rescue")) ||
+         !HasBeat(TEXT("madnar.weakness")))) return false;
+    if (NextMissionNumber == 7 &&
+        (!HasBeat(TEXT("m06.coward_duck_defeated")) ||
+         !HasBeat(TEXT("brother.escape_ladder")) ||
+         !HasBeat(TEXT("m06.card8_acquired")))) return false;
+    if (NextMissionNumber == 8 &&
+        (!HasBeat(TEXT("pow.final_reveal")) ||
+         !HasBeat(TEXT("snake.disobeys_abort")) ||
+         !HasBeat(TEXT("m07.final_security_cleared")))) return false;
     const int32 PreviousMissionNumber = Progress->MissionNumber;
     Progress->MissionNumber = NextMissionNumber;
     if (!Commit())
