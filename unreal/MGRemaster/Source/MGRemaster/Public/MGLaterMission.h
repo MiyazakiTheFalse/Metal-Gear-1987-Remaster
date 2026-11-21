@@ -32,6 +32,7 @@ public:
     bool TryInteract(AMGPlayerCharacter* Player);
     void OnBossDefeated(FName BossId);
     void NotifyWrongWeapon(FName BossId, FName RequiredWeapon);
+    void NotifyHostageShield();
     FString GetObjectiveText() const;
     FString GetRecentDialogue() const { return DialogueSeconds > 0.f ? Dialogue : FString(); }
     int32 GetActiveMission() const { return Mission; }
