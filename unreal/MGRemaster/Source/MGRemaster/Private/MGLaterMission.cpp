@@ -338,6 +338,8 @@ void AMGLaterMission::RestorePlayerEquipment(AMGPlayerCharacter* Player)
         else if (Id==TEXT("P09")) E->AwardWeapon(TEXT("RC_MISSILE"),4);
         else if (Id==TEXT("P10")) E->AwardWeapon(TEXT("GRENADE_LAUNCHER"),6);
     }
+    for (const FName Item:Save->ExtraOwnedItems)
+        E->AwardItem(Item,1);
     for (const FName Id:Save->LaterCollectedPickupIds)
     {
         if (Id==TEXT("L03_GRENADE_LAUNCHER"))
