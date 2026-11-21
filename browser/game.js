@@ -735,7 +735,7 @@ let stage=0,elapsedStage=0,gameTime=0,levelTime=0,health=100,missionFailed=false
 let footsteps=[],noiseEvents=[],nextNoiseId=0,particles=[],shots=[],notes=[],message=null,dialogueQueue=[],tipVisible='',lastStep=0,lastSound=0,awareness=0,alertTimer=0,achievement=[],lastRadar=0,frameCount=0,frameStart=performance.now();
 // Visual feedback is driven by COMMITTED gameplay damage, not a tracer graphic.
 let damagePulse=0,damageDirection=0;
-let equipOpen=null,eqIndex=0,activePadIndex=-1,recoveredGear=false,rounds=0,equippedWeapon='BARE HANDS',sectorSecured=false;const inventories={weapons:[{name:'BARE HANDS',usable:true},{name:'HANDGUN',usable:false},{name:'SUPPRESSOR',usable:false}],items:[{name:'NO ITEM',usable:true},{name:'RATION',usable:false},{name:'CARD 3',usable:false}]};
+let equipOpen=null,eqIndex=0,menuAxisRepeatAt=0,activePadIndex=-1,recoveredGear=false,rounds=0,equippedWeapon='BARE HANDS',sectorSecured=false;const inventories={weapons:[{name:'BARE HANDS',usable:true},{name:'HANDGUN',usable:false},{name:'SUPPRESSOR',usable:false}],items:[{name:'NO ITEM',usable:true},{name:'RATION',usable:false},{name:'CARD 3',usable:false}]};
 // This item enters the inventory only when the sealed kit comes back.
 // Optional freight bay in the condensed browser route.
 const boxSlot={name:'FREIGHT CARTON [TEMPORARY]',usable:false};
@@ -1516,7 +1516,9 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
  }
  else if(name==='equipitem'||name==='equipweapon'){
    equipOpen=name==='equipitem'?'items':'weapons';
-   eqIndex=equipOpen==='items'?Math.max(0,inventories.items.indexOf(equippedItemSlot)):0;
+   eqIndex=equipOpen==='items'?Math.max(0,inventories.items.indexOf(equippedItemSlot)):
+    Math.max(0,inventories.weapons.findIndex(x=>x.name===equippedWeapon));
+   menuAxisRepeatAt=0;
    discovery.openedEquip=true;drawEquipment();playCue('menu');
  }
  else if(name==='equipclose'){
@@ -1563,7 +1565,7 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
    }
    popup('ITEM HAS NO DIRECT USE HERE');playCue('denied');
  }
- else if(name==='next'||name==='previous'){if(equipOpen){const slots=inventories[equipOpen];eqIndex=(eqIndex+(name==='next'?1:-1)+slots.length)%slots.length;drawEquipment();playCue('menu')}}
+ else if(name==='next'||name==='previous'){if(equipOpen){const slots=inventories[equipOpen];eqIndex=window.MGEquipmentStrip.wrapped(eqIndex+(name==='next'?1:-1),slots.length);drawEquipment();playCue('menu')}}
  else if(name==='tips'){discovery.showTips=!discovery.showTips;tipToggle.checked=discovery.showTips;popup(discovery.showTips?'TRAINING PROMPTS ON':'TRAINING PROMPTS OFF');save()}
 }
 function lineBlocked(a,b,ignoreWeak=false){
@@ -2838,7 +2840,34 @@ $('status').textContent=`LIFE ${Math.ceil(health)} / 100   |   ${player.stance==
  for(const g of guards){if(g.knocked)continue;const c=coord(g.x,g.z);ctx.fillStyle=g.state>=1?'#f7b96b':'#e58a79';ctx.beginPath();ctx.arc(c[0],c[1],2.6,0,Math.PI*2);ctx.fill()}
  ctx.restore();
 }
-function drawEquipment(){const panel=$('equip');panel.style.display=equipOpen?'block':'none';if(!equipOpen)return;const slots=inventories[equipOpen];panel.innerHTML=`<div class="kicker">${equipOpen==='items'?'LEFT / ITEMS':'RIGHT / WEAPONS'} &nbsp;|&nbsp; TIME ×0.2</div>`+slots.map((v,i)=>`<div class="slot ${i===eqIndex?'picked ':''}${v.usable?'':'locked'}">${i===eqIndex?'► ':''}${v.name}${v.usable?'':' · LOCKED'}</div>`).join('')+(slots[eqIndex]===tagSlot?'<small>Stamped at processing. E / A · Set down</small>':'')+'<small>Hold LB / RB or Tab / G. D-pad left/right or [ ] selects. Release to SELECT; Y / D-pad down uses the equipped item.</small>'}
+function drawEquipment(){
+ const panel=$('equip');panel.style.display=equipOpen?'block':'none';
+ if(!equipOpen)return;
+ const slots=inventories[equipOpen];
+ const quantities={'HANDGUN':rounds,'RATION':rationRemaining,'CIGARETTES':'∞'};
+ const models=window.MGEquipmentStrip.windowSlots(slots,eqIndex,quantities);
+ const selected=slots[eqIndex];
+ panel.dataset.category=equipOpen;
+ panel.setAttribute('role','listbox');
+ panel.setAttribute('aria-label',equipOpen==='items'?'Items selection':'Weapons selection');
+ panel.innerHTML='<div class="mg-strip-heading"><span>'+
+  (equipOpen==='items'?'LB / TAB · EQUIPMENT':'RB / G · WEAPONS')+
+  '</span><span>HOLD · SCROLL · RELEASE</span></div>'+
+  '<div class="mg-strip-track">'+models.map(m=>
+    '<div class="mg-strip-card" data-current="'+m.centered+
+    '" data-offset="'+m.offset+'" data-unavailable="'+!m.available+
+    '" aria-selected="'+m.centered+'">'+
+    '<div class="mg-strip-icon">'+(m.available?m.icon:'□')+'</div>'+
+    '<div class="mg-strip-name">'+window.MGEquipmentStrip.inventoryLabel(m)+'</div>'+
+    '<div class="mg-strip-count">'+(m.count===null?' ':m.count)+'</div>'+
+    '</div>').join('')+'</div>'+
+  '<div class="mg-strip-current">'+(selected?.usable?selected.name:'UNAVAILABLE')+
+  (equipOpen==='items'&&selected===rationSlot?' · '+rationRemaining+' REMAIN':'')+
+  '</div><div class="mg-strip-footer">'+
+  (selected===tagSlot?'E / A: PLACE TRACKER · ':
+    'LEFT STICK / DPAD / WHEEL / [ ]: SCROLL · ')+
+  'RELEASE TO EQUIP · Y / DPAD DOWN: USE</div>';
+}
 function setPaused(value,type){paused=!!value;$('pause').style.display='none';$('intel').style.display='none';$('complete').style.display='none';$('missionFail').style.display='none';if(value){if(type==='complete'){$('complete').style.display='flex';paused=true}else if(type==='failed'){$('missionFail').style.display='flex';paused=true}else if(type==='intel'){showIntel()}else{$('pause').style.display='flex'}if(document.pointerLockElement)document.exitPointerLock?.()}else{if(canvas.requestPointerLock)Promise.resolve(canvas.requestPointerLock()).catch(()=>{})}}
 function showIntel(){
  paused=true;$('intel').style.display='flex';$('pause').style.display='none';
@@ -2973,7 +3002,7 @@ document.addEventListener('keydown',e=>{lastInputIsPad=false;const k=e.key.toLow
 }if(window.MGCinematicDirector?.active&&(k===' '||k==='escape')){
  e.preventDefault();window.MGCinematicDirector.skip();return;
 }if(window.MGCinematicDirector?.blocking)return;
-if(k==='escape'){action('pause');return}if(paused){if(k==='j'||k==='c')setPaused(false);return}const actions={e:'interact',control:'crouch',z:'prone',v:'cover',f:'melee',n:'knock',j:'intel',c:'codec',t:'tips',y:'useitem','[':'previous',']':'next'};if(actions[k])action(actions[k]);if(k==='tab')action('equipitem');if(k==='g')action('equipweapon');if(k==='r')retryCheckpoint();if(k==='q')cam.shoulder*=-1;});document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();key[k]=false;if(k==='tab'||k==='g')action('equipclose')});window.addEventListener('blur',()=>{for(const k of Object.keys(key))key[k]=false;if(equipOpen)action('equipclose')});
+if(k==='escape'){action('pause');return}if(paused){if(k==='j'||k==='c')setPaused(false);return}const actions={e:'interact',control:'crouch',z:'prone',v:'cover',f:'melee',n:'knock',j:'intel',c:'codec',t:'tips',y:'useitem','[':'previous',']':'next'};if(actions[k])action(actions[k]);if(k==='tab'){e.preventDefault?.();action('equipitem')}if(k==='g')action('equipweapon');if(equipOpen&&(k==='arrowup'||k==='arrowdown')){e.preventDefault?.();action(k==='arrowup'?'previous':'next')}if(k==='r')retryCheckpoint();if(k==='q')cam.shoulder*=-1;});document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();key[k]=false;if(k==='tab'||k==='g')action('equipclose')});window.addEventListener('blur',()=>{for(const k of Object.keys(key))key[k]=false;if(equipOpen)action('equipclose')});document.addEventListener('wheel',e=>{if(!equipOpen||paused)return;e.preventDefault?.();action(e.deltaY>0?'next':'previous')},{passive:false});
 function readGamepad(){const p=pollGamepad();updatePadStatus(p);padUsing=!!p&&(Math.abs(p.axes[0]||0)>.16||Math.abs(p.axes[1]||0)>.16);if(!p){padPrev=[];return;}const now=p.buttons.map(pressed);const previous=padPrev;const down=i=>now[i]&&!previous[i];const up=i=>!now[i]&&previous[i];padPrev=now;if(!started){
  if(!$('newGameConfirm').hidden){
   if(down(14))setNewGameConfirmChoice(0);
@@ -2989,7 +3018,7 @@ function readGamepad(){const p=pollGamepad();updatePadStatus(p);padUsing=!!p&&(M
 }if(window.MGCinematicDirector?.active&&down(1)){
  window.MGCinematicDirector.skip();return;
 }if(window.MGCinematicDirector?.blocking)return;
-if(down(9)){action('pause');return}if(paused){if(down(1)||down(0)){setPaused(false)}return}if(down(0))action('interact');if(down(1)){action('crouch');}if(down(2))action('melee');if(down(3))action('prone');if(down(12))action('intel');if(down(13))action('useitem');if(down(8))action('codec');if(down(11))cam.shoulder*=-1;if(down(4))action('equipitem');if(down(5))action('equipweapon');if(up(4)||up(5))action('equipclose');if(down(14))action('previous');if(down(15))action('next');if(down(7)){player.aim=inputDown('mouse2')||pressed(p.buttons[6]);action('fire');}}
+if(down(9)){action('pause');return}if(paused){if(down(1)||down(0)){setPaused(false)}return}if(down(0))action('interact');if(down(1)){action('crouch');}if(down(2))action('melee');if(down(3))action('prone');if(down(12))action('intel');if(down(13))action('useitem');if(down(8))action('codec');if(down(11))cam.shoulder*=-1;if(down(4))action('equipitem');if(down(5))action('equipweapon');if(up(4)||up(5))action('equipclose');if(down(14))action('previous');if(down(15))action('next');if(equipOpen&&Math.abs(p.axes[1]||0)>.62&&performance.now()>=menuAxisRepeatAt){action(p.axes[1]>0?'previous':'next');menuAxisRepeatAt=performance.now()+185;}if(down(7)){player.aim=inputDown('mouse2')||pressed(p.buttons[6]);action('fire');}}
 function frame(now){requestAnimationFrame(frame);const real=clamp((now-last)/1000,0,.06);last=now;readGamepad();
  damagePulse=Math.max(0,damagePulse-real*1.85);
  player.hitTimer=Math.max(0,(player.hitTimer||0)-real);
