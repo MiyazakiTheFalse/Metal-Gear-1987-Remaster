@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "scope": "1995 source-comparative campaign integration",
+  "status": "Unreal_C++_source_only_not_compiled",
+  "authoritative_edition": "Connect2Media J2ME v3.3.0 a1 still untraced",
+  "lore_references": [
+    "snake.mission_start",
+    "fox.missing",
+    "snake.early_pow",
+    "snake.capture",
+    "snake.rescue_fox",
+    "fox.revelation",
+    "madnar.named",
+    "snake.gear_recovery",
+    "fox.intel_persists"
+  ],
+  "chapters": [
+    {
+      "number": 0,
+      "id": "M01_BUILDING_ONE_OPENING",
+      "spawn_actor": "AMGMissionOne",
+      "spawn_at": "insertion or saved floor landing",
+      "exit_interaction": "3F detention transfer marker",
+      "requires": [
+        "snake.early_pow"
+      ],
+      "guard": "prisoner rescued in Card 1 room",
+      "save_slot": "MissionOneV1"
+    },
+    {
+      "number": 1,
+      "id": "M02_SECRET_PRISON_AND_FOX",
+      "spawn_actor": "AMGGrayFoxMission",
+      "spawn_at": "prison cell or GrayFoxSliceV1 checkpoint",
+      "exit_interaction": "escape marker after Gray Fox rescue + exit breach + gear locker",
+      "requires": [
+        "fox.revelation",
+        "snake.gear_recovery",
+        "fox.intel_persists"
+      ],
+      "save_slot": "GrayFoxSliceV1"
+    },
+    {
+      "number": 2,
+      "id": "M03_POST_RESCUE_BUILDING_ONE",
+      "spawn_actor": "AMGMissionOne",
+      "spawn_at": "restored 3F elevator landing",
+      "exit_interaction": "future Building Two route",
+      "requires": [],
+      "save_slot": "MissionOneV1"
+    }
+  ],
+  "story_save_slot": "MG1995CampaignV1",
+  "transition_policy": {
+    "chapter_changes": "Only adjacent chapter transitions with durable narrative evidence",
+    "source_position": "prison uses a separate prototype level-space; original basement coordinates require J2ME proof",
+    "load_mechanism": "UGameplayStatics::OpenLevel reload selecting mission actor from GameInstance subsystem save state",
+    "gear_handling": "Restore actual saved first-mission equipment only when interacting with prison locker; gear state survives save/load",
+    "softlock_guards": [
+      "radio never required",
+      "capture transfer requires POW clue and player interaction",
+      "prison exit requires real recovered gear",
+      "chapter advancement rolls back on SaveGame failure",
+      "one-shot beat IDs prevent duplicate intel"
+    ],
+    "testing": [
+      "Fresh 1995 campaign inserts player in Building One",
+      "3F prisoner cannot be contacted through sealed Card 1 entry",
+      "POW rescue unlocks opt-in capture marker",
+      "old standalone Gray Fox save is cleared upon first deliberate campaign capture",
+      "Prison starts confiscated, breach then Fox rescue",
+      "Exit corridor locker restores precisely collected items/ammo and consumables",
+      "Return to Building One only after legitimate prison exit",
+      "After restart, chapter and Fox intelligence remain durable",
+      "Repeated interactions never duplicate story entries",
+      "No rendered overlap of 1F/3F greybox with secret-prison world"
+    ]
+  },
+  "known_gaps": [
+    "Neither Unreal build nor tests have been executed",
+    "Transition is a masked level reload, not source-accurate prison shaft or streaming",
+    "No capture/exit cinematics, studio VO or realistic model performances",
+    "Prison guards still basic AI; no Shoot Gunner enemy implementation",
+    "Gear locker restore still uses finite authored pickup IDs rather than arbitrary inventory",
+    "Browser project absent from this repository; shared Rust campaign transition policy exists but is not yet linked to browser runtime",
+    "Building Two, Madnar, Ellen, TX-55 and finale remain story design"
+  ]
+}
