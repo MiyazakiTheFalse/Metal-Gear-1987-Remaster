@@ -60,7 +60,9 @@ bool UMGCampaignState::AdvanceChapter(int32 NextChapter)
     if (NextChapter == 1 && !HasBeat(TEXT("snake.early_pow"))) return false;
     // Only a completed Gray Fox prison escape unlocks returning to Building One.
     if (NextChapter == 2 &&
-        (!HasBeat(TEXT("fox.revelation")) || !HasBeat(TEXT("fox.intel_persists"))))
+        (!HasBeat(TEXT("fox.revelation")) ||
+         !HasBeat(TEXT("snake.gear_recovery")) ||
+         !HasBeat(TEXT("fox.intel_persists"))))
         return false;
     const int32 PreviousChapter = Progress->Chapter;
     Progress->Chapter = NextChapter;
