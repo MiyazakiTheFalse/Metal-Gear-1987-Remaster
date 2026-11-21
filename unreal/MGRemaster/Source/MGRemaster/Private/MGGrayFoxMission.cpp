@@ -174,7 +174,7 @@ void AMGGrayFoxMission::BeginPlay()
                     TEXT("GEAR RECLAIMED: Confiscated equipment was recovered."));
             Story->RecordBeat(TEXT("fox.intel_persists"),
                 TEXT("PRISON ESCAPED: Gray Fox's report remains in the mission log."));
-            Story->AdvanceChapter(2);
+            Story->AdvanceMission(3);
         }
         ReturnToOuterHeavenSeconds = 0.1f;
     }
