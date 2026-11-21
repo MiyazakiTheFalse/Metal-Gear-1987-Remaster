@@ -1,4 +1,10 @@
-# Gray Fox browser playtest
+# Operation Intrude N313 campaign playtest
+
+**Mission 1 begins at the waterline.** Choose **New Game** to enter Outer Heaven as rookie Solid Snake with his transceiver. Listen to Big Boss, head toward the inspection lamp and scout the supply trucks before looking for the missing operative. Continue restores your campaign checkpoint. The direct custody and Shoot Gunner rehearsal URLs use separate save slots.
+
+The route after the Building 2 tank now connects the maintenance wing, the hostage wing, the TX-55 basement and the surface ladder. Move to the illuminated station and use the normal interaction control. Red and green station lights accompany the sweep and clear-window text. At TX-55, use either physical socket and consult Madnar's sequence in the objective display. The checkpoint remembers each accepted placement.
+
+The later encounters are condensed interaction prototypes. Several original rooms, inventory gates and independently fighting bosses still need implementation. The drainage channel is a remake layout. The story premise follows [Konami's original-game manual](https://metalgear.konami.net/manual/mc1/mg1_msx/pc/en/page02.html).
 
 **21 November — latest playability + architecture pass.** Hold **LB / Tab** for equipment or **RB / G** for weapons, scroll the five-card MGS-style strip with stick/D-pad, mouse wheel or brackets, then release to EQUIP (never auto-use a ration). Press **Y / D-pad Down** to USE the selected item. The scroll model is `equipment_strip.js`, and both game and Unreal code use the same hold/scroll/release contract.
 
