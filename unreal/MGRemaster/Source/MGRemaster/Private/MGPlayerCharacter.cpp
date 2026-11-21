@@ -191,7 +191,7 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     const float MeleePose= bMeleeInProgress ?
         FMath::Sin(GetMeleeStrikeAlpha()*PI) : 0.f;
     const float MeleeTurn=MeleeStrikeIndex==1 ? -13.f :
-        (MeleeStrikeIndex==2 ? 13.f : 22.f);
+        (MeleeStrikeIndex==2 ? 13.f : 51.f);
     const FRotator ProxyRotation = bIsProne ? FRotator(88.f,0.f,0.f) :
         FRotator(0.f,MeleePose*MeleeTurn,MeleePose*4.f);
     PrototypeBody->SetRelativeRotation(FMath::RInterpTo(
@@ -1322,7 +1322,7 @@ void AMGPlayerCharacter::ResolveMeleeContact()
     UGameplayStatics::ApplyDamage(Target,MeleeDamage[MeleeStrikeIndex-1],
         Controller,this,UDamageType::StaticClass());
     if (!Target->IsIncapacitated())
-        Target->ReactToMeleeStrike(bKick,Origin);
+        Target->ReactToMeleeStrike(MeleeStrikeIndex,Origin);
     NotifyFeedback(Target->IsIncapacitated() ?
         TEXT("GUARD INCAPACITATED") :
         (bKick ? TEXT("FINISHING KICK — KNOCKDOWN") :
@@ -1344,8 +1344,8 @@ void AMGPlayerCharacter::UpdateMeleePresentation(float DeltaSeconds)
     const FRotator RightTarget((bRight ? -76.f*Arc :
                                (bKick ? -28.f*Arc : 0.f)),
                                bRight ? 12.f*Arc : 0.f,0.f);
-    const FRotator KickTarget(bKick ? -82.f*Arc : 0.f,
-                               bKick ? 18.f*Arc : 0.f,0.f);
+    const FRotator KickTarget(bKick ? -68.f*Arc : 0.f,
+                               bKick ? 62.f*Arc : 0.f,0.f);
     ProxyLeftArm->SetRelativeRotation(FMath::RInterpTo(
         ProxyLeftArm->GetRelativeRotation(),LeftTarget,DeltaSeconds,19.f));
     ProxyRightArm->SetRelativeRotation(FMath::RInterpTo(
@@ -1357,7 +1357,8 @@ void AMGPlayerCharacter::UpdateMeleePresentation(float DeltaSeconds)
         FRotator(bKick ? 10.f*Arc : 0.f,0.f,0.f),DeltaSeconds,12.f));
     ProxyRightLeg->SetRelativeLocation(FMath::VInterpTo(
         ProxyRightLeg->GetRelativeLocation(),
-        FVector(bKick ? 28.f*Arc : 0.f,19.f,
+        FVector(bKick ? 27.f*Arc : 0.f,
+                19.f-(bKick ? 21.f*Arc : 0.f),
                 -49.f+(bKick ? 29.f*Arc : 0.f)),DeltaSeconds,17.f));
 }
 float AMGPlayerCharacter::TakeDamage(float Amount, const FDamageEvent& Event,
