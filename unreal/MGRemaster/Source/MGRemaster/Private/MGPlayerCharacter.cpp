@@ -317,6 +317,11 @@ void AMGPlayerCharacter::ShoulderSwap()
             TEXT("RADIO TUNED — BIG BOSS / 120.85"), TEXT("select"));
         return;
     }
+    if (AMGMissionOne* Opening = Cast<AMGMissionOne>(
+        UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass())))
+    {
+        if (Opening->CycleLiftDestination(this)) return;
+    }
     ShoulderSign = -ShoulderSign;
 }
 
