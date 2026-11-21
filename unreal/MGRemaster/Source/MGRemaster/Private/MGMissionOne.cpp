@@ -136,8 +136,9 @@ void AMGMissionOne::SpawnGuards()
         {TEXT("G02_Trucks"), {CM(8,27),CM(19,27),CM(19,31),CM(8,31)}},
         {TEXT("G03_TruckDeparture"), {CM(18,33),CM(13,33),CM(13,29)}},
         {TEXT("G04_SecondYard"), {CM(53,29),CM(65,29),CM(65,34),CM(53,34)}},
-        {TEXT("G05_Lift"), {CM(70,24),CM(70,36)}},
-        {TEXT("G06_OptionalMaintenance"), {CM(59,46),CM(66,46),CM(66,51)}}
+        {TEXT("G05_Lift"), {CM(70,24),CM(70,36)}}
+        // G06's optional maintenance wing is sealed in source-fidelity mode.
+        // It remains authored in the JSON contract but must not spawn here.
     };
     for (const FGuardRoute& Route : Routes)
     {
