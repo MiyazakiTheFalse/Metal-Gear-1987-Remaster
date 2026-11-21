@@ -237,22 +237,64 @@
       "status": "design_only"
     },
     {
-      "id": "outer_heaven_bosses",
-      "name": "Outer Heaven elite enemies",
-      "identity": "Shoot Gunner, Machinegun Kid, Fire Trooper, Coward Duck and other source encounters",
-      "outer_goal": "Prevent Snake's infiltration and preserve security of key areas",
-      "inner_conflict": "Optional characterization must arise from assignment and encounter behaviour; no invented intimate backstories claimed canon",
-      "beginning": "Distinct defensive roles test acquired stealth skills",
-      "turn": "Escalate from containment to heavy weapons and hostage exploitation",
-      "end": "Their defeat or bypass exposes the organisation's increasing desperation",
-      "story_boundary": "Mechanical bosses and vehicles are encounter arcs, not automatically fully written personal stories",
+      "id": "shoot_gunner",
+      "name": "Shoot Gunner / Shotmaker",
+      "identity": "Source-named prison escape boss with a shotgun",
+      "outer_goal": "Stop any prisoner escape",
+      "inner_conflict": "Authority comes from controlling a confined fighting space; personal past is not given by the original game",
+      "beginning": "A feared unseen threat protecting the detention route",
+      "turn": "Challenges Snake immediately after the hard-won rescue and equipment recovery",
+      "end": "Defeat opens the escape trajectory; no invented familial or ideological confession",
+      "story_boundary": "Keep a readable shotgun commitment, role-grounded environment and source-authentic beat; detailed origin would be remake invention",
       "beats": [
-        "bosses.shoot_gunner",
-        "bosses.machinegun_kid",
-        "bosses.fire_trooper",
+        "bosses.shoot_gunner"
+      ],
+      "status": "arena_in_design"
+    },
+    {
+      "id": "machinegun_kid",
+      "name": "Machinegun Kid",
+      "identity": "Source-named machine-gun boss",
+      "outer_goal": "Hold a defended access route",
+      "inner_conflict": "His battlefield identity is a heavy suppression role; personal biography is source-limited",
+      "beginning": "Rumours or signs of a strongly held corridor",
+      "turn": "Player solves suppression through positioning, not pure health attrition",
+      "end": "The route opens after winning a meaningful confrontation",
+      "story_boundary": "No asserted age, childhood or psychological diagnosis just because the codename is 'Kid'",
+      "beats": [
+        "bosses.machinegun_kid"
+      ],
+      "status": "design_only"
+    },
+    {
+      "id": "fire_trooper",
+      "name": "Fire Trooper",
+      "identity": "Source-named flame-weapon boss",
+      "outer_goal": "Prevent access to a critical prisoner route",
+      "inner_conflict": "Risky area-denial behaviour should reveal tactical commitment rather than invented trauma",
+      "beginning": "Hazard signage and heat damage foreshadow a protected zone",
+      "turn": "Boss pressures cover, retreat routes and safe timing",
+      "end": "Source route is recovered; area hazards cease for believable physical reasons",
+      "story_boundary": "No secret character transformation or invented identity reveal",
+      "beats": [
+        "bosses.fire_trooper"
+      ],
+      "status": "design_only"
+    },
+    {
+      "id": "coward_duck",
+      "name": "Coward Duck / Dirty Duck",
+      "identity": "Source-named boomerang boss with human hostages",
+      "outer_goal": "Survive by using captives as protection",
+      "inner_conflict": "Self-preservation is expressed in a concrete morally pressured fight; original offers no detailed life history",
+      "beginning": "Jennifer's brother is believed captive, so Snake knows stakes ahead of encounter",
+      "turn": "Fighting around human shields makes target choice and positioning matter",
+      "end": "Safe hostages and Card 8 preserve source rewards and consequences",
+      "story_boundary": "Never treat hostages as disposable targets; preserve source character function and name variants",
+      "beats": [
         "bosses.coward_duck"
       ],
-      "status": "boss_design_only"
+      "status": "design_only"
     }
   ],
   "beats": [
@@ -510,7 +552,7 @@
     },
     {
       "id": "bosses.shoot_gunner",
-      "character": "outer_heaven_bosses",
+      "character": "shoot_gunner",
       "stage": "S02",
       "anchor": "prison.escape_route",
       "trigger": "Snake escapes confinement and meets Shoot Gunner",
@@ -576,7 +618,7 @@
     },
     {
       "id": "bosses.machinegun_kid",
-      "character": "outer_heaven_bosses",
+      "character": "machinegun_kid",
       "stage": "S03",
       "anchor": "building_2.heavy_weapon",
       "trigger": "Encounter heavy suppression specialist",
@@ -596,7 +638,7 @@
     },
     {
       "id": "bosses.fire_trooper",
-      "character": "outer_heaven_bosses",
+      "character": "fire_trooper",
       "stage": "S03",
       "anchor": "building_2.interior",
       "trigger": "Encounter flame specialist on route to Madnar",
@@ -900,7 +942,7 @@
     },
     {
       "id": "bosses.coward_duck",
-      "character": "outer_heaven_bosses",
+      "character": "coward_duck",
       "stage": "S05",
       "anchor": "building_3.coward_duck",
       "trigger": "Coward Duck encounter triggers",
@@ -1236,7 +1278,8 @@
     "A boss may have personality and environmental history without a fabricated canonical origin",
     "Tie each critical reveal to a stable event flag, physical location, persistent transcript, and interrupted-play path",
     "Keep older rescue and radio prototypes but mark unimplemented rest of full-game arcs",
-    "All beats must be reconciled against J2ME before being promoted to original-source verified"
+    "All beats must be reconciled against J2ME before being promoted to original-source verified",
+    "Named bosses have distinct source-limited character contracts; do not invent canonical psychology or family history."
   ],
   "dependency_semantics": "Narrative ordering/context only; never wire depends_on as mandatory mission gates. Mandatory gates require explicit separately source-verified state flags.",
   "gate_policy": {
