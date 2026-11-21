@@ -24,8 +24,13 @@ void UMGCampaignState::Initialize(FSubsystemCollectionBase& Collection)
         }
         else Progress = nullptr;
     }
-    if (!Progress || Progress->Version != 2 ||
-        Progress->MissionNumber < 1 || Progress->MissionNumber > 3)
+    if (Progress && Progress->Version == 2)
+    {
+        Progress->Version = 3;
+        Commit(); // backward-compatible, same ledger; no old saves discarded
+    }
+    if (!Progress || Progress->Version != 3 ||
+        Progress->MissionNumber < 1 || Progress->MissionNumber > 5)
         Progress = Cast<UMGCampaignSaveGame>(
             UGameplayStatics::CreateSaveGameObject(UMGCampaignSaveGame::StaticClass()));
 }
@@ -45,6 +50,8 @@ FString UMGCampaignState::GetMissionTitle() const
     case 1: return TEXT("MISSION 01 / OPERATION INTRUDE N313");
     case 2: return TEXT("MISSION 02 / THE MISSING FOX");
     case 3: return TEXT("MISSION 03 / THE SCIENTIST TRAIL");
+    case 4: return TEXT("MISSION 04 / THE OUTER DEFENCES");
+    case 5: return TEXT("MISSION 05 / THE PRICE OF METAL GEAR");
     default: return TEXT("MISSION / OUTER HEAVEN");
     }
 }
@@ -53,6 +60,14 @@ FString UMGCampaignState::GetCharacterThread() const
 {
     // A quiet story-state cue rather than a cutscene interrupt. Do not disclose
     // Big Boss's secret or the Venom retrospective before earned story events.
+    if (GetMissionNumber() == 5)
+        return HasBeat(TEXT("ellen.rescue")) ?
+            TEXT("ELLEN / RESCUED — RETURN TO HER FATHER") :
+            TEXT("MADNAR / SCIENTIST REFUSES TO COOPERATE UNTIL ELLEN IS SAFE");
+    if (GetMissionNumber() == 4)
+        return HasBeat(TEXT("jennifer.contact")) ?
+            TEXT("JENNIFER / HELP IS EARNED THROUGH RESCUING PRISONERS") :
+            TEXT("FOX / FOLLOW THE LEAD THROUGH THE DEFENDED RESEARCH COMPLEX");
     if (GetMissionNumber() == 3)
         return FString::Printf(
             TEXT("SNAKE / FOX'S LEAD VERIFIED BY %d OF 3 SOURCES"),
@@ -141,7 +156,7 @@ void UMGCampaignState::RevokeMisplacedDianeContact()
 bool UMGCampaignState::AdvanceMission(int32 NextMissionNumber)
 {
     if (!Progress || NextMissionNumber != Progress->MissionNumber + 1 ||
-        NextMissionNumber > 3)
+        NextMissionNumber > 5)
         return false;
     // The source route is back to 1F: one prisoner identifies Fox's hidden
     // cell; a second explains the capture route. Neither an optional radio
@@ -156,6 +171,17 @@ bool UMGCampaignState::AdvanceMission(int32 NextMissionNumber)
          !HasBeat(TEXT("snake.gear_recovery")) ||
          !HasBeat(TEXT("fox.intel_persists"))))
         return false;
+    // Boss and map gates are physical encounters, not completed by merely
+    // listening to an optional codec transmission.
+    if (NextMissionNumber == 4 &&
+        (!HasBeat(TEXT("m03.route.confirmed")) ||
+         !HasBeat(TEXT("m03.machinegun_kid_defeated")) ||
+         !HasBeat(TEXT("m03.hind_d_defeated")) ||
+         !HasBeat(TEXT("m03.tank_defeated")))) return false;
+    if (NextMissionNumber == 5 &&
+        (!HasBeat(TEXT("m04.bulldozer_defeated")) ||
+         !HasBeat(TEXT("m04.fire_trooper_defeated")) ||
+         !HasBeat(TEXT("tx11.rocket_defeat")))) return false;
     const int32 PreviousMissionNumber = Progress->MissionNumber;
     Progress->MissionNumber = NextMissionNumber;
     if (!Commit())
@@ -180,6 +206,16 @@ FString UMGCampaignState::GetIntelLog() const
 }
 FString UMGCampaignState::GetCurrentObjective() const
 {
+    if (GetMissionNumber() == 5)
+        return HasBeat(TEXT("ellen.rescue")) ?
+            TEXT("RETURN FROM BUILDING ONE BASEMENT / MADNAR AWAITS") :
+            TEXT("FIND ELLEN IN BUILDING ONE BASEMENT / SAVE HER");
+    if (GetMissionNumber() == 4)
+        return HasBeat(TEXT("jennifer.rocket_help")) ?
+            TEXT("RECOVER ROCKETS / DEFEAT THE TX-11 DEFENDERS") :
+            TEXT("SEARCH BUILDING TWO / FIND JENNIFER AND THE ROCKETS");
+    if (GetMissionNumber() == 3 && HasBeat(TEXT("m03.exterior_started")))
+        return TEXT("EXTERIOR / DEFEAT MACHINEGUN KID, HIND D AND TANK");
     if (GetMissionNumber() == 2) return
         HasBeat(TEXT("fox.revelation"))
             ? TEXT("ESCAPE THE SECRET PRISON / KEEP FOX'S INTEL")
@@ -203,6 +239,12 @@ FString UMGCampaignState::GetOpeningRadio(int32 Channel) const
 {
     // Original 1995 characters, remake-authored paraphrase. Dialogue responds
     // to earned first-hand events, not a prewritten mission-completion timer.
+    if (Channel == 2 && GetMissionNumber() >= 4)
+        return HasBeat(TEXT("jennifer.contact")) ?
+            TEXT("DIANE: Jennifer knows the research facility.\n"
+                 "DIANE: Help the prisoners first. Then call her.") :
+            TEXT("DIANE: The research wing has its own security.\n"
+                 "DIANE: Observe each guard before acting.");
     if (Channel == 2 && GetMissionNumber() == 3 &&
         GetMissionThreeIntelCount() >= 2)
         return TEXT("DIANE: You've confirmed that route twice.\n"
