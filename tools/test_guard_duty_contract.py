@@ -54,6 +54,16 @@ class GuardDutyContractTests(unittest.TestCase):
             self.assertIn(f'TEXT("{duty}")', PRISON)
         self.assertEqual(2, PRISON.count("GetWorld()->SpawnActor<AMGGuardActor>"))
 
+    def test_background_cells_have_colliding_containment(self):
+        # A visual-only cell must not accidentally be physically accessible
+        # through an upright or crouched mesh gap just because the floor moved.
+        self.assertIn("HoldingWingBarsUpper", PRISON)
+        self.assertIn("HoldingWingBarsLower", PRISON)
+        self.assertIn("BarX <= 1275.f; BarX += 50.f", PRISON)
+        self.assertIn("FVector(.12f,.14f,3.8f), true", PRISON)
+        self.assertIn("AMBIENT_DETAINEE_A_UNVERIFIED", PRISON)
+        self.assertIn("AMBIENT_DETAINEE_B_UNVERIFIED", PRISON)
+
     def test_guard_ai_has_work_and_search_without_floor_freezing(self):
         self.assertIn("void AMGGuardActor::ConfigureDuty(", GUARD)
         self.assertIn("void AMGGuardActor::AdvanceAssignedRoutine(", GUARD)
