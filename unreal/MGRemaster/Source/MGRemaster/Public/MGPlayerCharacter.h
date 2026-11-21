@@ -9,6 +9,8 @@ class UCameraComponent;
 class UStaticMeshComponent;
 class UMGEquipmentComponent;
 class AMGRemoteMissile;
+class AMGGuardActor;
+class AMGBodyHidingSpot;
 
 UCLASS()
 class MGREMASTER_API AMGPlayerCharacter : public ACharacter
@@ -32,6 +34,14 @@ public:
     float GetHealth() const { return Health; }
     bool IsProne() const { return bIsProne; }
     bool IsInCover() const { return bInCover; }
+    UFUNCTION(BlueprintPure, Category="Stealth|Interaction")
+    bool IsChokingGuard() const { return ChokedGuard.IsValid(); }
+    UFUNCTION(BlueprintPure, Category="Stealth|Interaction")
+    bool IsDraggingBody() const { return DraggedGuard.IsValid(); }
+    UFUNCTION(BlueprintPure, Category="Stealth|Interaction")
+    float GetChokeProgress() const { return FMath::Clamp(ChokeHoldTime / 1.35f, 0.f, 1.f); }
+    UFUNCTION(BlueprintPure, Category="Stealth|Interaction")
+    FString GetStealthInteractionPrompt() const;
     // Read by animation blueprints once the finished character rig is imported.
     UFUNCTION(BlueprintPure, Category="Stealth|Wall")
     bool IsCornerPeeking() const { return CoverPeekAlpha > 0.35f; }
@@ -83,6 +93,11 @@ private:
     float ShoulderSign = 1.f;
     int32 QualityPreset = 0;
     TWeakObjectPtr<AMGRemoteMissile> ControlledMissile;
+    TWeakObjectPtr<AMGGuardActor> ChokedGuard;
+    TWeakObjectPtr<AMGGuardActor> DraggedGuard;
+    float ChokeHoldTime = 0.f;
+    float ChokeStruggleTime = 0.f;
+    bool bInteractHeld = false;
     float Health = 100.f;
     float MeleeNextTime = 0.f;
     float LastMeleeTime = -100.f;
@@ -104,6 +119,12 @@ private:
     void ShoulderSwap();
     void FireStun();
     void Interact();
+    void ReleaseInteract();
+    AMGGuardActor* FindRearChokeCandidate() const;
+    AMGGuardActor* FindUnconsciousBody() const;
+    AMGBodyHidingSpot* FindBodyLocker() const;
+    void StopBodyDrag();
+    void UpdateStealthInteractions(float DeltaSeconds);
     void RestartRescue();
     void ToggleMissionLog();
     void CycleGraphicsQuality();
