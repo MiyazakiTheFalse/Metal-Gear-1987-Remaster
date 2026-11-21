@@ -8,6 +8,7 @@
 #include "MGEquipmentComponent.h"
 #include "MGPlayerCharacter.h"
 #include "MGPrototypeHUD.h"
+#include "MGAdaptiveAudioDirector.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/World.h"
@@ -38,6 +39,11 @@ void AMGRemasterGameMode::StartPlay()
 {
     Super::StartPlay();
     if (!GetWorld()) return;
+    // Music is an independent actor. It exists on the title screen and every
+    // playable mission, and reloads with the same world after Continue.
+    GetWorld()->SpawnActor<AMGAdaptiveAudioDirector>(
+        AMGAdaptiveAudioDirector::StaticClass(),FVector::ZeroVector,
+        FRotator::ZeroRotator);
 
     // Mission number survives a reload between mission spaces.
     // Never spawn both prototype worlds: their collisions would overlap.
