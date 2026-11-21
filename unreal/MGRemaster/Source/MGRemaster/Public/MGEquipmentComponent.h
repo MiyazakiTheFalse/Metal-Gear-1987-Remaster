@@ -53,11 +53,28 @@ public:
     bool IsStunEquipped() const;
     bool ConsumeStunRound();
     bool ConsumeRation();
+    bool ConsumeItem(FName ItemId, int32 Amount);
     int32 GetStunRounds() const;
 
     // Designed for eventual room/item pickup and mission SaveGame integration.
     bool AwardItem(FName ItemId, int32 Count);
     bool AwardWeapon(FName WeaponId, int32 Ammo);
+    bool HasItem(FName ItemId) const;
+    bool IsItemEquipped(FName ItemId) const;
+    bool IsHandgunEquipped() const;
+    int32 GetHandgunRounds() const;
+    bool ConsumeHandgunRound();
+    void RestoreHandgunRounds(int32 Rounds);
+    int32 GetItemQuantity(FName Id) const;
+    void RestoreItemQuantity(FName Id, int32 Quantity);
+    bool AwardAmmunition(FName WeaponId, int32 Count);
+    bool IsWeaponEquipped(FName WeaponId) const;
+    int32 GetWeaponAmmo(FName WeaponId) const;
+    bool ConsumeWeaponAmmo(FName WeaponId);
+    void RestoreWeaponAmmo(FName WeaponId, int32 Amount);
+    // Before Snake finds equipment in the 1987 opening, he has no field gear.
+    // Do not alter prison confiscation semantics for the later Gray Fox slice.
+    void InitialiseMissionOneLoadout();
     void SetFeedback(const FString& Message);
 
 private:

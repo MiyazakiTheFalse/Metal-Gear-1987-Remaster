@@ -2,7 +2,12 @@
 
 #include "MGEquipmentComponent.h"
 #include "MGGrayFoxMission.h"
+#include "MGMissionOne.h"
+#include "MGLaterMission.h"
 #include "MGGuardActor.h"
+#include "MGSecurityCamera.h"
+#include "MGCampaignState.h"
+#include "Engine/GameInstance.h"
 #include "MGPlayerCharacter.h"
 #include "Engine/Canvas.h"
 #include "EngineUtils.h"
@@ -40,6 +45,76 @@ void AMGPrototypeHUD::DrawHUD()
 
     const float Width = Canvas->ClipX;
     const float Height = Canvas->ClipY;
+    // MGS1-inspired screen grammar, not a copied Konami image, soundtrack,
+    // typeface, voice recording, or extracted visual asset. Always present
+    // the player with a real choice: never auto-restart behind the screen.
+    if (Player->IsGameOver() || Player->IsTitleScreenActive())
+    {
+        const bool bTitle=Player->IsTitleScreenActive();
+        const float Elapsed=Player->GetGameOverElapsed();
+        const float U=FMath::Clamp(Height/900.f,.65f,1.35f);
+        const FLinearColor Background(.008f,.023f,.018f,1.f);
+        const FLinearColor Signal(.56f,.80f,.60f,1.f);
+        const FLinearColor Faint(.26f,.42f,.32f,1.f);
+        const FLinearColor Emergency(.86f,.29f,.28f,1.f);
+        DrawRect(Background,0.f,0.f,Width,Height);
+        // Thin phosphor-style raster bands and structural framing.
+        for (float Y=0.f;Y<Height;Y+=11.f*U)
+            DrawRect(FLinearColor(.16f,.27f,.19f,.09f),
+                     0.f,Y,Width,1.4f*U);
+        const float Left=Width*.17f;
+        const float Right=Width*.83f;
+        DrawRect(Faint,Left,Height*.25f,Right-Left,1.5f*U);
+        DrawText(bTitle ? TEXT("OUTER HEAVEN") : TEXT("GAME OVER"),
+            bTitle ? Signal : Emergency,
+            Width*.31f,Height*.30f,nullptr,2.6f*U,false);
+        DrawText(bTitle ? TEXT("OPERATION INTRUDE N313") :
+            TEXT("MISSION TERMINATED / FOXHOUND LINK LOST"),
+            Faint,Left,Height*.45f,nullptr,.85f*U,false);
+        if (!bTitle)
+        {
+            if (Elapsed>=.35f)
+                DrawText(Player->GetDeathRadioLine(),
+                    Signal,Left,Height*.51f,nullptr,.94f*U,false);
+            if (Elapsed<1.65f)
+            {
+                DrawText(TEXT("SIGNAL LOST ..."),Emergency,
+                         Left,Height*.67f,nullptr,.80f*U,false);
+                return; // reveal the choice after the radio-loss sting
+            }
+        }
+        const float MenuY=Height*.65f;
+        const FString Primary=bTitle ? TEXT("START / CONTINUE") :
+                                      TEXT("CONTINUE");
+        const FString Secondary=bTitle ? TEXT("QUIT GAME") :
+                                        TEXT("EXIT TO TITLE");
+        const int32 Choice=Player->GetFailureMenuSelection();
+        DrawText(Choice==0 ? FString(TEXT(">  "))+Primary : Primary,
+                 Choice==0 ? Signal : Faint,
+                 Left,MenuY,nullptr,1.2f*U,false);
+        DrawText(Choice==1 ? FString(TEXT(">  "))+Secondary : Secondary,
+                 Choice==1 ? Signal : Faint,
+                 Left,MenuY+48.f*U,nullptr,1.2f*U,false);
+        DrawRect(Faint,Left,MenuY+100.f*U,Right-Left,1.f*U);
+        DrawText(TEXT("UP / DOWN: SELECT    ENTER / E / A: CONFIRM"),
+                 Faint,Left,MenuY+116.f*U,nullptr,.71f*U,false);
+        return;
+    }
+    // A dark cabin mask lets the elevator later hide asynchronous sublevel
+    // loads. At present it only obscures a short authored floor transition.
+    if (const AMGMissionOne* Lift = Cast<AMGMissionOne>(
+            UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass())))
+    {
+        if (Lift->IsLiftTravelling())
+        {
+            DrawRect(FLinearColor(0.005f, 0.018f, 0.018f, 1.f), 0.f, 0.f, Width, Height);
+            DrawText(TEXT("OUTER HEAVEN / BUILDING ONE"), FLinearColor::White,
+                     Width * .36f, Height * .43f, nullptr, 1.0f, false);
+            DrawText(TEXT("ELEVATOR TRANSIT"), FLinearColor(.60f,.89f,.68f,1.f),
+                     Width * .40f, Height * .51f, nullptr, .82f, false);
+            return;
+        }
+    }
     const float Margin = FMath::Clamp(Width * 0.018f, 12.f, 28.f);
     const float UiScale = FMath::Clamp(Height / 900.f, 0.76f, 1.20f);
     const UMGEquipmentComponent* Equip = Player->GetEquipment();
@@ -61,6 +136,12 @@ void AMGPrototypeHUD::DrawHUD()
              Margin + 12.f * UiScale, Margin + 62.f * UiScale,
              nullptr, 0.78f * UiScale, false);
 
+    const AMGMissionOne* Opening = Cast<AMGMissionOne>(
+        UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass()));
+    const AMGLaterMission* Later = Cast<AMGLaterMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGLaterMission::StaticClass()));
+    const UMGCampaignState* Story = GetWorld() && GetWorld()->GetGameInstance()
+        ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
     // Actual guard awareness drives radar vs threat overlay.
     int32 MaxThreat = 0;
     float MaxSuspicion = 0.f;
@@ -69,6 +150,21 @@ void AMGPrototypeHUD::DrawHUD()
         if (Guard->IsIncapacitated()) continue;
         MaxThreat = FMath::Max(MaxThreat, static_cast<int32>(Guard->GetAwarenessState()));
         MaxSuspicion = FMath::Max(MaxSuspicion, Guard->GetSuspicion());
+    }
+
+    bool bSecurityCameraTracking = false;
+    for (TActorIterator<AMGSecurityCamera> Cam(GetWorld()); Cam; ++Cam)
+    {
+        if (Cam->IsDisabled()) continue;
+        if (Opening && Cam->GetDeck() != Opening->GetCurrentFloor()) continue;
+        MaxSuspicion = FMath::Max(MaxSuspicion, Cam->GetDetectionProgress());
+        if (Cam->GetDetectionProgress() > 0.22f)
+        {
+            bSecurityCameraTracking = true;
+            MaxThreat = FMath::Max(MaxThreat, 1);
+        }
+        if (Cam->IsAlarmActive())
+            MaxThreat = 3;
     }
 
     const float RadarSize = 170.f * UiScale;
@@ -100,20 +196,21 @@ void AMGPrototypeHUD::DrawHUD()
         const float RW = RadarSize - 26.f * UiScale;
         const float RH = 91.f * UiScale;
         DrawRect(FLinearColor(0.05f, 0.13f, 0.13f, 1.f), X0, Y0, RW, RH);
-        // Provisional prison topology; replace with verified original map data.
-        const float SpanX = 26.6f * 100.f;
-        const float SpanY = 10.f * 100.f;
-        for (const float DividerWorldX : {-410.f, 450.f})
+        // Mission One uses provisional 100m x 54m layout. Prison uses the
+        // original prototype radar. These are *not* source-verified maps.
+        const float SpanX = Opening ? 10000.f : (Later ? 15000.f : 2660.f);
+        const float SpanY = Opening ? 5400.f : (Later ? 4400.f : 1000.f);
+        if (!Opening && !Later) for (const float DividerWorldX : {-410.f, 450.f})
         {
             const float V = X0 + FMath::Clamp((DividerWorldX + 1250.f) / SpanX, 0.f, 1.f) * RW;
             DrawRect(HudMuted, V, Y0, 2.f * UiScale, RH * 0.34f);
             DrawRect(HudMuted, V, Y0 + RH * 0.66f, 2.f * UiScale, RH * 0.34f);
         }
-        auto MarkPoint = [this, X0, Y0, RW, RH, UiScale](const FVector& World,
+        auto MarkPoint = [this, X0, Y0, RW, RH, UiScale, Opening, Later](const FVector& World,
                         const FLinearColor& Tint, float Size)
         {
-            const float Px = X0 + FMath::Clamp((World.X + 1250.f) / 2660.f, 0.f, 1.f) * RW;
-            const float Py = Y0 + FMath::Clamp((World.Y + 500.f) / 1000.f, 0.f, 1.f) * RH;
+            const float Px = X0 + FMath::Clamp((World.X + ((Opening || Later) ? 0.f : 1250.f)) / (Opening ? 10000.f : (Later ? 15000.f : 2660.f)), 0.f, 1.f) * RW;
+            const float Py = Y0 + FMath::Clamp((World.Y + ((Opening || Later) ? 0.f : 500.f)) / (Opening ? 5400.f : (Later ? 4400.f : 1000.f)), 0.f, 1.f) * RH;
             DrawRect(Tint, Px - Size * 0.5f * UiScale, Py - Size * 0.5f * UiScale,
                      Size * UiScale, Size * UiScale);
         };
@@ -125,11 +222,86 @@ void AMGPrototypeHUD::DrawHUD()
 
     const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
+    if (Opening)
+    {
+        DrawRect(HudPanel, Margin, Margin + 113.f * UiScale,
+                 FMath::Min(590.f * UiScale, Width - 2.f * Margin), 108.f * UiScale);
+        DrawText(Story ?
+                     FString::Printf(TEXT("%s / %dF"),
+                         *Story->GetMissionTitle(), Opening->GetCurrentFloor()) :
+                     FString::Printf(TEXT("MISSION 01 / BUILDING ONE / %dF"),
+                         Opening->GetCurrentFloor()), HudGreen,
+                 Margin + 12.f * UiScale, Margin + 120.f * UiScale,
+                 nullptr, 0.75f * UiScale, false);
+        if (bSecurityCameraTracking)
+            DrawText(TEXT("CCTV ACQUIRING TARGET"), HudAmber,
+                     RadarX + 9.f * UiScale, RadarY + 72.f * UiScale,
+                     nullptr, .69f * UiScale, false);
+        DrawText(Opening->GetObjectiveText(), FLinearColor::White,
+                 Margin + 12.f * UiScale, Margin + 149.f * UiScale,
+                 nullptr, 0.79f * UiScale, false);
+        DrawText(FString::Printf(TEXT("LIFT: Q CYCLE / E TRAVEL / TARGET %dF"), Opening->GetSelectedFloor()),
+                 HudMuted, Margin + 12.f * UiScale, Margin + 179.f * UiScale,
+                 nullptr, 0.67f * UiScale, false);
+        if (Story)
+            DrawText(Story->GetCharacterThread(), HudMuted,
+                     Margin + 12.f * UiScale, Margin + 205.f * UiScale,
+                     nullptr, 0.64f * UiScale, false);
+        const FString BeatDialogue = Opening->GetRecentDialogue();
+        if (!BeatDialogue.IsEmpty())
+        {
+            TArray<FString> Lines;
+            BeatDialogue.ParseIntoArrayLines(Lines, true);
+            const int32 Visible = FMath::Min(3, Lines.Num());
+            const float SubY = Height - (60.f + Visible * 22.f) * UiScale;
+            DrawRect(HudPanel, Margin, SubY, Width - 2.f * Margin,
+                     (18.f + Visible * 23.f) * UiScale);
+            for (int32 J = 0; J < Visible; ++J)
+                DrawText(Lines[J], FLinearColor::White,
+                         Margin + 12.f * UiScale,
+                         SubY + (7.f + J * 23.f) * UiScale,
+                         nullptr, 0.78f * UiScale, false);
+        }
+        if (Player->IsMissionLogVisible() && Story)
+        {
+            // Durable intel is readable after subtitles disappear or a fight
+            // interrupts a conversation. Chunk lines for narrow HUD widths.
+            TArray<FString> Entries;
+            Story->GetIntelLog().ParseIntoArrayLines(Entries, true);
+            TArray<FString> Wrapped;
+            for (const FString& Entry : Entries)
+            {
+                FString Left = Entry;
+                while (!Left.IsEmpty() && Wrapped.Num() < 14)
+                {
+                    const int32 Count = FMath::Min(64, Left.Len());
+                    Wrapped.Add(Left.Left(Count));
+                    Left.RightChopInline(Count, EAllowShrinking::No);
+                }
+                if (Wrapped.Num() >= 14) break;
+            }
+            const float PanelY = Margin + 234.f * UiScale;
+            const float PanelH = (38.f + Wrapped.Num() * 22.f) * UiScale;
+            DrawRect(HudPanel, Margin, PanelY,
+                     FMath::Min(590.f * UiScale, Width - 2.f * Margin), PanelH);
+            DrawText(TEXT("MISSION INTEL / J TO CLOSE"), HudGreen,
+                     Margin + 12.f * UiScale, PanelY + 6.f * UiScale,
+                     nullptr, 0.76f * UiScale, false);
+            for (int32 Index = 0; Index < Wrapped.Num(); ++Index)
+                DrawText(Wrapped[Index], FLinearColor::White,
+                         Margin + 12.f * UiScale,
+                         PanelY + (30.f + 22.f * Index) * UiScale,
+                         nullptr, 0.68f * UiScale, false);
+        }
+    }
     if (Mission)
     {
         DrawRect(HudPanel, Margin, Margin + 113.f * UiScale,
                  FMath::Min(540.f * UiScale, Width - 2.f * Margin), 112.f * UiScale);
-        DrawText(FString::Printf(TEXT("MISSION / %s"), *Mission->GetPhaseText()),
+        DrawText(Story ?
+                     FString::Printf(TEXT("%s / %s"),
+                         *Story->GetMissionTitle(), *Mission->GetPhaseText()) :
+                     FString::Printf(TEXT("MISSION 02 / %s"), *Mission->GetPhaseText()),
                  HudGreen, Margin + 12.f * UiScale,
                  Margin + 120.f * UiScale, nullptr, 0.75f * UiScale, false);
         DrawText(Mission->GetObjectiveText(), FLinearColor::White,
@@ -160,6 +332,30 @@ void AMGPrototypeHUD::DrawHUD()
                      Width - 2.f * Margin, 44.f * UiScale);
             DrawText(Cue, FLinearColor::White, Margin + 15.f * UiScale,
                      SubtitleY, nullptr, 0.92f * UiScale, false);
+        }
+    }
+
+    if (Later)
+    {
+        DrawRect(HudPanel,Margin,Margin+113.f*UiScale,
+                 FMath::Min(640.f*UiScale,Width-2.f*Margin),115.f*UiScale);
+        DrawText(Story ? Story->GetMissionTitle() : TEXT("OUTER HEAVEN / LATER MISSION"),
+                 HudGreen,Margin+12.f*UiScale,Margin+121.f*UiScale,
+                 nullptr,.79f*UiScale,false);
+        DrawText(Later->GetObjectiveText(),FLinearColor::White,
+                 Margin+12.f*UiScale,Margin+151.f*UiScale,
+                 nullptr,.76f*UiScale,false);
+        if (Player->IsMissionLogVisible() && Story)
+            DrawText(Story->GetIntelLog(),HudMuted,
+                     Margin+12.f*UiScale,Margin+201.f*UiScale,
+                     nullptr,.68f*UiScale,false);
+        const FString Recent=Later->GetRecentDialogue();
+        if (!Recent.IsEmpty())
+        {
+            DrawRect(HudPanel,Margin,Height-141.f*UiScale,
+                     Width-2.f*Margin,45.f*UiScale);
+            DrawText(Recent,FLinearColor::White,Margin+12.f*UiScale,
+                     Height-131.f*UiScale,nullptr,.78f*UiScale,false);
         }
     }
 
@@ -228,7 +424,8 @@ void AMGPrototypeHUD::DrawHUD()
         const int32 Channel = Player->GetTransceiverChannel();
         const FString Transcript = Mission ?
             Mission->GetTransceiverDialogue(Channel) :
-            TEXT("NO SIGNAL — LOCAL CONTACTS UNAVAILABLE");
+            ((Opening || Later) && Story ? Story->GetOpeningRadio(Channel) :
+                TEXT("NO SIGNAL — LOCAL CONTACTS UNAVAILABLE"));
         TArray<FString> Lines;
         Transcript.ParseIntoArrayLines(Lines, true);
         const float PanelWidth = FMath::Min(580.f * UiScale, Width - 2.f * Margin);
@@ -237,8 +434,10 @@ void AMGPrototypeHUD::DrawHUD()
         const int32 VisibleLines = FMath::Min(Lines.Num(), 8);
         const float PanelHeight = (71.f + 23.f * VisibleLines) * UiScale;
         DrawRect(HudPanel, PanelX, PanelY, PanelWidth, PanelHeight);
-        DrawText(Channel == 0 ? TEXT("TRANSCEIVER / 120.79 / KYLE SCHNEIDER")
-                              : TEXT("TRANSCEIVER / 120.85 / BIG BOSS"),
+        DrawText(Story ?
+                    FString::Printf(TEXT("TRANSCEIVER / %s"),
+                        *Story->GetRadioContactLabel(Channel)) :
+                    TEXT("TRANSCEIVER / LIMITED SIGNAL"),
                  HudGreen, PanelX + 12.f * UiScale, PanelY + 8.f * UiScale,
                  nullptr, 0.82f * UiScale, false);
         for (int32 Index = 0; Index < VisibleLines; ++Index)
@@ -262,9 +461,12 @@ void AMGPrototypeHUD::DrawHUD()
         DrawLine(X, Y + 3.f, X, Y + 11.f, FLinearColor::White, 1.f);
     }
 
-    const FString CoverHelp = Player->IsInCover() ?
-        TEXT("WALL: F / A KNOCK   AIM + SLIDE: CORNER PEEK   MOVE AWAY: RELEASE") :
-        TEXT("E / X: BREACH / INTERACT   MOVE INTO WALL: COVER   F / A: MELEE");
+    const FString StealthPrompt = Player->GetStealthInteractionPrompt();
+    const FString CoverHelp = !StealthPrompt.IsEmpty() ? StealthPrompt :
+        (Player->IsInCover() ?
+         TEXT("BACK TO WALL: F KNOCK / AIM + SLIDE TO PEEK / MOVE AWAY TO EXIT") :
+         TEXT("E: INTERACT / HOLD E: CHOKE / F: MELEE / MOVE INTO WALL: COVER"));
     DrawText(CoverHelp,
-             HudMuted, Margin, Height - 27.f * UiScale, nullptr, 0.69f * UiScale, false);
+             StealthPrompt.IsEmpty() ? HudMuted : HudGreen,
+             Margin, Height - 27.f * UiScale, nullptr, 0.69f * UiScale, false);
 }

@@ -1,0 +1,789 @@
+{
+  "schema_version": 1,
+  "name": "1995 Operation Intrude N313 character and story chronology",
+  "status": "source_comparative_storyboard_only_not_playable",
+  "year": 1995,
+  "exact_dates": "No canonical full mission clock/duration supplied; sequence order is narrative not hour-by-hour",
+  "authoritative_edition": "Connect2Media J2ME 3.3.0 a1 still requires event-map dialogue trace",
+  "comparative_evidence": [
+    {
+      "id": "official_characters",
+      "url": "https://www.konami.com/mg/archive/mg/chara.html",
+      "claim": "Core identities and pre-1995 biographies"
+    },
+    {
+      "id": "official_1995_history",
+      "url": "https://www.konami.com/mg/history/jp/ja/mg",
+      "claim": "1995 context, Gray Fox disappearance, rookie Snake, Outer Heaven"
+    },
+    {
+      "id": "1987_script",
+      "url": "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/30618",
+      "claim": "Transcript, Gray Fox, Madnar, Ellen, boss, Big Boss, ending"
+    },
+    {
+      "id": "msx2_walkthrough",
+      "url": "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/12398",
+      "claim": "Spatial ordering and critical pickups/events"
+    },
+    {
+      "id": "source_variants",
+      "url": "https://tcrf.tiago.zip/wiki/Metal_Gear_%28MSX2%29",
+      "claim": "Differences between localizations, Steve and later port edits"
+    }
+  ],
+  "sequence": [
+    {
+      "order": 1,
+      "id": "N00_PRELUDE",
+      "phase": "S01",
+      "location": "predeployment_1995",
+      "cast": [
+        "gray_fox",
+        "big_boss",
+        "solid_snake",
+        "tx55"
+      ],
+      "event": "Gray Fox infiltrates the South African fortress and is lost after his final Metal Gear transmission. Big Boss chooses rookie Snake for Intrude N313.",
+      "dramatic_role": "The elite's disappearance makes the rookie assignment ominous; the commander keeps his ownership of the fortress hidden.",
+      "player_beat": "Briefing dossier and very short insertion; no invented Gray Fox playable capture chapter.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 2,
+      "id": "N01_INSERTION",
+      "phase": "S01",
+      "location": "building_1_approach",
+      "cast": [
+        "solid_snake",
+        "big_boss"
+      ],
+      "event": "Snake arrives alone with transceiver, receives rescue and destroy objectives.",
+      "dramatic_role": "Initial obedience and isolation, with practical command credibility.",
+      "player_beat": "Control rapidly returned; stealth observation before violence.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 3,
+      "id": "N02_FIRST_LOOT",
+      "phase": "S01",
+      "location": "building_1_1f_truck_cluster",
+      "cast": [
+        "solid_snake",
+        "outer_heaven_security",
+        "big_boss"
+      ],
+      "event": "Snake gets ration/Card 1/binoculars at initial trucks while observing sentry routine.",
+      "dramatic_role": "Equipment is earned, not issued; the place presents first moral/survival choices.",
+      "player_beat": "Three interactable truck interiors with source progression; no free pistol.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 4,
+      "id": "N03_GAS_AND_CONTACT",
+      "phase": "S01",
+      "location": "building_1_1f_card1_room",
+      "cast": [
+        "solid_snake",
+        "schneider",
+        "big_boss"
+      ],
+      "event": "Gas Mask behind Card 1 door; resistance architect offers useful location advice.",
+      "dramatic_role": "Schneider becomes trustworthy because what he says can be checked physically.",
+      "player_beat": "Optional Schneider call, mandatory gear access defined by actual card state.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 5,
+      "id": "N04_SECOND_TRUCKS",
+      "phase": "S01",
+      "location": "building_1_1f_later_trucks",
+      "cast": [
+        "solid_snake",
+        "outer_heaven_security"
+      ],
+      "event": "Later truck compound offers handgun without initial ammo and land mines.",
+      "dramatic_role": "The player cannot simply solve every obstacle by firing.",
+      "player_beat": "Visible weapon location and stealth choice.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 6,
+      "id": "N05_UPPER_FLOOR",
+      "phase": "S01",
+      "location": "building_1_3f_2f",
+      "cast": [
+        "solid_snake",
+        "pow_ensemble",
+        "diane",
+        "steve"
+      ],
+      "event": "3F ammo, prisoners, keycards and further equipment; 2F cameras and security routes. POW information introduces Diane; Steve can answer Japanese-version calls.",
+      "dramatic_role": "Unknown allies become differentiated voices: soldier, architect, boss expert.",
+      "player_beat": "Use elevators as navigational continuity; no asserted fixed order for optional POW calls.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 7,
+      "id": "N06_DEEPENED_INFO",
+      "phase": "S01",
+      "location": "building_1_pow_and_secret_routes",
+      "cast": [
+        "solid_snake",
+        "pow_ensemble",
+        "schneider"
+      ],
+      "event": "Prisoners point to Gray Fox's secret solitary cell and suggest capture as the way in.",
+      "dramatic_role": "What looks like a mistake becomes an intentional high-risk plan.",
+      "player_beat": "Trace source floor and prison entrance before locking corridor map.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 8,
+      "id": "N07_CAPTURE",
+      "phase": "S02",
+      "location": "building_1_capture_path",
+      "cast": [
+        "solid_snake",
+        "outer_heaven_security"
+      ],
+      "event": "Snake is apprehended on the appropriate route; weapons and equipment confiscated.",
+      "dramatic_role": "Trusting the mission entails genuine vulnerability.",
+      "player_beat": "Capture cinematic no invented escape via menu; actual confiscation persisted.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 9,
+      "id": "N08_CELL_BREACH",
+      "phase": "S02",
+      "location": "building_1_secret_prison",
+      "cast": [
+        "solid_snake",
+        "gray_fox",
+        "schneider",
+        "big_boss"
+      ],
+      "event": "Snake detects hollow masonry and crosses into Fox's cell.",
+      "dramatic_role": "Player solves physical problem and meets the missing elite as a captive.",
+      "player_beat": "Sound and visible weakness; no compulsory radio call.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 10,
+      "id": "N09_FOX_TRUTH",
+      "phase": "S02",
+      "location": "building_1_secret_prison",
+      "cast": [
+        "solid_snake",
+        "gray_fox",
+        "madnar",
+        "tx55"
+      ],
+      "event": "Gray Fox explains nuclear-capable Metal Gear and names Dr. Pettrovich as source of weakness.",
+      "dramatic_role": "Experienced operative gives Snake his true mission, with the personal cost of his imprisonment.",
+      "player_beat": "Persistent full intel transcript; optional character exchange flagged remake-only.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 11,
+      "id": "N10_RECOVER_AND_SHOTMAKER",
+      "phase": "S02",
+      "location": "building_1_detention_escape",
+      "cast": [
+        "solid_snake",
+        "shoot_gunner",
+        "big_boss",
+        "outer_heaven_security"
+      ],
+      "event": "Recover seized gear and confront Shotmaker/Shoot Gunner defending escape.",
+      "dramatic_role": "The prior disarmed protagonist earns the first major combat victory.",
+      "player_beat": "No respawn wave; crates and recoverable weapons true to original structure.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 12,
+      "id": "N11_FIRST_REVISIT",
+      "phase": "S03",
+      "location": "building_1_post_escape",
+      "cast": [
+        "solid_snake",
+        "schneider",
+        "diane",
+        "pow_ensemble"
+      ],
+      "event": "Return from prison through upper routes, save further prisoners, access hidden equipment and new keycards.",
+      "dramatic_role": "Fox's intel carries forward despite his departure.",
+      "player_beat": "Maintain return navigation and POW state.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source",
+      "optional_interactions": [
+        "m03.route.manifest",
+        "m03.route.survey",
+        "m03.route.archive",
+        "m03.route.confirmed",
+        "m03.cache.claimed",
+        "m03.security.power_disabled"
+      ]
+    },
+    {
+      "order": 13,
+      "id": "N12_MACHINEGUN_KID",
+      "phase": "S03",
+      "location": "building_1_defended_route",
+      "cast": [
+        "solid_snake",
+        "machinegun_kid",
+        "diane"
+      ],
+      "event": "Machinegun Kid dominates a defended line; player finds angle/cover solution.",
+      "dramatic_role": "Boss-specific learned counterplay replaces hit-point inflation.",
+      "player_beat": "Distinct suppression telegraph and credible post.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 14,
+      "id": "N13_AIR_AND_ROOF",
+      "phase": "S03",
+      "location": "building_1_roof",
+      "cast": [
+        "solid_snake",
+        "hind_d_crew",
+        "outer_heaven_security"
+      ],
+      "event": "Roof route, parachute and Hind D helicopter confrontation.",
+      "dramatic_role": "From building security to militarized air defense.",
+      "player_beat": "Helicopter functional threat, not named invented pilot biography.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 15,
+      "id": "N14_TANK_CHECKPOINT",
+      "phase": "S03",
+      "location": "external_road_and_checkpoint",
+      "cast": [
+        "solid_snake",
+        "diane",
+        "armored_vehicles",
+        "big_boss",
+        "schneider"
+      ],
+      "event": "Tank engagement and disguise checkpoint; commander and architect offer practical access tips.",
+      "dramatic_role": "Big Boss still sometimes helps, making late betrayal stronger.",
+      "player_beat": "Land mine advice, visible uniform path, plausible transition.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 16,
+      "id": "N15_BULLDOZER",
+      "phase": "S03",
+      "location": "building_2_access",
+      "cast": [
+        "solid_snake",
+        "armored_vehicles"
+      ],
+      "event": "Bulldozer blocks route to deeper research wing.",
+      "dramatic_role": "Machinery is part of working fortress infrastructure.",
+      "player_beat": "Moving-vehicle encounter, no personality invented.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 17,
+      "id": "N16_FIRE_TROOPER",
+      "phase": "S03",
+      "location": "building_2_interiors",
+      "cast": [
+        "solid_snake",
+        "fire_trooper",
+        "diane"
+      ],
+      "event": "Fire Trooper contests a protected passage.",
+      "dramatic_role": "The mercenaries' old military skills are revealed through their encounters.",
+      "player_beat": "Area-denial warnings, extinguishing/interruption world reaction.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 18,
+      "id": "N17_FALSE_SCIENTIST",
+      "phase": "S03",
+      "location": "building_2_false_cell",
+      "cast": [
+        "solid_snake",
+        "fake_madnar",
+        "pow_ensemble"
+      ],
+      "event": "Misleading scientist location leads Snake into a trap; actual Madnar held elsewhere.",
+      "dramatic_role": "Not all intelligence is reliable, unlike physical evidence.",
+      "player_beat": "Mark false lead source-correlative, no named duplicate Madnar canon.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 19,
+      "id": "N18_JENNIFER_RANK",
+      "phase": "S04",
+      "location": "building_2_cells_medical_route",
+      "cast": [
+        "solid_snake",
+        "jennifer",
+        "pow_ensemble"
+      ],
+      "event": "Freed POWs identify medical staff resistance agent Jennifer; source requires sufficient rank for contact.",
+      "dramatic_role": "Rescuing strangers builds enough trust that a hidden insider risks talking.",
+      "player_beat": "Preserve 4-star original rank or design a recoverable equivalent after J2ME check.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 20,
+      "id": "N19_ROCKET_AND_TX11",
+      "phase": "S04",
+      "location": "building_2_armory_and_tx11_room",
+      "cast": [
+        "solid_snake",
+        "jennifer",
+        "tx11_arnolds",
+        "madnar"
+      ],
+      "event": "Jennifer arranges rocket launcher; two TX-11 Arnolds guard Card 7.",
+      "dramatic_role": "The engineer's other weapons now impede rescue; medical insider's aid becomes decisive.",
+      "player_beat": "Rocket availability/guarded card order, robots not given human feelings.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 21,
+      "id": "N20_ACTUAL_MADNAR",
+      "phase": "S04",
+      "location": "building_2_real_scientist_room",
+      "cast": [
+        "solid_snake",
+        "madnar",
+        "ellen"
+      ],
+      "event": "Snake finds real Madnar. Engineer says his daughter is captive and refuses to discuss Metal Gear until freed.",
+      "dramatic_role": "Frustrating to Snake but emotionally justified: father will not risk daughter's life.",
+      "player_beat": "Dialogue conditional persisted; no unearned early TX-55 sequence.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 22,
+      "id": "N21_ELLEN_RETRACE",
+      "phase": "S04",
+      "location": "from_building_2_to_building_1_basement",
+      "cast": [
+        "solid_snake",
+        "ellen",
+        "schneider"
+      ],
+      "event": "Snake deliberately navigates back to Building One through gas, darkness, basement traps and the earlier detention architecture.",
+      "dramatic_role": "Backtracking is no longer a chore: Snake revisits the site with a new reason.",
+      "player_beat": "Multiple legal return routes; keep hazards and earlier enemy state credible.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 23,
+      "id": "N22_HIDDEN_ELLEN",
+      "phase": "S04",
+      "location": "building_1_basement_hidden_cell",
+      "cast": [
+        "solid_snake",
+        "ellen",
+        "outer_heaven_security"
+      ],
+      "event": "Snake hears Ellen through a wall, breaches it and releases her.",
+      "dramatic_role": "Two captives rescued from adjacent history of the same facility; visible human cost of engineering project.",
+      "player_beat": "Sound/physical clue and rescue flag, separate from Gray Fox's prior cell.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 24,
+      "id": "N23_ELLEN_TESTIMONY",
+      "phase": "S04",
+      "location": "building_1_basement_hidden_cell",
+      "cast": [
+        "ellen",
+        "solid_snake",
+        "madnar"
+      ],
+      "event": "Ellen confirms father was forced to develop the weapon and asks Snake to help him.",
+      "dramatic_role": "She is a witness with her own words, not a keycard.",
+      "player_beat": "Give Ellen a restrained performance with recoverable transcript.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 25,
+      "id": "N24_RETURN_TO_SCIENTIST",
+      "phase": "S04",
+      "location": "building_2_real_scientist_room",
+      "cast": [
+        "solid_snake",
+        "madnar",
+        "ellen"
+      ],
+      "event": "Snake returns to Madnar, conveys Ellen's safety; engineer gives Metal Gear location in Building Three and destruction method.",
+      "dramatic_role": "Moral action unlocks operational truth; no fabricated on-screen family reunion.",
+      "player_beat": "Set source-verified rescue dependency after J2ME comparison.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 26,
+      "id": "N25_TECHNICAL_CODE",
+      "phase": "S04",
+      "location": "building_2_scientist_dialogue",
+      "cast": [
+        "madnar",
+        "solid_snake",
+        "tx55"
+      ],
+      "event": "Madnar describes sixteen charges on TX-55 feet in a particular left-right sequence, though the original dialogue omits the last step.",
+      "dramatic_role": "His highly specific knowledge is indispensable and still imperfect.",
+      "player_beat": "Persistent player-notebook, no mandatory memorization or unskippable lecture.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 27,
+      "id": "N26_DESERT_REENTRY",
+      "phase": "S05",
+      "location": "building_2_exterior_desert",
+      "cast": [
+        "solid_snake",
+        "outer_heaven_security",
+        "big_boss"
+      ],
+      "event": "Return across desert/land crossing to Building Three; truck ambush occurs.",
+      "dramatic_role": "The invasion has become a hunt; earlier safe routes are no longer secure.",
+      "player_beat": "Enemy placement updates should be source-backed and clearly telegraphed.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 28,
+      "id": "N27_BIG_BOSS_TRUCK_TRAP",
+      "phase": "S05",
+      "location": "building_3_truck_compound",
+      "cast": [
+        "solid_snake",
+        "big_boss",
+        "outer_heaven_security"
+      ],
+      "event": "Big Boss advises a dangerous truck, then a suspect door during pursuit.",
+      "dramatic_role": "The player can now independently catch command in a lie.",
+      "player_beat": "Do not force Snake to accept advice; alternative evidence always readable.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 29,
+      "id": "N28_DEEP_BUNKER_DETOUR",
+      "phase": "S05",
+      "location": "building_3_deep_basement_and_water_route",
+      "cast": [
+        "solid_snake",
+        "jennifer",
+        "schneider"
+      ],
+      "event": "Jennifer helps Snake find an oxygen cylinder; underwater link yields access to a previously inaccessible wing.",
+      "dramatic_role": "Allies' earlier promises are paid off by new traversability.",
+      "player_beat": "Genuine spatial links between buildings, no arbitrary teleport.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 30,
+      "id": "N29_SCHNEIDER_LAST_CALL",
+      "phase": "S05",
+      "location": "building_3_radio",
+      "cast": [
+        "schneider",
+        "solid_snake",
+        "big_boss"
+      ],
+      "event": "Schneider begins identifying fortress commander; transmission cuts off abruptly.",
+      "dramatic_role": "The most knowledgeable ally is no longer safe; silence has consequences.",
+      "player_beat": "Do not depict death as confirmed.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 31,
+      "id": "N30_COWARD_DUCK_ROOM",
+      "phase": "S05",
+      "location": "building_3_hostage_arena",
+      "cast": [
+        "solid_snake",
+        "coward_duck",
+        "jennifer",
+        "jennifer_brother",
+        "pow_ensemble"
+      ],
+      "event": "Coward Duck uses hostages as shield and carries Card 8; Jennifer warns her brother is among captives.",
+      "dramatic_role": "Correct target choice and restraint become narrative, not generic combat.",
+      "player_beat": "Track hostage survivor state; avoid unavoidable friendly fire.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 32,
+      "id": "N31_BROTHER_FREED",
+      "phase": "S05",
+      "location": "building_3_hostage_arena",
+      "cast": [
+        "jennifer_brother",
+        "solid_snake",
+        "jennifer"
+      ],
+      "event": "Snake rescues Jennifer's brother; freed man tells him to choose left ladder to escape.",
+      "dramatic_role": "Personal rescue seeds a specific final escape advantage.",
+      "player_beat": "Save left-ladder intel independent of whether radio was heard.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 33,
+      "id": "N32_OWNERSHIP_REVEALED",
+      "phase": "S05",
+      "location": "building_3_100th_basement_detention",
+      "cast": [
+        "solid_snake",
+        "pow_ensemble",
+        "big_boss"
+      ],
+      "event": "Deep bunker prisoner states Big Boss commands Outer Heaven.",
+      "dramatic_role": "Disbelief becomes external testimony; the player earned the revelation by rescuing.",
+      "player_beat": "Physical witness and persistent transcript, spoiler not telegraphed prematurely.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 34,
+      "id": "N33_ABORT_ORDER",
+      "phase": "S05",
+      "location": "building_3_deep_bunker",
+      "cast": [
+        "big_boss",
+        "solid_snake"
+      ],
+      "event": "Big Boss orders Snake to abandon operation and shut down system in original platform-specific style.",
+      "dramatic_role": "Authority breaks completely; command no longer defines duty.",
+      "player_beat": "Platform-neutral equivalent is a creative decision, preserve intent and shock.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 35,
+      "id": "N34_FINAL_SECURITY",
+      "phase": "S06",
+      "location": "building_3_gas_mines_electrified_route",
+      "cast": [
+        "solid_snake",
+        "jennifer",
+        "outer_heaven_security"
+      ],
+      "event": "Snake penetrates gas, mines and electrified zones using earned equipment and allies' warnings.",
+      "dramatic_role": "Earlier tools and relationships pay off in cumulative mastery.",
+      "player_beat": "No equipment-gating traps without fair recoverability.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 36,
+      "id": "N35_TX55_SABOTAGE",
+      "phase": "S06",
+      "location": "building_3_tx55_chamber",
+      "cast": [
+        "solid_snake",
+        "tx55",
+        "madnar",
+        "gray_fox"
+      ],
+      "event": "Snake destroys TX-55 with 16 foot charges; prior Fox and Madnar information directly enables the act.",
+      "dramatic_role": "Four arcs converge: missing operative, scientist, hostage and rookie are vindicated.",
+      "player_beat": "No added high-health walking tank duel that contradicts original.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 37,
+      "id": "N36_SELF_DESTRUCT",
+      "phase": "S06",
+      "location": "building_3_emergency_shaft",
+      "cast": [
+        "solid_snake",
+        "outer_heaven_security"
+      ],
+      "event": "Destruction activates alarm and self-destruct countdown.",
+      "dramatic_role": "Only now do the fortress and every prior route enter a new state.",
+      "player_beat": "Countdown starts after actual TX-55 demolition, not before.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 38,
+      "id": "N37_FINAL_BIG_BOSS",
+      "phase": "S06",
+      "location": "outer_heaven_command_room",
+      "cast": [
+        "solid_snake",
+        "big_boss",
+        "venom_snake",
+        "diane"
+      ],
+      "event": "Physical commander claims Big Boss identity and reveals use of Snake to return false data; Diane cannot provide fighting solution.",
+      "dramatic_role": "The opening voice becomes personal enemy; later canon's phantom remains a behind-scenes identity.",
+      "player_beat": "Preserve 1995 viewpoint and original encounter, no 1984 exposition dump.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 39,
+      "id": "N38_ESCAPE_LEFT_LADDER",
+      "phase": "S06",
+      "location": "outer_heaven_escape_shafts",
+      "cast": [
+        "solid_snake",
+        "jennifer",
+        "jennifer_brother"
+      ],
+      "event": "Snake defeats commander, follows left ladder clue and escapes; Jennifer's warning adds urgency.",
+      "dramatic_role": "Earlier rescue becomes decisive rather than a side quest statistic.",
+      "player_beat": "Maintain alternate-safe design only if source allowed; preserve left-ladder canon.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    },
+    {
+      "order": 40,
+      "id": "N39_CLOSING_BROADCAST",
+      "phase": "S06",
+      "location": "external_1995_exfiltration",
+      "cast": [
+        "solid_snake",
+        "big_boss",
+        "gray_fox",
+        "tx55"
+      ],
+      "event": "Snake reports Metal Gear destruction and mission completion; fortress explodes; post-credit message threatens future meeting.",
+      "dramatic_role": "Rookie becomes self-directed survivor, while command betrayal has an unresolved legacy.",
+      "player_beat": "Do not assert precise time/date or complete fates for every rescued person.",
+      "dependency": [],
+      "grade": "original_msx2_comparative",
+      "implementation": "design_only",
+      "exact_1995_time": "not_established_by_source"
+    }
+  ],
+  "narrative_policies": [
+    "No date/day assumed within mission, except 1995",
+    "Do not infer from a 100th basement floor that the above-ground tower is 100 storeys",
+    "1987-script locations and texts require comparison against target J2ME edition",
+    "One event may be encountered in variable order due to exploration; order defines first-time critical path not a rigid timer",
+    "Optional radio cues never gate movement; Jennifer's source-specific gear/door interventions may have actual, recoverable progression conditions",
+    "Retain 1995 Snake perspective; Venom identity stays behind-scenes/postgame"
+  ],
+  "links_to_registry": "data/character_arc_registry.json",
+  "known_revisions": [
+    "Ellen hidden in Building One basement, not Building Three",
+    "TX-55 destruction causes self destruct before Big Boss encounter",
+    "Jennifer's rocket launcher relationship is rank-gated in original MSX2",
+    "Source warns about Big Boss's false truck and door before official identity revelation",
+    "Unnamed boss vehicle crews never acquire invented personal biographies"
+  ]
+}

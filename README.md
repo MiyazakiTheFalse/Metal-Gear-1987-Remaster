@@ -23,6 +23,50 @@ These features are unverified source implementation, not finished gameplay or pr
 - `scripts/build_windows.ps1` — packaging entrypoint on a Windows UE5.7 build host.
 - `docs/` — source audit, gameplay scope, graphics policy and build notes.
 
+## First connected 1995 mission chapters — implementation source
+
+The [Building One → Gray Fox prison → Building One runtime bridge](docs/1995_PLAYABLE_CAMPAIGN_BRIDGE_PASS.md) now gives the first two narrative chapters a persistent Unreal launch, player-triggered POW/capture route, actual prison gear recovery, character-relevant log and a post-rescue continuation checkpoint. Chapter and source-comparative story IDs persist via `MG1995CampaignV1`. The [chapter contract](data/1995_runtime_chapter_contract.json) and [Python regression assertions](tools/test_campaign_chapter_bridge.py) track this integration; [Rust chapter rules](rust/src/campaign.rs) establish future engine-neutral parity.
+
+**Current truth:** Unreal and Rust source committed, **not compiled** or playtested; physical detention approach and missing building connections remain provisional until J2ME verification. Do not call this a complete playable game or a verified source level. A developer-only F9 reset from the Building One area clears test checkpoints and restarts at the beginning.
+
+## Implementation pass — Missions 05–08 and browser playtest v2
+
+**Unreal source:** Now has builders and interactions for proposed missions **1 through 8**. In particular the [Missions 5–8 implementation pass](docs/MISSIONS_05_TO_08_IMPLEMENTATION_PASS.md) adds the Madnar->Building Three exit, optional false Big Boss truck lead, guarded desert and oxygen passage, Coward Duck's **three physical hostage sightlines**, Card 8, an inner bunker witness/abort order, two security bypasses, the **16-step TX-55 demolition sequence**, a post-demolition self-destruct timer, final boss and left-ladder escape payoff. The former Card 7 collected-but-flag-not-recorded transition softlock is repaired. [Machine-readable mission registry](data/1995_numbered_missions.json) now clearly distinguishes *source world builder present* from *compile/playability verification*.
+
+**Browser demo v2:** A separate Gray Fox playtest ZIP was built and tested locally (not committed as a binary). The browser now supports **timed left punch -> right punch -> kick**, contact-based guard damage, knockback, maintained adaptive audio, and functional **Game Over Continue Checkpoint / Exit to Title** callbacks. Its original gameplay, rig, music/audio and updated melee regression tests pass under Node. The browser demo **does not contain the later Unreal missions**.
+
+**Acceptance remains open:** no Unreal 5.7 compile, cooked build, PIE playability or J2ME-exact spatial verification; no real Chromium WebGL/audio listening verification. Current rooms and bosses are a source-comparative prototype, not production-complete.
+
+## Original Adaptive Audio — multi-engine integration pass
+
+A **new original** sound bank now exists in the current conversation as separate downloadable bundles: 14 editable new MIDI compositions, 14 rendered music WAV loops, and 46 original WAV effects (**60 rendered WAV files**). The source game's 56 original J2ME MIDI files are **not** being redistributed. [Audio integration, cue IDs and instructions](docs/ORIGINAL_ADAPTIVE_AUDIO_IMPLEMENTATION.md) detail how to copy the same WAVs into Unreal and the browser.
+
+**Unreal:** `MGAdaptiveAudioDirector` is spawned on title and all missions; it crossfades from actual mission/guard/boss/gameover state and routes movement, three-hit melee, choking, dragging, guns, rockets, mines, radio and menu effects through SoundWave assets. The Python editor importer checks SHA-256 before turning the WAV files into `/Game/Audio` assets. **Actual files are in the downloadable overlay ZIP, not Git-tracked binaries, and Unreal compilation/import/playback remains unverified.**
+
+**Browser:** the expanded Gray Fox playtest ZIP includes WAVs, `audio_manager.js` for adaptive cues, positional effects, volume sliders and procedural fallback. The browser campaign and audio-bus source tests passed. The browser slice is not the eight-mission Unreal prototype; no full-game audio coverage should be claimed.
+
+## Audio and failure-screen readiness
+
+**Soundtrack status:** the source edition archive contains 56 original MIDIs (10 BGM, 4 intros, 42 sound effects); **there are no upgraded MIDI, WAV, OGG or other rendered music/sound files in this Unreal branch**. The separate expanded browser playtest has 19 procedural SFX cues and 3 ambient drone layers, but no audio file pack or adaptive MIDI score. See the [eight-mission audio inventory and coverage audit](data/1995_audio_coverage_audit.json). Sourcing, producing, mixing and importing appropriately licensed music/SFX remains unfinished.
+
+The [Game Over / Continue / Exit-to-title implementation](docs/GAME_OVER_AUDIO_AND_MENU_CONTRACT.md) is added in Unreal source with a radio-loss overlay and preserved checkpoints, but its sound assets and finished animation are *not* present. Unreal compilation and audio playback tests remain outstanding.
+
+## Three-strike Metal Gear Solid melee pass
+
+The [MGS-style melee implementation contract](docs/THREE_STRIKE_MELEE_IMPLEMENTATION.md) is reflected in Unreal source: **left punch → right punch → right roundhouse kick**, with two rapid queued presses, physically timed hit windows, alternate guard flinches and a finishing knockdown. Current prototype shoulder/hip joints show separate moves; real skeletal animation clips can be assigned to the three exposed montage slots. No actual licensed attack montages or high-resolution character rigs are included yet. Source and timing regressions: `python -m unittest tools/test_three_strike_melee_contract.py` (not run as a UE build).
+
+## Solid Snake's playable identity
+
+The [1995 Solid Snake character/gameplay doctrine](docs/SOLID_SNAKE_1995_PLAYABLE_IDENTITY.md) contrasts the first-mission rookie with Naked Snake's MGS3 wilderness-survival style while preserving shared CQC knowledge and the source-faithful weapon/prisoner loop. The [eight-trait identity contract](data/solid_snake_1995_playstyle_contract.json) assigns concrete character expressions to each numbered mission. **Character-direction work is not a substitute for real rigging, animation, engine compilation or playtesting.**
+
+## Character stories — 1995 campaign
+
+The [complete 1995 campaign narrative and cast timeline](docs/1995_FULL_CAST_NARRATIVE_AND_TIMELINE.md), [40-sequence storyboard](data/1995_campaign_sequence.json), [individual per-character chronological timelines](data/1995_individual_character_timelines.json), and [22-character/group / 105-beat planning registry](data/character_arc_registry.json) now map the core ensemble from first radio contact through Outer Heaven's finale, including individual boss encounters. This is **narrative design only**, except the separate source-level Gray Fox prison prototype and opening radio/mission code. All character beats remain unverified against the target Connect2Media J2ME edition. Narrative `depends_on` links are *not* hard mission gates. Check with `python tools/validate_character_arcs.py` and `python tools/validate_1995_sequence.py`.
+
+## Guard duty and prison census — game-wide binding rule
+
+The [guard-duty/prison-occupancy doctrine](docs/GUARD_DUTY_AND_PRISON_OCCUPANCY_POLICY.md) and its [machine-readable contract](data/1995_guard_duty_and_prison_occupancy_contract.json) govern **all eight numbered missions**. The current Mission 2 secret prison shows four detainees in the provisional source greybox: Snake, Gray Fox and two noncanonical ambient figures in barred side bays. They do **not** create extra rescuable POWs. The two prison guards now patrol actual cell-observation and confiscated-property posts; seven active Building One guards have distinct real duties. Guards continue working when Snake is on another floor. Actual enemy and prisoner positions for later missions require J2ME source review and UE collision/AI playtests. Structural check: `python -m unittest tools/test_guard_duty_contract.py`.
+
 ## Global production doctrine — binding
 
 **Doctrine 000 — [How We Build](docs/DOCTRINE_000_HOW_WE_BUILD.md)** governs every other doctrine. Product quality is defined by the *method*: research and provenance, player-first intent, integrated execution, actual evidence, accessibility, source fidelity, performance and maintainability. Its [Doctrine 005 — Spatial Structure](docs/DOCTRINE_005_SPATIAL_STRUCTURE.md) companion binds topology and room rhythm to the same standards, with [area contracts](data/area_contracts.json). When requirements conflict, record an explicit decision and test the player's experience instead of allowing undocumented shortcuts.

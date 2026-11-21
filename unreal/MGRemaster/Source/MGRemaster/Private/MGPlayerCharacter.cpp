@@ -1,13 +1,24 @@
 #include "MGPlayerCharacter.h"
 #include "MGGrayFoxMission.h"
+#include "MGMissionOne.h"
+#include "MGCampaignState.h"
+#include "Engine/GameInstance.h"
 #include "MGGuardActor.h"
+#include "MGBodyHidingSpot.h"
 #include "MGEquipmentComponent.h"
+#include "MGRemoteMissile.h"
+#include "MGOrdnance.h"
+#include "MGAdaptiveAudioDirector.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimMontage.h"
+#include "MGLaterMission.h"
 
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SceneComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "CollisionShape.h"
@@ -21,6 +32,7 @@
 #include "GameFramework/GameUserSettings.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 
 AMGPlayerCharacter::AMGPlayerCharacter()
@@ -46,6 +58,45 @@ AMGPlayerCharacter::AMGPlayerCharacter()
     PrototypeBody->SetRelativeScale3D(FVector(0.7f, 0.7f, 1.78f));
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
     if (Cylinder.Succeeded()) PrototypeBody->SetStaticMesh(Cylinder.Object);
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> LimbCube(
+        TEXT("/Engine/BasicShapes/Cube.Cube"));
+    // Shoulder and hip joints make the four placeholder limbs articulate
+    // from credible body pivots rather than spinning around their own centre.
+    ProxyLeftShoulder=CreateDefaultSubobject<USceneComponent>(
+        TEXT("LeftShoulderJoint"));
+    ProxyLeftShoulder->SetupAttachment(GetCapsuleComponent());
+    ProxyLeftShoulder->SetRelativeLocation(FVector(0.f,-30.f,50.f));
+    ProxyRightShoulder=CreateDefaultSubobject<USceneComponent>(
+        TEXT("RightShoulderJoint"));
+    ProxyRightShoulder->SetupAttachment(GetCapsuleComponent());
+    ProxyRightShoulder->SetRelativeLocation(FVector(0.f,30.f,50.f));
+    ProxyLeftHip=CreateDefaultSubobject<USceneComponent>(TEXT("LeftHipJoint"));
+    ProxyLeftHip->SetupAttachment(GetCapsuleComponent());
+    ProxyLeftHip->SetRelativeLocation(FVector(0.f,-19.f,-15.f));
+    ProxyRightHip=CreateDefaultSubobject<USceneComponent>(TEXT("RightHipJoint"));
+    ProxyRightHip->SetupAttachment(GetCapsuleComponent());
+    ProxyRightHip->SetRelativeLocation(FVector(0.f,19.f,-15.f));
+    const auto MakeLimb = [this, &LimbCube](
+        const TCHAR* Name, USceneComponent* Joint,
+        const FVector& LocalCenter, const FVector& Scale)
+            -> UStaticMeshComponent*
+    {
+        UStaticMeshComponent* Part=CreateDefaultSubobject<UStaticMeshComponent>(Name);
+        Part->SetupAttachment(Joint);
+        if (LimbCube.Succeeded()) Part->SetStaticMesh(LimbCube.Object);
+        Part->SetRelativeLocation(LocalCenter);
+        Part->SetRelativeScale3D(Scale);
+        Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        return Part;
+    };
+    ProxyLeftArm=MakeLimb(TEXT("LeftArmProxy"),ProxyLeftShoulder,
+        FVector(1.f,0.f,-29.f),FVector(.17f,.17f,.55f));
+    ProxyRightArm=MakeLimb(TEXT("RightArmProxy"),ProxyRightShoulder,
+        FVector(1.f,0.f,-29.f),FVector(.17f,.17f,.55f));
+    ProxyLeftLeg=MakeLimb(TEXT("LeftLegProxy"),ProxyLeftHip,
+        FVector(0.f,0.f,-35.f),FVector(.20f,.20f,.72f));
+    ProxyRightLeg=MakeLimb(TEXT("RightLegProxy"),ProxyRightHip,
+        FVector(0.f,0.f,-35.f),FVector(.20f,.20f,.72f));
 
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
@@ -92,6 +143,8 @@ void AMGPlayerCharacter::BeginPlay()
 
 void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    if (ChokedGuard.IsValid()) ChokedGuard->ReleaseChoke(false);
+    if (DraggedGuard.IsValid()) DraggedGuard->SetBodyDragged(false);
     // Ensure a checkpoint restart cannot inherit a slowed or paused world.
     if (GetWorld())
     {
@@ -104,8 +157,23 @@ void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AMGPlayerCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    if (bGameOver)
+    {
+        GameOverElapsed += FMath::Max(0.f, DeltaSeconds);
+        if (!bFailureRadioCuePlayed && GameOverElapsed >= .43f)
+        {
+            bFailureRadioCuePlayed = true;
+            // Completely new, optional sound: never include extracted MGS VO.
+            if (USoundBase* Radio = LoadObject<USoundBase>(
+                    nullptr, TEXT("/Game/Feedback/game_over_radio.game_over_radio")))
+                UGameplayStatics::PlaySound2D(this, Radio, .65f);
+        }
+        return; // Death no longer runs stealth, combat or movement systems.
+    }
+    if (IsTitleScreenActive()) return;
+    UpdateStealthInteractions(DeltaSeconds);
     CombatNoiseTimer = FMath::Max(0.f, CombatNoiseTimer - DeltaSeconds);
-    MeleeVisualTimer = FMath::Max(0.f, MeleeVisualTimer - DeltaSeconds);
+    AdvanceMeleeCombo(DeltaSeconds);
     WallKnockVisualTimer = FMath::Max(0.f, WallKnockVisualTimer - DeltaSeconds);
     CoverReattachCooldown = FMath::Max(0.f, CoverReattachCooldown - DeltaSeconds);
     // Start prone only once CharacterMovement has established a valid crouch
@@ -114,7 +182,13 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
         EnterProneAfterCrouch();
 
     if (GetMesh())
-        PrototypeBody->SetVisibility(GetMesh()->GetSkeletalMeshAsset() == nullptr, true);
+    {
+        const bool bUsePlaceholder = GetMesh()->GetSkeletalMeshAsset() == nullptr;
+        PrototypeBody->SetVisibility(bUsePlaceholder, true);
+        for (UStaticMeshComponent* Limb : {
+             ProxyLeftArm,ProxyRightArm,ProxyLeftLeg,ProxyRightLeg})
+            if (Limb) Limb->SetVisibility(bUsePlaceholder,true);
+    }
 
     // A temporary prone/cover camera uses real collision and interpolated
     // pivot/shoulder geometry. Artists can replace the cylinder with a rig.
@@ -148,18 +222,25 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     const FVector TargetProxyScale = bIsProne ?
         FVector(0.50f, 0.50f, 1.48f) :
         FVector(0.7f, 0.7f, bIsCrouched ? 1.10f : 1.78f);
-    const FRotator ProxyRotation = bIsProne ? FRotator(88.f, 0.f, 0.f) : FRotator::ZeroRotator;
+    const float MeleePose= bMeleeInProgress ?
+        FMath::Sin(GetMeleeStrikeAlpha()*PI) : 0.f;
+    const float MeleeTurn=MeleeStrikeIndex==1 ? -13.f :
+        (MeleeStrikeIndex==2 ? 13.f : 51.f);
+    const FRotator ProxyRotation = bIsProne ? FRotator(88.f,0.f,0.f) :
+        FRotator(0.f,MeleePose*MeleeTurn,MeleePose*4.f);
     PrototypeBody->SetRelativeRotation(FMath::RInterpTo(
         PrototypeBody->GetRelativeRotation(), ProxyRotation, DeltaSeconds, 12.f));
     PrototypeBody->SetRelativeScale3D(FMath::VInterpTo(PrototypeBody->GetRelativeScale3D(), TargetProxyScale, DeltaSeconds, 12.f));
-    // Clear visual windup/recovery cue until a source-accurate animation rig exists.
-    const float AttackOffset = MeleeVisualTimer > 0.f ?
-        17.f * FMath::Sin(FMath::Clamp(MeleeVisualTimer / 0.22f, 0.f, 1.f) * PI) : 0.f;
+    // The lightweight proxy has its own left/right/kick silhouettes while
+    // real skeletal rigs consume the same state through optional montages.
+    const float AttackOffset = MeleePose *
+        (MeleeStrikeIndex==3 ? 20.f : 12.f);
     const float KnockOffset = WallKnockVisualTimer > 0.f ?
         4.f * FMath::Sin(FMath::Clamp(WallKnockVisualTimer / 0.30f, 0.f, 1.f) * PI) : 0.f;
     PrototypeBody->SetRelativeLocation(FMath::VInterpTo(
         PrototypeBody->GetRelativeLocation(), FVector(AttackOffset, 0.f, 0.f) + CoverNormal * KnockOffset,
         DeltaSeconds, 19.f));
+    UpdateMeleePresentation(DeltaSeconds);
     CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, TargetLength, DeltaSeconds, 10.f);
     CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetSocket, DeltaSeconds, 10.f);
     FollowCamera->SetFieldOfView(FMath::FInterpTo(FollowCamera->FieldOfView, TargetFOV, DeltaSeconds, 11.f));
@@ -202,7 +283,11 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
     Input->BindAction("Fire", IE_Pressed, this, &AMGPlayerCharacter::FireStun);
     Input->BindAction("GraphicsPreset", IE_Pressed, this, &AMGPlayerCharacter::CycleGraphicsQuality);
     Input->BindAction("Interact", IE_Pressed, this, &AMGPlayerCharacter::Interact);
+    Input->BindAction("Interact", IE_Released, this, &AMGPlayerCharacter::ReleaseInteract);
     Input->BindAction("RestartRescue", IE_Pressed, this, &AMGPlayerCharacter::RestartRescue);
+    Input->BindAction("FailurePrevious", IE_Pressed, this, &AMGPlayerCharacter::FailureMenuPrevious);
+    Input->BindAction("FailureNext", IE_Pressed, this, &AMGPlayerCharacter::FailureMenuNext);
+    Input->BindAction("FailureConfirm", IE_Pressed, this, &AMGPlayerCharacter::FailureMenuConfirm);
     Input->BindAction("MissionLog", IE_Pressed, this, &AMGPlayerCharacter::ToggleMissionLog);
     Input->BindAction("WeaponWindow", IE_Pressed, this, &AMGPlayerCharacter::WeaponWindowStart);
     Input->BindAction("WeaponWindow", IE_Released, this, &AMGPlayerCharacter::WeaponWindowStop);
@@ -220,6 +305,12 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
 }
 void AMGPlayerCharacter::MoveForward(float Value)
 {
+    if (bGameOver || IsTitleScreenActive()) return;
+    if (ControlledMissile.IsValid())
+    {
+        ControlledMissile->SetPitchInput(Value);
+        return;
+    }
     if (Controller && !FMath::IsNearlyZero(Value))
     {
         const FRotator Yaw(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -244,6 +335,12 @@ void AMGPlayerCharacter::MoveForward(float Value)
 }
 void AMGPlayerCharacter::MoveRight(float Value)
 {
+    if (bGameOver || IsTitleScreenActive()) return;
+    if (ControlledMissile.IsValid())
+    {
+        ControlledMissile->SetYawInput(Value);
+        return;
+    }
     if (Controller && !FMath::IsNearlyZero(Value))
     {
         const FRotator Yaw(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -264,20 +361,29 @@ void AMGPlayerCharacter::MoveRight(float Value)
             AddMovementInput(Direction, Value);
     }
 }
-void AMGPlayerCharacter::Turn(float Value) { AddControllerYawInput(Value); }
-void AMGPlayerCharacter::LookUp(float Value) { AddControllerPitchInput(Value); }
+void AMGPlayerCharacter::Turn(float Value)
+{
+    if (!bGameOver && !IsTitleScreenActive()) AddControllerYawInput(Value);
+}
+void AMGPlayerCharacter::LookUp(float Value)
+{
+    if (!bGameOver && !IsTitleScreenActive()) AddControllerPitchInput(Value);
+}
 // Unlike raw mouse deltas, gamepad sticks represent velocity and require delta time.
 void AMGPlayerCharacter::TurnRate(float Value)
 {
-    if (GetWorld()) AddControllerYawInput(Value * 100.f * GetWorld()->GetDeltaSeconds());
+    if (GetWorld() && !bGameOver && !IsTitleScreenActive())
+        AddControllerYawInput(Value * 100.f * GetWorld()->GetDeltaSeconds());
 }
 void AMGPlayerCharacter::LookUpRate(float Value)
 {
-    if (GetWorld()) AddControllerPitchInput(Value * 80.f * GetWorld()->GetDeltaSeconds());
+    if (GetWorld() && !bGameOver && !IsTitleScreenActive())
+        AddControllerPitchInput(Value * 80.f * GetWorld()->GetDeltaSeconds());
 }
 
 void AMGPlayerCharacter::AimStart()
 {
+    if (bMeleeInProgress || bGameOver || IsTitleScreenActive()) return;
     bAiming = true;
     bSprinting = false;
     UpdateMovementState();
@@ -285,7 +391,9 @@ void AMGPlayerCharacter::AimStart()
 void AMGPlayerCharacter::AimStop() { bAiming = false; UpdateMovementState(); }
 void AMGPlayerCharacter::SprintStart()
 {
-    if (!bAiming && !bIsCrouched && !bIsProne)
+    if (bGameOver || IsTitleScreenActive()) return;
+    if (!bAiming && !bIsCrouched && !bIsProne &&
+        !bMeleeInProgress && !ChokedGuard.IsValid() && !DraggedGuard.IsValid())
     {
         if (bInCover) LeaveCover();
         bSprinting = true;
@@ -295,6 +403,7 @@ void AMGPlayerCharacter::SprintStart()
 void AMGPlayerCharacter::SprintStop() { bSprinting = false; UpdateMovementState(); }
 void AMGPlayerCharacter::CrouchToggle()
 {
+    if (bGameOver || IsTitleScreenActive()) return;
     bSprinting = false;
     if (bIsProne)
     {
@@ -310,11 +419,35 @@ void AMGPlayerCharacter::ShoulderSwap()
     // changes the station. Snake keeps movement/camera control.
     if (bCodecOpen)
     {
-        TransceiverChannel = (TransceiverChannel + 1) % 2;
-        NotifyFeedback(TransceiverChannel == 0 ?
-            TEXT("RADIO TUNED — SCHNEIDER / 120.79") :
-            TEXT("RADIO TUNED — BIG BOSS / 120.85"), TEXT("select"));
+        UMGCampaignState* Story = GetWorld() && GetWorld()->GetGameInstance()
+            ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
+        const int32 Count = Story ? Story->GetRadioContactCount() : 2;
+        TransceiverChannel = (TransceiverChannel + 1) % Count;
+        // Jennifer's source-canonical rocket help is an actual call in Building
+        // Two. The full original 4-star prisoner ranking needs the missing
+        // POW rooms, so currently access is earned by two rescued witnesses
+        // and reaching her local supply wing (provisional pacing proxy).
+        if (TransceiverChannel == 3 && Story &&
+            Story->HasBeat(TEXT("jennifer.contact")) &&
+            Story->HasBeat(TEXT("fake_madnar.basement_lure")))
+        {
+            if (AMGLaterMission* Later = Cast<AMGLaterMission>(
+                UGameplayStatics::GetActorOfClass(this, AMGLaterMission::StaticClass())))
+                if (Later->GetActiveMission() == 4 &&
+                    GetActorLocation().X >= 8200.f)
+                    Story->RecordBeat(TEXT("jennifer.rocket_help"),
+                        TEXT("JENNIFER 120.48: Rocket launcher and rockets now available in the research supply store."));
+        }
+        NotifyFeedback(Story ?
+            FString::Printf(TEXT("RADIO TUNED — %s"),
+                            *Story->GetRadioContactLabel(TransceiverChannel)) :
+            TEXT("RADIO TUNED"), TEXT("select"));
         return;
+    }
+    if (AMGMissionOne* Opening = Cast<AMGMissionOne>(
+        UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass())))
+    {
+        if (Opening->CycleLiftDestination(this)) return;
     }
     ShoulderSign = -ShoulderSign;
 }
@@ -324,9 +457,9 @@ void AMGPlayerCharacter::UpdateMovementState()
     UCharacterMovementComponent* Movement = GetCharacterMovement();
     Movement->bOrientRotationToMovement = !bAiming && !bInCover;
     Movement->bUseControllerDesiredRotation = bAiming && !bInCover;
-    Movement->MaxWalkSpeed = bIsProne ? 95.f :
-        (bInCover ? 120.f : (bIsCrouched ? 170.f :
-            (bAiming ? 210.f : (bSprinting ? 600.f : 350.f))));
+    Movement->MaxWalkSpeed = bMeleeInProgress ? 100.f : (bIsProne ? 95.f :
+        (bInCover || DraggedGuard.IsValid() ? 120.f : (bIsCrouched ? 170.f :
+            (bAiming ? 210.f : (bSprinting ? 600.f : 350.f)))));
     // Crouched/prone cover must not bypass the current slow movement cap.
     Movement->MaxWalkSpeedCrouched = bIsProne ? 95.f : (bInCover ? 120.f : 170.f);
 }
@@ -350,6 +483,75 @@ float AMGPlayerCharacter::GetVisibilityFactor() const
 
 void AMGPlayerCharacter::Interact()
 {
+    if (bGameOver || IsTitleScreenActive())
+    {
+        FailureMenuConfirm();
+        return;
+    }
+    if (bMeleeInProgress) return; // No simultaneous grapple/loot mid-strike.
+    bInteractHeld = true;
+    if (ChokedGuard.IsValid()) return; // E held: maintain grip
+    if (DraggedGuard.IsValid())
+    {
+        if (AMGBodyHidingSpot* Locker = FindBodyLocker())
+        {
+            if (Locker->TryStow(DraggedGuard.Get()))
+            {
+                DraggedGuard.Reset();
+                UpdateMovementState();
+                NotifyFeedback(TEXT("BODY STOWED — CLOSE THE LOCKER"), TEXT("locker"));
+                return;
+            }
+        }
+        StopBodyDrag();
+        NotifyFeedback(TEXT("BODY RELEASED"), TEXT("select"));
+        return;
+    }
+    if (AMGGuardActor* Guard = FindRearChokeCandidate())
+    {
+        LeaveCover();
+        bAiming = false;
+        bSprinting = false;
+        ChokedGuard = Guard;
+        ChokeHoldTime = 0.f;
+        ChokeStruggleTime = 0.f;
+        if (Guard->BeginChoke(this))
+        {
+            UpdateMovementState();
+            NotifyFeedback(TEXT("HOLD E — RESTRAIN GUARD / DO NOT RELEASE"), TEXT("choke"));
+            return;
+        }
+        ChokedGuard.Reset();
+    }
+    if (AMGGuardActor* Body = FindUnconsciousBody())
+    {
+        bAiming = false;
+        bSprinting = false;
+        if (bInCover) LeaveCover();
+        DraggedGuard = Body;
+        Body->SetBodyDragged(true);
+        UpdateMovementState();
+        NotifyFeedback(TEXT("DRAG BODY — WALK SLOWLY / E TO RELEASE"), TEXT("body_drag"));
+        return;
+    }
+    if (AMGLaterMission* Later = Cast<AMGLaterMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGLaterMission::StaticClass())))
+    {
+        if (Later->TryInteract(this)) return;
+        if (bInCover) LeaveCover();
+        else if (!TryEnterCover())
+            NotifyFeedback(TEXT("NO INTERACTIVE OBJECT IN REACH"),TEXT("denied"));
+        return;
+    }
+    if (AMGMissionOne* Opening = Cast<AMGMissionOne>(
+        UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass())))
+    {
+        if (Opening->TryInteract(this)) return;
+        if (bInCover) LeaveCover();
+        else if (!TryEnterCover())
+            NotifyFeedback(TEXT("NO ACTION AVAILABLE — MOVE CLOSER"), TEXT("denied"));
+        return;
+    }
     if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
     {
@@ -378,19 +580,194 @@ void AMGPlayerCharacter::ToggleMissionLog()
     if (!bCodecOpen) bShowMissionLog = !bShowMissionLog;
 }
 
+void AMGPlayerCharacter::ReleaseInteract()
+{
+    bInteractHeld = false;
+    if (!ChokedGuard.IsValid()) return;
+    ChokedGuard->ReleaseChoke(true);
+    ChokedGuard.Reset();
+    ChokeHoldTime = 0.f;
+    UpdateMovementState();
+    NotifyFeedback(TEXT("CHOKEHOLD RELEASED — GUARD ALERTED"), TEXT("denied"));
+}
+AMGGuardActor* AMGPlayerCharacter::FindRearChokeCandidate() const
+{
+    if (!GetWorld() || bIsProne || bAiming || IsCombatAlertActive()) return nullptr;
+    AMGGuardActor* Candidate = nullptr;
+    float Best = 142.f;
+    const FVector Facing = GetActorForwardVector().GetSafeNormal2D();
+    for (TActorIterator<AMGGuardActor> Guard(GetWorld()); Guard; ++Guard)
+    {
+        if (Guard->IsIncapacitated() || Guard->IsBeingChoked() ||
+            Guard->GetAwarenessState() >= 2) continue;
+        const FVector Offset = GetActorLocation() - Guard->GetActorLocation();
+        if (FMath::Abs(Offset.Z) > 80.f) continue;
+        const float Range = Offset.Size2D();
+        if (Range > Best || Range < 42.f) continue;
+        const FVector FromGuard = Offset.GetSafeNormal2D();
+        if (FVector::DotProduct(Guard->GetActorForwardVector().GetSafeNormal2D(),
+                                FromGuard) > -0.68f) continue;
+        if (FVector::DotProduct(Facing, -FromGuard) < 0.48f) continue;
+        FHitResult Hit;
+        FCollisionQueryParams Q(SCENE_QUERY_STAT(MGChokeLineOfSight), false, this);
+        if (GetWorld()->LineTraceSingleByChannel(Hit,
+            GetActorLocation()+FVector(0.f,0.f,52.f),
+            Guard->GetActorLocation()+FVector(0.f,0.f,52.f),
+            ECC_Visibility, Q) && Hit.GetActor() != *Guard) continue;
+        Candidate = *Guard;
+        Best = Range;
+    }
+    return Candidate;
+}
+AMGGuardActor* AMGPlayerCharacter::FindUnconsciousBody() const
+{
+    if (!GetWorld()) return nullptr;
+    AMGGuardActor* Candidate = nullptr;
+    float Best = 150.f;
+    for (TActorIterator<AMGGuardActor> Guard(GetWorld()); Guard; ++Guard)
+    {
+        if (!Guard->IsDiscoverableBody() || Guard->IsBodyDragged()) continue;
+        const FVector Diff = Guard->GetActorLocation() - GetActorLocation();
+        if (FMath::Abs(Diff.Z) > 80.f || Diff.Size2D() >= Best) continue;
+        FHitResult Hit;
+        FCollisionQueryParams Q(SCENE_QUERY_STAT(MGBodyContact), false, this);
+        if (GetWorld()->LineTraceSingleByChannel(Hit,
+            GetActorLocation()+FVector(0.f,0.f,32.f),
+            Guard->GetActorLocation()+FVector(0.f,0.f,18.f),
+            ECC_Visibility, Q) && Hit.GetActor() != *Guard) continue;
+        Best = Diff.Size2D();
+        Candidate = *Guard;
+    }
+    return Candidate;
+}
+AMGBodyHidingSpot* AMGPlayerCharacter::FindBodyLocker() const
+{
+    if (!GetWorld()) return nullptr;
+    for (TActorIterator<AMGBodyHidingSpot> Locker(GetWorld()); Locker; ++Locker)
+    {
+        if (!Locker->IsAccessible()) continue;
+        const FVector Offset = Locker->GetActorLocation() - GetActorLocation();
+        if (FMath::Abs(Offset.Z) <= 90.f && Offset.Size2D() < 190.f)
+            return *Locker;
+    }
+    return nullptr;
+}
+FString AMGPlayerCharacter::GetStealthInteractionPrompt() const
+{
+    if (ChokedGuard.IsValid())
+        return FString::Printf(TEXT("HOLD E — CHOKEHOLD %d%%"),
+            FMath::RoundToInt(GetChokeProgress()*100.f));
+    if (DraggedGuard.IsValid())
+        return FindBodyLocker() ? TEXT("E — HIDE BODY IN SERVICE LOCKER")
+                                : TEXT("DRAGGING BODY — E TO RELEASE");
+    if (FindRearChokeCandidate())
+        return TEXT("HOLD E — CHOKE GUARD FROM BEHIND");
+    if (FindUnconsciousBody())
+        return TEXT("E — DRAG UNCONSCIOUS GUARD");
+    return FString();
+}
+void AMGPlayerCharacter::StopBodyDrag()
+{
+    if (DraggedGuard.IsValid()) DraggedGuard->SetBodyDragged(false);
+    DraggedGuard.Reset();
+    UpdateMovementState();
+}
+void AMGPlayerCharacter::UpdateStealthInteractions(float DeltaSeconds)
+{
+    if (ChokedGuard.IsValid())
+    {
+        AMGGuardActor* Guard = ChokedGuard.Get();
+        const FVector Diff = Guard->GetActorLocation() - GetActorLocation();
+        const bool bGripValid = bInteractHeld && Health > 0.f &&
+            Diff.Size2D() < 175.f && FMath::Abs(Diff.Z) < 90.f &&
+            !bCodecOpen && !bIsProne;
+        if (!bGripValid)
+        {
+            Guard->ReleaseChoke(true);
+            ChokedGuard.Reset();
+            ChokeHoldTime = 0.f;
+            UpdateMovementState();
+            NotifyFeedback(TEXT("GRIP BROKEN — GUARD CALLS ALERT"), TEXT("denied"));
+        }
+        else
+        {
+            ChokeHoldTime += DeltaSeconds;
+            bSprinting = false;
+            GetCharacterMovement()->StopMovementImmediately();
+            // Keep Snake behind the enemy rather than snapping through him.
+            const FVector Look = (Guard->GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
+            if (!Look.IsNearlyZero())
+                SetActorRotation(FMath::RInterpTo(
+                    GetActorRotation(), Look.Rotation(), DeltaSeconds, 12.f));
+            if (ChokeHoldTime >= 1.35f)
+            {
+                Guard->CompleteChoke();
+                ChokedGuard.Reset();
+                ChokeHoldTime = 0.f;
+                UpdateMovementState();
+                NotifyFeedback(TEXT("GUARD UNCONSCIOUS — BODY REMAINS VISIBLE"), TEXT("select"));
+            }
+        }
+    }
+    if (DraggedGuard.IsValid())
+    {
+        AMGGuardActor* Guard = DraggedGuard.Get();
+        if (!Guard->IsIncapacitated() || bIsProne || bSprinting || bCodecOpen)
+        {
+            StopBodyDrag();
+            return;
+        }
+        // With a rig, this drives a backstep/arm constraint. The current proxy
+        // body is moved only if the physical space is large enough.
+        const FVector Behind = GetActorLocation() - GetActorForwardVector()*90.f;
+        const FVector BodyPosition(Behind.X,Behind.Y,Guard->GetActorLocation().Z);
+        if (!Guard->MoveDraggedBody(BodyPosition, DeltaSeconds))
+        {
+            if (FVector::Dist2D(Guard->GetActorLocation(),GetActorLocation()) > 230.f)
+            {
+                StopBodyDrag();
+                NotifyFeedback(TEXT("BODY CAUGHT ON OBSTACLE — GRIP LOST"), TEXT("denied"));
+            }
+        }
+    }
+}
+
 void AMGPlayerCharacter::RestartRescue()
 {
-    if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+    if (bGameOver || IsTitleScreenActive()) return; // F9 cannot erase progress
+#if !UE_BUILD_SHIPPING
+    // Deliberately developer-only: F9 in the opening/return area starts a
+    // genuinely fresh 1995 campaign, including clearing old slice checkpoints.
+    // In the prison slice, F9 retries that scene without erasing chapter 0.
+    if (AMGGrayFoxMission* Prison = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
     {
-        Mission->RestartMission();
+        Prison->RestartMission();
+        return;
     }
+    if (!GetWorld() ||
+        !UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass()))
+        return;
+    if (GetWorld()->GetGameInstance())
+        if (UMGCampaignState* Story =
+            GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+            Story->ResetForDevelopment();
+    UGameplayStatics::DeleteGameInSlot(TEXT("MissionOneV1"), 0);
+    UGameplayStatics::DeleteGameInSlot(TEXT("GrayFoxSliceV1"), 0);
+    UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
+#endif
 }
 
 
 FString AMGPlayerCharacter::GetPostureText() const
 {
+    if (bMeleeInProgress)
+        return MeleeStrikeIndex==1 ? TEXT("MELEE / LEFT PUNCH") :
+            (MeleeStrikeIndex==2 ? TEXT("MELEE / RIGHT PUNCH") :
+                                   TEXT("MELEE / FINISHING KICK"));
     if (bIsProne) return TEXT("PRONE");
+    if (ChokedGuard.IsValid()) return TEXT("GRAPPLING");
+    if (DraggedGuard.IsValid()) return TEXT("DRAGGING");
     if (bInCover) return TEXT("WALL COVER");
     if (bIsCrouched) return TEXT("CROUCHED");
     return TEXT("STANDING");
@@ -623,25 +1000,152 @@ void AMGPlayerCharacter::ToggleCover()
 
 void AMGPlayerCharacter::FireStun()
 {
-    if (!GetWorld() || !Controller) return;
+    if (bGameOver || IsTitleScreenActive()) return;
+    if (!GetWorld() || !Controller || bMeleeInProgress) return;
     if (!bAiming)
     {
         NotifyFeedback(TEXT("HOLD AIM BEFORE FIRING"), TEXT("denied"));
         return;
     }
-    if (!Equipment || !Equipment->IsStunEquipped())
+    const AMGMissionOne* Opening = Cast<AMGMissionOne>(
+        UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass()));
+    if (Opening && Opening->IsLiftTravelling()) return;
+    if (ControlledMissile.IsValid())
+    {
+        NotifyFeedback(TEXT("MISSILE ACTIVE — STEER WITH MOVEMENT CONTROLS"),
+                       TEXT("select"));
+        return;
+    }
+    // Original preparation matters physically: a planted mine is placed
+    // ahead of Snake, whereas grenades and rockets travel through the arena.
+    // No auto-awarded 'correct weapon' or arbitrary boss success toggle.
+    if (Equipment && Equipment->IsItemEquipped(TEXT("MINES")))
+    {
+        if (!Equipment->ConsumeItem(TEXT("MINES"),1))
+        {
+            NotifyFeedback(TEXT("NO MINES LEFT"),TEXT("denied"));
+            return;
+        }
+        const FVector Location = GetActorLocation() +
+            GetActorForwardVector()*130.f + FVector(0.f,0.f,-72.f);
+        AMGOrdnance* Mine=GetWorld()->SpawnActor<AMGOrdnance>(
+            Location,GetActorRotation());
+        if (!Mine)
+        {
+            Equipment->AwardItem(TEXT("MINES"),1);
+            NotifyFeedback(TEXT("CANNOT PLACE MINE HERE"),TEXT("denied"));
+            return;
+        }
+        Mine->Configure(TEXT("MINE"),FVector::ZeroVector,this);
+        NotifyFeedback(TEXT("MINE PLACED / ARMING IN 0.8 SEC"),TEXT("mine"));
+        if (AMGLaterMission* Later=Cast<AMGLaterMission>(
+            UGameplayStatics::GetActorOfClass(this,AMGLaterMission::StaticClass())))
+            Later->PersistPlayerEquipment(this);
+        else if (AMGMissionOne* Original=Cast<AMGMissionOne>(
+            UGameplayStatics::GetActorOfClass(this,AMGMissionOne::StaticClass())))
+            Original->PersistInventory(this);
+        return;
+    }
+    const bool bGrenade=Equipment &&
+        Equipment->IsWeaponEquipped(TEXT("GRENADE_LAUNCHER"));
+    const bool bRocket=Equipment &&
+        Equipment->IsWeaponEquipped(TEXT("ROCKET_LAUNCHER"));
+    if (bGrenade || bRocket)
+    {
+        const FName Weapon=bRocket ? FName(TEXT("ROCKET_LAUNCHER")) :
+                                     FName(TEXT("GRENADE_LAUNCHER"));
+        if (!Equipment->ConsumeWeaponAmmo(Weapon))
+        {
+            NotifyFeedback(TEXT("SPECIAL WEAPON OUT OF AMMUNITION"),TEXT("denied"));
+            return;
+        }
+        const FVector Direction=FollowCamera->GetForwardVector();
+        const FVector Origin=GetActorLocation()+Direction*130.f+
+                             FVector(0.f,0.f,55.f);
+        AMGOrdnance* Shot=GetWorld()->SpawnActor<AMGOrdnance>(
+            Origin,Direction.Rotation());
+        if (!Shot)
+        {
+            Equipment->AwardAmmunition(Weapon,1);
+            NotifyFeedback(TEXT("SHOT BLOCKED / CANNOT FIRE"),TEXT("denied"));
+            return;
+        }
+        Shot->Configure(Weapon,Direction*(bRocket ? 2200.f : 1450.f),this);
+        CombatNoiseTimer=1.25f;
+        NotifyFeedback(bRocket ? TEXT("ROCKET FIRED") :
+                                 TEXT("GRENADE LAUNCHED"),bRocket ?
+                                 TEXT("rocket") : TEXT("grenade"));
+        if (AMGLaterMission* Later=Cast<AMGLaterMission>(
+            UGameplayStatics::GetActorOfClass(this,AMGLaterMission::StaticClass())))
+            Later->PersistPlayerEquipment(this);
+        else if (AMGMissionOne* Original=Cast<AMGMissionOne>(
+            UGameplayStatics::GetActorOfClass(this,AMGMissionOne::StaticClass())))
+            Original->PersistInventory(this);
+        return;
+    }
+    if (Equipment && Equipment->IsWeaponEquipped(TEXT("RC_MISSILE")))
+    {
+        if (!Equipment->ConsumeWeaponAmmo(TEXT("RC_MISSILE")))
+        {
+            NotifyFeedback(TEXT("OUT OF REMOTE MISSILES"), TEXT("denied"));
+            return;
+        }
+        const FVector LaunchForward = FollowCamera->GetForwardVector();
+        const FVector SpawnPoint = GetActorLocation() +
+            LaunchForward * 125.f + FVector(0.f,0.f,50.f);
+        AMGRemoteMissile* Missile = GetWorld()->SpawnActor<AMGRemoteMissile>(
+            SpawnPoint, LaunchForward.Rotation());
+        if (!Missile)
+        {
+            Equipment->AwardAmmunition(TEXT("RC_MISSILE"), 1);
+            NotifyFeedback(TEXT("MISSILE COULD NOT LAUNCH"), TEXT("denied"));
+            return;
+        }
+        ControlledMissile = Missile;
+        Missile->SetOwner(this);
+        NotifyFeedback(TEXT("REMOTE MISSILE — STEER / SNAKE STAYS PUT"),
+                       TEXT("gunshot"));
+        CombatNoiseTimer = 1.f;
+        if (Opening) const_cast<AMGMissionOne*>(Opening)->PersistInventory(this);
+        else if (AMGGrayFoxMission* Prison = Cast<AMGGrayFoxMission>(
+                UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+            Prison->PersistRecoveredInventory(this);
+        else if (AMGLaterMission* Later = Cast<AMGLaterMission>(
+                UGameplayStatics::GetActorOfClass(this, AMGLaterMission::StaticClass())))
+            Later->PersistPlayerEquipment(this);
+        else if (AMGLaterMission* Later = Cast<AMGLaterMission>(
+                UGameplayStatics::GetActorOfClass(this, AMGLaterMission::StaticClass())))
+            Later->PersistPlayerEquipment(this);
+        return;
+    }
+    const bool bHandgun = Equipment && Equipment->IsHandgunEquipped();
+    const bool bStun = Equipment && Equipment->IsStunEquipped();
+    if (!bHandgun && !bStun)
     {
         NotifyFeedback(Equipment && Equipment->IsConfiscated() ?
             TEXT("WEAPONS CONFISCATED") : TEXT("NO WEAPON EQUIPPED"), TEXT("denied"));
         return;
     }
-    if (!Equipment->ConsumeStunRound())
+    const bool bSpent = bHandgun ? Equipment->ConsumeHandgunRound() :
+        Equipment->ConsumeStunRound();
+    if (!bSpent)
     {
         NotifyFeedback(TEXT("OUT OF AMMUNITION"), TEXT("denied"));
         return;
     }
-    NotifyFeedback(TEXT("STUN ROUND FIRED"), TEXT("stun"));
-    CombatNoiseTimer = 0.55f;
+    // The first usable pistol ammunition is a Building One 3F pickup.
+    // The firing model is a provisional hitscan interaction, not final ballistics.
+    NotifyFeedback(bHandgun ? TEXT("HANDGUN FIRED") : TEXT("STUN ROUND FIRED"),
+                   bHandgun ? TEXT("gunshot") : TEXT("stun"));
+    CombatNoiseTimer = bHandgun ? 1.0f : 0.55f;
+    if (Opening)
+        const_cast<AMGMissionOne*>(Opening)->PersistInventory(this);
+    else if (AMGGrayFoxMission* Prison = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+        Prison->PersistRecoveredInventory(this);
+    else if (AMGLaterMission* Later = Cast<AMGLaterMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGLaterMission::StaticClass())))
+        Later->PersistPlayerEquipment(this);
     // Camera ray determines crosshair target; a second ray enforces obstruction
     // between the character and target. Prototype nonlethal incapacitation only.
     const FVector CameraStart = FollowCamera->GetComponentLocation();
@@ -654,7 +1158,8 @@ void AMGPlayerCharacter::FireStun()
     FHitResult MuzzleHit;
     if (GetWorld()->LineTraceSingleByChannel(MuzzleHit, Muzzle, Target, ECC_Visibility, Params) && MuzzleHit.GetActor())
     {
-        UGameplayStatics::ApplyDamage(MuzzleHit.GetActor(), 100.f, Controller, this, UDamageType::StaticClass());
+        UGameplayStatics::ApplyDamage(MuzzleHit.GetActor(), bHandgun ? 100.f : 100.f,
+                                     Controller, this, UDamageType::StaticClass());
     }
 }
 
@@ -665,14 +1170,23 @@ void AMGPlayerCharacter::NotifyFeedback(const FString& Message, FName CueName)
     // Asset pipeline imports original placeholder WAVs to /Game/Feedback.
     // Absence is safe: visible feedback still works. No extracted licensed SFX
     // are included in the public repository.
+    // One canonical resolver for both engines' shared cue IDs.
+    // It handles original licensed wave files, cooldowns and 3D routing;
+    // no double-playback when the director successfully handles the cue.
+    if (AMGAdaptiveAudioDirector* Director=Cast<AMGAdaptiveAudioDirector>(
+        UGameplayStatics::GetActorOfClass(this,
+            AMGAdaptiveAudioDirector::StaticClass())))
+        if (Director->PlayCue(CueName,GetActorLocation(),false))
+            return;
     const FString Name = CueName.ToString();
     const FString ObjectRef = FString::Printf(
         TEXT("/Game/Feedback/%s.%s"), *Name, *Name);
-    if (USoundBase* Sound = LoadObject<USoundBase>(nullptr, *ObjectRef))
-        UGameplayStatics::PlaySound2D(this, Sound, 0.65f);
+    if (USoundBase* Sound=LoadObject<USoundBase>(nullptr,*ObjectRef))
+        UGameplayStatics::PlaySound2D(this,Sound,.65f);
 }
 void AMGPlayerCharacter::WeaponWindowStart()
 {
+    if (bGameOver || IsTitleScreenActive()) return;
     if (bCodecOpen) return;
     if (Equipment)
     {
@@ -695,6 +1209,7 @@ void AMGPlayerCharacter::WeaponWindowStop()
 }
 void AMGPlayerCharacter::ItemWindowStart()
 {
+    if (bGameOver || IsTitleScreenActive()) return;
     if (bCodecOpen) return;
     if (Equipment)
     {
@@ -717,16 +1232,27 @@ void AMGPlayerCharacter::ItemWindowStop()
 }
 void AMGPlayerCharacter::SelectionPrevious()
 {
+    if (bGameOver || IsTitleScreenActive())
+    {
+        FailureMenuPrevious();
+        return;
+    }
     if (Equipment && (Equipment->IsItemWindowOpen() || Equipment->IsWeaponWindowOpen()))
     { Equipment->SelectionPrevious(); NotifyFeedback(TEXT("SELECTION MOVED"), TEXT("menu")); }
 }
 void AMGPlayerCharacter::SelectionNext()
 {
+    if (bGameOver || IsTitleScreenActive())
+    {
+        FailureMenuNext();
+        return;
+    }
     if (Equipment && (Equipment->IsItemWindowOpen() || Equipment->IsWeaponWindowOpen()))
     { Equipment->SelectionNext(); NotifyFeedback(TEXT("SELECTION MOVED"), TEXT("menu")); }
 }
 void AMGPlayerCharacter::UseItem()
 {
+    if (bGameOver || IsTitleScreenActive()) return;
     if (!Equipment || Equipment->IsConfiscated())
     { NotifyFeedback(TEXT("ITEMS CONFISCATED"), TEXT("denied")); return; }
     if (Health >= 100.f)
@@ -735,72 +1261,314 @@ void AMGPlayerCharacter::UseItem()
     {
         Health = FMath::Min(100.f, Health + 45.f);
         NotifyFeedback(TEXT("RATION USED — HEALTH RESTORED"), TEXT("select"));
+        if (AMGMissionOne* Opening = Cast<AMGMissionOne>(
+                UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass())))
+            Opening->PersistInventory(this);
+        else if (AMGGrayFoxMission* Prison = Cast<AMGGrayFoxMission>(
+                UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+            Prison->PersistRecoveredInventory(this);
     }
     else NotifyFeedback(TEXT("EQUIP A RATION FIRST"), TEXT("denied"));
 }
+namespace
+{
+    // Three deliberate attacks, no hidden extra strike or animation-time
+    // instant damage. All times are seconds and are defined for the same
+    // 30/60/120 Hz gameplay even when an AnimMontage isn't yet imported.
+    constexpr float MeleeDurations[3] = {.34f,.36f,.56f};
+    constexpr float MeleeContactStart[3] = {.105f,.125f,.235f};
+    constexpr float MeleeContactEnd[3] = {.19f,.21f,.34f};
+    constexpr float MeleeDamage[3] = {24.f,26.f,36.f};
+}
+float AMGPlayerCharacter::GetMeleeStrikeAlpha() const
+{
+    return bMeleeInProgress && MeleeStrikeIndex>=1 && MeleeStrikeIndex<=3 ?
+        FMath::Clamp(MeleePhaseSeconds/MeleeDurations[MeleeStrikeIndex-1],
+                     0.f,1.f) : 0.f;
+}
+void AMGPlayerCharacter::StartMeleeStrike(int32 Strike)
+{
+    if (!GetWorld() || Strike<1 || Strike>3) return;
+    bMeleeInProgress=true;
+    bMeleeHitResolved=false;
+    bMeleeHitWindow=false;
+    MeleeStrikeIndex=Strike;
+    MeleePhaseSeconds=0.f;
+    CombatNoiseTimer=.20f;
+    bAiming=false;
+    bSprinting=false;
+    UpdateMovementState();
+
+    // Finished licensed rig/animation blueprint can provide exactly three
+    // authored montages. Until then the active proxy animates four limbs.
+    UAnimMontage* Montage = Strike==1 ? LeftPunchMontage :
+        (Strike==2 ? RightPunchMontage : FinisherKickMontage);
+    if (Montage && GetMesh() && GetMesh()->GetSkeletalMeshAsset())
+        if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
+            Anim->Montage_Play(Montage,1.f);
+}
 void AMGPlayerCharacter::MeleeAttack()
 {
-    if (!GetWorld() || !Controller) return;
-    if (bInCover) { KnockOnWall(); return; }
-    if (bIsProne)
+    if (bGameOver || IsTitleScreenActive())
     {
-        NotifyFeedback(TEXT("UNABLE TO STRIKE WHILE PRONE"), TEXT("denied"));
+        FailureMenuConfirm(); // controller face-button bottom = confirm
         return;
     }
-    const float Now = GetWorld()->GetTimeSeconds();
-    if (Now < MeleeNextTime) return;
-    MeleeNextTime = Now + 0.35f;
-    MeleeComboStep = (Now - LastMeleeTime > 1.0f) ? 1 : (MeleeComboStep % 3) + 1;
-    LastMeleeTime = Now;
-    MeleeVisualTimer = 0.22f;
-    CombatNoiseTimer = 0.45f;
-    const FVector Forward = FRotator(0.f, Controller->GetControlRotation().Yaw, 0.f).Vector();
-    const FVector Origin = GetActorLocation();
-    AMGGuardActor* Target = nullptr;
-    float Best = 165.f;
-    for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
+    if (!GetWorld() || !Controller) return;
+    // In wall cover the original contextual button knocks, rather than
+    // punching an invisible target through the solid surface.
+    if (bInCover) { KnockOnWall(); return; }
+    if (bIsProne || ChokedGuard.IsValid() || DraggedGuard.IsValid() ||
+        bCodecOpen || ControlledMissile.IsValid() || Health<=0.f)
+        return;
+    if (bMeleeInProgress)
     {
-        AMGGuardActor* Guard = *It;
+        // Rapid triple input works: two presses may be buffered before the
+        // first animation completes; inputs past the third are discarded.
+        const int32 Remaining=3-MeleeStrikeIndex-MeleeQueuedInputs;
+        if (Remaining>0) ++MeleeQueuedInputs;
+        return;
+    }
+    if (MeleeRecoverySeconds>0.f) return;
+    MeleeQueuedInputs=0;
+    StartMeleeStrike(1);
+}
+void AMGPlayerCharacter::AdvanceMeleeCombo(float DeltaSeconds)
+{
+    MeleeRecoverySeconds=FMath::Max(0.f,MeleeRecoverySeconds-DeltaSeconds);
+    if (!bMeleeInProgress || MeleeStrikeIndex<1 || MeleeStrikeIndex>3)
+        return;
+    MeleePhaseSeconds+=FMath::Max(0.f,DeltaSeconds);
+    const int32 Beat=MeleeStrikeIndex-1;
+    bMeleeHitWindow=MeleePhaseSeconds>=MeleeContactStart[Beat] &&
+                    MeleePhaseSeconds<=MeleeContactEnd[Beat];
+    // Resolve once at the authored contact time even if a hitch skips the
+    // entire active window. Never apply a second hit from the same strike.
+    if (!bMeleeHitResolved && MeleePhaseSeconds>=MeleeContactStart[Beat])
+    {
+        bMeleeHitResolved=true;
+        ResolveMeleeContact();
+    }
+    if (MeleePhaseSeconds>=MeleeDurations[Beat])
+    {
+        if (MeleeStrikeIndex<3 && MeleeQueuedInputs>0)
+        {
+            --MeleeQueuedInputs;
+            StartMeleeStrike(MeleeStrikeIndex+1);
+        }
+        else
+        {
+            bMeleeInProgress=false;
+            bMeleeHitWindow=false;
+            MeleeQueuedInputs=0;
+            MeleePhaseSeconds=0.f;
+            MeleeRecoverySeconds=MeleeStrikeIndex==3 ? .25f : .17f;
+            MeleeStrikeIndex=0;
+            UpdateMovementState();
+        }
+    }
+}
+void AMGPlayerCharacter::ResolveMeleeContact()
+{
+    if (!GetWorld() || MeleeStrikeIndex<1 || MeleeStrikeIndex>3)
+        return;
+    const bool bKick=MeleeStrikeIndex==3;
+    const float Range=bKick ? 194.f : 161.f;
+    // Facing is based on Snake's physical torso, not the camera snapping
+    // target acquisition to something behind or through a wall.
+    const FVector Forward=GetActorForwardVector().GetSafeNormal2D();
+    const FVector Origin=GetActorLocation();
+    AMGGuardActor* Target=nullptr;
+    float Best=Range;
+    for (TActorIterator<AMGGuardActor> It(GetWorld());It;++It)
+    {
+        AMGGuardActor* Guard=*It;
         if (!IsValid(Guard) || Guard->IsIncapacitated()) continue;
-        const FVector Diff = Guard->GetActorLocation() - Origin;
-        const float Distance = Diff.Size2D();
-        if (Distance >= Best || Distance < 20.f) continue;
-        if (FVector::DotProduct(Forward.GetSafeNormal2D(), Diff.GetSafeNormal2D()) < 0.58f)
+        const FVector Delta=Guard->GetActorLocation()-Origin;
+        if (FMath::Abs(Delta.Z)>85.f) continue;
+        const float Dist=Delta.Size2D();
+        if (Dist>=Best || Dist<28.f) continue;
+        if (FVector::DotProduct(Forward,Delta.GetSafeNormal2D())<.58f)
             continue;
         FHitResult Hit;
-        FCollisionQueryParams Query(SCENE_QUERY_STAT(MGUnarmedLOS), false, this);
-        const bool bBlocked = GetWorld()->LineTraceSingleByChannel(Hit,
-            Origin + FVector(0.f, 0.f, 44.f),
-            Guard->GetActorLocation() + FVector(0.f, 0.f, 44.f),
-            ECC_Visibility, Query);
-        if (bBlocked && Hit.GetActor() != Guard) continue;
-        Target = Guard;
-        Best = Distance;
+        FCollisionQueryParams Query(SCENE_QUERY_STAT(MGMeleeContact),false,this);
+        const bool bObstructed=GetWorld()->LineTraceSingleByChannel(Hit,
+            Origin+FVector(0,0,44.f),
+            Guard->GetActorLocation()+FVector(0,0,44.f),
+            ECC_Visibility,Query);
+        if (bObstructed && Hit.GetActor()!=Guard) continue;
+        Target=Guard;
+        Best=Dist;
     }
-    if (Target)
+    if (!Target)
     {
-        const float ComboDamage[3] = {35.f, 35.f, 40.f};
-        UGameplayStatics::ApplyDamage(Target, ComboDamage[MeleeComboStep - 1],
-            Controller, this, UDamageType::StaticClass());
-        NotifyFeedback(Target->IsIncapacitated() ?
-            TEXT("GUARD INCAPACITATED") : TEXT("MELEE IMPACT"), TEXT("impact"));
+        NotifyFeedback(bKick ? TEXT("FINISHING KICK — MISSED") :
+                               TEXT("PUNCH — MISSED"),TEXT("whoosh"));
+        return;
     }
-    else NotifyFeedback(TEXT("UNARMED STRIKE — NO TARGET"), TEXT("whoosh"));
+    UGameplayStatics::ApplyDamage(Target,MeleeDamage[MeleeStrikeIndex-1],
+        Controller,this,UDamageType::StaticClass());
+    if (!Target->IsIncapacitated())
+        Target->ReactToMeleeStrike(MeleeStrikeIndex,Origin);
+    NotifyFeedback(Target->IsIncapacitated() ?
+        TEXT("GUARD INCAPACITATED") :
+        (bKick ? TEXT("FINISHING KICK — KNOCKDOWN") :
+                 TEXT("PUNCH CONNECTED")),
+        bKick ? TEXT("kick") :
+        (MeleeStrikeIndex == 1 ? TEXT("punch1") : TEXT("punch2")));
 }
+void AMGPlayerCharacter::UpdateMeleePresentation(float DeltaSeconds)
+{
+    if (!ProxyLeftShoulder || !ProxyRightShoulder ||
+        !ProxyLeftHip || !ProxyRightHip || !ProxyRightLeg)
+        return;
+    const float Arc=bMeleeInProgress ?
+        FMath::Sin(GetMeleeStrikeAlpha()*PI) : 0.f;
+    const bool bLeft=bMeleeInProgress && MeleeStrikeIndex==1;
+    const bool bRight=bMeleeInProgress && MeleeStrikeIndex==2;
+    const bool bKick=bMeleeInProgress && MeleeStrikeIndex==3;
+    // Articulated shoulder and hip proxies. A committed skeletal asset uses
+    // the montage slots/AnimBP instead, with these blockout pieces hidden.
+    // Each punch extends a different arm from its shoulder joint. The
+    // roundhouse has a planted left leg and right-hip rotation across the arc.
+    const FRotator LeftTarget(bLeft ? -77.f*Arc : 0.f,
+        bLeft ? -14.f*Arc : 0.f,bLeft ? -9.f*Arc : 0.f);
+    const FRotator RightTarget((bRight ? -78.f*Arc :
+        (bKick ? -24.f*Arc : 0.f)),
+        bRight ? 15.f*Arc : 0.f,bRight ? 9.f*Arc : 0.f);
+    const FRotator RightHipTarget(bKick ? -68.f*Arc : 0.f,
+        bKick ? 62.f*Arc : 0.f,bKick ? -12.f*Arc : 0.f);
+    ProxyLeftShoulder->SetRelativeRotation(FMath::RInterpTo(
+        ProxyLeftShoulder->GetRelativeRotation(),LeftTarget,DeltaSeconds,21.f));
+    ProxyRightShoulder->SetRelativeRotation(FMath::RInterpTo(
+        ProxyRightShoulder->GetRelativeRotation(),RightTarget,DeltaSeconds,21.f));
+    ProxyRightHip->SetRelativeRotation(FMath::RInterpTo(
+        ProxyRightHip->GetRelativeRotation(),RightHipTarget,DeltaSeconds,16.f));
+    ProxyLeftHip->SetRelativeRotation(FMath::RInterpTo(
+        ProxyLeftHip->GetRelativeRotation(),
+        FRotator(bKick ? 10.f*Arc : 0.f,0.f,0.f),DeltaSeconds,13.f));
+    ProxyRightLeg->SetRelativeLocation(FMath::VInterpTo(
+        ProxyRightLeg->GetRelativeLocation(),
+        FVector(bKick ? 20.f*Arc : 0.f,0.f,
+                -35.f+(bKick ? 20.f*Arc : 0.f)),DeltaSeconds,17.f));
+}
+bool AMGPlayerCharacter::IsTitleScreenActive() const
+{
+    return GetWorld() && GetWorld()->GetGameInstance() &&
+        GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() &&
+        GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>()->
+            IsTitleScreenActive();
+}
+void AMGPlayerCharacter::EnterGameOver()
+{
+    if (bGameOver || !GetWorld()) return;
+    bGameOver = true;
+    GameOverElapsed = 0.f;
+    FailureMenuSelection = 0; // always default to non-destructive Continue
+    bFailureRadioCuePlayed = false;
+    if (UMGCampaignState* Story = GetWorld()->GetGameInstance() ?
+            GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr)
+    {
+        DeathRadioLine = Story->GetMissionNumber() >= 7 ?
+            TEXT("RADIO / NO RESPONSE") :
+            Story->HasBeat(TEXT("diane.contact")) ?
+            TEXT("DIANE: Snake? Come in. Please respond.") :
+            TEXT("BIG BOSS: Snake! Report your status.");
+    }
+    else DeathRadioLine=TEXT("RADIO / SIGNAL LOST");
+
+    // Close optional UI and stop gameplay, without modifying a single save.
+    if (ChokedGuard.IsValid()) ChokedGuard->ReleaseChoke(false);
+    if (DraggedGuard.IsValid()) DraggedGuard->SetBodyDragged(false);
+    ChokedGuard.Reset();
+    DraggedGuard.Reset();
+    ControlledMissile.Reset();
+    bCodecOpen = false;
+    CloseEquipmentWindows();
+    bAiming = false;
+    bSprinting = false;
+    bMeleeInProgress = false;
+    bInteractHeld = false;
+    UGameplayStatics::SetGamePaused(this,false);
+    UGameplayStatics::SetGlobalTimeDilation(this,1.f);
+    if (UCharacterMovementComponent* Movement=GetCharacterMovement())
+    {
+        Movement->StopMovementImmediately();
+        Movement->DisableMovement();
+    }
+    NotifyFeedback(TEXT("SNAKE IS DOWN — RADIO CONTACT LOST"),
+                   TEXT("game_over_sting"));
+}
+void AMGPlayerCharacter::FailureMenuPrevious()
+{
+    FailureMenuMove(-1);
+}
+void AMGPlayerCharacter::FailureMenuNext()
+{
+    FailureMenuMove(1);
+}
+void AMGPlayerCharacter::FailureMenuMove(int32 Direction)
+{
+    if (!IsTitleScreenActive() && !IsGameOverMenuReady()) return;
+    FailureMenuSelection=FMath::Clamp(FailureMenuSelection +
+        (Direction>=0 ? 1 : -1),0,1);
+    NotifyFeedback(FailureMenuSelection==0 ?
+        TEXT("CONTINUE SELECTED") : TEXT("EXIT SELECTED"),TEXT("menu"));
+}
+void AMGPlayerCharacter::RestartFromCheckpoint()
+{
+    if (!GetWorld()) return;
+    // This is intentionally a level reload, NOT ResetForDevelopment and NOT
+    // a delete-save. The campaign, POWs, weapons, rooms and current mission
+    // come from their existing checkpoints. Before the first checkpoint,
+    // Mission 1 naturally starts at insertion.
+    UGameplayStatics::SetGamePaused(this,false);
+    UGameplayStatics::SetGlobalTimeDilation(this,1.f);
+    UGameplayStatics::OpenLevel(this,FName(*GetWorld()->GetName()));
+}
+void AMGPlayerCharacter::FailureMenuConfirm()
+{
+    if (!IsTitleScreenActive() && !IsGameOverMenuReady()) return;
+    if (IsTitleScreenActive())
+    {
+        if (FailureMenuSelection==0)
+        {
+            if (GetWorld() && GetWorld()->GetGameInstance())
+                if (UMGCampaignState* Story=GetWorld()->GetGameInstance()->
+                    GetSubsystem<UMGCampaignState>())
+                    Story->SetTitleScreenActive(false);
+            RestartFromCheckpoint();
+        }
+        else
+        {
+            if (APlayerController* PC=Cast<APlayerController>(GetController()))
+                UKismetSystemLibrary::QuitGame(this,PC,EQuitPreference::Quit,false);
+        }
+        return;
+    }
+    if (FailureMenuSelection==0)
+        RestartFromCheckpoint();
+    else if (GetWorld() && GetWorld()->GetGameInstance())
+    {
+        if (UMGCampaignState* Story=GetWorld()->GetGameInstance()->
+            GetSubsystem<UMGCampaignState>())
+        {
+            Story->SetTitleScreenActive(true);
+            RestartFromCheckpoint();
+        }
+    }
+}
+
 float AMGPlayerCharacter::TakeDamage(float Amount, const FDamageEvent& Event,
                                      AController* Instigator, AActor* Causer)
 {
     const float Accepted = Super::TakeDamage(Amount, Event, Instigator, Causer);
     if (Amount <= 0.f || Health <= 0.f) return Accepted;
     Health = FMath::Max(0.f, Health - Amount);
-    NotifyFeedback(Health <= 0.f ? TEXT("SNAKE DOWN — RELOADING CHECKPOINT")
-                                  : TEXT("INJURED — TAKE COVER"), TEXT("hurt"));
-    if (Health <= 0.f && GetWorld())
-    {
-        // A full failure flow will add death animation/AI reset; checkpoint
-        // reload retains the versioned mission save.
-        UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
-    }
+    if (Health <= 0.f)
+        EnterGameOver();
+    else
+        NotifyFeedback(TEXT("INJURED — TAKE COVER"),TEXT("hurt"));
     return Accepted;
 }
 
@@ -824,6 +1592,12 @@ void AMGPlayerCharacter::CloseEquipmentWindows()
 void AMGPlayerCharacter::ApplyMenuTimeState()
 {
     if (!GetWorld()) return;
+    if (bGameOver || IsTitleScreenActive())
+    {
+        UGameplayStatics::SetGlobalTimeDilation(this,1.f);
+        return;
+    }
+
     const bool bSelecting = Equipment &&
         (Equipment->IsWeaponWindowOpen() || Equipment->IsItemWindowOpen());
     const float Desired = (!bCodecOpen && bSelecting) ?
@@ -835,6 +1609,7 @@ void AMGPlayerCharacter::ApplyMenuTimeState()
 
 void AMGPlayerCharacter::ToggleCodec()
 {
+    if (bGameOver || IsTitleScreenActive()) return;
     if (!GetWorld()) return;
     if (bCodecOpen)
     {
@@ -851,7 +1626,7 @@ void AMGPlayerCharacter::ToggleCodec()
     CloseEquipmentWindows();
     ApplyMenuTimeState();
     bCodecOpen = true;
-    TransceiverChannel = 0; // Kyle Schneider; Q changes to Big Boss.
+    TransceiverChannel = 0; // Schneider, Big Boss, then Diane once introduced by a POW.
     CodecStatus = TEXT("TRANSCEIVER ACTIVE — CHANGE CHANNEL Q / RS; CLOSE C / START");
     NotifyFeedback(TEXT("TRANSCEIVER OPEN — SCHNEIDER / 120.79"), TEXT("select"));
 }

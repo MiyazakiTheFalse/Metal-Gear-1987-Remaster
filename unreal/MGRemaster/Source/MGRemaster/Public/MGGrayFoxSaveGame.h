@@ -10,11 +10,14 @@ class MGREMASTER_API UMGGrayFoxSaveGame : public USaveGame
     GENERATED_BODY()
 public:
     UPROPERTY(SaveGame)
-    uint32 SchemaVersion = 1;
+    uint32 SchemaVersion = 2;
 
     UPROPERTY(SaveGame)
     uint32 MissionFlags = 0;
 
     UPROPERTY(SaveGame)
     FVector CheckpointLocation = FVector(-950.f, 0.f, -11.f);
+
+    UPROPERTY(SaveGame)
+    bool bGearRecovered = false;
 };

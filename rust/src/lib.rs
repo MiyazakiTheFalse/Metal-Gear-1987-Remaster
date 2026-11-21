@@ -3,6 +3,7 @@
 pub mod resource;
 pub mod mission_events;
 pub mod gray_fox;
+pub mod campaign;
 pub mod pacing;
 
 #[repr(C)]

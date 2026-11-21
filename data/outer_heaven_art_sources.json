@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "updated": "2026-11-21",
+  "license_policy": "Only assets with directly recorded licence provenance may enter the distributable source build. Never commit ripped Metal Gear or independently purchased Fab/Mixamo raw files to a public repo.",
+  "status": "source_candidates_selected_import_scripts_committed_not_yet_downloaded",
+  "source_authority": [
+    {
+      "source": "Poly Haven",
+      "type": "materials/hdris/models",
+      "license": "CC0 1.0",
+      "license_url": "https://polyhaven.com/license",
+      "api_url": "https://api.polyhaven.com",
+      "redistribution": "allowed"
+    },
+    {
+      "source": "Kenney",
+      "type": "industrial/factory proxy mesh packs",
+      "license": "CC0 1.0",
+      "license_url": "https://kenney.nl/support",
+      "redistribution": "allowed"
+    },
+    {
+      "source": "Adobe Mixamo",
+      "type": "licensed motion clips",
+      "license": "Adobe Mixamo user terms / royalty-free embedded commercial game",
+      "license_url": "https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html",
+      "redistribution": "do not commit raw extracted animations or characters to a public asset library; use inside authorized game build"
+    },
+    {
+      "source": "Fab",
+      "type": "skeleton-compatible high-detail character models",
+      "license": "listing-specific Fab Standard/other EULA",
+      "license_url": "https://www.fab.com/eula?lang=en",
+      "redistribution": "requires license verification and user entitlement; do not commit purchased source files into public repository"
+    }
+  ],
+  "materials": [
+    {
+      "id": "concrete",
+      "role": "prison/fortress interior walls",
+      "source": "Poly Haven",
+      "asset_page": "https://polyhaven.com/a/concrete",
+      "polyhaven_slug": "concrete",
+      "unreal_path": "/Game/OuterHeaven/Art/Materials/M_concrete",
+      "target_resolution": "2k",
+      "priority": "critical"
+    },
+    {
+      "id": "garage_floor",
+      "role": "industrial corridor floors, stains, drainage and floor scuffs",
+      "source": "Poly Haven",
+      "asset_page": "https://polyhaven.com/a/garage_floor",
+      "polyhaven_slug": "garage_floor",
+      "unreal_path": "/Game/OuterHeaven/Art/Materials/M_garage_floor",
+      "target_resolution": "2k",
+      "priority": "critical"
+    },
+    {
+      "id": "metal_plate",
+      "role": "stair/elevator threshold and machinery walkplates",
+      "source": "Poly Haven",
+      "asset_page": "https://polyhaven.com/a/metal_plate",
+      "polyhaven_slug": "metal_plate",
+      "unreal_path": "/Game/OuterHeaven/Art/Materials/M_metal_plate",
+      "target_resolution": "2k",
+      "priority": "critical"
+    },
+    {
+      "id": "green_metal_rust",
+      "role": "vehicle bodywork and logistics containers",
+      "source": "Poly Haven",
+      "asset_page": "https://polyhaven.com/a/green_metal_rust",
+      "polyhaven_slug": "green_metal_rust",
+      "unreal_path": "/Game/OuterHeaven/Art/Materials/M_green_metal_rust",
+      "target_resolution": "2k",
+      "priority": "high"
+    },
+    {
+      "id": "painted_rusty_metal_gate",
+      "role": "detention shutter, storage door, barred wing and plate trims",
+      "source": "Poly Haven",
+      "asset_page": "https://polyhaven.com/a/painted_rusty_metal_gate",
+      "polyhaven_slug": "painted_rusty_metal_gate",
+      "unreal_path": "/Game/OuterHeaven/Art/Materials/M_painted_rusty_metal_gate",
+      "target_resolution": "2k",
+      "priority": "high"
+    },
+    {
+      "id": "rusty_painted_metal",
+      "role": "service cupboards, removable card doors, metal wall frames",
+      "source": "Poly Haven",
+      "asset_page": "https://polyhaven.com/a/rusty_painted_metal",
+      "polyhaven_slug": "rusty_painted_metal",
+      "unreal_path": "/Game/OuterHeaven/Art/Materials/M_rusty_painted_metal",
+      "target_resolution": "2k",
+      "priority": "critical"
+    }
+  ],
+  "prop_packs": [
+    {
+      "id": "kenney_factory_kit_3",
+      "source": "Kenney",
+      "asset_page": "https://kenney.nl/assets/factory-kit",
+      "license": "CC0",
+      "intended_use": "conveyors, warehouse maintenance, equipment silhouettes, valves; blockout-to-art transition only",
+      "status": "selection_not_downloaded"
+    },
+    {
+      "id": "kenney_city_industrial",
+      "source": "Kenney",
+      "asset_page": "https://kenney.nl/assets/city-kit-industrial",
+      "license": "CC0",
+      "intended_use": "external plant/warehouse massing; requires reworking and high-res surfacing to match realistic art direction",
+      "status": "selection_not_downloaded"
+    }
+  ],
+  "rigged_character_candidates": [
+    {
+      "id": "fab_realistic_soldier",
+      "source": "Fab",
+      "asset_page": "https://www.fab.com/listings/f898e650-ecbc-4e57-bd99-41184245463b",
+      "description": "Realistic military soldier, Epic-skeleton rig, PBR materials",
+      "license": "listing-specific; verify purchaser rights",
+      "role": "generic guard only",
+      "status": "not_acquired"
+    },
+    {
+      "id": "fab_realistic_tactical_soldier",
+      "source": "Fab",
+      "asset_page": "https://www.fab.com/listings/d315a20f-e985-421d-a909-eea89e154885",
+      "description": "Realistic tactical soldier rigged with PBR",
+      "license": "listing-specific; verify purchaser rights",
+      "role": "generic guard/rig reference",
+      "status": "not_acquired"
+    },
+    {
+      "id": "mixamo_motion",
+      "source": "Adobe Mixamo",
+      "asset_page": "https://www.mixamo.com",
+      "description": "motion library for guard idle, locomotion, crouch, restraint and knockdown retargeting",
+      "license": "embedded use; separate download and terms review",
+      "role": "animation sourcing, not a 1995 Snake character model",
+      "status": "not_acquired"
+    }
+  ],
+  "custom_required": [
+    {
+      "role": "Solid Snake 1995",
+      "asset_id": "SK_Snake1995",
+      "requirement": "original character likeness interpreted from authorized source references; human skeletal mesh, 1995 costume, facial blendshapes and body proportions",
+      "status": "artist_asset_not_created"
+    },
+    {
+      "role": "Gray Fox 1995",
+      "asset_id": "SK_GrayFox1995",
+      "requirement": "recognizable pre-cyborg FOX operative, captive/ravaged variant, facial animation",
+      "status": "artist_asset_not_created"
+    },
+    {
+      "role": "Big Boss 1995 / later retrospective phantom",
+      "asset_id": "SK_FinalCommander1995",
+      "requirement": "separate 1995 viewpoint; do not leak later continuity identity visually early",
+      "status": "artist_asset_not_created"
+    },
+    {
+      "role": "prisoner ensemble",
+      "asset_id": "SK_PrisonerGeneric",
+      "requirement": "rigged detainee with idle, breathing, seated/restless, rescue reaction and body language",
+      "status": "artist_asset_not_created"
+    }
+  ],
+  "runtime_mapping": {
+    "Floor": "garage_floor",
+    "HoldingWingFloor": "garage_floor",
+    "Boundary": "concrete",
+    "NorthBoundary": "concrete",
+    "SouthBoundary": "concrete",
+    "WestBoundary": "concrete",
+    "EastBoundary": "concrete",
+    "Divider": "concrete",
+    "WeakWall": "concrete",
+    "CrateCover": "green_metal_rust",
+    "TruckProxy": "green_metal_rust",
+    "CardDoor": "rusty_painted_metal",
+    "GearLocker": "rusty_painted_metal",
+    "BodyLocker": "rusty_painted_metal",
+    "ElectricPanel": "metal_plate",
+    "HoldingWingBar": "painted_rusty_metal_gate"
+  },
+  "integration": {
+    "download": "python tools/acquire_polyhaven_pbr.py --resolution 2k",
+    "import": "Unreal Editor: Tools > Execute Python Script > tools/unreal_import_pbr.py",
+    "ue_mesh_import": "Separately import licensed .fbx/.glb into /Game/OuterHeaven/Art/Meshes then bind slots; runtime remains geometric fallback",
+    "packaging": "Cooked UE build includes licensed materials; public source repository keeps only CC0 or self-authored content",
+    "fidelity": "Asset selection must preserve 1995 military-industrial function, room readability, collision and stealth silhouettes; visual detail never changes source-critical accessible routes"
+  }
+}

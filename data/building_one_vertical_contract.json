@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "building": "Outer Heaven Building One",
+  "status": "unreal_source_greybox_not_compiled",
+  "authority": "MSX2 1987 comparative; J2ME 3.3.0 pending exact map verification",
+  "world_units": "metres; floor separations 6m are remake placeholders, not recovered source dimensions",
+  "decks": [
+    {
+      "floor": 1,
+      "z_m": 0,
+      "name": "truck compounds and elevator lobby",
+      "bounds_xywh_m": [
+        0,
+        0,
+        100,
+        54
+      ],
+      "entry": [
+        7,
+        7
+      ],
+      "elevator": [
+        92,
+        26
+      ],
+      "guards": [
+        "G01",
+        "G02",
+        "G03",
+        "G04",
+        "G05"
+      ],
+      "pickups": [
+        "P01",
+        "P02",
+        "P03",
+        "P04",
+        "P05",
+        "P06"
+      ],
+      "source_status": "comparative_msx2"
+    },
+    {
+      "floor": 2,
+      "z_m": 6,
+      "name": "security and service corridor",
+      "bounds_xywh_m": [
+        42,
+        18,
+        58,
+        24
+      ],
+      "elevator": [
+        92,
+        26
+      ],
+      "guards": [
+        "G07"
+      ],
+      "pickups": [],
+      "source_status": "provisional_expansion"
+    },
+    {
+      "floor": 3,
+      "z_m": 12,
+      "name": "camera gallery and first ammunition",
+      "bounds_xywh_m": [
+        42,
+        18,
+        58,
+        24
+      ],
+      "elevator": [
+        92,
+        26
+      ],
+      "guards": [
+        "G08"
+      ],
+      "pickups": [
+        "P07"
+      ],
+      "interactions": [
+        "PRISONER_CONTACT_3F"
+      ],
+      "source_status": "comparative_item_placement_provisional_geometry"
+    }
+  ],
+  "lift": {
+    "shaft_xy_m": [
+      92,
+      26
+    ],
+    "operational_floors": [
+      1,
+      2,
+      3
+    ],
+    "default_first_destination": 3,
+    "controls": "Q cycles target only near lift; E initiates travel",
+    "phase_seconds": 0.85,
+    "loading_policy": "Current implementation is a closed-door simulated transition; async streamed sublevels will replace it when cooked level assets exist; never invent a fixed loading wait",
+    "state": [
+      "CurrentFloor",
+      "SelectedFloor",
+      "DestinationFloor",
+      "bLiftTravelling"
+    ],
+    "save_schema": 2,
+    "return_travel": true,
+    "checkpoint_on_arrival": true,
+    "arrival_validation": "uncompiled, collision clearance requires UE playtest"
+  },
+  "upper_guard_patrols": [
+    {
+      "id": "G07",
+      "floor": 2,
+      "role": "floor_security_inspector",
+      "waypoints_xy_m": [
+        [
+          58,
+          29
+        ],
+        [
+          69,
+          29
+        ],
+        [
+          69,
+          35
+        ]
+      ],
+      "status": "source_proxy_guard"
+    },
+    {
+      "id": "G08",
+      "floor": 3,
+      "role": "camera_gallery_watch",
+      "waypoints_xy_m": [
+        [
+          65,
+          28
+        ],
+        [
+          76,
+          28
+        ],
+        [
+          76,
+          36
+        ]
+      ],
+      "status": "source_proxy_guard"
+    }
+  ],
+  "upper_pickups": [
+    {
+      "id": "P07",
+      "floor": 3,
+      "item": "handgun_ammo",
+      "quantity": 12,
+      "xy_m": [
+        78,
+        28
+      ],
+      "source": "MSX2 3F west opening comparative",
+      "policy": "Ammo quantity is provisional game-balance value; pickup does not auto-give gun"
+    }
+  ],
+  "qa": [
+    "1F to 3F via E on default destination",
+    "3F to 2F then 1F via Q selection",
+    "2F to 3F and back without losing equipment",
+    "Save/restart on 2F and 3F restores safe lift landing",
+    "Pickup on 3F cannot be collected on 1F directly below",
+    "Guard across floors cannot hear, see, or chase Snake",
+    "Lift cannot start second transition during current travel",
+    "Unreachable upper rooms must be corrected before claiming playable",
+    "Loading mask may never force travel completion before streamed floor is ready"
+  ],
+  "limitations": [
+    "No actual level streaming yet; all decks constructed on start",
+    "3F cameras are environmental proxies and not active sensors",
+    "Upper-floor guard geometry and patrol routes not source verified",
+    "Prisoner encounter is a source-placeholder interaction, without completed dialogue",
+    "No packaged Unreal validation or browser parity"
+  ]
+}

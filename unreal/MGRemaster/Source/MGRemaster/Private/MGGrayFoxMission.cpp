@@ -1,7 +1,13 @@
 #include "MGGrayFoxMission.h"
 
 #include "MGGuardActor.h"
+#include "MGBodyHidingSpot.h"
+#include "MGSetpieceBoss.h"
 #include "MGGrayFoxSaveGame.h"
+#include "MGMissionOneSaveGame.h"
+#include "MGEquipmentComponent.h"
+#include "MGCampaignState.h"
+#include "Engine/GameInstance.h"
 #include "MGPlayerCharacter.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SceneComponent.h"
@@ -80,7 +86,34 @@ void AMGGrayFoxMission::CreateGreybox()
     // Unreal's basic cube is 100cm at scale 1. Floor top is -100cm.
     // Three functional areas: prison cell, Fox cell, guarded escape corridor.
     SpawnBlock(TEXT("Floor"), FVector(75.f, 0.f, -150.f), FVector(26.5f, 10.f, 1.f), true);
-    SpawnBlock(TEXT("NorthBoundary"), FVector(75.f, 500.f, 90.f), FVector(26.5f, 0.4f, 3.8f), true);
+    // The solitary cells remain isolated; an adjacent, separate barred wing
+    // shows the detention facility has other human occupants. The two anonymous
+    // figures are optional remake ambience, NOT original-source POW rewards.
+    // Remove or reconcile them when exact J2ME prison maps are recovered.
+    SpawnBlock(TEXT("NorthBoundary"), FVector(-300.f, 500.f, 90.f), FVector(19.f,0.4f,3.8f), true);
+    SpawnBlock(TEXT("NorthBoundary"), FVector(1350.f,500.f,90.f), FVector(1.f,0.4f,3.8f), true);
+    SpawnBlock(TEXT("HoldingWingFloor"), FVector(975.f,750.f,-150.f), FVector(6.5f,5.f,1.f), true);
+    SpawnBlock(TEXT("HoldingWingRearWall"), FVector(975.f,1000.f,90.f), FVector(6.5f,.4f,3.8f), true);
+    SpawnBlock(TEXT("HoldingWingWestWall"), FVector(650.f,750.f,90.f), FVector(.4f,5.f,3.8f), true);
+    SpawnBlock(TEXT("HoldingWingEastWall"), FVector(1300.f,750.f,90.f), FVector(.4f,5.f,3.8f), true);
+    SpawnBlock(TEXT("HoldingWingPartition"), FVector(975.f,750.f,90.f), FVector(.4f,5.f,3.8f), true);
+    SpawnBlock(TEXT("HoldingWingBarsUpper"), FVector(975.f,500.f,235.f), FVector(6.5f,.14f,.24f), true);
+    SpawnBlock(TEXT("HoldingWingBarsLower"), FVector(975.f,500.f,-70.f), FVector(6.5f,.14f,.24f), true);
+    // Every bar physically spans floor to overhead support. Close spacing
+    // blocks both upright and prone collision; there is no free crawl shortcut.
+    for (float BarX = 675.f; BarX <= 1275.f; BarX += 50.f)
+        SpawnBlock(TEXT("HoldingWingBar"), FVector(BarX,500.f,90.f),
+                   FVector(.12f,.14f,3.8f), true);
+    SpawnBlock(TEXT("HoldingWingBed"), FVector(805.f,850.f,-62.f),
+               FVector(1.8f,.9f,.75f), true);
+    SpawnBlock(TEXT("HoldingWingBed"), FVector(1115.f,850.f,-62.f),
+               FVector(1.8f,.9f,.75f), true);
+    // Ambient prisoners cannot be farmed for rank, cards or dialogue. Their
+    // non-interactive provisional silhouettes have stable per-cell identities.
+    SpawnBlock(TEXT("AMBIENT_DETAINEE_A_UNVERIFIED"), FVector(800.f,745.f,-11.f),
+               FVector(.42f,.42f,1.7f), false);
+    SpawnBlock(TEXT("AMBIENT_DETAINEE_B_UNVERIFIED"), FVector(1130.f,780.f,-11.f),
+               FVector(.42f,.42f,1.7f), false);
     SpawnBlock(TEXT("SouthBoundary"), FVector(75.f, -500.f, 90.f), FVector(26.5f, 0.4f, 3.8f), true);
     SpawnBlock(TEXT("WestBoundary"), FVector(-1250.f, 0.f, 90.f), FVector(0.4f, 10.f, 3.8f), true);
     SpawnBlock(TEXT("EastBoundary"), FVector(1400.f, 0.f, 90.f), FVector(0.4f, 10.f, 3.8f), true);
@@ -107,16 +140,49 @@ void AMGGrayFoxMission::CreateGreybox()
     SpawnBlock(TEXT("GuardCover"), FVector(1200.f, -200.f, -40.f),
                FVector(1.8f, 0.7f, 1.2f), true);
     ExitMarker = SpawnBlock(TEXT("EscapeMarker"), ExitPoint, FVector(0.5f,0.5f,1.2f), false);
+    GearLocker = SpawnBlock(TEXT("ConfiscatedGearLocker"),
+        FVector(725.f, -220.f, -11.f), FVector(1.2f,.65f,1.3f), false);
+    // Different cabinets have different functions: this body locker does not
+    // yield confiscated gear and cannot bypass the recovery requirement.
+    if (AMGBodyHidingSpot* Locker = GetWorld()->SpawnActor<AMGBodyHidingSpot>(
+            FVector(1240.f, -365.f, -11.f), FRotator(0.f,90.f,0.f)))
+        Locker->SetFacilityLabel(TEXT("DETENTION / SERVICE"));
+    ShootGunnerAmmo=SpawnBlock(TEXT("M02_StoredHandgunRounds"),
+        FVector(830.f,-250.f,-11.f),FVector(.6f,.6f,.4f),false);
+    ShootGunnerCard=SpawnBlock(TEXT("M02_CardThreePostBoss"),
+        FVector(1190.f,245.f,-11.f),FVector(.6f,.6f,.4f),false);
+    if (IsValid(ShootGunnerCard)) ShootGunnerCard->SetActorHiddenInGame(true);
 }
 
 void AMGGrayFoxMission::SpawnPerimeterGuards()
 {
-    // Existing hostile patrols outside confinement. No surprise wave on rescue.
+    // Two staff with genuine jobs, not arbitrary corridor sentries. Patrols
+    // never enter cells or appear as sudden waves on Gray Fox's rescue.
     if (!GetWorld()) return;
-    GetWorld()->SpawnActor<AMGGuardActor>(FVector(840.f, 360.f, -11.f),
-                                           FRotator(0.f, 180.f, 0.f));
-    GetWorld()->SpawnActor<AMGGuardActor>(FVector(1120.f, -340.f, -11.f),
-                                           FRotator(0.f, 180.f, 0.f));
+    if (AMGGuardActor* CellGuard = GetWorld()->SpawnActor<AMGGuardActor>(
+            FVector(840.f, 345.f, -11.f), FRotator(0.f, -90.f, 0.f)))
+    {
+        CellGuard->ConfigureDuty(FName(TEXT("PRISON_G01")), FName(TEXT("CELL_BLOCK_WATCH")),
+                                 FName(TEXT("NORTH_HOLDING_BAYS")),
+                                 FVector(840.f,345.f,-11.f), 2.8f,
+                                 FVector(975.f,500.f,-11.f));
+        CellGuard->ConfigurePatrol(TArray<FVector>{
+            FVector(840.f,345.f,-11.f), FVector(1080.f,345.f,-11.f),
+            FVector(1080.f,365.f,-11.f), FVector(840.f,365.f,-11.f)
+        });
+    }
+    if (AMGGuardActor* PropertyGuard = GetWorld()->SpawnActor<AMGGuardActor>(
+            FVector(1120.f,-340.f,-11.f), FRotator(0.f,180.f,0.f)))
+    {
+        PropertyGuard->ConfigureDuty(FName(TEXT("PRISON_G02")), FName(TEXT("PROPERTY_CUSTODY")),
+                                     FName(TEXT("CONFISCATED_GEAR_AND_EXIT")),
+                                     FVector(1120.f,-340.f,-11.f), 1.7f,
+                                     FVector(725.f,-220.f,-11.f));
+        PropertyGuard->ConfigurePatrol(TArray<FVector>{
+            FVector(1120.f,-340.f,-11.f), FVector(960.f,-340.f,-11.f),
+            FVector(760.f,-340.f,-11.f), FVector(960.f,-340.f,-11.f)
+        });
+    }
 }
 
 void AMGGrayFoxMission::BeginPlay()
@@ -143,24 +209,75 @@ void AMGGrayFoxMission::BeginPlay()
             // A stale save must not place the player beyond a solid, unopened wall.
             && ((F & MG_FOX_FIRST_WALL_BREACHED) || P.X < -350.f)
             && ((F & MG_FOX_EXIT_WALL_BREACHED) || P.X < 420.f);
-        if (bValid && bPositionSafe && Save->SchemaVersion == 1
+        if (bValid && bPositionSafe && (Save->SchemaVersion == 1 || Save->SchemaVersion == 2)
             && (F & MG_FOX_CAPTURED))
         {
             Flags = F;
             SavedPosition = Save->CheckpointLocation;
             bHasLoadedSave = true;
+            bGearRecovered = Save->SchemaVersion >= 2 && Save->bGearRecovered;
         }
     }
     RestoreVisualState();
     InitializePlayerIfReady();
+    // Recover from a save taken after the exit flag was committed but before
+    // the return transition. The narrative transaction must not repeat.
+    if ((Flags & MG_FOX_LEFT_PRISON) && GetWorld() && GetWorld()->GetGameInstance())
+    {
+        if (UMGCampaignState* Story =
+            GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+        {
+            Story->RecordBeat(TEXT("fox.revelation"),
+                TEXT("GRAY FOX: Metal Gear is nuclear-capable. Find Dr. Pettrovich."));
+            if (bGearRecovered)
+                Story->RecordBeat(TEXT("snake.gear_recovery"),
+                    TEXT("GEAR RECLAIMED: Confiscated equipment was recovered."));
+            Story->RecordBeat(TEXT("fox.intel_persists"),
+                TEXT("PRISON ESCAPED: Gray Fox's report remains in the mission log."));
+            Story->AdvanceMission(3);
+        }
+        ReturnToOuterHeavenSeconds = 0.1f;
+    }
 }
 
+void AMGGrayFoxMission::SpawnShootGunnerWhenArmed()
+{
+    if (bShootGunnerSpawned || !bGearRecovered ||
+        !(Flags & MG_FOX_EXIT_WALL_BREACHED) || !GetWorld()) return;
+    bShootGunnerSpawned=true;
+    const UMGCampaignState* State=GetWorld()->GetGameInstance() ?
+        GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
+    if (State && State->HasBeat(TEXT("bosses.shoot_gunner"))) return;
+    if (AMGSetpieceBoss* Gunner=GetWorld()->SpawnActor<AMGSetpieceBoss>(
+        FVector(1170.f,65.f,-11.f),FRotator(0.f,180.f,0.f)))
+    {
+        // Distinct deliberate shotgun blast: local high-pressure fire lane,
+        // clear windup, cover break, heavy shot then recovery time.
+        Gunner->ConfigureEncounter(nullptr,TEXT("bosses.shoot_gunner"),
+            TEXT("HANDGUN"),190.f,850.f,1.5f,24.f,FVector(1170,65,-11));
+    }
+}
 void AMGGrayFoxMission::RestoreVisualState()
 {
     if ((Flags & MG_FOX_FIRST_WALL_BREACHED) && IsValid(WeakWall))
         WeakWall->Destroy();
     if ((Flags & MG_FOX_EXIT_WALL_BREACHED) && IsValid(EscapeWall))
         EscapeWall->Destroy();
+    if (bGearRecovered && IsValid(GearLocker))
+        GearLocker->Destroy();
+    const UMGCampaignState* State=GetWorld() && GetWorld()->GetGameInstance() ?
+        GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
+    if (State)
+    {
+        if (State->HasBeat(TEXT("m02.card3_acquired")) && IsValid(ShootGunnerCard))
+            ShootGunnerCard->Destroy();
+        else if (State->HasBeat(TEXT("bosses.shoot_gunner")) &&
+                 IsValid(ShootGunnerCard))
+            ShootGunnerCard->SetActorHiddenInGame(false);
+        if (State->HasBeat(TEXT("m02.shootgunner_ammo")) && IsValid(ShootGunnerAmmo))
+            ShootGunnerAmmo->Destroy();
+    }
+    SpawnShootGunnerWhenArmed();
 }
 
 void AMGGrayFoxMission::InitializePlayerIfReady()
@@ -174,6 +291,11 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
     if (APlayerController* PC = Cast<APlayerController>(Player->GetController()))
         PC->SetControlRotation(FRotator(-8.f, 0.f, 0.f));
     bPlayerInitialised = true;
+    if (bGearRecovered)
+    {
+        RestoreCapturedGear(Player);
+        SpawnShootGunnerWhenArmed();
+    }
 
     if (!bHasLoadedSave)
     {
@@ -193,11 +315,81 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
         UGameplayStatics::CreateSaveGameObject(UMGGrayFoxSaveGame::StaticClass()));
     if (!Save) return;
-    Save->SchemaVersion = 1;
+    Save->SchemaVersion = 2;
+    Save->bGearRecovered = bGearRecovered;
     Save->MissionFlags = Flags;
     Save->CheckpointLocation = Player ? Player->GetActorLocation() : CellStart;
     if (!UGameplayStatics::SaveGameToSlot(Save, SaveSlot, 0))
         UE_LOG(LogTemp, Warning, TEXT("Gray Fox: could not save mission checkpoint"));
+}
+
+void AMGGrayFoxMission::PersistRecoveredInventory(AMGPlayerCharacter* Player)
+{
+    if (!bGearRecovered || !Player || !Player->GetEquipment()) return;
+    UMGMissionOneSaveGame* OpeningSave = Cast<UMGMissionOneSaveGame>(
+        UGameplayStatics::LoadGameFromSlot(TEXT("MissionOneV1"), 0));
+    if (!OpeningSave) return;
+    OpeningSave->Version = FMath::Max(4, OpeningSave->Version);
+    OpeningSave->HandgunRounds = Player->GetEquipment()->GetHandgunRounds();
+    OpeningSave->RationsRemaining = Player->GetEquipment()->GetItemQuantity(TEXT("RATION"));
+    for (const FMGEquipmentEntry& Entry:Player->GetEquipment()->GetItems())
+        if (Entry.bOwned && Entry.Id == TEXT("CARD3"))
+            OpeningSave->ExtraOwnedItems.AddUnique(Entry.Id);
+    for (const FMGEquipmentEntry& Entry:Player->GetEquipment()->GetWeapons())
+        if (Entry.bOwned && Entry.Id == TEXT("HANDGUN") &&
+            !OpeningSave->CollectedPickupIds.Contains(TEXT("P05")))
+            OpeningSave->ExtraOwnedWeapons.AddUnique(Entry.Id);
+    if (OpeningSave->Version >= 6)
+    {
+        for (const FMGEquipmentEntry& Entry : Player->GetEquipment()->GetWeapons())
+            if (Entry.Id != TEXT("NONE"))
+                OpeningSave->WeaponRounds.Add(Entry.Id, Entry.Quantity);
+        for (const FMGEquipmentEntry& Entry : Player->GetEquipment()->GetItems())
+            if (Entry.Id != TEXT("NONE"))
+                OpeningSave->ItemQuantities.Add(Entry.Id, Entry.Quantity);
+    }
+    if (!UGameplayStatics::SaveGameToSlot(OpeningSave, TEXT("MissionOneV1"), 0))
+        UE_LOG(LogTemp, Warning, TEXT("Prison gear usage was not persisted to Building One"));
+}
+
+void AMGGrayFoxMission::RestoreCapturedGear(AMGPlayerCharacter* Player)
+{
+    if (!Player || !Player->GetEquipment()) return;
+    UMGEquipmentComponent* Equipment = Player->GetEquipment();
+    Equipment->InitialiseMissionOneLoadout();
+    const UMGMissionOneSaveGame* OpeningSave = Cast<UMGMissionOneSaveGame>(
+        UGameplayStatics::LoadGameFromSlot(TEXT("MissionOneV1"), 0));
+    if (!OpeningSave) return;
+    for (const FName Id : OpeningSave->CollectedPickupIds)
+    {
+        if (Id == TEXT("P01")) Equipment->AwardItem(TEXT("RATION"), 1);
+        else if (Id == TEXT("P02")) Equipment->AwardItem(TEXT("CARD1"), 1);
+        else if (Id == TEXT("P03")) Equipment->AwardItem(TEXT("BINOCULARS"), 1);
+        else if (Id == TEXT("P04")) Equipment->AwardItem(TEXT("GASMASK"), 1);
+        else if (Id == TEXT("P05")) Equipment->AwardWeapon(TEXT("HANDGUN"), 0);
+        else if (Id == TEXT("P06")) Equipment->AwardItem(TEXT("MINES"), 1);
+        else if (Id == TEXT("P07")) Equipment->AwardAmmunition(TEXT("HANDGUN"), 12);
+        else if (Id == TEXT("P08")) Equipment->AwardItem(TEXT("CARD2"), 1);
+        else if (Id == TEXT("P09")) Equipment->AwardWeapon(TEXT("RC_MISSILE"), 4);
+        else if (Id == TEXT("P10"))
+            Equipment->AwardWeapon(TEXT("GRENADE_LAUNCHER"), 6);
+    }
+    for (const FName Item : OpeningSave->ExtraOwnedItems)
+        Equipment->AwardItem(Item,1);
+    for (const FName Weapon:OpeningSave->ExtraOwnedWeapons)
+        Equipment->AwardWeapon(Weapon,0);
+    if (OpeningSave->Version >= 4)
+    {
+        Equipment->RestoreHandgunRounds(FMath::Max(0, OpeningSave->HandgunRounds));
+        Equipment->RestoreItemQuantity(TEXT("RATION"), FMath::Max(0, OpeningSave->RationsRemaining));
+        if (OpeningSave->Version >= 6)
+        {
+            for (const TPair<FName, int32>& Entry : OpeningSave->WeaponRounds)
+                Equipment->RestoreWeaponAmmo(Entry.Key, Entry.Value);
+            for (const TPair<FName, int32>& Entry : OpeningSave->ItemQuantities)
+                Equipment->RestoreItemQuantity(Entry.Key, Entry.Value);
+        }
+    }
 }
 
 bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
@@ -227,16 +419,46 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         break;
     case MG_FOX_RESCUE:
         // Placeholder original prose, not a published game-script transcription.
-        Dialogue = TEXT("GRAY FOX: Metal Gear is real. Find the scientist behind it.");
+        Dialogue = TEXT("GRAY FOX: Metal Gear is nuclear-armed. Find Pettrovich.");
+        // The recorded objective does not depend on watching this dialogue.
+        // Fox remains a vulnerable captive, not an all-knowing AI companion.
         break;
     case MG_FOX_BREACH_EXIT_WALL:
         if (IsValid(EscapeWall)) EscapeWall->Destroy();
         Dialogue = TEXT("The outer passage is open. Stay low. Guards are nearby.");
         break;
     case MG_FOX_ESCAPE:
-        Dialogue = TEXT("PRISON ESCAPED — Gray Fox rescued. Checkpoint secured.");
+        Dialogue = TEXT("GRAY FOX RESCUED — FIND THE SCIENTIST");
         break;
     default: break;
+    }
+    // Commit narrative knowledge at the same moment as the durable gameplay
+    // flag, not when text/voice playback happens to finish.
+    if (GetWorld() && GetWorld()->GetGameInstance())
+    {
+        if (UMGCampaignState* Story =
+            GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+        {
+            if (Action == MG_FOX_CAPTURE)
+                Story->RecordBeat(TEXT("snake.capture"),
+                    TEXT("CAPTURED: Snake enters the secret detention wing without his equipment."));
+            else if (Action == MG_FOX_RESCUE)
+            {
+                Story->RecordBeat(TEXT("snake.rescue_fox"),
+                    TEXT("GRAY FOX RESCUED: The missing FOXHOUND operative is alive."));
+                Story->RecordBeat(TEXT("fox.revelation"),
+                    TEXT("GRAY FOX: Metal Gear is a nuclear-armed walking weapon. Find Dr. Pettrovich."));
+                Story->RecordBeat(TEXT("madnar.named"),
+                    TEXT("NEW LEAD: Dr. Pettrovich, designer of Metal Gear."));
+            }
+            else if (Action == MG_FOX_ESCAPE)
+            {
+                Story->RecordBeat(TEXT("fox.intel_persists"),
+                    TEXT("PRISON ESCAPED: Gray Fox's report remains in the mission log."));
+                if (Story->AdvanceChapter(2))
+                    ReturnToOuterHeavenSeconds = 1.35f;
+            }
+        }
     }
     // Short subtitle holds are placeholder reading windows; dialogue never locks control.
     DialogueTimeRemaining = Action == MG_FOX_RESCUE ? 7.f : 4.5f;
@@ -279,6 +501,81 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
     if ((Flags & MG_FOX_EXIT_WALL_BREACHED) == 0
         && CanReach(Player, EscapeWall, 240.f))
         return ApplyAction(MG_FOX_BREACH_EXIT_WALL, Player);
+    if ((Flags & MG_FOX_EXIT_WALL_BREACHED) && !bGearRecovered &&
+        CanReach(Player, GearLocker, 220.f))
+    {
+        bGearRecovered = true;
+        RestoreCapturedGear(Player);
+        if (IsValid(GearLocker)) GearLocker->Destroy();
+        SaveProgress(Player);
+        if (GetWorld() && GetWorld()->GetGameInstance())
+            if (UMGCampaignState* Story =
+                GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+                Story->RecordBeat(TEXT("snake.gear_recovery"),
+                    TEXT("EQUIPMENT RECOVERED: The prison locker held Snake's confiscated supplies."));
+        SpawnShootGunnerWhenArmed();
+        Dialogue = TEXT("GEAR RECLAIMED — SHOTGUN GUARD ON THE ESCAPE ROUTE");
+        DialogueTimeRemaining = 4.5f;
+        return true;
+    }
+    if (bGearRecovered && IsValid(ShootGunnerAmmo) &&
+        CanReach(Player,ShootGunnerAmmo,210.f))
+    {
+        if (GetWorld()->GetGameInstance())
+            if (UMGCampaignState* Story=GetWorld()->GetGameInstance()->
+                GetSubsystem<UMGCampaignState>())
+            {
+                if (Story->RecordBeat(TEXT("m02.shootgunner_ammo"),
+                    TEXT("DETENTION PROPERTY: Additional handgun rounds available before Shoot Gunner.")))
+                {
+                    if (Player->GetEquipment())
+                    {
+                        bool bHasHandgun=false;
+                        for (const FMGEquipmentEntry& Entry:Player->GetEquipment()->GetWeapons())
+                            if (Entry.Id==TEXT("HANDGUN") && Entry.bOwned)
+                                bHasHandgun=true;
+                        if (!bHasHandgun)
+                        {
+                            // Greybox fallback: custody/property post logically
+                            // also contains a service pistol. Do not mark it
+                            // as source-exact until the original map is traced.
+                            Player->GetEquipment()->AwardWeapon(TEXT("HANDGUN"),0);
+                        }
+                        Player->GetEquipment()->AwardAmmunition(TEXT("HANDGUN"),22);
+                    }
+                    PersistRecoveredInventory(Player);
+                    ShootGunnerAmmo->Destroy();
+                    Dialogue=TEXT("ADDITIONAL HANDGUN AMMO / SHOTGUN DEFENDER AHEAD");
+                    DialogueTimeRemaining=4.5f;
+                    return true;
+                }
+            }
+    }
+    if (bGearRecovered && IsValid(ShootGunnerCard) &&
+        CanReach(Player,ShootGunnerCard,220.f))
+    {
+        if (GetWorld()->GetGameInstance())
+            if (UMGCampaignState* Story=GetWorld()->GetGameInstance()->
+                GetSubsystem<UMGCampaignState>())
+            {
+                if (!Story->HasBeat(TEXT("bosses.shoot_gunner")))
+                {
+                    Player->NotifyFeedback(TEXT("CARD THREE / GUNNER STILL ACTIVE"),TEXT("denied"));
+                    return true;
+                }
+                if (Story->RecordBeat(TEXT("m02.card3_acquired"),
+                    TEXT("CARD 3: recovered from the prison corridor after Shoot Gunner.")))
+                {
+                    if (Player->GetEquipment())
+                        Player->GetEquipment()->AwardItem(TEXT("CARD3"),1);
+                    PersistRecoveredInventory(Player);
+                    ShootGunnerCard->Destroy();
+                    Dialogue=TEXT("CARD THREE ACQUIRED / OUTER HEAVEN ACCESS EXPANDED");
+                    DialogueTimeRemaining=4.5f;
+                }
+                return true;
+            }
+    }
     return false;
 }
 
@@ -358,7 +655,17 @@ FString AMGGrayFoxMission::GetObjectiveText() const
     if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
         return TEXT("Find a route into the outer passage.");
     if (!(Flags & MG_FOX_LEFT_PRISON))
-        return TEXT("Get past the guards and reach the far side of the corridor.");
+    {
+        if (!bGearRecovered)
+            return TEXT("RECOVER YOUR CONFISCATED EQUIPMENT");
+        const UMGCampaignState* State=GetWorld() && GetWorld()->GetGameInstance() ?
+            GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
+        if (!State || !State->HasBeat(TEXT("bosses.shoot_gunner")))
+            return TEXT("ESCAPE CORRIDOR / SHOOT GUNNER / AMMO BY THE LOCKER");
+        if (!State->HasBeat(TEXT("m02.card3_acquired")))
+            return TEXT("COLLECT CARD 3 FROM THE GUARD'S CORRIDOR");
+        return TEXT("SHOTGUN GUARD DOWN / REACH THE PHYSICAL EXIT");
+    }
     return TEXT("Gray Fox rescued. You have escaped the prison.");
 }
 
@@ -375,6 +682,9 @@ FString AMGGrayFoxMission::GetPacingHint() const
     if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
         return Level == 1 ? TEXT("Old work and new repairs might meet again.")
                           : TEXT("Investigate the unusual section of the next barrier.");
+    if (!bGearRecovered)
+        return Level == 1 ? TEXT("Equipment may be stored near the guard route.")
+                          : TEXT("Inspect the marked locker along the south wall.");
     return Level == 1 ? TEXT("Keep low and use the obstacles to break line of sight.")
                       : TEXT("Move east to the end of the passage, beyond the guards.");
 }
@@ -383,8 +693,9 @@ FString AMGGrayFoxMission::GetMissionLogText() const
 {
     if (!(Flags & MG_FOX_RESCUED)) return FString();
     // Temporary paraphrase; not a verbatim line from the licensed J2ME script.
-    return TEXT("GRAY FOX INTEL: Metal Gear is real. Seek the scientist who designed it. "
-                "Your equipment is still missing. Continue the infiltration.");
+    return bGearRecovered ?
+        TEXT("GRAY FOX INTEL: Metal Gear is real. Seek its scientist. Equipment recovered.") :
+        TEXT("GRAY FOX INTEL: Metal Gear is real. Seek its scientist. Recover equipment.");
 }
 
 FString AMGGrayFoxMission::GetRecentDialogue() const
@@ -395,7 +706,14 @@ FString AMGGrayFoxMission::GetRecentDialogue() const
 
 FString AMGGrayFoxMission::GetTransceiverDialogue(int32 Channel) const
 {
-    // Remake-authored dialogue; Schneider knows architecture, not this prison layout.
+    // Remake-authored dialogue; Diane can be reached if her contact was
+    // learned from the rescued POW, but she has no magical prison blueprint.
+    if (Channel == 2)
+        return TEXT("DIANE: I heard one of your people may be inside.\n"
+                    "DIANE: I don't know this detention wing.\n"
+                    "SNAKE: Then I'll have to find him myself.\n"
+                    "DIANE: Be careful.");
+    // Schneider knows architecture, not this prison layout.
     if (Channel == 0)
     {
         if (!(Flags & MG_FOX_FIRST_WALL_BREACHED))
@@ -443,9 +761,21 @@ void AMGGrayFoxMission::Tick(float Dt)
     Super::Tick(Dt);
     InitializePlayerIfReady();
     if (!bPlayerInitialised) return;
+    if (ReturnToOuterHeavenSeconds >= 0.f)
+    {
+        ReturnToOuterHeavenSeconds -= FMath::Max(0.f, Dt);
+        if (ReturnToOuterHeavenSeconds <= 0.f)
+            UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
+        return;
+    }
     ElapsedSinceBeat += FMath::Max(0.f, Dt);
     DialogueTimeRemaining = FMath::Max(0.f, DialogueTimeRemaining - Dt);
     UpdateGuardAlert();
+    if (IsValid(ShootGunnerCard) && GetWorld() && GetWorld()->GetGameInstance())
+        if (const UMGCampaignState* State=GetWorld()->GetGameInstance()->
+            GetSubsystem<UMGCampaignState>())
+            if (State->HasBeat(TEXT("bosses.shoot_gunner")))
+                ShootGunnerCard->SetActorHiddenInGame(false);
     AMGPlayerCharacter* Player =
         Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (Player)
@@ -465,7 +795,12 @@ void AMGGrayFoxMission::Tick(float Dt)
         LastObservedViewRotation = View;
         bHasObservedPlayer = true;
     }
-    if (Player && (Flags & MG_FOX_EXIT_WALL_BREACHED) &&
+    const UMGCampaignState* State = GetWorld() && GetWorld()->GetGameInstance()
+        ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
+    if (Player && bGearRecovered && State &&
+        State->HasBeat(TEXT("bosses.shoot_gunner")) &&
+        State->HasBeat(TEXT("m02.card3_acquired")) &&
+        (Flags & MG_FOX_EXIT_WALL_BREACHED) &&
         !(Flags & MG_FOX_LEFT_PRISON) &&
         FVector::Dist2D(Player->GetActorLocation(), ExitPoint) < 190.f)
     {

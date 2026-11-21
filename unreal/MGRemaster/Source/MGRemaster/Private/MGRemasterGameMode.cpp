@@ -1,8 +1,14 @@
 #include "MGRemasterGameMode.h"
 
 #include "MGGrayFoxMission.h"
+#include "MGCampaignState.h"
+#include "Engine/GameInstance.h"
+#include "MGMissionOne.h"
+#include "MGLaterMission.h"
+#include "MGEquipmentComponent.h"
 #include "MGPlayerCharacter.h"
 #include "MGPrototypeHUD.h"
+#include "MGAdaptiveAudioDirector.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/World.h"
@@ -33,18 +39,75 @@ void AMGRemasterGameMode::StartPlay()
 {
     Super::StartPlay();
     if (!GetWorld()) return;
+    // Music is an independent actor. It exists on the title screen and every
+    // playable mission, and reloads with the same world after Continue.
+    GetWorld()->SpawnActor<AMGAdaptiveAudioDirector>(
+        AMGAdaptiveAudioDirector::StaticClass(),FVector::ZeroVector,
+        FRotator::ZeroRotator);
 
-    // The rescue is the current runnable mission slice; other greybox
-    // environments are added only after original J2ME map verification.
+    // Mission number survives a reload between mission spaces.
+    // Never spawn both prototype worlds: their collisions would overlap.
+    UMGCampaignState* Story = GetWorld()->GetGameInstance() ?
+        GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
+    const int32 MissionNumber = Story ? Story->GetMissionNumber() : 1;
+    if (Story && MissionNumber == 1)
+    {
+        Story->RecordBeat(TEXT("snake.mission_start"),
+            TEXT("OPERATION INTRUDE N313: Locate the missing operative Gray Fox."));
+        Story->RecordBeat(TEXT("fox.missing"),
+            TEXT("GRAY FOX: Previous FOXHOUND infiltration ended after a Metal Gear report."));
+    }
+    // Launch from the insertion unless the player has deliberately entered
+    // the secret prison. Reloading after a completed rescue returns to 3F.
     if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
     {
         if (!PC->GetPawn())
         {
             AMGPlayerCharacter* Pawn = GetWorld()->SpawnActor<AMGPlayerCharacter>(
-                FVector(-950.f, 0.f, -11.f), FRotator::ZeroRotator);
+                FVector(700.f, 700.f, 90.f), FRotator::ZeroRotator);
             if (Pawn) PC->Possess(Pawn);
         }
     }
-    GetWorld()->SpawnActor<AMGGrayFoxMission>(AMGGrayFoxMission::StaticClass(),
-                                            FVector::ZeroVector, FRotator::ZeroRotator);
+    if (Story && Story->IsTitleScreenActive())
+    {
+        // Exit on Game Over returns to an actual in-session title, not
+        // a shell quit. No mission actors or enemies spawn behind the menu.
+        return;
+    }
+    if (MissionNumber == 2)
+    {
+        // The prison actor restores the dedicated capture checkpoint and
+        // initializes confiscated inventory. It is never spawned alongside 1F.
+        GetWorld()->SpawnActor<AMGGrayFoxMission>(
+            AMGGrayFoxMission::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+        return;
+    }
+    if (MissionNumber >= 4 ||
+        (MissionNumber == 3 && Story && Story->IsMissionThreeExteriorActive()))
+    {
+        if (AMGLaterMission* Later = GetWorld()->SpawnActor<AMGLaterMission>(
+            AMGLaterMission::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator))
+        {
+            Later->RestorePlayerEquipment(Cast<AMGPlayerCharacter>(
+                UGameplayStatics::GetPlayerCharacter(this, 0)));
+        }
+        return;
+    }
+    if (AMGMissionOne* Mission = GetWorld()->SpawnActor<AMGMissionOne>(
+            AMGMissionOne::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator))
+    {
+        if (AMGPlayerCharacter* Snake = Cast<AMGPlayerCharacter>(
+                UGameplayStatics::GetPlayerCharacter(this, 0)))
+        {
+            Snake->SetActorLocation(Mission->ResumeLocation(), false, nullptr,
+                                    ETeleportType::TeleportPhysics);
+            if (UMGEquipmentComponent* Inventory = Snake->GetEquipment())
+                Inventory->InitialiseMissionOneLoadout();
+            Mission->RestoreSavedEquipment(Snake);
+            Snake->NotifyFeedback(MissionNumber == 3 ?
+                TEXT("MISSION 03 — FOX'S INTELLIGENCE / FIND PETTROVICH") :
+                TEXT("MISSION 01 — OPERATION INTRUDE N313"),
+                                  TEXT("select"));
+        }
+    }
 }

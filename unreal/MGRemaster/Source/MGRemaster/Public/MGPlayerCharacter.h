@@ -7,7 +7,12 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UStaticMeshComponent;
+class UAnimMontage;
+class USceneComponent;
 class UMGEquipmentComponent;
+class AMGRemoteMissile;
+class AMGGuardActor;
+class AMGBodyHidingSpot;
 
 UCLASS()
 class MGREMASTER_API AMGPlayerCharacter : public ACharacter
@@ -29,8 +34,23 @@ public:
     float GetEquipmentTimeScale() const { return EquipmentTimeScale; }
     float GetNoiseFactor() const;
     float GetHealth() const { return Health; }
+    // 1998-MGS-style fail screen, with a separate continue choice.
+    bool IsGameOver() const { return bGameOver; }
+    bool IsGameOverMenuReady() const { return bGameOver && GameOverElapsed >= 1.65f; }
+    bool IsTitleScreenActive() const;
+    float GetGameOverElapsed() const { return GameOverElapsed; }
+    int32 GetFailureMenuSelection() const { return FailureMenuSelection; }
+    const FString& GetDeathRadioLine() const { return DeathRadioLine; }
     bool IsProne() const { return bIsProne; }
     bool IsInCover() const { return bInCover; }
+    UFUNCTION(BlueprintPure, Category="Stealth|Interaction")
+    bool IsChokingGuard() const { return ChokedGuard.IsValid(); }
+    UFUNCTION(BlueprintPure, Category="Stealth|Interaction")
+    bool IsDraggingBody() const { return DraggedGuard.IsValid(); }
+    UFUNCTION(BlueprintPure, Category="Stealth|Interaction")
+    float GetChokeProgress() const { return FMath::Clamp(ChokeHoldTime / 1.35f, 0.f, 1.f); }
+    UFUNCTION(BlueprintPure, Category="Stealth|Interaction")
+    FString GetStealthInteractionPrompt() const;
     // Read by animation blueprints once the finished character rig is imported.
     UFUNCTION(BlueprintPure, Category="Stealth|Wall")
     bool IsCornerPeeking() const { return CoverPeekAlpha > 0.35f; }
@@ -40,7 +60,17 @@ public:
     bool IsWallKnocking() const { return WallKnockVisualTimer > 0.f; }
     UFUNCTION(BlueprintPure, Category="Stealth|Wall")
     float GetCoverShuffleDirection() const { return CoverShuffleDirection; }
-    FString GetPostureText() const;
+    // MGS-style source-inspired input sequence: left punch, right punch,
+    // finishing kick. Blueprint animation graph can read these live values.
+    UFUNCTION(BlueprintPure, Category="Animation|Melee")
+    int32 GetMeleeStrikeIndex() const { return bMeleeInProgress ? MeleeStrikeIndex : 0; }
+    UFUNCTION(BlueprintPure, Category="Animation|Melee")
+    float GetMeleeStrikeAlpha() const;
+    UFUNCTION(BlueprintPure, Category="Animation|Melee")
+    bool IsMeleeComboActive() const { return bMeleeInProgress; }
+    UFUNCTION(BlueprintPure, Category="Animation|Melee")
+    bool IsMeleeHitWindow() const { return bMeleeInProgress && bMeleeHitWindow; }
+        FString GetPostureText() const;
     bool TryEnterCover();
     void LeaveCover();
     UMGEquipmentComponent* GetEquipment() const { return Equipment; }
@@ -81,12 +111,51 @@ private:
     bool bSprinting = false;
     float ShoulderSign = 1.f;
     int32 QualityPreset = 0;
+    TWeakObjectPtr<AMGRemoteMissile> ControlledMissile;
+    TWeakObjectPtr<AMGGuardActor> ChokedGuard;
+    TWeakObjectPtr<AMGGuardActor> DraggedGuard;
+    float ChokeHoldTime = 0.f;
+    float ChokeStruggleTime = 0.f;
+    bool bInteractHeld = false;
     float Health = 100.f;
-    float MeleeNextTime = 0.f;
-    float LastMeleeTime = -100.f;
-    float MeleeVisualTimer = 0.f;
+    bool bGameOver = false;
+    float GameOverElapsed = 0.f;
+    int32 FailureMenuSelection = 0;  // 0=Continue/Start, 1=Exit/Quit
+    FString DeathRadioLine;
+    bool bFailureRadioCuePlayed = false;
+    // Authoritative melee state runs on real seconds and applies hit damage
+    // only at the active frame, never at the initial button press.
+    bool bMeleeInProgress = false;
+    bool bMeleeHitWindow = false;
+    bool bMeleeHitResolved = false;
+    int32 MeleeStrikeIndex = 0; // 1=left, 2=right, 3=kick
+    int32 MeleeQueuedInputs = 0; // buffer up to two quick successive taps
+    float MeleePhaseSeconds = 0.f;
+    float MeleeRecoverySeconds = 0.f;
     float CombatNoiseTimer = 0.f;
-    int32 MeleeComboStep = 0;
+    // Distinct physical fallback body parts for the current non-rigged proxy.
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    UStaticMeshComponent* ProxyLeftArm = nullptr;
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    USceneComponent* ProxyLeftShoulder = nullptr;
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    USceneComponent* ProxyRightShoulder = nullptr;
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    USceneComponent* ProxyLeftHip = nullptr;
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    USceneComponent* ProxyRightHip = nullptr;
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    UStaticMeshComponent* ProxyRightArm = nullptr;
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    UStaticMeshComponent* ProxyRightLeg = nullptr;
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    UStaticMeshComponent* ProxyLeftLeg = nullptr;
+    UPROPERTY(EditDefaultsOnly, Category="Animation|Melee")
+    UAnimMontage* LeftPunchMontage = nullptr;
+    UPROPERTY(EditDefaultsOnly, Category="Animation|Melee")
+    UAnimMontage* RightPunchMontage = nullptr;
+    UPROPERTY(EditDefaultsOnly, Category="Animation|Melee")
+    UAnimMontage* FinisherKickMontage = nullptr;
 
     void MoveForward(float Value);
     void MoveRight(float Value);
@@ -102,6 +171,18 @@ private:
     void ShoulderSwap();
     void FireStun();
     void Interact();
+    void ReleaseInteract();
+    AMGGuardActor* FindRearChokeCandidate() const;
+    AMGGuardActor* FindUnconsciousBody() const;
+    AMGBodyHidingSpot* FindBodyLocker() const;
+    void StopBodyDrag();
+    void UpdateStealthInteractions(float DeltaSeconds);
+    void EnterGameOver();
+    void FailureMenuPrevious();
+    void FailureMenuNext();
+    void FailureMenuConfirm();
+    void FailureMenuMove(int32 Direction);
+    void RestartFromCheckpoint();
     void RestartRescue();
     void ToggleMissionLog();
     void CycleGraphicsQuality();
@@ -113,6 +194,10 @@ private:
     void SelectionNext();
     void UseItem();
     void MeleeAttack();
+    void StartMeleeStrike(int32 Strike);
+    void AdvanceMeleeCombo(float DeltaSeconds);
+    void ResolveMeleeContact();
+    void UpdateMeleePresentation(float DeltaSeconds);
     void ToggleProne();
     void ToggleCover();
     void EnterProneAfterCrouch();

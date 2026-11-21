@@ -22,6 +22,9 @@ public:
 
     bool TryInteract(AMGPlayerCharacter* Player);
     bool HasEquipmentConfiscated() const;
+    // Spent ammunition/rations after locker recovery must survive returning
+    // to Building One. Captured inventory is never available before recovery.
+    void PersistRecoveredInventory(AMGPlayerCharacter* Player);
     uint32 GetMissionFlags() const { return Flags; }
     FString GetObjectiveText() const;
     FString GetPacingHint() const;
@@ -44,8 +47,17 @@ private:
     AStaticMeshActor* FoxProxy = nullptr;
     UPROPERTY(Transient)
     AStaticMeshActor* ExitMarker = nullptr;
+    UPROPERTY(Transient)
+    AStaticMeshActor* GearLocker = nullptr;
+    UPROPERTY(Transient)
+    AStaticMeshActor* ShootGunnerAmmo = nullptr;
+    UPROPERTY(Transient)
+    AStaticMeshActor* ShootGunnerCard = nullptr;
+    bool bShootGunnerSpawned = false;
+    void SpawnShootGunnerWhenArmed();
 
     uint32 Flags = 0;
+    bool bGearRecovered = false;
     bool bPlayerInitialised = false;
     bool bHasLoadedSave = false;
     bool bUnderAlert = false;
@@ -56,6 +68,7 @@ private:
     FRotator LastObservedViewRotation = FRotator::ZeroRotator;
     bool bHasObservedPlayer = false;
     float DialogueTimeRemaining = 0.f;
+    float ReturnToOuterHeavenSeconds = -1.f;
     FVector SavedPosition = FVector::ZeroVector;
     FString Dialogue;
 
@@ -67,6 +80,7 @@ private:
     bool ApplyAction(uint32 Action, AMGPlayerCharacter* Player);
     void RestoreVisualState();
     void SaveProgress(AMGPlayerCharacter* Player);
+    void RestoreCapturedGear(AMGPlayerCharacter* Player);
     bool CanReach(const AMGPlayerCharacter* Player, const AActor* Target,
                   float MaxDistanceCm) const;
     uint32 GetPacingPhase() const;

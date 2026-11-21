@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "audited_at": "2026-11-21",
+  "source_j2me": {
+    "archive": "Metal-Gear_J2ME_EN_v330.zip",
+    "edition": "Connect2Media v3.3.0 (a1).jar",
+    "midi_count": 56,
+    "bgm_count": 10,
+    "intro_count": 4,
+    "sound_effect_midi_count": 42,
+    "bgm_files": [
+      "mg1_bgm00_playerout.mid",
+      "mg1_bgm01_continue.mid",
+      "mg1_bgm02_kiken.mid",
+      "mg1_bgm03_main.mid",
+      "mg1_bgm04_underground.mid",
+      "mg1_bgm05_boss.mid",
+      "mg1_bgm06_opening.mid",
+      "mg1_bgm07_metalgear.mid",
+      "mg1_bgm08_escape.mid",
+      "mg1_bgm09_ending.mid"
+    ],
+    "intro_files": [
+      "mg1_intro00_main.mid",
+      "mg1_intro01_escape.mid",
+      "mg1_intro02_ending.mid",
+      "mg1_intro03_boss.mid"
+    ],
+    "status": "original source references only; no upgraded, rendered or mastered variants verified"
+  },
+  "connected_unreal": {
+    "branch": "design/mission-01-spatial-encounters",
+    "committed_audio_files": 0,
+    "status": "C++ cue hooks but no imported music or sound assets"
+  },
+  "separate_browser": {
+    "packages": [
+      "Gray_Fox_Expanded_Playtest.zip",
+      "Gray_Fox_Expanded_Playtest(1).zip"
+    ],
+    "audio_files": 0,
+    "procedural_cue_types": 19,
+    "procedural_drone_layers": 3,
+    "status": "Web Audio generated effects and ambient drones; no upgraded MIDI, WAV or OGG"
+  },
+  "mission_cue_needs": [
+    {
+      "mission": 1,
+      "location_or_phase": "insertion_Building_One",
+      "cue_roles": [
+        "opening",
+        "main_infiltration",
+        "alert",
+        "industrial_floors",
+        "cards",
+        "electric",
+        "surveillance"
+      ],
+      "asset_status": "missing production-ready assets and tested implementation"
+    },
+    {
+      "mission": 2,
+      "location_or_phase": "Gray_Fox_prison_and_Shoot_Gunner",
+      "cue_roles": [
+        "prison_dread",
+        "Gray_Fox_reveal",
+        "boss",
+        "wall_break",
+        "radio_call",
+        "shotgun",
+        "disarm",
+        "drag"
+      ],
+      "asset_status": "missing production-ready assets and tested implementation"
+    },
+    {
+      "mission": 3,
+      "location_or_phase": "revisit_and_exterior",
+      "cue_roles": [
+        "revisit_theme",
+        "escalation",
+        "tank_battle",
+        "grenades",
+        "mines",
+        "helicopter",
+        "tank_treads"
+      ],
+      "asset_status": "missing production-ready assets and tested implementation"
+    },
+    {
+      "mission": 4,
+      "location_or_phase": "Building_Two_Jennifer_TX11",
+      "cue_roles": [
+        "research_security",
+        "boss",
+        "Jennifer_help",
+        "flame",
+        "bulldozer_engine",
+        "rockets",
+        "robot_servo"
+      ],
+      "asset_status": "missing production-ready assets and tested implementation"
+    },
+    {
+      "mission": 5,
+      "location_or_phase": "Madnar_Ellen_return",
+      "cue_roles": [
+        "scientist_tension",
+        "hostage_rescue",
+        "revelation",
+        "plastic_charge",
+        "prisoner_foley",
+        "research_hum"
+      ],
+      "asset_status": "missing production-ready assets and tested implementation"
+    },
+    {
+      "mission": 6,
+      "location_or_phase": "desert_Coward_Duck",
+      "cue_roles": [
+        "desert_exposure",
+        "hostage",
+        "betrayal_foreshadow",
+        "wind",
+        "hostage_voices",
+        "Coward_Duck_weapon"
+      ],
+      "asset_status": "missing production-ready assets and tested implementation"
+    },
+    {
+      "mission": 7,
+      "location_or_phase": "deep_base_truth",
+      "cue_roles": [
+        "bunker_ambient",
+        "command_doubt",
+        "confrontation",
+        "generators",
+        "doors",
+        "radio_interference"
+      ],
+      "asset_status": "missing production-ready assets and tested implementation"
+    },
+    {
+      "mission": 8,
+      "location_or_phase": "Metal_Gear_finale",
+      "cue_roles": [
+        "metalgear",
+        "boss",
+        "escape",
+        "ending",
+        "TX55_demolition",
+        "countdown",
+        "ending_explosion",
+        "game_over"
+      ],
+      "asset_status": "missing production-ready assets and tested implementation"
+    }
+  ],
+  "critical_audio_tasks": [
+    "verified original or appropriately licensed music compositions and individual recording rights",
+    "original 1995 inspired arrangements in renderable audio with stems and looping metadata",
+    "radio connection/disconnect, cue and optional voiced characters",
+    "stealth states normal/suspicion/alert/evasion musical transitions",
+    "footstep surfaces and variation concrete/metal/soil, spatial occlusion",
+    "three-strike melee/contact, choke, body drag, locker and guard alert",
+    "weapons magazines, suppressed vs unsuppressed guns, launcher, guided rocket, mine, grenade, gear handling",
+    "unique boss telegraph and hit, guard behavior, rescue and cinematic transitions",
+    "room-tone/ventilation/reverb for floors, prison, exterior, lab and tunnel",
+    "Game Over, Continue, Exit, title and checkpoint SFX, stinger and ducking",
+    "coherent loudness/mixing/accessibility/headphone/mono testing",
+    "shared stable cue identifiers and actual rendered audio in browser and Unreal"
+  ],
+  "rights": "J2ME MIDIs and underlying musical compositions remain protected: do not redistribute source MIDIs or derived soundtrack in public builds without appropriate permissions. Independent original licensed music and SFX are preferable.",
+  "acceptance": "Actual playable audio files, manifests, scene triggers, loop/crossfade behaviour, and Unreal/browser listening tests are required; filenames and code strings alone do not count.",
+  "production_pass_2026_11_21": {
+    "version": "original_audio_bank_v1",
+    "created_as_files_in_conversation_not_yet_committed_to_git": true,
+    "original_editable_midis": 14,
+    "rendered_music_wav_pcm16_32khz": 14,
+    "original_sfx_wav_pcm16_32khz": 46,
+    "total_new_audio_files": 74,
+    "sample_rate_hz": 32000,
+    "provenance": "procedural original music motifs and effects; not transcriptions or captured Konami samples; rights retained subject to underlying franchise IP",
+    "checks": "Each WAV integrity-checked SHA-256, non-clipping, 32 kHz mono PCM16; browser audio manager mocked tests and campaign regressions passed",
+    "browser_scope": "Gray Fox expanded vertical slice ZIP only; uses native WebAudio decoded buffers and legacy procedural fallback, volume sliders, 3D panning, caution/alert/boss Game Over transitions",
+    "unreal_scope": "C++ FMGAdaptiveAudioDirector source committed and Python import tool; WAV assets must be copied from Overlay ZIP and imported through Unreal Editor before cooked playback is available",
+    "missing_validation": [
+      "UE 5.7 compile",
+      "Unreal Editor SoundWave import",
+      "cooked UE audio runtime",
+      "platform-wide loudness and spatial mix",
+      "final approved licensed character/voice work",
+      "full eight mission audio timing playtest"
+    ],
+    "distributed_bundles": [
+      "OuterHeaven_Original_Audio_Source_v1.zip",
+      "OuterHeaven_Unreal_Audio_Overlay_v1.zip",
+      "Gray_Fox_Browser_With_Original_Audio_v1.zip"
+    ],
+    "cue_contract_music": [
+      "music_title",
+      "music_infiltration",
+      "music_caution",
+      "music_alert",
+      "music_prison",
+      "music_revelation",
+      "music_boss",
+      "music_research",
+      "music_desert",
+      "music_betrayal",
+      "music_metalgear",
+      "music_escape",
+      "music_game_over",
+      "music_ending"
+    ],
+    "cue_contract_fx": [
+      "menu",
+      "select",
+      "denied",
+      "pickup",
+      "card",
+      "unlock",
+      "radio",
+      "radio_lost",
+      "game_over_sting",
+      "knock",
+      "breach",
+      "step_concrete",
+      "step_metal",
+      "step_soil",
+      "gear",
+      "door",
+      "locker",
+      "punch1",
+      "punch2",
+      "kick",
+      "choke",
+      "body_drag",
+      "guard_alert",
+      "alarm",
+      "gunshot",
+      "gunshot_suppressed",
+      "rocket",
+      "grenade",
+      "mine",
+      "electric",
+      "boss_windup",
+      "boss_attack",
+      "boss_step",
+      "boss_stagger",
+      "whoosh",
+      "hit",
+      "win",
+      "tension_rise",
+      "propertyPing",
+      "kennel",
+      "rack",
+      "seal",
+      "alert",
+      "step",
+      "bossStep",
+      "gunshot_heavy"
+    ]
+  }
+}
