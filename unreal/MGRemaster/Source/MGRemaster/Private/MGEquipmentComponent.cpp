@@ -151,6 +151,21 @@ bool UMGEquipmentComponent::ConsumeRation()
     if (Ration.Quantity == 0) EquippedItem = 0;
     return true;
 }
+bool UMGEquipmentComponent::ConsumeItem(FName ItemId, int32 Amount)
+{
+    if (bConfiscated || Amount <= 0) return false;
+    for (FMGEquipmentEntry& Entry : Items)
+        if (Entry.Id == ItemId && Entry.bOwned && Entry.bConsumable)
+        {
+            if (Entry.Quantity < Amount) return false;
+            Entry.Quantity -= Amount;
+            if (Entry.Quantity <= 0 && Items.IsValidIndex(EquippedItem) &&
+                Items[EquippedItem].Id == ItemId)
+                EquippedItem = 0;
+            return true;
+        }
+    return false;
+}
 bool UMGEquipmentComponent::AwardItem(FName Id, int32 Count)
 {
     if (Count <= 0) return false;
