@@ -474,7 +474,7 @@ void AMGPrototypeHUD::DrawHUD()
                 PanelX + 12.f * UiScale,
                 PanelY + (154.f + 22.f * Index) * UiScale,
                 nullptr, .72f * UiScale, false);
-        DrawText(TEXT("Q / RS: TUNE    C / START: CLOSE    MOVE: CONTINUE"),
+        DrawText(TEXT("Q / RS: TUNE    C / VIEW: CLOSE    MOVE: CONTINUE"),
             HudMuted, PanelX + 12.f * UiScale,
             PanelY + (166.f + 22.f * VisibleLines) * UiScale,
             nullptr, .65f * UiScale, false);
@@ -490,9 +490,15 @@ void AMGPrototypeHUD::DrawHUD()
         DrawLine(X, Y + 3.f, X, Y + 11.f, FLinearColor::White, 1.f);
     }
 
+    // Two consistent instruction rails: the same face buttons are bound in
+    // browser and native Unreal. D-pad down/Y keyboard uses item deliberately;
+    // selecting an item does not itself consume finite rations.
     const FString CoverHelp = Player->IsInCover() ?
-        TEXT("WALL: F / A KNOCK   AIM + SLIDE: CORNER PEEK   MOVE AWAY: RELEASE") :
-        TEXT("E / X: BREACH / INTERACT   MOVE INTO WALL: COVER   F / A: MELEE");
+        TEXT("COVER: F / X KNOCK  |  AIM + SLIDE: PEEK  |  MOVE AWAY: RELEASE") :
+        TEXT("E / A INTERACT  |  F / X MELEE  |  Z / Y PRONE  |  ESC / B SKIP");
     DrawText(CoverHelp,
-             HudMuted, Margin, Height - 27.f * UiScale, nullptr, 0.69f * UiScale, false);
+             HudMuted, Margin, Height - 46.f * UiScale, nullptr, 0.66f * UiScale, false);
+    DrawText(TEXT("Y / DPAD DOWN USE ITEM  |  TAB / LB ITEMS  |  G / RB WEAPONS  |  F9 RETRY CHECKPOINT"),
+             HudMuted, Margin, Height - 26.f * UiScale,
+             nullptr, 0.63f * UiScale, false);
 }
