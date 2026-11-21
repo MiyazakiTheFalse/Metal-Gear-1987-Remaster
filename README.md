@@ -23,6 +23,12 @@ These features are unverified source implementation, not finished gameplay or pr
 - `scripts/build_windows.ps1` — packaging entrypoint on a Windows UE5.7 build host.
 - `docs/` — source audit, gameplay scope, graphics policy and build notes.
 
+## First connected 1995 mission chapters — implementation source
+
+The [Building One → Gray Fox prison → Building One runtime bridge](docs/1995_PLAYABLE_CAMPAIGN_BRIDGE_PASS.md) now gives the first two narrative chapters a persistent Unreal launch, player-triggered POW/capture route, actual prison gear recovery, character-relevant log and a post-rescue continuation checkpoint. Chapter and source-comparative story IDs persist via `MG1995CampaignV1`. The [chapter contract](data/1995_runtime_chapter_contract.json) and [Python regression assertions](tools/test_campaign_chapter_bridge.py) track this integration; [Rust chapter rules](rust/src/campaign.rs) establish future engine-neutral parity.
+
+**Current truth:** Unreal and Rust source committed, **not compiled** or playtested; physical detention approach and missing building connections remain provisional until J2ME verification. Do not call this a complete playable game or a verified source level. A developer-only F9 reset from the Building One area clears test checkpoints and restarts at the beginning.
+
 ## Character stories — 1995 campaign
 
 The [complete 1995 campaign narrative and cast timeline](docs/1995_FULL_CAST_NARRATIVE_AND_TIMELINE.md), [40-sequence storyboard](data/1995_campaign_sequence.json), [individual per-character chronological timelines](data/1995_individual_character_timelines.json), and [22-character/group / 105-beat planning registry](data/character_arc_registry.json) now map the core ensemble from first radio contact through Outer Heaven's finale, including individual boss encounters. This is **narrative design only**, except the separate source-level Gray Fox prison prototype and opening radio/mission code. All character beats remain unverified against the target Connect2Media J2ME edition. Narrative `depends_on` links are *not* hard mission gates. Check with `python tools/validate_character_arcs.py` and `python tools/validate_1995_sequence.py`.
