@@ -122,7 +122,10 @@ assert.equal(supplies.game.state.binocularsEarned,true,'east truck awards scouti
 supplies.game.act('equipitem');
 for(let i=0;i<7;i++)supplies.game.act('next'); // Binoculars are the last item slot.
 supplies.game.act('equipclose');
-assert.equal(supplies.game.state.freight.scouting,true,'scout view is player-selected');
+assert.equal(supplies.game.state.freight.scouting,false,
+ 'closing the menu EQUIPS binoculars but never triggers them');
+supplies.game.act('useitem');
+assert.equal(supplies.game.state.freight.scouting,true,'scout view requires deliberate use');
 const supplyRestore=boot(supplies.storage);supplyRestore.button('resume');
 assert.equal(supplyRestore.game.state.rationRemaining,1);
 assert.equal(supplyRestore.game.state.rationWorld,null,'ration prop remains collected');
@@ -131,7 +134,16 @@ assert.equal(supplyRestore.game.state.card1World,null,'Card 1 prop remains colle
 assert.equal(supplyRestore.game.state.freight.scouting,false,'camera view resets safely on load');
 assert.equal(supplyRestore.game.testApplyPlayerDamage(60),true,'test inflicted actual player health loss');
 assert.equal(supplyRestore.game.state.health,40);
-supplyRestore.game.act('equipitem');supplyRestore.game.act('next');supplyRestore.game.act('equipclose');
+const selectRation=supplyRestore.game.state.itemSlots;
+const startRation=selectRation.findIndex(slot=>slot.name===supplyRestore.game.state.equippedItemName);
+const rationTarget=selectRation.findIndex(slot=>slot.name==='RATION');
+supplyRestore.game.act('equipitem');
+for(let i=0;i<(rationTarget-startRation+selectRation.length)%selectRation.length;i++)
+ supplyRestore.game.act('next');
+supplyRestore.game.act('equipclose');
+assert.equal(supplyRestore.game.state.health,40,
+ 'browsing items cannot accidentally consume a finite ration');
+supplyRestore.game.act('useitem');
 assert.equal(supplyRestore.game.state.health,85,'earned ration restores finite health');
 assert.equal(supplyRestore.game.state.rationRemaining,0,'ration is actually consumed');
 const spentRation=boot(supplyRestore.storage);spentRation.button('resume');
@@ -311,7 +323,7 @@ for(let i=0;i<4;i++)tg.testSetGuard(i,{knocked:true});
 assert.equal(tg.state.tagState,'carried');
 tg.act('equipitem');for(let i=0;i<3;i++)tg.act('next');
 tg.act('equipclose');assert.equal(tg.state.tagState,'carried','browsing preserves the item');
-tg.act('equipitem');for(let i=0;i<3;i++)tg.act('next');
+tg.act('equipitem'); // Menu reopens on the actual selected property-tag slot.
 tg.act('interact');assert.equal(tg.state.tagState,'placed');
 const stored=boot(tagRun.storage);stored.button('resume');
 assert.deepEqual({...stored.game.state.tagPoint},{x:24.0,z:1.4});
@@ -353,8 +365,10 @@ const dispatch=boot();
 dispatch.button('start');
 const freightGame=dispatch.game;
 const selectItem=index=>{
+ const slots=freightGame.state.itemSlots;
+ const from=slots.findIndex(x=>x.name===freightGame.state.equippedItemName);
  freightGame.act('equipitem');
- for(let i=0;i<index;i++)freightGame.act('next');
+ for(let i=0;i<(index-from+slots.length)%slots.length;i++)freightGame.act('next');
  freightGame.act('equipclose');
 };
 freightGame.teleport(-26.8,-2.3);
