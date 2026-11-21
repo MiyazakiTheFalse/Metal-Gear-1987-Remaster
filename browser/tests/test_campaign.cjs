@@ -108,6 +108,25 @@ assert.equal(afterRetry.storage.get('mg1987.grayfox.browser.v1'),beforePauseRetr
  'pause Retry does not delete inventory, world flags or earned progress');
 console.log('PASS: browser R and pause Retry reload checkpoints without destructive progress loss.');
 
+// A fatal guard hit must take the same deterministic auto-retry path as
+// deliberate retries, not leave the player watching a title/loading loop.
+const deathRetry=boot();
+deathRetry.button('start');
+const livingCheckpoint=deathRetry.storage.get('mg1987.grayfox.browser.v1');
+assert.equal(deathRetry.game.testApplyPlayerDamage(150),true);
+deathRetry.game.testStepGuards(.016);
+assert.equal(deathRetry.reloads,1,'death initiates a single checkpoint reload');
+deathRetry.game.testStepGuards(.016);
+assert.equal(deathRetry.reloads,1,'repeated dead frames cannot loop reloads');
+assert.equal(deathRetry.location.hash,'#retry-checkpoint');
+assert.equal(deathRetry.storage.get('mg1987.grayfox.browser.v1'),livingCheckpoint,
+ 'death never checkpoints zero health or replaces the last safe mission state');
+const recoveredDeath=boot(deathRetry.storage,'',()=>[],deathRetry.location.hash);
+assert.equal(recoveredDeath.game.state.started,true);
+assert.equal(recoveredDeath.game.state.health,100);
+console.log('PASS: fatal damage reloads a safe checkpoint once and restores living play.');
+
+
 // Broken checkpoints must be recoverable, never silently replaced by a fresh
 // mission when the user selects Continue. Preserve bytes until they approve
 // the title's destructive New Operation confirmation.
