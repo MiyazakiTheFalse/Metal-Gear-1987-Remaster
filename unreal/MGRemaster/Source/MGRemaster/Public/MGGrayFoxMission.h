@@ -22,6 +22,9 @@ public:
 
     bool TryInteract(AMGPlayerCharacter* Player);
     bool HasEquipmentConfiscated() const;
+    // Spent ammunition/rations after locker recovery must survive returning
+    // to Building One. Captured inventory is never available before recovery.
+    void PersistRecoveredInventory(AMGPlayerCharacter* Player);
     uint32 GetMissionFlags() const { return Flags; }
     FString GetObjectiveText() const;
     FString GetPacingHint() const;
