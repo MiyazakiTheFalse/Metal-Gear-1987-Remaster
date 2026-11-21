@@ -20,6 +20,10 @@ public:
     int32 Chapter = 0;
     UPROPERTY()
     TArray<FName> CompletedBeatIds;
+    // Mission 3 supports a reversible, physically justified Building One <->
+    // exterior return connector instead of locking away earlier discoveries.
+    UPROPERTY()
+    bool bMissionThreeExteriorActive = false;
     UPROPERTY()
     TArray<FString> IntelLines;
 };
