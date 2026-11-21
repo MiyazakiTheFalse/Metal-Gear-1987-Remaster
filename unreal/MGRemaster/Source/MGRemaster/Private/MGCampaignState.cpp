@@ -61,6 +61,11 @@ FString UMGCampaignState::GetCharacterThread() const
         return HasBeat(TEXT("fox.revelation"))
             ? TEXT("FOX / SEEK THE ENGINEER WHO KNOWS THE MACHINE")
             : TEXT("FOX / MISSING OPERATIVE, POSSIBLY IMPRISONED");
+    if (HasBeat(TEXT("fox.location_learned")) &&
+        HasBeat(TEXT("fox.capture_method_learned")))
+        return TEXT("FOX / 1F WEST DEAD END — SECRET CELL ROUTE");
+    if (HasBeat(TEXT("diane.contact")))
+        return TEXT("DIANE / A NEW RESISTANCE RADIO CONTACT");
     return HasBeat(TEXT("snake.early_pow"))
         ? TEXT("PRISONER / AN OPERATIVE IS HELD BEHIND THE WALLS")
         : TEXT("BIG BOSS / INITIAL ORDERS: FIND GRAY FOX");
@@ -117,13 +122,34 @@ bool UMGCampaignState::RecordBeat(FName Id, const FString& Intel)
     }
     return true;
 }
+void UMGCampaignState::RevokeMisplacedDianeContact()
+{
+    if (!Progress || !HasBeat(TEXT("diane.contact"))) return;
+    const TArray<FName> PreviousBeats = Progress->CompletedBeatIds;
+    const TArray<FString> PreviousIntel = Progress->IntelLines;
+    Progress->CompletedBeatIds.Remove(TEXT("diane.contact"));
+    Progress->IntelLines.RemoveAll([](const FString& Entry)
+    {
+        return Entry.Contains(TEXT("Resistance contact Diane can be reached"));
+    });
+    if (!Commit())
+    {
+        Progress->CompletedBeatIds = PreviousBeats;
+        Progress->IntelLines = PreviousIntel;
+    }
+}
 bool UMGCampaignState::AdvanceMission(int32 NextMissionNumber)
 {
     if (!Progress || NextMissionNumber != Progress->MissionNumber + 1 ||
         NextMissionNumber > 3)
         return false;
-    // A prisoner clue, not a radio selection, unlocks the voluntary capture.
-    if (NextMissionNumber == 2 && !HasBeat(TEXT("snake.early_pow"))) return false;
+    // The source route is back to 1F: one prisoner identifies Fox's hidden
+    // cell; a second explains the capture route. Neither an optional radio
+    // conversation nor the earlier 3F POW alone is a valid substitute.
+    if (NextMissionNumber == 2 &&
+        (!HasBeat(TEXT("fox.location_learned")) ||
+         !HasBeat(TEXT("fox.capture_method_learned"))))
+        return false;
     // Only a completed Gray Fox prison escape unlocks returning to Building One.
     if (NextMissionNumber == 3 &&
         (!HasBeat(TEXT("fox.revelation")) ||
@@ -162,8 +188,15 @@ FString UMGCampaignState::GetCurrentObjective() const
         return GetMissionThreeIntelCount() > 0 ?
             TEXT("SERVICE ROUTE ESTABLISHED / SEEK BUILDING TWO") :
             TEXT("FOLLOW FOX: INVESTIGATE THREE BUILDING ONE LEADS");
+    if (HasBeat(TEXT("fox.location_learned")) &&
+        HasBeat(TEXT("fox.capture_method_learned")))
+        return TEXT("RETURN TO 1F WESTERN DEAD END — CAPTURE ROUTE");
+    if (HasBeat(TEXT("diane.contact")))
+        return TEXT("RETURN TO 1F / FIND THE TWO FOX-RELATED PRISONERS");
+    if (HasBeat(TEXT("m01.electric.discovered")))
+        return TEXT("STEER REMOTE MISSILE INTO THE ELECTRIC CONTROL PANEL");
     if (HasBeat(TEXT("snake.early_pow")))
-        return TEXT("PRISONER CLUE: LOCATE THE DETENTION TRANSFER");
+        return TEXT("FIND CARD 2 AND THE WESTERN REMOTE MISSILE ROOM");
     return TEXT("INFILTRATE BUILDING ONE / RESCUE PRISONERS");
 }
 FString UMGCampaignState::GetOpeningRadio(int32 Channel) const
@@ -190,6 +223,13 @@ FString UMGCampaignState::GetOpeningRadio(int32 Channel) const
             TEXT("CHANNEL NOT YET AVAILABLE");
     if (Channel == 0)
     {
+        if (GetMissionNumber() == 1 &&
+            HasBeat(TEXT("m01.electric.discovered")) &&
+            !HasBeat(TEXT("m01.electric.disabled")))
+            return TEXT("SNAKE: The floor is electrified. I can see its controller.\n"
+                        "SCHNEIDER: A remote missile can reach it.\n"
+                        "SNAKE: Where are the missiles?\n"
+                        "SCHNEIDER: Check the western Card Two store.");
         if (GetMissionNumber() == 3 && HasBeat(TEXT("m03.route.survey")))
             return TEXT("SNAKE: The service road is visible from the upper floor.\n"
                         "SCHNEIDER: Then it survived the rebuilding.\n"
