@@ -29,6 +29,14 @@ The [Building One → Gray Fox prison → Building One runtime bridge](docs/1995
 
 **Current truth:** Unreal and Rust source committed, **not compiled** or playtested; physical detention approach and missing building connections remain provisional until J2ME verification. Do not call this a complete playable game or a verified source level. A developer-only F9 reset from the Building One area clears test checkpoints and restarts at the beginning.
 
+## Implementation pass — Missions 05–08 and browser playtest v2
+
+**Unreal source:** Now has builders and interactions for proposed missions **1 through 8**. In particular the [Missions 5–8 implementation pass](docs/MISSIONS_05_TO_08_IMPLEMENTATION_PASS.md) adds the Madnar->Building Three exit, optional false Big Boss truck lead, guarded desert and oxygen passage, Coward Duck's **three physical hostage sightlines**, Card 8, an inner bunker witness/abort order, two security bypasses, the **16-step TX-55 demolition sequence**, a post-demolition self-destruct timer, final boss and left-ladder escape payoff. The former Card 7 collected-but-flag-not-recorded transition softlock is repaired. [Machine-readable mission registry](data/1995_numbered_missions.json) now clearly distinguishes *source world builder present* from *compile/playability verification*.
+
+**Browser demo v2:** A separate Gray Fox playtest ZIP was built and tested locally (not committed as a binary). The browser now supports **timed left punch -> right punch -> kick**, contact-based guard damage, knockback, maintained adaptive audio, and functional **Game Over Continue Checkpoint / Exit to Title** callbacks. Its original gameplay, rig, music/audio and updated melee regression tests pass under Node. The browser demo **does not contain the later Unreal missions**.
+
+**Acceptance remains open:** no Unreal 5.7 compile, cooked build, PIE playability or J2ME-exact spatial verification; no real Chromium WebGL/audio listening verification. Current rooms and bosses are a source-comparative prototype, not production-complete.
+
 ## Original Adaptive Audio — multi-engine integration pass
 
 A **new original** sound bank now exists in the current conversation as separate downloadable bundles: 14 editable new MIDI compositions, 14 rendered music WAV loops, and 46 original WAV effects (**60 rendered WAV files**). The source game's 56 original J2ME MIDI files are **not** being redistributed. [Audio integration, cue IDs and instructions](docs/ORIGINAL_ADAPTIVE_AUDIO_IMPLEMENTATION.md) detail how to copy the same WAVs into Unreal and the browser.
