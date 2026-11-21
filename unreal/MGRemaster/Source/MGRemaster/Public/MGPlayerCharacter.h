@@ -8,6 +8,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UStaticMeshComponent;
 class UAnimMontage;
+class USceneComponent;
 class UMGEquipmentComponent;
 class AMGRemoteMissile;
 class AMGGuardActor;
@@ -123,6 +124,14 @@ private:
     // Distinct physical fallback body parts for the current non-rigged proxy.
     UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
     UStaticMeshComponent* ProxyLeftArm = nullptr;
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    USceneComponent* ProxyLeftShoulder = nullptr;
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    USceneComponent* ProxyRightShoulder = nullptr;
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    USceneComponent* ProxyLeftHip = nullptr;
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    USceneComponent* ProxyRightHip = nullptr;
     UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
     UStaticMeshComponent* ProxyRightArm = nullptr;
     UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
