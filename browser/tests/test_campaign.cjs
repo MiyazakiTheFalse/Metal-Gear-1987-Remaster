@@ -333,6 +333,24 @@ assert.ok(Math.hypot(encounter.state.bossLocation.x-atShot.x,encounter.state.bos
 assert.equal(encounter.state.health,75,'recovery and crossover are quiet windows');
 console.log('PASS: first sight, uninterrupted introduction, interrupted windup, single shot, recovery and collision-aware crossover.');
 
+// Optional guidance respects time and agency. This pure query is safe to call
+// from HUD without changing stage, enemy knowledge or an earned item.
+const helpRun=loadFixture({version:5,stage:4,x:15.3,z:0,health:100}).game;
+const helpBefore=helpRun.state;
+assert.equal(helpRun.optionalStageHelp(0),'','no hint before the anti-stall threshold');
+assert.ok(/exposes himself/.test(helpRun.optionalStageHelp(1)),
+ 'early boss hint explains pacing without prescribing every step');
+assert.ok(/Return fire/.test(helpRun.optionalStageHelp(2)),
+ 'stronger boss hint teaches the recovery window after real delay');
+assert.equal(helpRun.state.stage,helpBefore.stage);
+assert.equal(helpRun.state.bossHP,helpBefore.bossHP);
+assert.equal(helpRun.state.rounds,helpBefore.rounds);
+const cardHelp=loadFixture({version:5,stage:5,x:26,z:0,health:100}).game;
+assert.ok(/Card 2/.test(cardHelp.optionalStageHelp(2)),
+ 'card-reader guidance appears only after actually reaching the cards beat');
+console.log('PASS: optional boss/card hints are tiered, player-led, and cannot advance state.');
+
+
 const shared=new Map([[slot,JSON.stringify({version:5,stage:2,x:0,z:0})]]);
 const rehearsal=boot(shared,'?boss');
 assert.equal(rehearsal.game.state.stage,4);
