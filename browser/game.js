@@ -1557,7 +1557,7 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
    popup('ITEM HAS NO DIRECT USE HERE');playCue('denied');
  }
  else if(name==='next'||name==='previous'){if(equipOpen){const slots=inventories[equipOpen];eqIndex=(eqIndex+(name==='next'?1:-1)+slots.length)%slots.length;drawEquipment();playCue('menu')}}
- else if(name==='tips'){discovery.showTips=!discovery.showTips;tipToggle.checked=discovery.showTips;popup(discovery.showTips?'TRAINING PROMPTS ON':'TRAINING PROMPTS OFF')}
+ else if(name==='tips'){discovery.showTips=!discovery.showTips;tipToggle.checked=discovery.showTips;popup(discovery.showTips?'TRAINING PROMPTS ON':'TRAINING PROMPTS OFF');save()}
 }
 function lineBlocked(a,b,ignoreWeak=false){
  // Analytic segment/AABB intersection: stepped rays can skip 28cm walls.
@@ -2676,6 +2676,58 @@ const chapters=[
  ['BUILDING 1 ROOF','Find shelter, observe the Hind D firing run and use the grenade launcher.'],
  ['BUILDING 2 APPROACH','Scout the armoured road and lay mines on the track.']
 ];
+// Optional anti-stall clue, revealed ONLY after meaningful time since
+// progress and an exploration pause. Tier 1 preserves discovery, tier 2
+// explains a mechanical input. It never grants access, unlocks, or informs AI.
+function optionalStageHelp(tier){
+ if(tier<1)return '';
+ const strong=tier>=2;
+ if(stage===-2)return strong?
+   'Search beside the northern guarded utility area for a prisoner.':
+   'The northern service yard has signs of detained workers.';
+ if(stage===-1)return strong?
+   'At the processing post, release aim and use E / A to surrender.':
+   'Transport security is easier to approach with your weapon lowered.';
+ if(stage===3)return strong?
+   'Strike the southern recovery door twice, then take the kit inside.':
+   'Personal effects are kept away from the open firing lane.';
+ if(stage===4)return strong?
+   'Break line of sight during the volley. Return fire in his recovery window.':
+   'Shoot Gunner exposes himself after committing to his shots.';
+ if(stage===5)return strong?
+   'Use the recovered Card 2 at the northern records-storeroom reader.':
+   'The records stores accept a different access card.';
+ if(stage===6)return strong?
+   'Present Card 3 to the eastern shutter reader.':
+   'The shutter still needs an access credential.';
+ if(stage===7)return strong?
+   'Move east through the raised shutter to leave this sector.':
+   'The way deeper into the facility is now open.';
+ if(stage===8){
+  if(!service.charge)return strong?
+    'Look for a demolition charge near the kennel service route.':
+    'A supply parcel may solve a structural problem.';
+  if(!service.open)return strong?
+    'Place the recovered charge on the patched service wall.':
+    'The patched joint can be breached, but not by punches.';
+  if(!service.intel)return strong?
+    'Inspect the relay desk beyond the new passage.':
+    'The abandoned relay work area contains clues about the lift.';
+  if(!service.kidDown)return strong?
+    'Wait for Machinegun Kid to reload, then move between his marked bursts.':
+    'His long bursts leave an opening while the feed is reloaded.';
+  return strong?
+    'Take the parachute near the west lift, then use the lift.':
+    'The cleared machine-gun post leads to the west lift.';
+ }
+ if(stage===9)return strong?
+   'Use the grenade rack between Hind D attack runs; shelter blocks its sight.':
+   'The helicopter commits to a firing run before breaking away.';
+ if(stage===10)return strong?
+   'Plant mines on unoccupied track markers and retreat behind solid cover.':
+   'The tank follows a track and warns before its turret fires.';
+ return '';
+}
 function updateHUD(dt){
  const [phase,objective]=chapters[stage+2];$('phase').textContent=phase;$('obj').textContent=stage===10?(b2.defeated?'Tank immobilised. Next checkpoint is not yet implemented.':b2.active?'Lay track mines · '+b2.mines+' remain.':'Return to Building 2 from roof.') :stage===9?(roof.defeated?'Hind D disabled · return by the west lift.':roof.active?'Use the roof shelters and the launcher rack · '+roof.grenades+' grenades.':'Return to the roof from the west lift.') :service.parachute?'Take the west lift to the roof.':service.kidDown?'Collect the parachute by the lift.':service.intel?'Follow the relay passage to the west lift.':service.open?'Investigate the relay room beyond the kennels.':objective;
  const sample=[player.x,player.z,cam.yaw,cam.pitch];
@@ -2684,8 +2736,13 @@ function updateHUD(dt){
  }
  const silence=gameTime-quietSince;
  const hintEligible=elapsedStage>=28&&(silence>=6||elapsedStage>=100);
- $('hint').textContent=stage>=0&&stage<3&&awareness<2&&discovery.showTips&&hintEligible?
-   window.MGTutorial.getHint({...discovery,stage,elapsedStage:elapsedStage>=75&&(silence>=10||elapsedStage>=150)?75:28}):'';
+ const hintLevel=elapsedStage>=75&&(silence>=10||elapsedStage>=150)?2:
+   hintEligible?1:0;
+ $('hint').textContent=discovery.showTips&&awareness<2&&hintLevel>0?
+   stage>=0&&stage<3?
+     window.MGTutorial.getHint({...discovery,stage,
+       elapsedStage:hintLevel===2?75:28}):
+     optionalStageHelp(hintLevel):'';
  const pulseCaption=$('propertyCaption');
  const audible=gameTime-tag.flash<1.55;
  pulseCaption.textContent=audible&&stage===-1?'Two chirps · processing desk':
@@ -2945,7 +3002,7 @@ if(location.hash==='#retry-checkpoint'){
  if(available)start(true);
 }
 // Console contract for deterministic browser tests, never elevated to source fidelity.
-window.__mgGameDebug={previewRigActors:(time=gameTime)=>activeCastForRig(time),get state(){return {stage,equippedItemName:equippedItemSlot.name,service:{...service},roof:{...roof},b2:{...b2,armed:[...b2.armed]},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
+window.__mgGameDebug={optionalStageHelp,previewRigActors:(time=gameTime)=>activeCastForRig(time),get state(){return {stage,equippedItemName:equippedItemSlot.name,service:{...service},roof:{...roof},b2:{...b2,armed:[...b2.armed]},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
  firstCardEarned,rationEarned,rationRemaining,binocularsEarned,
  rationWorld:originalRationProp.active?{...originalRationTarget}:null,
  binocularsWorld:originalBinocularsProp.active?{...originalBinocularsTarget}:null,
