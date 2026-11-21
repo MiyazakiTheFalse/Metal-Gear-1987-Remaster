@@ -399,7 +399,7 @@ void AMGPrototypeHUD::DrawHUD()
                     const int32 Index = ((Selection + Offset) % Count + Count) % Count;
                     const FMGEquipmentEntry& Entry = Entries[Index];
                     const bool bAvailable = Entry.bOwned &&
-                        (!Equip->IsConfiscated() || Entry.Id == TEXT("NONE")) &&
+                        (!Equip->IsConfiscated() || Entry.Id == FName(TEXT("NONE"))) &&
                         (!Entry.bConsumable || Entry.Quantity > 0);
                     const bool bFocused = Offset == 0;
                     const float CardX = PanelX + 11.f * UiScale +
@@ -415,11 +415,11 @@ void AMGPrototypeHUD::DrawHUD()
                              CardW, (bFocused ? 3.f : 1.f) * UiScale);
                     const FString Label = bAvailable ?
                         Entry.Label.Left(15) : TEXT("UNAVAILABLE");
-                    const FString CountText = Entry.Id == TEXT("HANDGUN") ?
+                    const FString CountText = Entry.Id == FName(TEXT("HANDGUN")) ?
                         FString::Printf(TEXT("%d RD"), Entry.Quantity) :
                         Entry.bConsumable ?
                         FString::Printf(TEXT("x%d"), Entry.Quantity) :
-                        Entry.Id == TEXT("NONE") ? TEXT("UNEQUIPPED") :
+                        Entry.Id == FName(TEXT("NONE")) ? TEXT("UNEQUIPPED") :
                         bAvailable ? TEXT("EQUIPPED") : TEXT("LOCKED");
                     const FLinearColor Tint = !bAvailable ? HudRed :
                         bFocused ? HudAmber : HudGreen;
