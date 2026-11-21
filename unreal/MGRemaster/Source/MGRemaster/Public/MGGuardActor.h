@@ -26,7 +26,8 @@ public:
     /** Every deployed sentry has an authored duty, an actual protected object
      * and a local route, rather than a random enemy spawn. */
     void ConfigureDuty(FName DutyId, FName DutyName, FName ProtectedObject,
-                       const FVector& AssignmentAnchor, float StopSeconds);
+                       const FVector& AssignmentAnchor, float StopSeconds,
+                       const FVector& AssetFocusPoint);
     FName GetDutyId() const { return AssignedDutyId; }
     FName GetProtectedObject() const { return AssignedObject; }
     // A confirmed sighting shared by a local, functioning CCTV system.
@@ -62,6 +63,7 @@ private:
     FName AssignedDutyName = NAME_None;
     FName AssignedObject = NAME_None;
     FVector AssignmentAnchor = FVector::ZeroVector;
+    FVector DutyFocusPoint = FVector::ZeroVector;
     float DutyPauseSeconds = 0.8f;
     float DutyPauseRemaining = 0.f;
     float DutyBlockedSeconds = 0.f;
