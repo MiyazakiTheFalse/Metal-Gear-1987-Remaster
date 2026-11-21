@@ -799,8 +799,21 @@ FString AMGMissionOne::GetObjectiveText() const
             ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
         if (Story && Story->GetMissionNumber() == 3)
             return TEXT("FOLLOW FOX'S LEAD — FIND DR. PETTROVICH");
-        return bPOWRescued ? TEXT("3F — DETENTION TRANSFER MARKER / FIND GRAY FOX")
-            : TEXT("3F — RECOVER AMMO / FREE PRISONER WITH CARD 1");
+        if (!bPOWRescued)
+            return TEXT("3F — RESCUE FIRST PRISONER / CARD 1 AND GAS MASK");
+        bool bHasCardTwo = false, bHasMissiles = false;
+        for (const FPickup& P : Pickups)
+        {
+            if (P.Item == TEXT("CARD2") && P.bTaken) bHasCardTwo = true;
+            if (P.Item == TEXT("RC_MISSILE") && P.bTaken) bHasMissiles = true;
+        }
+        if (!bHasCardTwo) return TEXT("3F — FIND CARD 2 IN THE SOUTHEAST CARD 1 ROOM");
+        if (!bHasMissiles) return TEXT("3F — WESTERN CARD 2 MISSILE ROOM");
+        if (!bElectricPanelDisabled)
+            return TEXT("3F — GUIDE RC MISSILE THROUGH ELECTRIC HALL TO WALL PANEL");
+        if (!bDianePOWRescued)
+            return TEXT("3F — RESCUE POW BEYOND ELECTRIC FLOOR / DIANE 120.33");
+        return TEXT("3F COMPLETE — RETURN VIA 2F TO 1F PRISONER CELLS");
     }
     if (CurrentFloor == 2)
         return TEXT("2F — RECONNOITRE CORRIDORS / RETURN TO ELEVATOR");
@@ -810,7 +823,12 @@ FString AMGMissionOne::GetObjectiveText() const
             bCardCollected = true;
     if (!bCardCollected) return TEXT("INFILTRATE THE TRUCK YARD — FIND ACCESS CARD 1");
     if (!bCardDoorOpened) return TEXT("ACCESS THE CARD 1 ROOM — INVESTIGATE ITS CONTENTS");
-    return FString::Printf(TEXT("1F — REACH ELEVATOR / Q SELECTS %dF"), SelectedFloor);
+    if (!bDianePOWRescued) return TEXT("1F — ELEVATOR TO 3F / CARD 2 AND ELECTRIC POW");
+    if (!bFoxLocationPOWRescued)
+        return TEXT("1F REVISIT — CARD 2 PRISONER CELL IN NORTH ANNEX");
+    if (!bCaptureMethodPOWRescued)
+        return TEXT("1F REVISIT — CARD 1 PRISONER CELL IN NORTH ANNEX");
+    return TEXT("1F WESTERN DEAD END — FOLLOW CAPTURE CLUE TO GRAY FOX");
 }
 
 void AMGMissionOne::BuildUpperFloors()
@@ -969,6 +987,8 @@ void AMGMissionOne::Tick(float DeltaSeconds)
     // Gas is a readable environmental threat, not a binary inventory gate.
     // The real equipped GASMASK protects; holding one in inventory does not.
     GasWarningCooldown = FMath::Max(0.f, GasWarningCooldown - DeltaSeconds);
+    ElectricWarningCooldown = FMath::Max(
+        0.f, ElectricWarningCooldown - DeltaSeconds);
     if (!bLiftTravelling && CurrentFloor == 3)
     {
         AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(
@@ -995,6 +1015,42 @@ void AMGMissionOne::Tick(float DeltaSeconds)
                 }
             }
             else GasDamageAccum = 0.f;
+
+            const bool bElectric = !bElectricPanelDisabled &&
+                L.X >= 8750.f && L.X <= 9350.f &&
+                L.Y >= 3275.f && L.Y <= 3750.f &&
+                L.Z > 1180.f && L.Z < 1470.f;
+            if (bElectric)
+            {
+                ElectricDamageAccum += FMath::Max(0.f, DeltaSeconds);
+                if (ElectricWarningCooldown <= 0.f)
+                {
+                    Player->NotifyFeedback(
+                        TEXT("ELECTRIFIED FLOOR — GUIDE MISSILE TO WALL SWITCH"),
+                        TEXT("denied"));
+                    ElectricWarningCooldown = 2.2f;
+                }
+                if (ElectricDamageAccum >= .65f)
+                {
+                    ElectricDamageAccum -= .65f;
+                    UGameplayStatics::ApplyDamage(Player, 24.f, nullptr, this,
+                                                   UDamageType::StaticClass());
+                }
+            }
+            else ElectricDamageAccum = 0.f;
+            // Seeing the live hazard teaches the problem and activates optional
+            // Schneider advice. It never awards the missile or solves itself.
+            if (!bElectricPanelDisabled &&
+                L.X >= 8200.f && L.X <= 9600.f &&
+                L.Y >= 2700.f && L.Y <= 3300.f)
+            {
+                if (GetWorld()->GetGameInstance())
+                    if (UMGCampaignState* Story =
+                        GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+                        if (!Story->HasBeat(TEXT("m01.electric.discovered")))
+                            Story->RecordBeat(TEXT("m01.electric.discovered"),
+                                TEXT("3F: Electrical floor protects a northern POW; wall panel is visible."));
+            }
         }
     }
     if (!bLiftTravelling) return;
