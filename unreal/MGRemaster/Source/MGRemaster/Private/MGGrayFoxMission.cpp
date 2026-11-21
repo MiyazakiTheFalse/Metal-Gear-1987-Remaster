@@ -1584,6 +1584,19 @@ bool AMGGrayFoxMission::TryServiceInteraction(AMGPlayerCharacter* Player)
         {
             Dialogue = TEXT("GRENADE RACK EMPTY. SEEK COVER OR RETURN TO LIFT.");
         }
+        else if (!IsValid(HindProxy))
+        {
+            // An unloaded/missing target must never crash or spend finite
+            // ammunition. A real PIE import error should remain visible.
+            Dialogue = TEXT("AIRCRAFT TARGET UNAVAILABLE. RETREAT TO LIFT.");
+        }
+        else if (HindPhase == 3)
+        {
+            // Don't advertise a clear shot then waste the only six grenades
+            // during a mechanically invulnerable evasive beat. Both builds
+            // let an impatient player observe the aircraft's return instead.
+            Dialogue = TEXT("HELICOPTER EVADING — HOLD FIRE.");
+        }
         else
         {
             --RoofGrenadesRemaining;
