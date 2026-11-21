@@ -41,6 +41,21 @@ void AMGPrototypeHUD::DrawHUD()
 
     const float Width = Canvas->ClipX;
     const float Height = Canvas->ClipY;
+    // A dark cabin mask lets the elevator later hide asynchronous sublevel
+    // loads. At present it only obscures a short authored floor transition.
+    if (const AMGMissionOne* Lift = Cast<AMGMissionOne>(
+            UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass())))
+    {
+        if (Lift->IsLiftTravelling())
+        {
+            DrawRect(FLinearColor(0.005f, 0.018f, 0.018f, 1.f), 0.f, 0.f, Width, Height);
+            DrawText(TEXT("OUTER HEAVEN / BUILDING ONE"), FLinearColor::White,
+                     Width * .36f, Height * .43f, nullptr, 1.0f, false);
+            DrawText(TEXT("ELEVATOR TRANSIT"), FLinearColor(.60f,.89f,.68f,1.f),
+                     Width * .40f, Height * .51f, nullptr, .82f, false);
+            return;
+        }
+    }
     const float Margin = FMath::Clamp(Width * 0.018f, 12.f, 28.f);
     const float UiScale = FMath::Clamp(Height / 900.f, 0.76f, 1.20f);
     const UMGEquipmentComponent* Equip = Player->GetEquipment();
