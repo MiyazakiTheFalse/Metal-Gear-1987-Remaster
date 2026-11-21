@@ -1,0 +1,193 @@
+{
+  "schema_version": 1,
+  "title": "Solid Snake (1995): playable identity distinct from Naked Snake",
+  "status": "binding_character_design_contract_not_mechanically_fully_implemented",
+  "historical_scope": "Operation Intrude N313, 1995",
+  "source_priority": [
+    "Konami 1987 Metal Gear profiles and MSX2 manual",
+    "1987 MSX2 comparative dialogue/behaviour",
+    "later Metal Gear canon as characterization continuity, not pre-1995 knowledge",
+    "remake-only expression explicitly labelled"
+  ],
+  "contrast": "Naked Snake foregrounds wilderness survival and formal CQC; 1995 Solid Snake foregrounds adapting to a military-industrial fortress, prisoners and equipment earned within it. Both are competent stealth operatives; neither lacks the other's skills.",
+  "source_refs": [
+    "https://www.konami.com/mg/archive/mg/chara.html",
+    "https://metalgear.konami.net/manual/mc1/mg1_msx/pc/en/page02.html",
+    "https://metalgear.konami.net/manual/mc1/mg1_msx/pc/en/page08.html",
+    "https://www.konami.com/mg/archive/mgs3/uk/system_main.html",
+    "https://metalgear.konami.net/manual/mc2/mgs4/ps5/en/page14.html",
+    "https://img.konami.com/mg/mc2/s/img/top/book_sample_mgs4_en.pdf"
+  ],
+  "traits": [
+    {
+      "id": "intelligence_through_exploration",
+      "label": "Lateral, observant problem-solver",
+      "source_status": "source_supported_mechanic_remake_expression",
+      "player_expression": "Separate ways around a locked/guarded area; learn through door, sound, machinery and physical evidence",
+      "critical_payoff": "Items, discovered routes and prisoner clues acquired in earlier missions remain useful later",
+      "anti_pattern": "GPS marker or radio voice solves everything automatically"
+    },
+    {
+      "id": "quiet_resolve",
+      "label": "Understated resilience",
+      "source_status": "later_canon_supports_understatement",
+      "player_expression": "Under pressure, tactical decisions are reliable; a small restrained reaction, no premature superhero speeches",
+      "critical_payoff": "Even late betrayal gets concise reaction followed by player-driven action",
+      "anti_pattern": "Invincible swagger and dramatic threats at mission start"
+    },
+    {
+      "id": "empathy_as_action",
+      "label": "Protective, compassionate in conduct",
+      "source_status": "original_rescue_system",
+      "player_expression": "Rescue POWs and preserve hostage survival; suffering affects decisions and world state",
+      "critical_payoff": "Helping Ellen unlocks Madnar's cooperation; Jennifer's brother gives a credible final escape clue",
+      "anti_pattern": "Rescuing humans solely for points or showing sentimental monologues after every rescue"
+    },
+    {
+      "id": "earned_autonomy",
+      "label": "Questions authority and learns to trust evidence",
+      "source_status": "plot_supported",
+      "player_expression": "Early Big Boss advice is credible; later player can physically test the false advice and reject the abort order",
+      "critical_payoff": "Relationship shifts gradually from mentor-dependence to independent judgment",
+      "anti_pattern": "Early premature reveal or forced obedience to a visibly bad instruction"
+    },
+    {
+      "id": "adaptive_combat",
+      "label": "Economical, opportunistic combat",
+      "source_status": "modernized_remake_proposal",
+      "player_expression": "Rear takedown, wall-to-wall movement, body dragging and rapid weapon-switching; obstacles and stealth are preferred over mandatory combat",
+      "critical_payoff": "Guard posture/awareness makes a grapple earned; equipment placement sets up boss counters",
+      "anti_pattern": "Treating Snake as a CQC-incompetent novice or a combat power-fantasy demigod"
+    },
+    {
+      "id": "dry_questions",
+      "label": "Dry, pointed, sometimes incredulous",
+      "source_status": "later_solid_character_voice",
+      "player_expression": "Brief questions clarify threats, expose evasive intelligence or provide humor without making him oblivious",
+      "critical_payoff": "Player hears doubts accumulate through codec as the fortress story unfolds",
+      "anti_pattern": "Parroting the last noun every line without narrative purpose"
+    },
+    {
+      "id": "physical_precision",
+      "label": "Body-conscious, practical movement",
+      "source_status": "modernized_remake_proposal",
+      "player_expression": "Back to wall; measured footwork, corner peek, localized hand placement, drag weight, quiet controlled weapon presentation",
+      "critical_payoff": "Stealth movements communicate body position and sound to player without relying entirely on UI",
+      "anti_pattern": "Chest facing wall, moonwalking while dragging, teleporting bodies into lockers"
+    },
+    {
+      "id": "rookie_without_clumsiness",
+      "label": "First field mission, but fully trained",
+      "source_status": "konami_original_character_profile",
+      "player_expression": "Mechanics responsive from frame one; express inexperience through situations and authored choices, not artificial input lag",
+      "critical_payoff": "Growing confidence shown in earned radio reactions and clearer personal decisions",
+      "anti_pattern": "Make 1995 Snake incompetent, fall over or need arbitrary XP skills to do basic stealth"
+    }
+  ],
+  "mechanics_to_keep_distinct": {
+    "foreground": [
+      "fortress route topology and backtracking",
+      "acquired weapon/item exploitation",
+      "card-access and radio intelligence",
+      "POW rescue and rank/inventory consequence",
+      "guard duty/vision/physical concealment",
+      "real equipment preparation for bosses"
+    ],
+    "modernized_without_replacing_source": [
+      "back-to-wall cover with animation cues",
+      "rear approach hold-to-choke and recoverable risk",
+      "slow heavy body dragging with geometry collision",
+      "industrial hiding lockers only where infrastructure permits"
+    ],
+    "not_imported_from_mgs3_as_progression": [
+      "jungle food hunting",
+      "stamina hunger loop",
+      "camouflage percentage wardrobe optimization",
+      "survival-cure fracture/poison menu"
+    ],
+    "protected_lore": [
+      "Naked Snake's CQC is not a reason Solid is ignorant of CQC",
+      "Big Boss's real command betrayal remains unresolved until earned",
+      "Gray Fox is the missing veteran not an always-on guide",
+      "Venom identity must not be known to Snake in 1995",
+      "early game Snake must not speak as his future Alaska-era self"
+    ]
+  },
+  "mission_expressions": [
+    {
+      "mission": 1,
+      "trait_focus": [
+        "intelligence_through_exploration",
+        "rookie_without_clumsiness"
+      ],
+      "example": "Scavenge gear, read guards at real jobs, free first prisoners and learn Outer Heaven with tangible uncertainty"
+    },
+    {
+      "mission": 2,
+      "trait_focus": [
+        "quiet_resolve",
+        "adaptive_combat",
+        "physical_precision"
+      ],
+      "example": "Submit to capture to reach Gray Fox, improvise an exit, reclaim equipment; physical vulnerability not cutscene invulnerability"
+    },
+    {
+      "mission": 3,
+      "trait_focus": [
+        "intelligence_through_exploration",
+        "earned_autonomy"
+      ],
+      "example": "Earlier binoculars/gas mask/card/POW intel support multiple revisits and reward corroboration"
+    },
+    {
+      "mission": 4,
+      "trait_focus": [
+        "adaptive_combat",
+        "empathy_as_action"
+      ],
+      "example": "Jennifer's legitimate aid and researched enemy weaknesses should be earned, not gifted by scripted loadouts"
+    },
+    {
+      "mission": 5,
+      "trait_focus": [
+        "empathy_as_action",
+        "quiet_resolve"
+      ],
+      "example": "Prioritize Ellen's rescue before Madnar's technical disclosure; physically revisit earlier detention rooms"
+    },
+    {
+      "mission": 6,
+      "trait_focus": [
+        "earned_autonomy",
+        "dry_questions"
+      ],
+      "example": "Detect contradictions in Big Boss's truck/door guidance; save Jennifer's brother during Coward Duck encounter"
+    },
+    {
+      "mission": 7,
+      "trait_focus": [
+        "earned_autonomy",
+        "quiet_resolve"
+      ],
+      "example": "A prisoner corroborates command deception and Snake knowingly refuses the abort order"
+    },
+    {
+      "mission": 8,
+      "trait_focus": [
+        "quiet_resolve",
+        "intelligence_through_exploration",
+        "empathy_as_action"
+      ],
+      "example": "TX-55 sabotage uses Fox and Madnar intelligence; left escape ladder pays off earlier hostage rescue, final report understated"
+    }
+  ],
+  "production_gates": [
+    "No character personality trait may replace a source-critical equipment or prisoner gate",
+    "Movement is responsive at mission start; character growth occurs through learned world use, not locked basic controls",
+    "Every stealth animation state has a gameplay counterpart with collision, perception and timing",
+    "Back-to-wall requires surface normal orientation, side-slide, corner behavior and camera tests",
+    "Rescues change people and later mission outcomes without inventing unsupported canonical dialogue",
+    "Check subtitles, audio-free alternatives, gamepad prompts and save/reload on every trait expression",
+    "Mark what is actually in Unreal as source-only/uncompiled until engine tests pass"
+  ]
+}
