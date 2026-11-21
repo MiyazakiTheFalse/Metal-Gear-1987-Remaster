@@ -325,6 +325,8 @@ void AMGGrayFoxMission::RestoreCapturedGear(AMGPlayerCharacter* Player)
         else if (Id == TEXT("P07")) Equipment->AwardAmmunition(TEXT("HANDGUN"), 12);
         else if (Id == TEXT("P08")) Equipment->AwardItem(TEXT("CARD2"), 1);
         else if (Id == TEXT("P09")) Equipment->AwardWeapon(TEXT("RC_MISSILE"), 4);
+        else if (Id == TEXT("P10"))
+            Equipment->AwardWeapon(TEXT("GRENADE_LAUNCHER"), 6);
     }
     if (OpeningSave->Version >= 4)
     {
