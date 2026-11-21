@@ -165,7 +165,7 @@ void AMGMissionOne::BeginPlay()
     SpawnGuards();
     const UMGMissionOneSaveGame* Save = Cast<UMGMissionOneSaveGame>(
         UGameplayStatics::LoadGameFromSlot(TEXT("MissionOneV1"), 0));
-    if (Save && (Save->Version == 1 || Save->Version == 2 || Save->Version == 3))
+    if (Save && (Save->Version >= 1 && Save->Version <= 4))
     {
         for (FPickup& P : Pickups)
             if (Save->CollectedPickupIds.Contains(P.Id))
@@ -179,6 +179,8 @@ void AMGMissionOne::BeginPlay()
         bPOWRescued = Save->Version >= 2 && Save->bPOWRescued;
         bPrisonerDoorOpened = Save->Version >= 3 && Save->bPrisonerDoorOpened;
         bGasDoorOpened = Save->Version >= 3 && Save->bGasDoorOpened;
+        SavedHandgunRounds = Save->Version >= 4 ? Save->HandgunRounds : -1;
+        SavedRationsRemaining = Save->Version >= 4 ? Save->RationsRemaining : -1;
         if (bPrisonerDoorOpened && IsValid(PrisonerDoor)) PrisonerDoor->Destroy();
         if (bGasDoorOpened && IsValid(GasDoor)) GasDoor->Destroy();
         CurrentFloor = Save->Version >= 2 ? FMath::Clamp(Save->CurrentFloor, 1, 3) : 1;
@@ -200,6 +202,10 @@ void AMGMissionOne::RestoreSavedEquipment(AMGPlayerCharacter* Player)
             else if (P.bWeapon) Equipment->AwardWeapon(P.Item, 0);
             else Equipment->AwardItem(P.Item, 1);
         }
+    if (SavedHandgunRounds >= 0)
+        Equipment->RestoreHandgunRounds(SavedHandgunRounds);
+    if (SavedRationsRemaining >= 0)
+        Equipment->RestoreItemQuantity(TEXT("RATION"), SavedRationsRemaining);
 }
 
 void AMGMissionOne::SaveProgress(AMGPlayerCharacter* Player)
@@ -215,7 +221,12 @@ void AMGMissionOne::SaveProgress(AMGPlayerCharacter* Player)
     Save->bPrisonerDoorOpened = bPrisonerDoorOpened;
     Save->bGasDoorOpened = bGasDoorOpened;
     Save->CurrentFloor = CurrentFloor;
-    Save->Version = 3;
+    Save->Version = 4;
+    if (Player && Player->GetEquipment())
+    {
+        Save->HandgunRounds = Player->GetEquipment()->GetHandgunRounds();
+        Save->RationsRemaining = Player->GetEquipment()->GetItemQuantity(TEXT("RATION"));
+    }
     if (!UGameplayStatics::SaveGameToSlot(Save, TEXT("MissionOneV1"), 0))
         UE_LOG(LogTemp, Warning, TEXT("Mission One checkpoint save failed"));
 }
@@ -258,6 +269,34 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
         }
         return true;
     }
+    if (CurrentFloor == 3 && !bPrisonerDoorOpened && IsValid(PrisonerDoor) &&
+        FVector::Dist(Player->GetActorLocation(), PrisonerDoor->GetActorLocation()) < 260.f)
+    {
+        if (!Equipment->HasItem(TEXT("CARD1")))
+            Player->NotifyFeedback(TEXT("PRISONER CELL LOCKED — CARD 1"), TEXT("denied"));
+        else
+        {
+            bPrisonerDoorOpened = true;
+            PrisonerDoor->Destroy();
+            SaveProgress(Player);
+            Player->NotifyFeedback(TEXT("CARD 1 — PRISONER CELL OPEN"), TEXT("select"));
+        }
+        return true;
+    }
+    if (CurrentFloor == 3 && !bGasDoorOpened && IsValid(GasDoor) &&
+        FVector::Dist(Player->GetActorLocation(), GasDoor->GetActorLocation()) < 260.f)
+    {
+        if (!Equipment->HasItem(TEXT("CARD1")))
+            Player->NotifyFeedback(TEXT("GAS CHAMBER LOCKED — CARD 1"), TEXT("denied"));
+        else
+        {
+            bGasDoorOpened = true;
+            GasDoor->Destroy();
+            SaveProgress(Player);
+            Player->NotifyFeedback(TEXT("GAS CHAMBER — EQUIP GAS MASK"), TEXT("select"));
+        }
+        return true;
+    }
     if (CurrentFloor == 3 && !bPOWRescued &&
         FVector::Dist(Player->GetActorLocation(), CM(54.f, 33.f, 1290.f)) < 240.f)
     {
@@ -275,8 +314,8 @@ FString AMGMissionOne::GetObjectiveText() const
     if (bLiftTravelling)
         return FString::Printf(TEXT("ELEVATOR / EN ROUTE TO %dF"), DestinationFloor);
     if (CurrentFloor == 3)
-        return bPOWRescued ? TEXT("3F — SEARCH CAMERA GALLERY / RETURN VIA ELEVATOR")
-            : TEXT("3F — FIND HANDGUN AMMO AND THE PRISONER");
+        return bPOWRescued ? TEXT("3F — AVOID CCTV / INVESTIGATE GAS WING")
+            : TEXT("3F — RECOVER AMMO / UNLOCK PRISONER CELL WITH CARD 1");
     if (CurrentFloor == 2)
         return TEXT("2F — RECONNOITRE CORRIDORS / RETURN TO ELEVATOR");
     bool bCardCollected = false;
@@ -411,6 +450,37 @@ bool AMGMissionOne::StartLift(AMGPlayerCharacter* Player)
 void AMGMissionOne::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    // Gas is a readable environmental threat, not a binary inventory gate.
+    // The real equipped GASMASK protects; holding one in inventory does not.
+    GasWarningCooldown = FMath::Max(0.f, GasWarningCooldown - DeltaSeconds);
+    if (!bLiftTravelling && CurrentFloor == 3)
+    {
+        AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(
+            UGameplayStatics::GetPlayerCharacter(this, 0));
+        if (Player && Player->GetEquipment())
+        {
+            const FVector L = Player->GetActorLocation();
+            const bool bInside = L.X >= 6200.f && L.X <= 8000.f &&
+                L.Y >= 3300.f && L.Y <= 4100.f && L.Z > 1180.f && L.Z < 1470.f;
+            const bool bProtected = Player->GetEquipment()->IsItemEquipped(TEXT("GASMASK"));
+            if (bInside && !bProtected)
+            {
+                if (GasWarningCooldown <= 0.f)
+                {
+                    Player->NotifyFeedback(TEXT("TOXIC GAS — EQUIP GAS MASK"), TEXT("denied"));
+                    GasWarningCooldown = 3.f;
+                }
+                GasDamageAccum += FMath::Max(0.f, DeltaSeconds);
+                if (GasDamageAccum >= 1.f)
+                {
+                    GasDamageAccum -= 1.f;
+                    UGameplayStatics::ApplyDamage(Player, 9.f, nullptr, this,
+                                                  UDamageType::StaticClass());
+                }
+            }
+            else GasDamageAccum = 0.f;
+        }
+    }
     if (!bLiftTravelling) return;
     LiftTravelRemaining -= FMath::Max(0.f, DeltaSeconds);
     if (LiftTravelRemaining <= 0.f) FinishLift();
