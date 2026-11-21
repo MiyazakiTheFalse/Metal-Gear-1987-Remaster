@@ -71,7 +71,7 @@ void AMGRemasterGameMode::StartPlay()
         return;
     }
     if (MissionNumber >= 4 ||
-        (MissionNumber == 3 && Story && Story->HasBeat(TEXT("m03.exterior_started"))))
+        (MissionNumber == 3 && Story && Story->IsMissionThreeExteriorActive()))
     {
         if (AMGLaterMission* Later = GetWorld()->SpawnActor<AMGLaterMission>(
             AMGLaterMission::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator))
