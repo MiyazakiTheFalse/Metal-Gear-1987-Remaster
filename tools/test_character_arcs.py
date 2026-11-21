@@ -28,7 +28,7 @@ class CharacterStoryContractTests(unittest.TestCase):
 
     def test_optional_radio_is_not_a_hard_gate(self):
         self.assertTrue(DATA["gate_policy"]["optional_radio"].startswith("Never"))
-        self.assertIn("not", DATA["dependency_semantics"].lower())
+        self.assertIn("never", DATA["dependency_semantics"].lower())
         self.assertTrue(all(b["provenance"] != "j2me_verified" for b in DATA["beats"]))
 
     def test_gray_fox_story_stays_in_1995(self):
