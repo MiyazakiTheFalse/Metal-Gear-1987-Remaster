@@ -94,7 +94,12 @@ void AMGMissionOne::Build()
     WallX(24.f, 18.f, 25.4f); WallX(24.f, 28.6f, 36.f);
     WallX(48.f, 18.f, 26.5f); WallX(48.f, 29.5f, 36.f);
     WallY(18.f, 24.f, 100.f);
-    WallY(42.f, 48.f, 78.f);
+    // The original requires return to 1F for two different prisoner clues.
+    // This formerly sealed prototype side wing is now a two-cell detention
+    // annex: Card 2 reveals the hidden Fox cell, Card 1 the capture route.
+    WallY(42.f, 48.f, 54.f); WallY(42.f, 59.f, 68.f);
+    WallY(42.f, 73.f, 78.f);
+    WallX(64.f,42.f,54.f);
     WallX(48.f, 36.f, 54.f);
     WallY(54.f, 48.f, 78.f);
     WallX(78.f, 42.f, 54.f);
@@ -116,6 +121,18 @@ void AMGMissionOne::Build()
     // verified original connectivity. Never make up a critical source shortcut.
     CardDoor = Block(TEXT("CardOneDoor"), CM(24.f, 27.f, 135.f),
                      FVector(.40f, 3.2f, 2.7f));
+    FoxLocationDoor = Block(TEXT("1F_FoxLocationCell_Card2"),
+                            CM(56.5f,42.f,135.f), FVector(5.f,.35f,2.7f));
+    CaptureMethodDoor = Block(TEXT("1F_CaptureMethodCell_Card1"),
+                              CM(70.5f,42.f,135.f), FVector(5.f,.35f,2.7f));
+    FoxLocationPrisoner = Block(TEXT("1F_FoxLocationPOW"),
+                               CM(56.f,49.f,90.f), FVector(.6f,.6f,1.7f),false);
+    CaptureMethodPrisoner = Block(TEXT("1F_CaptureMethodPOW"),
+                                 CM(70.f,49.f,90.f), FVector(.6f,.6f,1.7f),false);
+    // Returning to the western dead end on 1F leads to capture. This remains
+    // a clearly marked prototype interaction until the J2ME rooms are traced.
+    CaptureMarker = Block(TEXT("1F_DeliberateCaptureDeadEnd"),
+                          CM(3.f,8.f,90.f), FVector(.8f,.8f,1.6f),false);
     Block(TEXT("ElevatorMarker"), CM(92.f, 26.f, 90.f), FVector(1.f, 1.f, 1.8f), false);
 
     // Interior locations are represented by pickup markers near accessible sides
@@ -643,8 +660,8 @@ void AMGMissionOne::BuildUpperFloors()
             // and exact shapes remain provisional pending J2ME map recovery.
             Block(TEXT("3F_PrisonerContact"), CM(54.f, 33.f, DeckZ + 90.f),
                   FVector(.6f,.6f,1.8f), false);
-            CaptureMarker = Block(TEXT("3F_DetentionTransfer"),
-                CM(64.f,24.f,DeckZ + 90.f), FVector(.8f,.8f,1.7f), false);
+            // Actual original capture follows a 1F return, not this 3F cell.
+            // The original 3F room is the first POW, not Diane's contact.
             Block(TEXT("3F_CrateCover"), CM(83.f, 27.f, DeckZ + 70.f),
                   FVector(1.8f,1.3f,1.4f));
             Block(TEXT("3F_CameraBlindCover"), CM(73.f, 23.f, DeckZ + 70.f),
@@ -666,6 +683,17 @@ void AMGMissionOne::BuildUpperFloors()
             WallX(60.f,29.f,31.5f); WallX(60.f,34.5f,39.f);
             PrisonerDoor = Block(TEXT("3F_PrisonerDoor_Card1"),
                 CM(60.f,33.f,DeckZ+135.f), FVector(.35f,3.f,2.7f));
+            // Two explicitly locked cache rooms: southeast Card 1 -> Card 2,
+            // then the western Card 2 door -> remote-controlled missiles.
+            WallY(20.f,82.f,88.f); WallY(28.f,82.f,88.f);
+            WallX(88.f,20.f,28.f);
+            WallX(82.f,20.f,22.5f); WallX(82.f,25.5f,28.f);
+            CardTwoDoor = Block(TEXT("3F_Card2CacheDoor_Card1"),
+                CM(82.f,24.f,DeckZ+135.f), FVector(.35f,3.f,2.7f));
+            WallY(20.f,42.f,49.f); WallY(28.f,42.f,49.f);
+            WallX(49.f,20.f,22.5f); WallX(49.f,25.5f,28.f);
+            RCStoreDoor = Block(TEXT("3F_RCMissileStore_Card2"),
+                CM(49.f,24.f,DeckZ+135.f), FVector(.35f,3.f,2.7f));
             // The optional hazardous side passage is physically bounded.
             WallX(62.f,33.f,35.f); WallX(62.f,38.f,41.f);
             WallY(41.f,62.f,80.f);
@@ -673,6 +701,20 @@ void AMGMissionOne::BuildUpperFloors()
             WallX(80.f,33.f,35.f); WallX(80.f,38.f,41.f);
             GasDoor = Block(TEXT("3F_GasDoor_Card1"),
                 CM(62.f,36.5f,DeckZ+135.f), FVector(.35f,3.f,2.7f));
+            // A single 3F north access choke makes the electric floor a
+            // meaningful obstacle. Its source-correct solution is a guided
+            // missile striking the wall controller from the safe side.
+            WallY(32.f,80.f,88.f); WallY(32.f,93.f,100.f);
+            WallX(88.f,32.f,42.f); WallX(93.f,32.f,42.f);
+            WallY(38.5f,88.f,88.9f); WallY(38.5f,91.1f,93.f);
+            Block(TEXT("3F_ElectricHazardStrip"), CM(90.5f,35.f,DeckZ+4.f),
+                  FVector(5.f,4.5f,.15f), false);
+            ElectricPanel = Block(TEXT("M01_ElectricPanel"),
+                CM(90.5f,38.f,DeckZ+120.f),FVector(.65f,.3f,.65f),true);
+            DianeDoor = Block(TEXT("3F_DianePOWCell_Card1"),
+                CM(90.f,38.5f,DeckZ+135.f),FVector(2.2f,.35f,2.7f));
+            DianePrisoner = Block(TEXT("3F_DianeFrequencyPOW"),
+                CM(90.5f,40.3f,DeckZ+90.f),FVector(.6f,.6f,1.7f),false);
             // 2.7m-high mounted cameras sweep toward the main 3F corridor.
             for (float X : {68.f,79.f})
             {
@@ -685,6 +727,8 @@ void AMGMissionOne::BuildUpperFloors()
               CM(92.f, 26.f, DeckZ + 90.f), FVector(1.f,1.f,1.8f), false);
     }
     AddPickup(TEXT("P07"), TEXT("HANDGUN_AMMO"), FVector(78.f, 28.f, 12.f), false);
+    AddPickup(TEXT("P08"), TEXT("CARD2"), FVector(85.f,24.f,12.f),false);
+    AddPickup(TEXT("P09"), TEXT("RC_MISSILE"), FVector(45.f,24.f,12.f),true);
 }
 
 FVector AMGMissionOne::FloorLiftLocation(int32 Floor)
