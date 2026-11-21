@@ -25,6 +25,7 @@ public:
     void PersistInventory(AMGPlayerCharacter* Player) { SaveProgress(Player); }
     void RestoreSavedEquipment(AMGPlayerCharacter* Player);
     FString GetObjectiveText() const;
+    FString GetRecentDialogue() const { return BeatSubtitleTime > 0.f ? BeatSubtitle : FString(); }
     bool CycleLiftDestination(AMGPlayerCharacter* Player);
     int32 GetCurrentFloor() const { return CurrentFloor; }
     int32 GetSelectedFloor() const { return SelectedFloor; }
@@ -50,6 +51,8 @@ private:
     bool bCardDoorOpened = false;
     bool bElevatorReached = false;
     bool bPOWRescued = false;
+    float BeatSubtitleTime = 0.f;
+    FString BeatSubtitle;
     bool bPrisonerDoorOpened = false;
     bool bGasDoorOpened = false;
     UPROPERTY()
