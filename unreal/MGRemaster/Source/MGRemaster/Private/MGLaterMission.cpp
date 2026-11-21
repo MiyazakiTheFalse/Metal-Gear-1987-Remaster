@@ -345,6 +345,15 @@ void AMGLaterMission::OnBossDefeated(FName Id)
         }
     RemoveDefeatedGates();
 }
+void AMGLaterMission::NotifyHostageShield()
+{
+    if (!GetWorld() || WrongWeaponCooldown>0.f) return;
+    WrongWeaponCooldown=2.0f;
+    if (AMGPlayerCharacter* Snake=Cast<AMGPlayerCharacter>(
+        UGameplayStatics::GetPlayerCharacter(this,0)))
+        Snake->NotifyFeedback(TEXT("HOSTAGE IN THE LINE OF FIRE / FLANK COWARD DUCK"),
+                              TEXT("denied"));
+}
 void AMGLaterMission::NotifyWrongWeapon(FName BossId,FName Needed)
 {
     if (!GetWorld() || WrongWeaponCooldown>0.f) return;
