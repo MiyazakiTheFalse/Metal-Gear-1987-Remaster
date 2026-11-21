@@ -16,9 +16,10 @@ EQUIPMENT = (ROOT / "unreal/MGRemaster/Source/MGRemaster/Private/MGEquipmentComp
 
 
 class MissionOneRuntimeContractTests(unittest.TestCase):
-    def test_mission_one_is_start_mode(self):
+    def test_chapter_zero_loads_mission_one_and_chapter_one_loads_prison(self):
         self.assertIn("SpawnActor<AMGMissionOne>", GAME_MODE)
-        self.assertNotIn("SpawnActor<AMGGrayFoxMission>", GAME_MODE)
+        self.assertIn("SpawnActor<AMGGrayFoxMission>", GAME_MODE)
+        self.assertIn("if (Chapter == 1)", GAME_MODE)
         self.assertIn("InitialiseMissionOneLoadout()", GAME_MODE)
 
     def test_source_pickup_ids_and_types_are_present(self):
@@ -29,7 +30,11 @@ class MissionOneRuntimeContractTests(unittest.TestCase):
             )
             self.assertIn(expected, RUNTIME)
         matches = re.findall(r'AddPickup\(TEXT\("(P\d{2})"\)', RUNTIME)
-        self.assertCountEqual(matches, [p["id"] for p in DATA["pickups"]])
+        # The third-floor P07 pickup is defined in the vertical contract, not
+        # the ground-floor spatial data. Do not mistakenly reject an extension.
+        self.assertTrue(set(p["id"] for p in DATA["pickups"]).issubset(matches))
+        self.assertEqual(len(matches), len(set(matches)))
+        self.assertIn("P07", matches)
 
     def test_guards_are_not_duplicated_or_spawned_in_disabled_wing(self):
         for g in DATA["guards"][:5]:
