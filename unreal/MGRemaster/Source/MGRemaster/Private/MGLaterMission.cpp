@@ -297,6 +297,11 @@ void AMGLaterMission::RemoveDefeatedGates()
         if (Story()->HasBeat(TEXT("m03.tank_defeated")) && IsValid(PassageGateC))
             PassageGateC->Destroy();
     }
+    if (Mission==8 && Story()->HasBeat(TEXT("m08.big_boss_defeated")))
+    {
+        if (IsValid(PassageGateB)) PassageGateB->Destroy();
+        SetSubtitle(TEXT("SNAKE: The left ladder. I remember."));
+    }
     if (Mission==6)
     {
         if (Story()->HasBeat(TEXT("m06.card7_gate_open"))&&IsValid(PassageGateA))
