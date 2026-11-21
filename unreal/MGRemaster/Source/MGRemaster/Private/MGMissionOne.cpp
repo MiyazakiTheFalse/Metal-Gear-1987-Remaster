@@ -329,7 +329,7 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
         }
         UMGCampaignState* Story = GetWorld() && GetWorld()->GetGameInstance()
             ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
-        if (!Story || !Story->AdvanceChapter(1))
+        if (!Story || !Story->AdvanceMission(2))
         {
             Player->NotifyFeedback(TEXT("TRANSFER NOT READY — CHECK INTEL"), TEXT("denied"));
             return true;
@@ -358,7 +358,7 @@ FString AMGMissionOne::GetObjectiveText() const
     {
         const UMGCampaignState* Story = GetWorld() && GetWorld()->GetGameInstance()
             ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
-        if (Story && Story->GetChapter() == 2)
+        if (Story && Story->GetMissionNumber() == 3)
             return TEXT("GRAY FOX RESCUED — FIND THE SCIENTIST / RETURN ROUTE PENDING");
         return bPOWRescued ? TEXT("3F — DETENTION TRANSFER MARKER / FIND GRAY FOX")
             : TEXT("3F — RECOVER AMMO / FREE PRISONER WITH CARD 1");
