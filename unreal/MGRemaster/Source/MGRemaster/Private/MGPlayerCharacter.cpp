@@ -644,19 +644,31 @@ void AMGPlayerCharacter::FireStun()
         NotifyFeedback(TEXT("HOLD AIM BEFORE FIRING"), TEXT("denied"));
         return;
     }
-    if (!Equipment || !Equipment->IsStunEquipped())
+    const AMGMissionOne* Opening = Cast<AMGMissionOne>(
+        UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass()));
+    if (Opening && Opening->IsLiftTravelling()) return;
+    const bool bHandgun = Equipment && Equipment->IsHandgunEquipped();
+    const bool bStun = Equipment && Equipment->IsStunEquipped();
+    if (!bHandgun && !bStun)
     {
         NotifyFeedback(Equipment && Equipment->IsConfiscated() ?
             TEXT("WEAPONS CONFISCATED") : TEXT("NO WEAPON EQUIPPED"), TEXT("denied"));
         return;
     }
-    if (!Equipment->ConsumeStunRound())
+    const bool bSpent = bHandgun ? Equipment->ConsumeHandgunRound() :
+        Equipment->ConsumeStunRound();
+    if (!bSpent)
     {
         NotifyFeedback(TEXT("OUT OF AMMUNITION"), TEXT("denied"));
         return;
     }
-    NotifyFeedback(TEXT("STUN ROUND FIRED"), TEXT("stun"));
-    CombatNoiseTimer = 0.55f;
+    // The first usable pistol ammunition is a Building One 3F pickup.
+    // The firing model is a provisional hitscan interaction, not final ballistics.
+    NotifyFeedback(bHandgun ? TEXT("HANDGUN FIRED") : TEXT("STUN ROUND FIRED"),
+                   bHandgun ? TEXT("gunshot") : TEXT("stun"));
+    CombatNoiseTimer = bHandgun ? 1.0f : 0.55f;
+    if (Opening)
+        const_cast<AMGMissionOne*>(Opening)->PersistInventory(this);
     // Camera ray determines crosshair target; a second ray enforces obstruction
     // between the character and target. Prototype nonlethal incapacitation only.
     const FVector CameraStart = FollowCamera->GetComponentLocation();
@@ -669,7 +681,8 @@ void AMGPlayerCharacter::FireStun()
     FHitResult MuzzleHit;
     if (GetWorld()->LineTraceSingleByChannel(MuzzleHit, Muzzle, Target, ECC_Visibility, Params) && MuzzleHit.GetActor())
     {
-        UGameplayStatics::ApplyDamage(MuzzleHit.GetActor(), 100.f, Controller, this, UDamageType::StaticClass());
+        UGameplayStatics::ApplyDamage(MuzzleHit.GetActor(), bHandgun ? 100.f : 100.f,
+                                     Controller, this, UDamageType::StaticClass());
     }
 }
 
@@ -750,6 +763,9 @@ void AMGPlayerCharacter::UseItem()
     {
         Health = FMath::Min(100.f, Health + 45.f);
         NotifyFeedback(TEXT("RATION USED — HEALTH RESTORED"), TEXT("select"));
+        if (AMGMissionOne* Opening = Cast<AMGMissionOne>(
+                UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass())))
+            Opening->PersistInventory(this);
     }
     else NotifyFeedback(TEXT("EQUIP A RATION FIRST"), TEXT("denied"));
 }
