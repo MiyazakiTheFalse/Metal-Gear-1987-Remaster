@@ -375,7 +375,7 @@ void AMGGuardActor::Tick(float DeltaSeconds)
                 if (AMGAdaptiveAudioDirector* Audio=Cast<AMGAdaptiveAudioDirector>(
                         UGameplayStatics::GetActorOfClass(this,
                             AMGAdaptiveAudioDirector::StaticClass())))
-                    Audio->PlayCue(TEXT("step_concrete"),Here,false);
+                    Audio->PlayCue(TEXT("step_concrete"),Here,true);
             }
         }
     }
