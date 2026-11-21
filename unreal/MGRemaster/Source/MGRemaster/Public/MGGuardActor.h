@@ -38,7 +38,7 @@ public:
     bool IsBodyDragged() const { return bBodyDragged; }
     // Hit animation response: the first two strikes stagger, the kick knocks
     // down. The AI cannot shoot or move during a genuine knockdown.
-    void ReactToMeleeStrike(bool bFinishingKick, const FVector& StrikeSource);
+    void ReactToMeleeStrike(int32 StrikeIndex, const FVector& StrikeSource);
     UFUNCTION(BlueprintPure, Category="Animation|Combat")
     bool IsMeleeKnockedDown() const { return MeleeKnockdownSeconds > 0.f; }
     UFUNCTION(BlueprintPure, Category="Animation|Combat")
@@ -104,6 +104,7 @@ private:
     float Health = 100.f;
     float StaggerSeconds = 0.f;
     float MeleeKnockdownSeconds = 0.f;
+    int32 LastMeleeReaction = 0;
     float AttackCooldown = 0.f;
     uint32 AwarenessState = 0;
 };
