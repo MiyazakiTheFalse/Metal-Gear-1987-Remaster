@@ -168,7 +168,11 @@ void AMGPrototypeHUD::DrawHUD()
     {
         DrawRect(HudPanel, Margin, Margin + 113.f * UiScale,
                  FMath::Min(590.f * UiScale, Width - 2.f * Margin), 108.f * UiScale);
-        DrawText(FString::Printf(TEXT("MISSION 01 / BUILDING ONE / %dF"), Opening->GetCurrentFloor()), HudGreen,
+        DrawText(Story ?
+                     FString::Printf(TEXT("%s / %dF"),
+                         *Story->GetMissionTitle(), Opening->GetCurrentFloor()) :
+                     FString::Printf(TEXT("MISSION 01 / BUILDING ONE / %dF"),
+                         Opening->GetCurrentFloor()), HudGreen,
                  Margin + 12.f * UiScale, Margin + 120.f * UiScale,
                  nullptr, 0.75f * UiScale, false);
         if (bSecurityCameraTracking)
@@ -181,6 +185,25 @@ void AMGPrototypeHUD::DrawHUD()
         DrawText(FString::Printf(TEXT("LIFT: Q CYCLE / E TRAVEL / TARGET %dF"), Opening->GetSelectedFloor()),
                  HudMuted, Margin + 12.f * UiScale, Margin + 179.f * UiScale,
                  nullptr, 0.67f * UiScale, false);
+        if (Story)
+            DrawText(Story->GetCharacterThread(), HudMuted,
+                     Margin + 12.f * UiScale, Margin + 205.f * UiScale,
+                     nullptr, 0.64f * UiScale, false);
+        const FString BeatDialogue = Opening->GetRecentDialogue();
+        if (!BeatDialogue.IsEmpty())
+        {
+            TArray<FString> Lines;
+            BeatDialogue.ParseIntoArrayLines(Lines, true);
+            const int32 Visible = FMath::Min(3, Lines.Num());
+            const float SubY = Height - (60.f + Visible * 22.f) * UiScale;
+            DrawRect(HudPanel, Margin, SubY, Width - 2.f * Margin,
+                     (18.f + Visible * 23.f) * UiScale);
+            for (int32 J = 0; J < Visible; ++J)
+                DrawText(Lines[J], FLinearColor::White,
+                         Margin + 12.f * UiScale,
+                         SubY + (7.f + J * 23.f) * UiScale,
+                         nullptr, 0.78f * UiScale, false);
+        }
         if (Player->IsMissionLogVisible() && Story)
         {
             // Durable intel is readable after subtitles disappear or a fight
@@ -217,7 +240,10 @@ void AMGPrototypeHUD::DrawHUD()
     {
         DrawRect(HudPanel, Margin, Margin + 113.f * UiScale,
                  FMath::Min(540.f * UiScale, Width - 2.f * Margin), 112.f * UiScale);
-        DrawText(FString::Printf(TEXT("MISSION / %s"), *Mission->GetPhaseText()),
+        DrawText(Story ?
+                     FString::Printf(TEXT("%s / %s"),
+                         *Story->GetMissionTitle(), *Mission->GetPhaseText()) :
+                     FString::Printf(TEXT("MISSION 02 / %s"), *Mission->GetPhaseText()),
                  HudGreen, Margin + 12.f * UiScale,
                  Margin + 120.f * UiScale, nullptr, 0.75f * UiScale, false);
         DrawText(Mission->GetObjectiveText(), FLinearColor::White,
@@ -326,8 +352,10 @@ void AMGPrototypeHUD::DrawHUD()
         const int32 VisibleLines = FMath::Min(Lines.Num(), 8);
         const float PanelHeight = (71.f + 23.f * VisibleLines) * UiScale;
         DrawRect(HudPanel, PanelX, PanelY, PanelWidth, PanelHeight);
-        DrawText(Channel == 0 ? TEXT("TRANSCEIVER / 120.79 / KYLE SCHNEIDER")
-                              : TEXT("TRANSCEIVER / 120.85 / BIG BOSS"),
+        DrawText(Story ?
+                    FString::Printf(TEXT("TRANSCEIVER / %s"),
+                        *Story->GetRadioContactLabel(Channel)) :
+                    TEXT("TRANSCEIVER / LIMITED SIGNAL"),
                  HudGreen, PanelX + 12.f * UiScale, PanelY + 8.f * UiScale,
                  nullptr, 0.82f * UiScale, false);
         for (int32 Index = 0; Index < VisibleLines; ++Index)
