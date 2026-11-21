@@ -190,6 +190,8 @@ bool UMGCampaignState::AdvanceMission(int32 NextMissionNumber)
     if (NextMissionNumber == 3 &&
         (!HasBeat(TEXT("fox.revelation")) ||
          !HasBeat(TEXT("snake.gear_recovery")) ||
+         !HasBeat(TEXT("bosses.shoot_gunner")) ||
+         !HasBeat(TEXT("m02.card3_acquired")) ||
          !HasBeat(TEXT("fox.intel_persists"))))
         return false;
     // Boss and map gates are physical encounters, not completed by merely
