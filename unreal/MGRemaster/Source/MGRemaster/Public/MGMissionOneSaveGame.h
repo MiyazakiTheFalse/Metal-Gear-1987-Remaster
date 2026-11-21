@@ -21,6 +21,8 @@ public:
     UPROPERTY()
     TArray<FName> ExtraOwnedItems;
     UPROPERTY()
+    TArray<FName> ExtraOwnedWeapons;
+    UPROPERTY()
     bool bCardDoorOpened = false;
     UPROPERTY()
     bool bElevatorReached = false;
