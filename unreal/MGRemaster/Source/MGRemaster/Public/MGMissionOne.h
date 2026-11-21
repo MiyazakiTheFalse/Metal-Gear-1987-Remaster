@@ -7,6 +7,7 @@
 class AMGPlayerCharacter;
 class AStaticMeshActor;
 class UStaticMesh;
+class UMGCampaignState;
 
 /**
  * Mission 1 authored greybox. Coordinates are provisional remake metres.
@@ -65,6 +66,15 @@ private:
     float GasDamageAccum = 0.f;
     int32 SavedHandgunRounds = -1;
     int32 SavedRationsRemaining = -1;
+    bool bMissionThreeCacheClaimed = false;
+    UPROPERTY()
+    AStaticMeshActor* M03Manifest = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* M03Survey = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* M03Archive = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* M03Cache = nullptr;
     bool bLiftTravelling = false;
     float LiftTravelRemaining = 0.f;
     int32 CurrentFloor = 1;
@@ -76,8 +86,10 @@ private:
     void FinishLift();
     bool IsNearLift(const AMGPlayerCharacter* Player) const;
     void BuildUpperFloors();
+    void BuildMissionThreeInvestigation();
+    bool TryMissionThreeInvestigation(AMGPlayerCharacter* Player, UMGCampaignState* Story);
     FVector SavedCheckpoint = FVector(700.f, 700.f, 90.f);
-    void SaveProgress(AMGPlayerCharacter* Player);
+    bool SaveProgress(AMGPlayerCharacter* Player);
     AStaticMeshActor* Block(FName Tag, FVector Position, FVector Scale, bool bCollision = true);
     void Build();
     void SpawnGuards();
