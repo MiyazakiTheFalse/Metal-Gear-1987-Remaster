@@ -17,6 +17,9 @@ class MGREMASTER_API UMGCampaignState : public UGameInstanceSubsystem
     GENERATED_BODY()
 public:
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+    /** Transient front-end mode: EXIT returns to title without deleting saves. */
+    bool IsTitleScreenActive() const { return bTitleScreenActive; }
+    void SetTitleScreenActive(bool bActive) { bTitleScreenActive = bActive; }
     int32 GetMissionNumber() const;
     bool IsMissionThreeExteriorActive() const;
     bool SetMissionThreeExteriorActive(bool bExterior);
@@ -41,5 +44,8 @@ public:
 private:
     UPROPERTY()
     UMGCampaignSaveGame* Progress = nullptr;
+    // Deliberately not saved: opening a new application starts gameplay as
+    // before, but Game Over > Exit returns to this session's title screen.
+    bool bTitleScreenActive = false;
     bool Commit();
 };
