@@ -18,6 +18,7 @@ void UMGEquipmentComponent::BeginPlay()
         {FName(TEXT("NONE")), TEXT("NO ITEM"), 0, true, false},
         {FName(TEXT("RATION")), TEXT("RATION [TEST]"), 1, true, true},
         {FName(TEXT("CARD1")), TEXT("CARD 1"), 0, false, false},
+        {FName(TEXT("CARD2")), TEXT("CARD 2"), 0, false, false},
         {FName(TEXT("BINOCULARS")), TEXT("BINOCULARS"), 0, false, false},
         {FName(TEXT("GASMASK")), TEXT("GAS MASK"), 0, false, false},
         {FName(TEXT("MINES")), TEXT("LAND MINES"), 0, false, true}
