@@ -258,9 +258,16 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     }
     else
     {
-        const FVector Point = PatrolOrigin + FVector(bPatrolForward ? 180.f : -180.f, 0.f, 0.f);
+        const FVector Point = PatrolWaypoints.IsEmpty() ?
+            PatrolOrigin + FVector(bPatrolForward ? 180.f : -180.f, 0.f, 0.f) :
+            PatrolWaypoints[PatrolWaypointIndex];
         const FVector Diff = Point - GetActorLocation();
-        if (Diff.Size2D() < 20.f) bPatrolForward = !bPatrolForward;
+        if (Diff.Size2D() < 20.f)
+        {
+            if (!PatrolWaypoints.IsEmpty())
+                PatrolWaypointIndex = (PatrolWaypointIndex + 1) % PatrolWaypoints.Num();
+            else bPatrolForward = !bPatrolForward;
+        }
         else
         {
             const FVector Step = Diff.GetSafeNormal2D();
