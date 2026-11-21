@@ -37,7 +37,11 @@ function areaMatches(a){
 }
 function colorFor(a){return a.boss?'#e9b878':a.pickups.length?'#82bfe5':'#9ee0b5'}
 function visible(a){
+ // Site layer overlays the campaign's 11 significant encounters in the
+ // building where they happen, as ground-projected signs WITH floor tags.
+ // It is a planning view, not an omniscient player HUD or confirmed survey.
  return a.level===state.floor||
+  (state.floor==='SITE'&&!!a.boss)||
   (state.floor==='SITE'&&a.level==='TUNNEL'&&state.ghost);
 }
 function zoneFor(id){return atlas.areas.find(a=>a.id===id)}
@@ -150,7 +154,7 @@ function draw(){
  const shown=atlas.areas.filter(a=>visible(a)&&areaMatches(a));
  const shownIds=new Set(shown.map(a=>a.id));
  $('mapCaption').textContent=state.floor==='SITE'?
-   'Exterior district plan, proposed measured metre scale · choose a floor to reveal interior beats':
+   'Proposed site metres · boss arenas projected to ground with floor labels · choose a floor to inspect all beats':
    'Floor elevation '+lvl.elevation_m+' m (provisional) · '+shown.length+' matching areas · original gates shown by named connector';
  if(state.connections){
   for(const e of atlas.links){
@@ -181,7 +185,8 @@ function draw(){
   if(a.pickups.length)svg('rect',{x:x+4,y:y-13,width:7,height:7,
      fill:'#90cae8',stroke:'#142c31'},g);
   text(x+13,y-8,a.label.length>23?a.label.slice(0,22)+'…':a.label);
-  text(x+13,y+5,a.mission+'  ['+a.beats.length+' BEATS]');
+  text(x+13,y+5,a.mission+' · '+(state.floor==='SITE'?a.level+' · ':'')+
+    '['+a.beats.length+' BEATS]');
   title(g,a.label+' · '+a.beats.map(b=>'#'+b.ordinal+' '+b.name).join(' | ')+
    ' · '+a.pickups.join(', '));
   g.addEventListener('click',()=>showArea(a.id));
