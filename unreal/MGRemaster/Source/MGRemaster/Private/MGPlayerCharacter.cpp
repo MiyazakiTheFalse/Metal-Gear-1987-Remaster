@@ -1222,10 +1222,15 @@ void AMGPlayerCharacter::ItemWindowStop()
                 if (bInCover) LeaveCover();
                 Crouch();
             }
-            if (Equipment->IsItemEquipped(TEXT("CIGARETTES")))
-                if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
-                    UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
-                    Mission->ExhaleSmoke(this);
+            // Selecting cigarettes only equips them. A visible plume
+            // requires deliberate UseItem, as in the browser control scheme.
+            if (bBinocularView &&
+                !Equipment->IsItemEquipped(TEXT("BINOCULARS")))
+            {
+                bBinocularView = false;
+                if (FollowCamera) FollowCamera->SetFieldOfView(
+                    bAiming ? 65.f : 85.f);
+            }
         }
         ApplyMenuTimeState();
         NotifyFeedback(Equipment->GetEquippedItemIndex() == Selected ?
@@ -1267,6 +1272,18 @@ void AMGPlayerCharacter::UseItem()
         if (FollowCamera) FollowCamera->SetFieldOfView(bBinocularView ? 34.f : 85.f);
         NotifyFeedback(bBinocularView ? TEXT("BINOCULARS — SCOUTING")
                                      : TEXT("BINOCULARS LOWERED"), TEXT("select"));
+        return;
+    }
+    if (Equipment->IsItemEquipped(TEXT("CIGARETTES")))
+    {
+        if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+                UGameplayStatics::GetActorOfClass(
+                    this, AMGGrayFoxMission::StaticClass())))
+        {
+            Mission->ExhaleSmoke(this);
+            NotifyFeedback(TEXT("CIGARETTE SMOKE EXHALED"), TEXT("select"));
+        }
+        else NotifyFeedback(TEXT("NO AIRFLOW CONTEXT"), TEXT("denied"));
         return;
     }
     if (Health >= 100.f)
