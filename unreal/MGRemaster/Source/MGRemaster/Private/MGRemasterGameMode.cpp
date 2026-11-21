@@ -38,12 +38,12 @@ void AMGRemasterGameMode::StartPlay()
     Super::StartPlay();
     if (!GetWorld()) return;
 
-    // Campaign GameInstance state survives a reload between separate mission
-    // spaces. Do not spawn both prototypes: their collision would overlap.
+    // Mission number survives a reload between mission spaces.
+    // Never spawn both prototype worlds: their collisions would overlap.
     UMGCampaignState* Story = GetWorld()->GetGameInstance() ?
         GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
-    const int32 Chapter = Story ? Story->GetChapter() : 0;
-    if (Story && Chapter == 0)
+    const int32 MissionNumber = Story ? Story->GetMissionNumber() : 1;
+    if (Story && MissionNumber == 1)
     {
         Story->RecordBeat(TEXT("snake.mission_start"),
             TEXT("OPERATION INTRUDE N313: Locate the missing operative Gray Fox."));
@@ -61,7 +61,7 @@ void AMGRemasterGameMode::StartPlay()
             if (Pawn) PC->Possess(Pawn);
         }
     }
-    if (Chapter == 1)
+    if (MissionNumber == 2)
     {
         // The prison actor restores the dedicated capture checkpoint and
         // initializes confiscated inventory. It is never spawned alongside 1F.
@@ -80,7 +80,9 @@ void AMGRemasterGameMode::StartPlay()
             if (UMGEquipmentComponent* Inventory = Snake->GetEquipment())
                 Inventory->InitialiseMissionOneLoadout();
             Mission->RestoreSavedEquipment(Snake);
-            Snake->NotifyFeedback(TEXT("OPERATION INTRUDE N313 — INFILTRATE OUTER HEAVEN"),
+            Snake->NotifyFeedback(MissionNumber == 3 ?
+                TEXT("MISSION 03 — FOX'S INTELLIGENCE / FIND PETTROVICH") :
+                TEXT("MISSION 01 — OPERATION INTRUDE N313"),
                                   TEXT("select"));
         }
     }
