@@ -24,8 +24,8 @@ def validate(data):
         errors.append("Narrative and hard progression gates must be explicitly separated")
     if "j2me" not in data["authority"]["target"].lower():
         errors.append("Original J2ME edition lost target-authority precedence")
-    if not data.get("gate_policy", {}).get("optional_radio", "").startswith("Never"):
-        errors.append("Optional calls must not gate game progression")
+    if not data.get("gate_policy", {}).get("optional_radio", "").startswith("Optional exposition/advice radio never"):
+        errors.append("Optional dialogue cannot gate progress; source-required Jennifer material support is an explicit exception")
     for c in data["characters"]:
         for field in ("outer_goal", "inner_conflict", "beginning", "turn", "end",
                       "story_boundary", "status"):
@@ -71,7 +71,10 @@ def validate(data):
         visit(node)
     required = ("solid_snake", "gray_fox", "big_boss", "schneider", "diane",
                 "jennifer", "madnar", "ellen", "jennifer_brother",
-                "shoot_gunner", "machinegun_kid", "fire_trooper", "coward_duck")
+                "shoot_gunner", "machinegun_kid", "fire_trooper", "coward_duck",
+                "venom_snake", "steve", "tx11_arnolds", "fake_madnar",
+                "pow_ensemble", "outer_heaven_security", "hind_d_crew",
+                "armored_vehicles", "tx55")
     for cid in required:
         if cid not in characters:
             errors.append(f"Missing core character arc {cid}")
@@ -82,6 +85,11 @@ def validate(data):
     for bid in required_beats:
         if bid not in beats:
             errors.append(f"Missing core source-comparative narrative beat {bid}")
+    ellen = beats.get("ellen.rescue", {})
+    if ellen.get("anchor") != "building_1.basement.hidden_cell":
+        errors.append("Lore regression: Ellen rescue must be Building One basement hidden cell")
+    if "venus" in str(data).lower():
+        errors.append("Unrelated identity typo")
     return errors
 
 def main():
