@@ -2,6 +2,8 @@
 #include "MGLaterMission.h"
 #include "MGOrdnance.h"
 #include "MGPlayerCharacter.h"
+#include "MGCampaignState.h"
+#include "Engine/GameInstance.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -41,6 +43,8 @@ void AMGSetpieceBoss::ConfigureEncounter(
         Body->SetWorldScale3D(FVector(5.f,3.5f,2.6f));
     else if (Id.ToString().Contains(TEXT("TX11")))
         Body->SetWorldScale3D(FVector(1.8f,1.3f,2.7f));
+    else if (Id == TEXT("bosses.shoot_gunner"))
+        Body->SetWorldScale3D(FVector(1.6f,1.2f,2.2f));
     else
         Body->SetWorldScale3D(FVector(1.3f,1.3f,2.1f));
 }
@@ -63,6 +67,14 @@ float AMGSetpieceBoss::TakeDamage(float Damage, const FDamageEvent& Event,
     {
         bDefeated = true;
         if (Director.IsValid()) Director->OnBossDefeated(Id);
+        else if (Id == TEXT("bosses.shoot_gunner") &&
+                 GetWorld() && GetWorld()->GetGameInstance())
+        {
+            if (UMGCampaignState* Story =
+                GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+                Story->RecordBeat(Id,
+                    TEXT("SHOOT GUNNER DEFEATED: The prison corridor's shotgun guard is down."));
+        }
         Destroy();
     }
     else Windup = -1.f;
