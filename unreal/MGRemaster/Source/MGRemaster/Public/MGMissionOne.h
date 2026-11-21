@@ -20,6 +20,7 @@ public:
     AMGMissionOne();
     virtual void BeginPlay() override;
     bool TryInteract(AMGPlayerCharacter* Player);
+    void RestoreSavedEquipment(AMGPlayerCharacter* Player);
     FVector EntryLocation() const { return FVector(700.f, 700.f, 90.f); }
 private:
     struct FPickup
@@ -38,6 +39,8 @@ private:
     AStaticMeshActor* CardDoor = nullptr;
     bool bCardDoorOpened = false;
     bool bElevatorReached = false;
+    FVector SavedCheckpoint = FVector(700.f, 700.f, 90.f);
+    void SaveProgress(AMGPlayerCharacter* Player);
     AStaticMeshActor* Block(FName Tag, FVector Position, FVector Scale, bool bCollision = true);
     void Build();
     void SpawnGuards();
