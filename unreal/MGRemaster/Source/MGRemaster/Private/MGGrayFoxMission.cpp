@@ -164,6 +164,8 @@ void AMGGrayFoxMission::BeginPlay()
         {
             Story->RecordBeat(TEXT("fox.revelation"),
                 TEXT("GRAY FOX: Metal Gear is nuclear-capable. Find Dr. Pettrovich."));
+            Story->RecordBeat(TEXT("fox.intel_persists"),
+                TEXT("PRISON ESCAPED: Gray Fox's report remains in the mission log."));
             Story->AdvanceChapter(2);
         }
         ReturnToOuterHeavenSeconds = 0.1f;
