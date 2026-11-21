@@ -7,6 +7,8 @@
 #include "MGBodyHidingSpot.h"
 #include "MGEquipmentComponent.h"
 #include "MGRemoteMissile.h"
+#include "MGOrdnance.h"
+#include "MGLaterMission.h"
 
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
@@ -330,10 +332,25 @@ void AMGPlayerCharacter::ShoulderSwap()
     // changes the station. Snake keeps movement/camera control.
     if (bCodecOpen)
     {
-        const UMGCampaignState* Story = GetWorld() && GetWorld()->GetGameInstance()
+        UMGCampaignState* Story = GetWorld() && GetWorld()->GetGameInstance()
             ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
         const int32 Count = Story ? Story->GetRadioContactCount() : 2;
         TransceiverChannel = (TransceiverChannel + 1) % Count;
+        // Jennifer's source-canonical rocket help is an actual call in Building
+        // Two. The full original 4-star prisoner ranking needs the missing
+        // POW rooms, so currently access is earned by two rescued witnesses
+        // and reaching her local supply wing (provisional pacing proxy).
+        if (TransceiverChannel == 3 && Story &&
+            Story->HasBeat(TEXT("jennifer.contact")) &&
+            Story->HasBeat(TEXT("fake_madnar.basement_lure")))
+        {
+            if (AMGLaterMission* Later = Cast<AMGLaterMission>(
+                UGameplayStatics::GetActorOfClass(this, AMGLaterMission::StaticClass())))
+                if (Later->GetActiveMission() == 4 &&
+                    GetActorLocation().X >= 8200.f)
+                    Story->RecordBeat(TEXT("jennifer.rocket_help"),
+                        TEXT("JENNIFER 120.48: Rocket launcher and rockets now available in the research supply store."));
+        }
         NotifyFeedback(Story ?
             FString::Printf(TEXT("RADIO TUNED — %s"),
                             *Story->GetRadioContactLabel(TransceiverChannel)) :
@@ -422,6 +439,15 @@ void AMGPlayerCharacter::Interact()
         Body->SetBodyDragged(true);
         UpdateMovementState();
         NotifyFeedback(TEXT("DRAG BODY — WALK SLOWLY / E TO RELEASE"), TEXT("select"));
+        return;
+    }
+    if (AMGLaterMission* Later = Cast<AMGLaterMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGLaterMission::StaticClass())))
+    {
+        if (Later->TryInteract(this)) return;
+        if (bInCover) LeaveCover();
+        else if (!TryEnterCover())
+            NotifyFeedback(TEXT("NO INTERACTIVE OBJECT IN REACH"),TEXT("denied"));
         return;
     }
     if (AMGMissionOne* Opening = Cast<AMGMissionOne>(
@@ -891,6 +917,72 @@ void AMGPlayerCharacter::FireStun()
                        TEXT("select"));
         return;
     }
+    // Original preparation matters physically: a planted mine is placed
+    // ahead of Snake, whereas grenades and rockets travel through the arena.
+    // No auto-awarded 'correct weapon' or arbitrary boss success toggle.
+    if (Equipment && Equipment->IsItemEquipped(TEXT("MINES")))
+    {
+        if (!Equipment->ConsumeItem(TEXT("MINES"),1))
+        {
+            NotifyFeedback(TEXT("NO MINES LEFT"),TEXT("denied"));
+            return;
+        }
+        const FVector Location = GetActorLocation() +
+            GetActorForwardVector()*130.f + FVector(0.f,0.f,-72.f);
+        AMGOrdnance* Mine=GetWorld()->SpawnActor<AMGOrdnance>(
+            Location,GetActorRotation());
+        if (!Mine)
+        {
+            Equipment->AwardItem(TEXT("MINES"),1);
+            NotifyFeedback(TEXT("CANNOT PLACE MINE HERE"),TEXT("denied"));
+            return;
+        }
+        Mine->Configure(TEXT("MINE"),FVector::ZeroVector,this);
+        NotifyFeedback(TEXT("MINE PLACED / ARMING IN 0.8 SEC"),TEXT("select"));
+        if (AMGLaterMission* Later=Cast<AMGLaterMission>(
+            UGameplayStatics::GetActorOfClass(this,AMGLaterMission::StaticClass())))
+            Later->PersistPlayerEquipment(this);
+        else if (AMGMissionOne* Original=Cast<AMGMissionOne>(
+            UGameplayStatics::GetActorOfClass(this,AMGMissionOne::StaticClass())))
+            Original->PersistInventory(this);
+        return;
+    }
+    const bool bGrenade=Equipment &&
+        Equipment->IsWeaponEquipped(TEXT("GRENADE_LAUNCHER"));
+    const bool bRocket=Equipment &&
+        Equipment->IsWeaponEquipped(TEXT("ROCKET_LAUNCHER"));
+    if (bGrenade || bRocket)
+    {
+        const FName Weapon=bRocket ? FName(TEXT("ROCKET_LAUNCHER")) :
+                                     FName(TEXT("GRENADE_LAUNCHER"));
+        if (!Equipment->ConsumeWeaponAmmo(Weapon))
+        {
+            NotifyFeedback(TEXT("SPECIAL WEAPON OUT OF AMMUNITION"),TEXT("denied"));
+            return;
+        }
+        const FVector Direction=FollowCamera->GetForwardVector();
+        const FVector Origin=GetActorLocation()+Direction*130.f+
+                             FVector(0.f,0.f,55.f);
+        AMGOrdnance* Shot=GetWorld()->SpawnActor<AMGOrdnance>(
+            Origin,Direction.Rotation());
+        if (!Shot)
+        {
+            Equipment->AwardAmmunition(Weapon,1);
+            NotifyFeedback(TEXT("SHOT BLOCKED / CANNOT FIRE"),TEXT("denied"));
+            return;
+        }
+        Shot->Configure(Weapon,Direction*(bRocket ? 2200.f : 1450.f),this);
+        CombatNoiseTimer=1.25f;
+        NotifyFeedback(bRocket ? TEXT("ROCKET FIRED") :
+                                 TEXT("GRENADE LAUNCHED"),TEXT("gunshot"));
+        if (AMGLaterMission* Later=Cast<AMGLaterMission>(
+            UGameplayStatics::GetActorOfClass(this,AMGLaterMission::StaticClass())))
+            Later->PersistPlayerEquipment(this);
+        else if (AMGMissionOne* Original=Cast<AMGMissionOne>(
+            UGameplayStatics::GetActorOfClass(this,AMGMissionOne::StaticClass())))
+            Original->PersistInventory(this);
+        return;
+    }
     if (Equipment && Equipment->IsWeaponEquipped(TEXT("RC_MISSILE")))
     {
         if (!Equipment->ConsumeWeaponAmmo(TEXT("RC_MISSILE")))
@@ -918,6 +1010,12 @@ void AMGPlayerCharacter::FireStun()
         else if (AMGGrayFoxMission* Prison = Cast<AMGGrayFoxMission>(
                 UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
             Prison->PersistRecoveredInventory(this);
+        else if (AMGLaterMission* Later = Cast<AMGLaterMission>(
+                UGameplayStatics::GetActorOfClass(this, AMGLaterMission::StaticClass())))
+            Later->PersistPlayerEquipment(this);
+        else if (AMGLaterMission* Later = Cast<AMGLaterMission>(
+                UGameplayStatics::GetActorOfClass(this, AMGLaterMission::StaticClass())))
+            Later->PersistPlayerEquipment(this);
         return;
     }
     const bool bHandgun = Equipment && Equipment->IsHandgunEquipped();
@@ -945,6 +1043,9 @@ void AMGPlayerCharacter::FireStun()
     else if (AMGGrayFoxMission* Prison = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
         Prison->PersistRecoveredInventory(this);
+    else if (AMGLaterMission* Later = Cast<AMGLaterMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGLaterMission::StaticClass())))
+        Later->PersistPlayerEquipment(this);
     // Camera ray determines crosshair target; a second ray enforces obstruction
     // between the character and target. Prototype nonlethal incapacitation only.
     const FVector CameraStart = FollowCamera->GetComponentLocation();
