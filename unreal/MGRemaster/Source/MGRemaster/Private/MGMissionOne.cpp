@@ -312,7 +312,8 @@ void AMGMissionOne::RestoreSavedEquipment(AMGPlayerCharacter* Player)
             if (P.Item == TEXT("HANDGUN_AMMO"))
                 Equipment->AwardAmmunition(TEXT("HANDGUN"), 12);
             else if (P.bWeapon)
-                Equipment->AwardWeapon(P.Item, P.Item == TEXT("RC_MISSILE") ? 4 : 0);
+                Equipment->AwardWeapon(P.Item, P.Item == TEXT("RC_MISSILE") ? 4 :
+                   (P.Item == TEXT("GRENADE_LAUNCHER") ? 6 : 0));
             else Equipment->AwardItem(P.Item, 1);
         }
     if (SavedHandgunRounds >= 0)
@@ -399,6 +400,8 @@ void AMGMissionOne::BuildMissionThreeInvestigation()
     if (!bMissionThreeCacheClaimed)
         M03Cache = Block(TEXT("M03_CorroborationCache"),
                          CM(86.f,35.f,665.f), FVector(1.f,.9f,1.1f), false);
+    M03ExteriorConnector = Block(TEXT("M03_ExteriorServiceExit"),
+        CM(96.f,36.f,90.f),FVector(.85f,.85f,1.65f),false);
     if (!Story->HasBeat(TEXT("m03.security.power_disabled")))
         M03Breaker = Block(TEXT("M03_ServiceBreaker"),
                            CM(54.f,35.f,665.f), FVector(.8f,.6f,1.3f), false);
@@ -472,6 +475,28 @@ bool AMGMissionOne::TryMissionThreeInvestigation(
     if (CheckLead(M03Archive, TEXT("m03.route.archive"),
         TEXT("ARCHIVE: A service diagram connects the outer building to research."),
         false)) return true;
+
+    // Progress is earned by ANY discovery; additional clues remain valuable
+    // because this same exterior service door allows real return visits.
+    if (IsValid(M03ExteriorConnector) &&
+        FVector::Dist(Player->GetActorLocation(),
+                      M03ExteriorConnector->GetActorLocation()) < 220.f)
+    {
+        if (!Story->HasBeat(TEXT("m03.route.confirmed")))
+        {
+            Player->NotifyFeedback(TEXT("EXTERIOR SERVICE EXIT / FIND SCIENTIST ROUTE FIRST"),
+                                   TEXT("denied"));
+            return true;
+        }
+        if (Story->SetMissionThreeExteriorActive(true))
+        {
+            Story->RecordBeat(TEXT("m03.exterior_started"),
+                TEXT("EXTERIOR: Following the researched service road toward Building Two."));
+            UGameplayStatics::OpenLevel(this,FName(*GetWorld()->GetName()));
+        }
+        else Player->NotifyFeedback(TEXT("EXIT CHECKPOINT SAVE FAILED"),TEXT("denied"));
+        return true;
+    }
 
     // Fourth option: nonviolent, persistent surveillance shutdown through a
     // real 2F circuit. It does not award mission-critical intel or auto-unlock
@@ -809,8 +834,8 @@ FString AMGMissionOne::GetObjectiveText() const
         if (Leads >= 2 && !bMissionThreeCacheClaimed)
             return TEXT("ROUTE FOUND — OPTIONAL 2F SUPPLY CACHE NOW ACCESSIBLE");
         if (Leads >= 2)
-            return TEXT("ROUTE VERIFIED / SCIENTIST TRAIL — SEEK BUILDING TWO");
-        return TEXT("BUILDING TWO LEAD FOUND — EXPLORE FOR MORE OPTIONS");
+            return TEXT("ROUTE VERIFIED / VISIT 1F EXTERIOR EXIT OR OPTIONAL 2F CACHE");
+        return TEXT("SERVICE ROAD FOUND / 1F EXTERIOR EXIT / MORE CLUES OPTIONAL");
     }
     if (CurrentFloor == 3)
     {
@@ -956,6 +981,10 @@ void AMGMissionOne::BuildUpperFloors()
     AddPickup(TEXT("P07"), TEXT("HANDGUN_AMMO"), FVector(78.f, 28.f, 12.f), false);
     AddPickup(TEXT("P08"), TEXT("CARD2"), FVector(85.f,24.f,12.f),false);
     AddPickup(TEXT("P09"), TEXT("RC_MISSILE"), FVector(45.f,24.f,12.f),true);
+    // Source-comparative early grenade launcher: useful against the rooftop
+    // aircraft and the road bulldozer. Exterior cache remains a safety-net.
+    AddPickup(TEXT("P10"), TEXT("GRENADE_LAUNCHER"),
+              FVector(77.f,25.f,12.f),true);
 }
 
 FVector AMGMissionOne::FloorLiftLocation(int32 Floor)
