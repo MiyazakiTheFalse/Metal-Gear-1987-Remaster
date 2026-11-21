@@ -516,6 +516,34 @@ bool AMGMissionOne::TryMissionThreeInvestigation(
     return false;
 }
 
+bool AMGMissionOne::DisableElectricalSupply()
+{
+    if (bElectricPanelDisabled || !GetWorld()) return false;
+    bElectricPanelDisabled = true;
+    if (IsValid(ElectricPanel)) ElectricPanel->Destroy();
+    AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(
+        UGameplayStatics::GetPlayerCharacter(this, 0));
+    // A destroyed physical switch is a persistent world transaction, not an
+    // optional radio flag or an actor magically disabled by proximity.
+    if (!SaveProgress(Player))
+    {
+        UE_LOG(LogTemp, Error, TEXT("Electric panel was hit but persistent save failed"));
+        return true; // Remains disabled in current play; retries on checkpoint.
+    }
+    if (GetWorld()->GetGameInstance())
+        if (UMGCampaignState* Story =
+            GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+            Story->RecordBeat(TEXT("m01.electric.disabled"),
+                TEXT("3F: Guided remote missile destroyed the electrical control panel."));
+    if (Player)
+    {
+        BeatSubtitle = TEXT("SNAKE: Current's gone. I can reach the prisoner now.");
+        BeatSubtitleTime = 5.f;
+        Player->NotifyFeedback(TEXT("ELECTRIFIED FLOOR / POWER OFF"), TEXT("select"));
+    }
+    return true;
+}
+
 bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
 {
     if (!Player || !Player->GetEquipment()) return false;
@@ -535,8 +563,9 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
         }
         const bool bAwarded = P.Item == TEXT("HANDGUN_AMMO") ?
             Equipment->AwardAmmunition(TEXT("HANDGUN"), 12) :
-            (P.bWeapon ? Equipment->AwardWeapon(P.Item, 0) :
-            Equipment->AwardItem(P.Item, 1));
+            (P.bWeapon ? Equipment->AwardWeapon(P.Item,
+                 P.Item == TEXT("RC_MISSILE") ? 4 : 0) :
+             Equipment->AwardItem(P.Item, 1));
         if (!bAwarded) return false;
         P.bTaken = true;
         if (IsValid(P.Marker)) P.Marker->Destroy();
@@ -544,6 +573,37 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
         Player->NotifyFeedback(FString::Printf(TEXT("%s ACQUIRED"), *P.Item.ToString()), TEXT("select"));
         return true;
     }
+    // Locked caches and survivor cells belong to the real 1F/3F geometry,
+    // not abstract inventory menus. A blocked door can be revisited later.
+    const auto TryCardDoor =
+        [this, Player, Equipment](AStaticMeshActor* Door,
+            bool& bOpened, FName RequiredCard, const TCHAR* Success) -> bool
+    {
+        if (!IsValid(Door) || bOpened ||
+            FVector::Dist(Player->GetActorLocation(), Door->GetActorLocation()) > 240.f)
+            return false;
+        if (!Equipment->HasItem(RequiredCard))
+        {
+            Player->NotifyFeedback(FString::Printf(TEXT("LOCKED — %s"),
+                *RequiredCard.ToString()), TEXT("denied"));
+            return true;
+        }
+        bOpened = true;
+        Door->Destroy();
+        SaveProgress(Player);
+        Player->NotifyFeedback(FString(Success), TEXT("select"));
+        return true;
+    };
+    if (TryCardDoor(CardTwoDoor, bCardTwoDoorOpened, TEXT("CARD1"),
+                    TEXT("CARD 1 / ACCESS CARD 2 STORAGE"))) return true;
+    if (TryCardDoor(RCStoreDoor, bRCStoreDoorOpened, TEXT("CARD2"),
+                    TEXT("CARD 2 / MISSILE ARMORY OPEN"))) return true;
+    if (TryCardDoor(DianeDoor, bDianeDoorOpened, TEXT("CARD1"),
+                    TEXT("CARD 1 / ELECTRIC FLOOR PRISON CELL OPEN"))) return true;
+    if (TryCardDoor(FoxLocationDoor, bFoxLocationDoorOpened, TEXT("CARD2"),
+                    TEXT("CARD 2 / FOX PRISONER CELL OPEN"))) return true;
+    if (TryCardDoor(CaptureMethodDoor, bCaptureMethodDoorOpened, TEXT("CARD1"),
+                    TEXT("CARD 1 / CAPTURE-ROUTE PRISONER CELL OPEN"))) return true;
     if (!bCardDoorOpened && IsValid(CardDoor) &&
         FVector::Dist2D(Player->GetActorLocation(), CardDoor->GetActorLocation()) < 240.f)
     {
@@ -597,21 +657,83 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
             {
                 Story->RecordBeat(TEXT("snake.early_pow"),
                     TEXT("PRISONER: A FOXHOUND agent was transferred through a concealed detention post."));
-                Story->RecordBeat(TEXT("diane.contact"),
-                    TEXT("PRISONER: Resistance contact Diane can be reached on 120.33."));
+                // This is the first 3F POW; the original Diane frequency is
+                // taught by a *later* prisoner beyond the electrified floor.
             }
         // Optional character material: the player has control throughout,
         // and the durable intel is recoverable if a patrol interrupts.
-        BeatSubtitle = TEXT("PRISONER: They took one of your operatives.\n"
-                            "SNAKE: Where?\n"
-                            "PRISONER: The detention transfer. Diane may help—120.33.");
+        BeatSubtitle = TEXT("PRISONER: Another FOXHOUND agent came before you.\n"
+                            "SNAKE: Gray Fox?\n"
+                            "PRISONER: Search the higher-security cells.");
         BeatSubtitleTime = 9.f;
         Player->NotifyFeedback(TEXT("PRISONER RESCUED — DETENTION TRANSFER REVEALED"), TEXT("rescue"));
         return true;
     }
+    // The original MSX2 prisoner who gives Diane's 120.33 frequency is
+    // north of the electrical floor. He cannot be rescued through a wall.
+    if (CurrentFloor == 3 && !bDianePOWRescued && bDianeDoorOpened &&
+        bElectricPanelDisabled && IsValid(DianePrisoner) &&
+        FVector::Dist(Player->GetActorLocation(),
+                      DianePrisoner->GetActorLocation()) < 240.f)
+    {
+        bDianePOWRescued = true;
+        DianePrisoner->Destroy();
+        SaveProgress(Player);
+        if (GetWorld() && GetWorld()->GetGameInstance())
+            if (UMGCampaignState* Story =
+                GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+                Story->RecordBeat(TEXT("diane.contact"),
+                    TEXT("ELECTRIC-FLOOR PRISONER: Diane knows the mercenaries. Frequency 120.33."));
+        BeatSubtitle = TEXT("PRISONER: Call Diane. 120.33.\n"
+                            "SNAKE: What does she know?\n"
+                            "PRISONER: The men guarding this fortress.");
+        BeatSubtitleTime = 8.f;
+        Player->NotifyFeedback(TEXT("DIANE / 120.33 RADIO CONTACT LEARNED"), TEXT("rescue"));
+        return true;
+    }
+    if (CurrentFloor == 1 && !bFoxLocationPOWRescued &&
+        bFoxLocationDoorOpened && IsValid(FoxLocationPrisoner) &&
+        FVector::Dist(Player->GetActorLocation(),
+                      FoxLocationPrisoner->GetActorLocation()) < 240.f)
+    {
+        bFoxLocationPOWRescued = true;
+        FoxLocationPrisoner->Destroy();
+        SaveProgress(Player);
+        if (GetWorld() && GetWorld()->GetGameInstance())
+            if (UMGCampaignState* Story =
+                GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+                Story->RecordBeat(TEXT("fox.location_learned"),
+                    TEXT("1F PRISONER: Gray Fox is held behind the secret solitary-cell walls."));
+        BeatSubtitle = TEXT("PRISONER: Gray Fox is in a secret solitary cell.\n"
+                            "SNAKE: Where's the entrance?\n"
+                            "PRISONER: The detention route is concealed.");
+        BeatSubtitleTime = 8.f;
+        Player->NotifyFeedback(TEXT("FOX LOCATION / SECRET CELL INTEL"), TEXT("rescue"));
+        return true;
+    }
+    if (CurrentFloor == 1 && !bCaptureMethodPOWRescued &&
+        bCaptureMethodDoorOpened && IsValid(CaptureMethodPrisoner) &&
+        FVector::Dist(Player->GetActorLocation(),
+                      CaptureMethodPrisoner->GetActorLocation()) < 240.f)
+    {
+        bCaptureMethodPOWRescued = true;
+        CaptureMethodPrisoner->Destroy();
+        SaveProgress(Player);
+        if (GetWorld() && GetWorld()->GetGameInstance())
+            if (UMGCampaignState* Story =
+                GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+                Story->RecordBeat(TEXT("fox.capture_method_learned"),
+                    TEXT("1F PRISONER: The western dead end leads to capture and secret detention."));
+        BeatSubtitle = TEXT("PRISONER: The western dead end is a trap.\n"
+                            "SNAKE: A way into the cells?\n"
+                            "PRISONER: Yes. They'll take your equipment.");
+        BeatSubtitleTime = 8.f;
+        Player->NotifyFeedback(TEXT("CAPTURE ROUTE / 1F WEST DEAD END"), TEXT("rescue"));
+        return true;
+    }
     // Voluntary source-comparative capture. No unseen trigger, no forced
     // teleport when passing by; a rescued POW provides the physical lead.
-    if (CurrentFloor == 3 && IsValid(CaptureMarker) &&
+    if (CurrentFloor == 1 && IsValid(CaptureMarker) &&
         FVector::Dist(Player->GetActorLocation(), CaptureMarker->GetActorLocation()) < 220.f)
     {
         if (GetWorld() && GetWorld()->GetGameInstance())
@@ -622,9 +744,11 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
                     Player->NotifyFeedback(TEXT("TRANSFER USED — FOX ALREADY RESCUED"), TEXT("select"));
                     return true;
                 }
-        if (!bPOWRescued)
+        if (!bFoxLocationPOWRescued || !bCaptureMethodPOWRescued)
         {
-            Player->NotifyFeedback(TEXT("SEALED TRANSFER — SEARCH PRISONER CELLS"), TEXT("denied"));
+            Player->NotifyFeedback(
+                TEXT("SEARCH BOTH 1F PRISONER CELLS / CARD 2 AND CARD 1"),
+                TEXT("denied"));
             return true;
         }
         UMGCampaignState* Story = GetWorld() && GetWorld()->GetGameInstance()
@@ -638,7 +762,7 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
         // campaign attempt. Capture opens a fresh dedicated prison checkpoint.
         UGameplayStatics::DeleteGameInSlot(TEXT("GrayFoxSliceV1"), 0);
         Story->RecordBeat(TEXT("snake.capture"),
-            TEXT("CAPTURED: Snake allows himself to be transferred into the secret prison. Equipment confiscated."));
+            TEXT("CAPTURED: Returning to the western dead end leads Snake into the hidden prison."));
         Player->LeaveCover();
         Player->NotifyFeedback(TEXT("CAPTURE SEQUENCE — PRISON TRANSFER"), TEXT("select"));
         // The prison is a separate prototype level-space until the verified
