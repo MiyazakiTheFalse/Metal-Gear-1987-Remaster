@@ -16,6 +16,7 @@ PRISON_HEADER = read("unreal/MGRemaster/Source/MGRemaster/Public/MGGrayFoxSaveGa
 STORY = read("unreal/MGRemaster/Source/MGRemaster/Private/MGCampaignState.cpp")
 STORY_HEADER = read("unreal/MGRemaster/Source/MGRemaster/Public/MGCampaignSaveGame.h")
 HUD = read("unreal/MGRemaster/Source/MGRemaster/Private/MGPrototypeHUD.cpp")
+PLAYER = read("unreal/MGRemaster/Source/MGRemaster/Private/MGPlayerCharacter.cpp")
 RUST = read("rust/src/campaign.rs")
 RUST_LIB = read("rust/src/lib.rs")
 
@@ -57,6 +58,12 @@ class ChapterBridgeSourceTests(unittest.TestCase):
         self.assertIn("Save->bGearRecovered = bGearRecovered;", PRISON)
         self.assertIn("SchemaVersion = 2", PRISON_HEADER)
         self.assertIn('TEXT("MissionOneV1")', PRISON)
+
+    def test_consumables_stay_spent_after_prison_exit(self):
+        self.assertIn("PersistRecoveredInventory(AMGPlayerCharacter* Player)", PRISON)
+        self.assertIn("OpeningSave->HandgunRounds =", PRISON)
+        self.assertIn("OpeningSave->RationsRemaining =", PRISON)
+        self.assertGreaterEqual(PLAYER.count("Prison->PersistRecoveredInventory(this)"), 2)
 
     def test_radio_and_intel_are_replayable(self):
         self.assertIn("Story->GetOpeningRadio(Channel)", HUD)
