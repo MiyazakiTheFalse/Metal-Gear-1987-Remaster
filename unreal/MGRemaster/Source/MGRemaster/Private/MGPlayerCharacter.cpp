@@ -8,6 +8,7 @@
 #include "MGEquipmentComponent.h"
 #include "MGRemoteMissile.h"
 #include "MGOrdnance.h"
+#include "MGAdaptiveAudioDirector.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimMontage.h"
 #include "MGLaterMission.h"
@@ -1168,11 +1169,19 @@ void AMGPlayerCharacter::NotifyFeedback(const FString& Message, FName CueName)
     // Asset pipeline imports original placeholder WAVs to /Game/Feedback.
     // Absence is safe: visible feedback still works. No extracted licensed SFX
     // are included in the public repository.
+    // One canonical resolver for both engines' shared cue IDs.
+    // It handles original licensed wave files, cooldowns and 3D routing;
+    // no double-playback when the director successfully handles the cue.
+    if (AMGAdaptiveAudioDirector* Director=Cast<AMGAdaptiveAudioDirector>(
+        UGameplayStatics::GetActorOfClass(this,
+            AMGAdaptiveAudioDirector::StaticClass())))
+        if (Director->PlayCue(CueName,GetActorLocation(),false))
+            return;
     const FString Name = CueName.ToString();
     const FString ObjectRef = FString::Printf(
         TEXT("/Game/Feedback/%s.%s"), *Name, *Name);
-    if (USoundBase* Sound = LoadObject<USoundBase>(nullptr, *ObjectRef))
-        UGameplayStatics::PlaySound2D(this, Sound, 0.65f);
+    if (USoundBase* Sound=LoadObject<USoundBase>(nullptr,*ObjectRef))
+        UGameplayStatics::PlaySound2D(this,Sound,.65f);
 }
 void AMGPlayerCharacter::WeaponWindowStart()
 {
