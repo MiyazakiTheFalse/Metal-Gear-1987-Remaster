@@ -524,7 +524,10 @@ late.teleport(42.0,0);late.act('interact');
 assert.equal(late.state.service.open,false);
 late.teleport(35.8,1.75);late.act('interact');
 assert.equal(late.state.service.charge,true);
-late.teleport(42.0,0);late.act('interact');late.step(.4);late.act('interact');
+late.teleport(42.0,0);late.act('interact');
+assert.equal(late.currentServiceAction(),'CHARGE TICKING',
+ 'live fuse has a truthful environmental affordance');
+late.step(.4);late.act('interact');
 assert.ok(late.state.service.fuse<2.1,'a second interaction cannot restart the timer');
 for(let i=0;i<64;i++)late.step(1/30);
 assert.equal(late.state.service.open,true);
@@ -539,6 +542,31 @@ console.log('PASS: old exit save through charge, timed breach, relay, Machinegun
 /* Connected roof continuity is tested with normal gameplay interactions,
  * not only by setting mission flags. The shot test asserts real ammo usage;
  * actual projectile collision must still be playtested in a browser. */
+// A finite boss reward is never spent when the CURRENT physical action
+// cannot succeed: evasive aircraft, occupied mine track or ticking charge.
+const evasive=loadFixture({version:9,stage:9,x:76.6,z:-2.65,health:100,
+ service:{charge:true,open:true,intel:true,kidDown:true,parachute:true},
+ roof:{active:true,defeated:false,hp:3,grenades:4,phase:'evasive',
+  clock:1.2,lap:0,flyX:82,flyZ:0}}).game;
+assert.equal(evasive.currentServiceAction(),'HIND EVADING');
+evasive.act('interact');
+assert.equal(evasive.state.roof.grenades,4,
+ 'pressing Interact while Hind D is invulnerable cannot waste a grenade');
+assert.equal(evasive.state.roof.hp,3);
+
+const occupied=loadFixture({version:10,stage:10,x:105,z:1.1,health:100,
+ service:{charge:true,open:true,intel:true,kidDown:true,parachute:true},
+ roof:{active:false,defeated:true,hp:0,grenades:3,phase:'disabled',
+  clock:0,lap:0,flyX:82,flyZ:0},
+ b2:{active:true,defeated:false,hp:3,mines:4,armed:[],x:105,
+  dir:1,phase:'warning',clock:1.1}}).game;
+assert.equal(occupied.currentServiceAction(),'TRACK OCCUPIED');
+occupied.act('interact');
+assert.equal(occupied.state.b2.mines,4,
+ 'a tank physically occupying the mine site cannot consume a mine');
+assert.equal(occupied.state.b2.armed.length,0);
+console.log('PASS: roof evasion and physically occupied tank tracks never waste finite weapons.');
+
 const roofSave=loadFixture({version:9,stage:8,x:63,z:0,health:100,
  service:{charge:true,open:true,intel:true,kidDown:true,parachute:true}});
 assert.equal(roofSave.game.state.roof.active,false);
