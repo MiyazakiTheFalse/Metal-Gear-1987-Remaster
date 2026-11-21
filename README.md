@@ -29,6 +29,10 @@ The [Building One → Gray Fox prison → Building One runtime bridge](docs/1995
 
 **Current truth:** Unreal and Rust source committed, **not compiled** or playtested; physical detention approach and missing building connections remain provisional until J2ME verification. Do not call this a complete playable game or a verified source level. A developer-only F9 reset from the Building One area clears test checkpoints and restarts at the beginning.
 
+## Three-strike Metal Gear Solid melee pass
+
+The [MGS-style melee implementation contract](docs/THREE_STRIKE_MELEE_IMPLEMENTATION.md) is reflected in Unreal source: **left punch → right punch → right roundhouse kick**, with two rapid queued presses, physically timed hit windows, alternate guard flinches and a finishing knockdown. Current prototype shoulder/hip joints show separate moves; real skeletal animation clips can be assigned to the three exposed montage slots. No actual licensed attack montages or high-resolution character rigs are included yet. Source and timing regressions: `python -m unittest tools/test_three_strike_melee_contract.py` (not run as a UE build).
+
 ## Solid Snake's playable identity
 
 The [1995 Solid Snake character/gameplay doctrine](docs/SOLID_SNAKE_1995_PLAYABLE_IDENTITY.md) contrasts the first-mission rookie with Naked Snake's MGS3 wilderness-survival style while preserving shared CQC knowledge and the source-faithful weapon/prisoner loop. The [eight-trait identity contract](data/solid_snake_1995_playstyle_contract.json) assigns concrete character expressions to each numbered mission. **Character-direction work is not a substitute for real rigging, animation, engine compilation or playtesting.**
