@@ -76,6 +76,29 @@ def validate(document):
             for pt in positions:
                 if not inside(room, pt):
                     errors.append(f"{kind} position outside room: {item['id']} @ {pt}")
+    # Source-comparison invariants: keep J2ME verification pending but prevent
+    # accidental regression to the invented early supply-room placement.
+    pickups = {p["item"]: p for p in document["pickups"]}
+    expectations = {
+        "ration": "m01.checkpoint",
+        "card_1": "m01.checkpoint",
+        "binoculars": "m01.checkpoint",
+        "gas_mask": "m01.service",
+        "handgun": "m01.security",
+        "land_mines": "m01.security",
+    }
+    for item, expected_room in expectations.items():
+        if item not in pickups or pickups[item]["room"] != expected_room:
+            errors.append(f"Source-comparison item placement changed: {item}")
+    if pickups.get("handgun", {}).get("access") != "later_west_truck":
+        errors.append("Handgun must stay at later west truck, without implicit ammunition")
+    if pickups.get("gas_mask", {}).get("access") != "door_requires_card_1":
+        errors.append("Gas Mask must retain Card 1 access dependency")
+    for p in document["portals"]:
+        if p["from"] == "m01.checkpoint" and p["to"] == "m01.service" and p["gate"] != "card_1":
+            errors.append("Card 1 door portal must be gated")
+    if not any(p["item"] == "handgun_ammo" and p["area"] == "building_1_floor_3" for p in document.get("future_source_critical_placements", [])):
+        errors.append("Third-floor handgun ammo follow-on is missing")
     for beat in document["beats"]:
         if beat["room"] not in rooms:
             errors.append(f"Beat in missing room: {beat['id']}")
