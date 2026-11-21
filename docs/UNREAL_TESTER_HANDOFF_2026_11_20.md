@@ -34,6 +34,8 @@ This branch now uses the **same main Xbox inputs in Unreal and browser:** A = E/
 
 Unreal now draws locally true action prompts only when real physical reach/LOS and mission flags allow the interaction (truck loot, prisoner, custody, breakable walls, gear, Card 2/3, roof launcher, lift and mine sites). The browser has matching action opportunities, a non-consuming equipment selector, safe R/pause/death retries, and tiered anti-stall guidance beyond the prison. See the [cross-engine playability record](CROSS_ENGINE_PLAYABILITY_PASS_2026_11_21.md).
 
+**New late-encounter acceptance:** Stand at a planted-mine marker while the tank is directly above it: the HUD must say HOLD MINE and E/A must NOT consume a mine. Approach the roof launcher during Hind D's evasive beat: the HUD must say HOLD FIRE and E/A must NOT consume a grenade. Repeat while Hind is vulnerable but physically obstructed; verify a fired grenade may still miss, so aiming/timing retains stakes. Place the service charge twice during the same live fuse: only one countdown/breach and no duplicate expenditure. Try these in both builds using the same controller.
+
 **Required physical-play acceptance:** Test every A/X/B/Y/D-pad mapping with a real controller and keyboard, then attempt to get stuck by dying mid-boss, pressing Retry during a cinematic, skipping an active scene, reaching a physical item from the wrong side of a wall, consuming the last ration, reopening equipment, running out of grenades, and re-entering roof/tank areas. Compare screenshots and player comprehension between engines. These are source modifications; UE5.7 compile, PIE, native package and human playability are not validated by this note.
 
 ## Unreal native import and packaging troubleshooting added this pass
