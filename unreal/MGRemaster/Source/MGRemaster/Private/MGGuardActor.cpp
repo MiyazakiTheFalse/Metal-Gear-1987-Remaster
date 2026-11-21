@@ -262,12 +262,19 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     // until a real stair/elevator traversal and NavMesh handoff exists.
     if (FMath::Abs(Player->GetActorLocation().Z - GetActorLocation().Z) > 260.f)
     {
-        // On a different deck, maintain local routine, but do not see, hear,
-        // receive a magical pursuit target or deal damage through ceilings.
-        CameraAlertSeconds = 0.f;
-        Suspicion = FMath::Max(0.f, Suspicion - 0.2f * DeltaSeconds);
-        if (Suspicion < 0.22f) AwarenessState = 0;
-        AdvanceAssignedRoutine(DeltaSeconds);
+        // Snake being on another deck is not a magical "all clear". A guard
+        // finishes a short, local search of the last actually observed location.
+        // The guard cannot follow Snake through an unbuilt shaft or teleport.
+        Suspicion = FMath::Max(0.f, Suspicion - 0.12f * DeltaSeconds);
+        AwarenessState = CameraAlertSeconds > 0.f ? 3 :
+            Suspicion > 0.60f ? 2 : Suspicion > 0.22f ? 1 : 0;
+        if (AwarenessState == 0)
+            AdvanceAssignedRoutine(DeltaSeconds);
+        else if (FMath::Abs(LastKnownPlayerPosition.Z - GetActorLocation().Z) <= 260.f)
+        {
+            if (FVector::Dist2D(LastKnownPlayerPosition, GetActorLocation()) > 95.f)
+                MoveToward(LastKnownPlayerPosition, 110.f, DeltaSeconds);
+        }
         return;
     }
     const FVector ToPlayer = Player->GetActorLocation() - GetActorLocation();
