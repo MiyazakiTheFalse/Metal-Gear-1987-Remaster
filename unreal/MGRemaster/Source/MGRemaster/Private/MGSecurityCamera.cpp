@@ -16,7 +16,9 @@ AMGSecurityCamera::AMGSecurityCamera()
     Housing = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("CameraHousing"));
     Housing->SetupAttachment(SceneRoot);
     Housing->SetRelativeScale3D(FVector(.7f,.38f,.32f));
-    Housing->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    Housing->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    Housing->SetCollisionResponseToAllChannels(ECR_Ignore);
+    Housing->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
     if (Cube.Succeeded()) Housing->SetStaticMesh(Cube.Object);
 }
@@ -31,11 +33,11 @@ void AMGSecurityCamera::Configure(FName StableId, int32 DeckNumber, float SweepD
     Deck = DeckNumber;
     SweepAmplitude = FMath::Clamp(SweepDegrees, 0.f, 75.f);
     // Deterministic phase offsets prevent synchronised mechanical camera waves.
-    ScanPhase = DeckNumber * .8f + static_cast<float>(StableId.ToString().Len()) * .41f;
+    ScanPhase = DeckNumber * .8f + GetActorLocation().X * .001f;
 }
 void AMGSecurityCamera::ReportConfirmedSighting(const FVector& LastSeenLocation)
 {
-    if (!GetWorld()) return;
+    if (!GetWorld() || bDisabled) return;
     AlertSeconds = 6.f;
     AlertCooldown = 7.f;
     // Only guards close enough to this *actual camera* get the message.
@@ -88,4 +90,17 @@ void AMGSecurityCamera::Tick(float DeltaSeconds)
         Suspicion = FMath::Max(0.f, Suspicion - DeltaSeconds * .36f);
     if (Suspicion >= 1.f && AlertCooldown <= 0.f)
         ReportConfirmedSighting(Player->GetActorLocation());
+}
+
+float AMGSecurityCamera::TakeDamage(float DamageAmount, const FDamageEvent& Event,
+                                    AController* Instigator, AActor* DamageCauser)
+{
+    if (bDisabled || DamageAmount <= 0.f) return 0.f;
+    bDisabled = true;
+    Suspicion = 0.f;
+    AlertSeconds = 0.f;
+    Housing->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    Housing->SetRelativeRotation(FRotator(0.f,0.f,65.f));
+    SetActorTickEnabled(false);
+    return DamageAmount;
 }
