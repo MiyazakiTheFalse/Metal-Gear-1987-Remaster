@@ -85,7 +85,9 @@ public:
     // Mission rescue state is authoritative and never depends on clip length.
     UFUNCTION(BlueprintImplementableEvent, Category="Mission|Voice")
     void OnNarrativeVoiceStarted(FName Performer, FName ClipId, float ClipSeconds);
-    void RestartMission();
+    // Restart the current map and LOAD the latest durable checkpoint; never
+    // discard a player's finite items, boss progress or earned access cards.
+    void RetryFromCheckpoint();
     void ExhaleSmoke(const AMGPlayerCharacter* Player);
     void SkipStoryCinematic();
     UFUNCTION(BlueprintPure, Category="Mission|Story")
