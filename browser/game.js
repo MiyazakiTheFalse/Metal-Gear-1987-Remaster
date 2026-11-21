@@ -1109,6 +1109,7 @@ function retryCheckpoint(){
  let checkpoint=null;
  try{checkpoint=localStorage.getItem(STORAGE)}catch(e){}
  if(!checkpoint){popup('NO CHECKPOINT AVAILABLE',2);playCue('denied');return false;}
+ if(location.hash==='#retry-checkpoint')return true; // death can recur before browser unload
  location.hash='#retry-checkpoint';
  location.reload();
  return true;
@@ -2161,7 +2162,7 @@ function updateGuards(dt){kennelTick(dt);kidTick(dt);roofTick(dt);b2Tick(dt);con
  }
  for(const g of triggered){for(const other of guards){if(g===other||other.knocked||other.boss)continue;if(hypot(g.x-other.x,g.z-other.z)<14){other.suspicion=Math.max(other.suspicion,.55);other.last={...g.last};other.state=Math.max(other.state,1)}}}
  awareness=max;
- if(health<=0){location.hash='continue';location.reload();return}
+ if(health<=0){retryCheckpoint();return}
  if(stage===4&&boss.knocked){
    cardDrop={...cardHome};dropTime=-10;
    dialogueQueue=dialogueQueue.filter(line=>!line.id.startsWith('boss'));
