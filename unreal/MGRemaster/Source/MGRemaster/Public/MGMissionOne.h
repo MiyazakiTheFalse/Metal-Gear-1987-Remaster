@@ -28,6 +28,7 @@ public:
     bool IsLiftTravelling() const { return bLiftTravelling; }
     bool HasReachedElevator() const { return bElevatorReached; }
     FVector EntryLocation() const { return FVector(700.f, 700.f, 90.f); }
+    FVector ResumeLocation() const { return CurrentFloor == 1 ? EntryLocation() : FloorLiftLocation(CurrentFloor); }
 private:
     struct FPickup
     {
