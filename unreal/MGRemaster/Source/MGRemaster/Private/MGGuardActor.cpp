@@ -179,6 +179,11 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     const AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (!Player) return;
 
+    // Floors are distinct security volumes. Never perceive or chase a player
+    // through several metres of reinforced deck; floor isolation is mandatory
+    // until a real stair/elevator traversal and NavMesh handoff exists.
+    if (FMath::Abs(Player->GetActorLocation().Z - GetActorLocation().Z) > 260.f)
+        return;
     const FVector ToPlayer = Player->GetActorLocation() - GetActorLocation();
     const float Distance = ToPlayer.Size2D();
 
