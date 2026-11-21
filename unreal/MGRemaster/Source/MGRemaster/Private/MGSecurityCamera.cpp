@@ -92,15 +92,21 @@ void AMGSecurityCamera::Tick(float DeltaSeconds)
         ReportConfirmedSighting(Player->GetActorLocation());
 }
 
-float AMGSecurityCamera::TakeDamage(float DamageAmount, const FDamageEvent& Event,
-                                    AController* Instigator, AActor* DamageCauser)
+bool AMGSecurityCamera::DisableForService()
 {
-    if (bDisabled || DamageAmount <= 0.f) return 0.f;
+    if (bDisabled) return false;
     bDisabled = true;
     Suspicion = 0.f;
     AlertSeconds = 0.f;
+    AlertCooldown = 0.f;
     Housing->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     Housing->SetRelativeRotation(FRotator(0.f,0.f,65.f));
     SetActorTickEnabled(false);
+    return true;
+}
+float AMGSecurityCamera::TakeDamage(float DamageAmount, const FDamageEvent& Event,
+                                    AController* Instigator, AActor* DamageCauser)
+{
+    if (DamageAmount <= 0.f || !DisableForService()) return 0.f;
     return DamageAmount;
 }
