@@ -43,6 +43,9 @@ Check-Exit 'browser campaign'
 Write-Host 'Running full-body/face rig geometry checks...'
 & node (Join-Path $Repo 'browser\tests\test_field_rigs.cjs')
 Check-Exit 'rig geometry'
+Write-Host 'Checking MGS hold-scroll-release equipment strip state model...'
+& node (Join-Path $Repo 'browser\tests\test_equipment_strip.cjs')
+Check-Exit 'equipment strip'
 Write-Host 'Running gameplay-owned character animation-selection checks...'
 & node (Join-Path $Repo 'browser\tests\test_animation_intent.cjs')
 Check-Exit 'cast animation intent'
