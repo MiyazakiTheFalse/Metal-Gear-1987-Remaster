@@ -52,9 +52,19 @@ The browser's staged 28/75-second optional guidance previously stopped after ear
 
 Numbers remain provisional hypotheses pending novice/veteran testing. Explicit hints explain action only **after** the player has had room to observe the environment. They never open doors or adjust AI.
 
+### 6. Readability and resource fairness at late bosses
+
+The old interactive labels allowed `FIRE ROOFTOP GRENADE` during Hind D's evasive/invulnerable beat and `PLANT MINE` while a tank physically occupied the track. The first wasted a limited grenade; the second was rejected only **after** a misleading action prompt. Both versions now expose the real situation before committing resources:
+
+- **Hind D evading:** browser shows `HIND EVADING` and refuses the interaction without decrementing grenades; Unreal shows `HELICOPTER EVADING — HOLD FIRE` and refuses to decrement. Unreal also checks `IsValid(HindProxy)` before dereferencing or consuming a shot. Ordinary actual obstruction misses remain possible when the aircraft is otherwise vulnerable.
+- **Tank occupies a mine site:** browser announces `TRACK OCCUPIED` and rejects without using a mine; Unreal HUD says `TANK OCCUPIES TRACK — HOLD MINE` and the existing interaction code refuses to plant until the track clears.
+- **Demolition fuse active:** browser announces `CHARGE TICKING` rather than inviting a second charge placement, while the actual fuse continues. Unreal uses its existing timer and tells players to get clear.
+
+The source does **not** make every boss shot automatically hit, grant free ammunition or remove the need to understand attack patterns. It merely avoids punishing a player for following a command that cannot possibly work in that phase. A new browser regression covers these three states; an Unreal source contract checks that the finite ammunition decrement occurs after the evasive rejection. Physical boss fairness still needs actual player and UE5.7 PIE testing.
+
 ## Regression evidence in this source-authoring turn
 
-- V8-based browser DOM/WebGL-stub campaign and animation tests: **passed**, now **22 logged checkpoints including animation intent**. Actual WebGL render, human look/feel and controller hardware were not exercised by these stubs.
+- V8-based browser DOM/WebGL-stub campaign and animation tests: **passed**, now **23 logged checkpoints including animation intent**. Actual WebGL render, human look/feel and controller hardware were not exercised by these stubs.
 - `browser/tests/test_campaign.cjs` includes lossless R/pause retry, fatal-damage once-only reload, invalid saved-JSON protection, separate item selection/use, finite ration, binocular scope and smoke activation, boss/card guidance without state changes, mission story route, guard interactions, roof/tank progression and older save migration.
 - `tools/test_cross_engine_playability_source.py` checks Xbox mapping, skip binding, HUD locally reachable prompts, non-consuming menus, retries, and source invariants. It is automatically included in the tester's standard local Python unittest discovery. **Native Python suite and UE compile not executed in this session.**
 
