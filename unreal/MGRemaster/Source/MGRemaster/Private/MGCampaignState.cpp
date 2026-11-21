@@ -32,7 +32,9 @@ bool UMGCampaignState::HasBeat(FName Id) const
 bool UMGCampaignState::RecordBeat(FName Id, const FString& Intel)
 {
     if (!Progress || Id.IsNone() || HasBeat(Id)) return false;
-    // Do not use dialogue playback completion as a progression requirement.
+    // Save transactions must roll back in memory on a storage failure.
+    const int32 EarlierBeatCount = Progress->CompletedBeatIds.Num();
+    const TArray<FString> EarlierIntel = Progress->IntelLines;
     Progress->CompletedBeatIds.Add(Id);
     if (!Intel.IsEmpty())
     {
@@ -42,7 +44,12 @@ bool UMGCampaignState::RecordBeat(FName Id, const FString& Intel)
             Progress->IntelLines.RemoveAt(0, Progress->IntelLines.Num() - 32);
     }
     if (!Commit())
+    {
+        Progress->CompletedBeatIds.SetNum(EarlierBeatCount);
+        Progress->IntelLines = EarlierIntel;
         UE_LOG(LogTemp, Warning, TEXT("Failed to save 1995 story beat %s"), *Id.ToString());
+        return false;
+    }
     return true;
 }
 bool UMGCampaignState::AdvanceChapter(int32 NextChapter)
@@ -52,10 +59,17 @@ bool UMGCampaignState::AdvanceChapter(int32 NextChapter)
     // A prisoner clue, not a radio selection, unlocks the voluntary capture.
     if (NextChapter == 1 && !HasBeat(TEXT("snake.early_pow"))) return false;
     // Only a completed Gray Fox prison escape unlocks returning to Building One.
-    if (NextChapter == 2 && !HasBeat(TEXT("fox.revelation"))) return false;
+    if (NextChapter == 2 &&
+        (!HasBeat(TEXT("fox.revelation")) || !HasBeat(TEXT("fox.intel_persists"))))
+        return false;
+    const int32 PreviousChapter = Progress->Chapter;
     Progress->Chapter = NextChapter;
     if (!Commit())
+    {
+        Progress->Chapter = PreviousChapter;
         UE_LOG(LogTemp, Warning, TEXT("Failed to persist chapter %d"), NextChapter);
+        return false;
+    }
     return true;
 }
 FString UMGCampaignState::GetIntelLog() const
