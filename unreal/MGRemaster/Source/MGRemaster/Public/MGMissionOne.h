@@ -55,6 +55,8 @@ private:
     UPROPERTY()
     AStaticMeshActor* PrisonerDoor = nullptr;
     UPROPERTY()
+    AStaticMeshActor* CaptureMarker = nullptr;
+    UPROPERTY()
     AStaticMeshActor* GasDoor = nullptr;
     float GasWarningCooldown = 0.f;
     float GasDamageAccum = 0.f;
