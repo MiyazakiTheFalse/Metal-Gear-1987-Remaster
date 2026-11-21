@@ -1104,7 +1104,7 @@ void AMGMissionOne::Tick(float DeltaSeconds)
                 {
                     Player->NotifyFeedback(
                         TEXT("ELECTRIFIED FLOOR — GUIDE MISSILE TO WALL SWITCH"),
-                        TEXT("denied"));
+                        TEXT("electric"));
                     ElectricWarningCooldown = 2.2f;
                 }
                 if (ElectricDamageAccum >= .65f)
