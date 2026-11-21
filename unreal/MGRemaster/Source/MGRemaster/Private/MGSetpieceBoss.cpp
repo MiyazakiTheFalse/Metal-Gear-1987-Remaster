@@ -9,6 +9,8 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/World.h"
 #include "GameFramework/DamageType.h"
+#include "Engine/StaticMeshActor.h"
+#include "EngineUtils.h"
 
 AMGSetpieceBoss::AMGSetpieceBoss()
 {
@@ -71,6 +73,38 @@ float AMGSetpieceBoss::TakeDamage(float Damage, const FDamageEvent& Event,
     // Snake's existing hitscan prototype emits 100 damage for incapacitating
     // guards. Human bosses need a separate multi-shot endurance profile,
     // including Coward Duck's ten careful pistol shots.
+    if (Id==TEXT("m06.coward_duck_defeated") && IsValid(Causer) &&
+        GetWorld())
+    {
+        // He hides behind THREE actual hostages. Shooting straight through
+        // one cannot magically damage the boss: Snake must seek an angle.
+        // Full POW harm/rank simulation is a separate unverified system.
+        const FVector From=Causer->GetActorLocation();
+        const FVector Delta=GetActorLocation()-From;
+        const float D2=Delta.SizeSquared2D();
+        if (D2>1.f)
+        {
+            for (TActorIterator<AStaticMeshActor> Pawn(GetWorld());Pawn;++Pawn)
+            {
+                AStaticMeshActor* Captive=*Pawn;
+                if (!IsValid(Captive) ||
+                    (!Captive->ActorHasTag(TEXT("M06_JenniferBrother_Hostage")) &&
+                     !Captive->ActorHasTag(TEXT("M06_HostageWest")) &&
+                     !Captive->ActorHasTag(TEXT("M06_HostageEast")))) continue;
+                const FVector ToHostage=Captive->GetActorLocation()-From;
+                const float U=FVector::DotProduct(
+                    FVector(Delta.X,Delta.Y,0.f),
+                    FVector(ToHostage.X,ToHostage.Y,0.f))/D2;
+                if (U<=0.f || U>=1.f) continue;
+                const FVector Closest=From+Delta*U;
+                if (FVector::Dist2D(Closest,Captive->GetActorLocation())<125.f)
+                {
+                    if (Director.IsValid()) Director->NotifyHostageShield();
+                    return 0.f;
+                }
+            }
+        }
+    }
     const float EffectiveDamage=Source==TEXT("HANDGUN") ?
         FMath::Min(Damage,18.f) : Damage;
     Health = FMath::Max(0.f, Health - EffectiveDamage);
