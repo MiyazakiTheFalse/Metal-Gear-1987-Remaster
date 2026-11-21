@@ -338,6 +338,8 @@ void AMGMissionOne::RestoreSavedEquipment(AMGPlayerCharacter* Player)
     {
         for (const FName Item : Saved->ExtraOwnedItems)
             Equipment->AwardItem(Item,1);
+        for (const FName Weapon:Saved->ExtraOwnedWeapons)
+            Equipment->AwardWeapon(Weapon,0);
         for (const FName LaterId : Saved->LaterCollectedPickupIds)
         {
             if (LaterId == TEXT("L03_GRENADE_LAUNCHER"))
