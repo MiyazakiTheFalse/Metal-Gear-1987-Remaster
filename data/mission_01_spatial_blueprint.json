@@ -41,7 +41,7 @@
         24,
         0,
         18,
-        12
+        18
       ],
       "pressure": "low",
       "neighbors": [
@@ -118,7 +118,7 @@
       "bounds_xywh_m": [
         48,
         42,
-        24,
+        30,
         12
       ],
       "pressure": "medium",
