@@ -87,6 +87,25 @@ class CrossEnginePlayabilitySourceTests(unittest.TestCase):
             self.assertIn(term, use)
         self.assertIn("equippedItemName:equippedItemSlot.name", browser)
 
+    def test_finite_boss_resources_are_not_wasted_on_impossible_actions(self):
+        browser = read("browser/game.js")
+        unreal = read(
+            "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+        )
+        for label in ("TRACK OCCUPIED", "HIND EVADING", "CHARGE TICKING"):
+            self.assertIn(label, browser)
+        for label in ("TANK OCCUPIES TRACK", "HELICOPTER EVADING",
+                      "CHARGE TICKING"):
+            self.assertIn(label, unreal)
+        self.assertIn("if(cmd==='TRACK OCCUPIED')", browser)
+        self.assertIn("if(action==='HIND EVADING')", browser)
+        self.assertIn("if(action==='CHARGE TICKING')", browser)
+        pos = unreal.index("else if (HindPhase == 3)")
+        expend = unreal.index("--RoofGrenadesRemaining;", pos)
+        self.assertLess(pos, expend, "Unreal must reject invulnerable target before ammo")
+        self.assertIn("else if (!IsValid(HindProxy))", unreal)
+        self.assertIn("currentServiceAction:()=>serviceAction()", browser)
+
     def test_hud_context_is_real_local_reach_not_omniscient_marker(self):
         mission = read("unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp")
         declaration = read("unreal/MGRemaster/Source/MGRemaster/Public/MGGrayFoxMission.h")
