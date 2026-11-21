@@ -2180,7 +2180,8 @@ function updateGuards(dt){kennelTick(dt);kidTick(dt);roofTick(dt);b2Tick(dt);con
 
 }
 function lerpAngle(a,b,t){return a+Math.atan2(Math.sin(b-a),Math.cos(b-a))*clamp(t,0,1)}
-function updatePlayer(dt){const oldX=player.x,oldZ=player.z;let mF=(inputDown('w')?1:0)-(inputDown('s')?1:0),mR=(inputDown('d')?1:0)-(inputDown('a')?1:0);const pad=activeGamepad();if(pad){const dz=v=>Math.abs(v)>.16?v:0;mF+=-dz(pad.axes[1]||0);mR+=dz(pad.axes[0]||0)}const m=nrm(mF,mR),moving=hypot(mF,mR)>.08;
+function updatePlayer(dt){const oldX=player.x,oldZ=player.z;let mF=(inputDown('w')?1:0)-(inputDown('s')?1:0),mR=(inputDown('d')?1:0)-(inputDown('a')?1:0);const pad=activeGamepad();if(pad){const dz=v=>Math.abs(v)>.16?v:0;mF+=-dz(pad.axes[1]||0);mR+=dz(pad.axes[0]||0)}if(equipOpen){mF=0;mR=0;} // Same stationary tactical selection as Unreal.
+ const m=nrm(mF,mR),moving=hypot(mF,mR)>.08;
  player.sprint=player.stance===0&&(inputDown('shift')||pressed(pad?.buttons[10]));player.aim=inputDown('mouse2')||pressed(pad?.buttons[6]);
  if(draggedGuard){player.sprint=false;player.aim=false;}
  if(world.boxed){player.aim=false;player.sprint=false;}
