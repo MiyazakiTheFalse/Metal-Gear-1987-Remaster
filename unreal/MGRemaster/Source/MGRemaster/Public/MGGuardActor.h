@@ -98,6 +98,10 @@ private:
     bool bBodyDragged = false;
     bool bBodyConcealed = false;
     float BodyDiscoveryCooldown = 0.f;
+    FVector LastFootstepPosition = FVector::ZeroVector;
+    float TravelSinceStep = 0.f;
+    bool bFootstepLocationInitialised = false;
+
     TWeakObjectPtr<AActor> ChokeInstigator;
     float Suspicion = 0.f;
     float CameraAlertSeconds = 0.f;
