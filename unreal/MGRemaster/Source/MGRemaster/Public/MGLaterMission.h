@@ -71,6 +71,26 @@ private:
     AStaticMeshActor* PassageGateD = nullptr;
     UPROPERTY()
     AStaticMeshActor* RocketRoomDoor = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* JenniferBrother = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* HostageLeft = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* HostageRight = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* FinalWitness = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* DecisionPost = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* TX55LeftFoot = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* TX55RightFoot = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* LeftEscapeLadder = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* RightEscapeLadder = nullptr;
+    float ChargePlacementRecovery = 0.f;
+    float EscapeSaveAccumulator = 0.f;
     TArray<FWorldPickup> Pickups;
     int32 Mission = 3;
     float DialogueSeconds = 0.f;
@@ -88,6 +108,9 @@ private:
     void BuildExterior();
     void BuildBuildingTwo();
     void BuildEllenReturn();
+    void BuildDesertAndCowardDuck();
+    void BuildDeepBunker();
+    void BuildTX55Finale();
     void RemoveDefeatedGates();
     void SetSubtitle(const FString& Text, float Seconds = 7.f);
     bool RescuePOW(AStaticMeshActor*& Marker, FName Beat, const FString& Intel,
