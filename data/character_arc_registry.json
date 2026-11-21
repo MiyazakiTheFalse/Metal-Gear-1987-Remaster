@@ -1,0 +1,1241 @@
+{
+  "schema_version": 1,
+  "scope": "entire_1995_game",
+  "status": "story_beats_mapped_not_playable",
+  "authority": {
+    "target": "Connect2Media J2ME v3.3.0 a1",
+    "comparative": "1987 MSX2 game and manual",
+    "hindsight": "later canonical titles, strictly gated",
+    "not_yet_done": "original J2ME script/event/map trace"
+  },
+  "sources": [
+    {
+      "id": "official_mg1_characters",
+      "url": "https://www.konami.com/mg/archive/mg/chara.html",
+      "tier": "official_original"
+    },
+    {
+      "id": "official_mg2_characters",
+      "url": "https://www.konami.com/mg/archive/mg2/chara.html",
+      "tier": "official_later"
+    },
+    {
+      "id": "msx2_script",
+      "url": "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/30618",
+      "tier": "comparative_text"
+    },
+    {
+      "id": "msx2_story_summary",
+      "url": "https://www.expositionbreak.com/the-story-so-far-metal-gear-msx2/",
+      "tier": "comparative_analysis"
+    }
+  ],
+  "stages": [
+    {
+      "id": "S01",
+      "label": "Outer Heaven insertion and first building",
+      "place": "Building One 1F–3F; early radio and prisoner intelligence",
+      "status": "source_greybox_partial"
+    },
+    {
+      "id": "S02",
+      "label": "Confinement and Gray Fox rescue",
+      "place": "Secret prison cells, equipment recovery, Shoot Gunner escape",
+      "status": "isolated_rescue_prototype"
+    },
+    {
+      "id": "S03",
+      "label": "Outlying facilities and the scientist trail",
+      "place": "Courtyard, Building Two, resistance connections, boss routes",
+      "status": "design_only"
+    },
+    {
+      "id": "S04",
+      "label": "Hostage chain",
+      "place": "Madnar confrontation, Ellen search and rescue, return to scientist",
+      "status": "design_only"
+    },
+    {
+      "id": "S05",
+      "label": "Outer Heaven interior and betrayal",
+      "place": "Building Three, TX-55, tactical misinformation and collapsing trust",
+      "status": "design_only"
+    },
+    {
+      "id": "S06",
+      "label": "Final confrontation and evacuation",
+      "place": "Big Boss confrontation, fortress escape, aftermath",
+      "status": "design_only"
+    }
+  ],
+  "characters": [
+    {
+      "id": "solid_snake",
+      "name": "Solid Snake",
+      "identity": "FOXHOUND rookie on Operation Intrude N313",
+      "outer_goal": "Find Gray Fox, investigate and destroy Metal Gear",
+      "inner_conflict": "Trust in his mentor and command versus the evidence he must act on himself",
+      "beginning": "Follows his CO and relies on authoritative instructions",
+      "turn": "Rescues Fox, confronts manipulated guidance, earns relationships beyond chain of command",
+      "end": "Defeats the Outer Heaven leader and escapes without uncritical reliance on command",
+      "story_boundary": "No knowledge of Big Boss's later-canon identity retcon while playing the 1995 mission",
+      "beats": [
+        "snake.mission_start",
+        "snake.early_trust",
+        "snake.capture",
+        "snake.rescue_fox",
+        "snake.madnar_choice",
+        "snake.betrayal_inference",
+        "snake.final_choice",
+        "snake.escape"
+      ],
+      "status": "partial_start_source"
+    },
+    {
+      "id": "gray_fox",
+      "name": "Gray Fox / Grey Fox",
+      "identity": "FOXHOUND's senior Fox operative; earlier infiltration failed",
+      "outer_goal": "Pass actionable Metal Gear intelligence to Snake",
+      "inner_conflict": "Competent elite soldier rendered vulnerable by captivity, yet still an ally rather than a failed-objective token",
+      "beginning": "Missing operative whose fate drives the first investigation",
+      "turn": "Discovered in the adjacent prison cell after Snake is deliberately captured; reveals the nuclear threat and points to Madnar",
+      "end": "Survives rescue; his whereabouts after this encounter are not authoritatively expanded within the 1987 game",
+      "story_boundary": "Do not give Fox a 1995 cyborg body, a new 1995 betrayal, or a second mandatory confrontation; later games' events are future",
+      "beats": [
+        "fox.missing",
+        "fox.prison_clues",
+        "fox.revelation",
+        "fox.parting"
+      ],
+      "status": "rescue_interaction_prototype"
+    },
+    {
+      "id": "big_boss",
+      "name": "Big Boss / commanding officer",
+      "identity": "Snake's trusted FOXHOUND commander and hidden Outer Heaven antagonist",
+      "outer_goal": "Direct the field operation while concealing his role in Outer Heaven",
+      "inner_conflict": "The persona of the mentor becomes incompatible with mounting evidence of deliberate sabotage",
+      "beginning": "Helpful mission-giver with equipment and route advice",
+      "turn": "Suspicious guidance escalates to explicit operational obstruction",
+      "end": "Confronted as the enemy behind the fortress at the end of the original 1987 plot",
+      "story_boundary": "Later-canon Venom Snake distinction should be optional post-credits hindsight, not exposed to in-world Snake as 1995 truth",
+      "beats": [
+        "boss.briefing",
+        "boss.useful_advice",
+        "boss.misdirection",
+        "boss.abort_order",
+        "boss.reveal",
+        "boss.confrontation"
+      ],
+      "status": "start_radio_only"
+    },
+    {
+      "id": "schneider",
+      "name": "Kyle Schneider",
+      "identity": "Former fortress architect and resistance leader",
+      "outer_goal": "Dismantle the fortress that destroyed his family",
+      "inner_conflict": "Knowledge of the structure versus danger to everyone involved in resistance",
+      "beginning": "Unknown radio source who knows the actual built environment",
+      "turn": "Gives practical route, equipment and wall information that changes traversal",
+      "end": "Transmission is interrupted as he approaches disclosure of the enemy leadership",
+      "story_boundary": "Do not depict his later MG2 identity as a 1995 character fact; fate of interrupted call is not definitively resolved here",
+      "beats": [
+        "schneider.contact",
+        "schneider.route_aid",
+        "schneider.fox_cell_guidance",
+        "schneider.final_signal"
+      ],
+      "status": "optional_radio_prototype"
+    },
+    {
+      "id": "diane",
+      "name": "Diane",
+      "identity": "Resistance operative and former Thin Wall vocalist",
+      "outer_goal": "Protect the resistance and keep Snake alive around specialized threats",
+      "inner_conflict": "Operational commitment and the personal risk of caring about the infiltrator",
+      "beginning": "Knowledgeable contact, initially practical",
+      "turn": "Enemy-specific advice grows into a working alliance across bosses",
+      "end": "Personal farewell as Snake faces a threat beyond her knowledge",
+      "story_boundary": "Her exact emotional language and Steve relationship are version-specific; do not assert romance beyond original script",
+      "beats": [
+        "diane.contact",
+        "diane.boss_guidance",
+        "diane.final_call"
+      ],
+      "status": "design_only"
+    },
+    {
+      "id": "jennifer",
+      "name": "Jennifer",
+      "identity": "Undercover medical-staff member seeking imprisoned brother",
+      "outer_goal": "Rescue her brother while sabotaging Outer Heaven from within",
+      "inner_conflict": "Maintaining cover while putting her personal stake ahead of self-preservation",
+      "beginning": "Resistance insider with unknown personal motive to Snake",
+      "turn": "Helps procure weaponry and bypass barriers; reveals her brother among hostages held by Coward Duck",
+      "end": "Brother's liberation makes her warning and escape help personally consequential",
+      "story_boundary": "Keep brother's identity unnamed until supported by the chosen script; don't give him invented rank or crimes",
+      "beats": [
+        "jennifer.contact",
+        "jennifer.rocket_help",
+        "jennifer.brother_reveal",
+        "jennifer.brother_rescue",
+        "jennifer.escape_warning"
+      ],
+      "status": "design_only"
+    },
+    {
+      "id": "madnar",
+      "name": "Dr. Pettrovich / Drago Pettrovich Madnar",
+      "identity": "Engineer coerced into TX-55 development",
+      "outer_goal": "Secure Ellen's freedom before revealing how to destroy his creation",
+      "inner_conflict": "Technical responsibility versus the need to protect his daughter",
+      "beginning": "Rumoured source of Metal Gear's vulnerabilities",
+      "turn": "Rescued but refuses to disclose vital information until Ellen is saved",
+      "end": "After Ellen rescue, supplies the necessary destruction method and location",
+      "story_boundary": "Do not make him willingly proud of building TX-55 in this 1995 story or pull later MG2 choices into his 1987 rescue",
+      "beats": [
+        "madnar.named",
+        "madnar.discovered",
+        "madnar.condition",
+        "madnar.reunion_confirmation",
+        "madnar.weakness"
+      ],
+      "status": "design_only"
+    },
+    {
+      "id": "ellen",
+      "name": "Ellen Pettrovich / Ellen Madnar",
+      "identity": "Madnar's daughter; former ballet performer, kidnapped hostage",
+      "outer_goal": "Regain freedom and help her father survive",
+      "inner_conflict": "Held as coercive leverage without being reduced to an inventory key",
+      "beginning": "Missing hostage whose captivity blocks Madnar's cooperation",
+      "turn": "Snake reaches and protects her; she conveys the coercion behind Metal Gear",
+      "end": "Rescued; objective to return information and secure father is acknowledged",
+      "story_boundary": "No invented armed-combat role or unilateral machine disarm; allow a human-scale agency beat without adding false canon",
+      "beats": [
+        "ellen.mentioned",
+        "ellen.rescue",
+        "ellen.knowledge",
+        "ellen.safety"
+      ],
+      "status": "design_only"
+    },
+    {
+      "id": "jennifer_brother",
+      "name": "Jennifer's brother",
+      "identity": "Prisoner used as a hostage by Coward Duck",
+      "outer_goal": "Survive and escape detention",
+      "inner_conflict": "Protect other prisoners and remain alive during firefight",
+      "beginning": "Identity withheld from Snake until Jennifer's radio disclosure",
+      "turn": "Player must avoid harming captives during Coward Duck encounter",
+      "end": "Liberated; provides escape-related information where source supports it",
+      "story_boundary": "No independent pre-1987 service record or personality asserted without evidence",
+      "beats": [
+        "brother.hostage",
+        "brother.safe_rescue"
+      ],
+      "status": "design_only"
+    },
+    {
+      "id": "outer_heaven_bosses",
+      "name": "Outer Heaven elite enemies",
+      "identity": "Shoot Gunner, Machinegun Kid, Fire Trooper, Coward Duck and other source encounters",
+      "outer_goal": "Prevent Snake's infiltration and preserve security of key areas",
+      "inner_conflict": "Optional characterization must arise from assignment and encounter behaviour; no invented intimate backstories claimed canon",
+      "beginning": "Distinct defensive roles test acquired stealth skills",
+      "turn": "Escalate from containment to heavy weapons and hostage exploitation",
+      "end": "Their defeat or bypass exposes the organisation's increasing desperation",
+      "story_boundary": "Mechanical bosses and vehicles are encounter arcs, not automatically fully written personal stories",
+      "beats": [
+        "bosses.shoot_gunner",
+        "bosses.machinegun_kid",
+        "bosses.fire_trooper",
+        "bosses.coward_duck"
+      ],
+      "status": "boss_design_only"
+    }
+  ],
+  "beats": [
+    {
+      "id": "snake.mission_start",
+      "character": "solid_snake",
+      "stage": "S01",
+      "anchor": "insertion",
+      "trigger": "Begin new campaign: player lands unarmed, learns command objective",
+      "dramatic_effect": "Establish rookie perspective without forced exposition",
+      "depends_on": [],
+      "implementation": "source_prototype",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "snake.early_trust",
+      "character": "solid_snake",
+      "stage": "S01",
+      "anchor": "radio.any",
+      "trigger": "Player chooses first useful contact with Big Boss",
+      "dramatic_effect": "Offer real advice so later betrayal has dramatic contrast",
+      "depends_on": [],
+      "implementation": "radio_source_partial",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "fox.missing",
+      "character": "gray_fox",
+      "stage": "S01",
+      "anchor": "radio.intro",
+      "trigger": "First mission orders and evidence of missing senior agent",
+      "dramatic_effect": "Fox exists as a reason to investigate rather than as a marker",
+      "depends_on": [],
+      "implementation": "intro_source_partial",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "schneider.contact",
+      "character": "schneider",
+      "stage": "S01",
+      "anchor": "radio.resistance",
+      "trigger": "Contact local architect after informative encounter",
+      "dramatic_effect": "Explain why resistance knowledge outperforms generic waypoint UI",
+      "depends_on": [],
+      "implementation": "optional_radio_source_partial",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "schneider.route_aid",
+      "character": "schneider",
+      "stage": "S01",
+      "anchor": "building_1.secret_routes",
+      "trigger": "Player calls in a confusing, real branching space",
+      "dramatic_effect": "Reveal a useful connection only if confirmed by actual navigable geometry",
+      "depends_on": [
+        "schneider.contact"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "diane.contact",
+      "character": "diane",
+      "stage": "S01",
+      "anchor": "radio.resistance",
+      "trigger": "Prisoner intel or resistance contact unlocks Diane's channel",
+      "dramatic_effect": "Initial tactical help without stealing player agency",
+      "depends_on": [],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "snake.capture",
+      "character": "solid_snake",
+      "stage": "S02",
+      "anchor": "prison.snake_cell",
+      "trigger": "Player gets taken into a real detention state",
+      "dramatic_effect": "Force temporary disarm and preserve confiscated assets",
+      "depends_on": [],
+      "implementation": "prison_prototype_source",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "fox.prison_clues",
+      "character": "gray_fox",
+      "stage": "S02",
+      "anchor": "prison.snake_cell",
+      "trigger": "Player identifies double-wall seam and captive presence",
+      "dramatic_effect": "Allow discovery without compulsory radio/hint",
+      "depends_on": [
+        "snake.capture"
+      ],
+      "implementation": "prototype_partial",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "schneider.fox_cell_guidance",
+      "character": "schneider",
+      "stage": "S02",
+      "anchor": "prison.cells",
+      "trigger": "Optional transceiver call about altered prison wall",
+      "dramatic_effect": "Do not reveal a magic exit or override collision",
+      "depends_on": [
+        "snake.capture"
+      ],
+      "implementation": "optional_radio_source_partial",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "snake.rescue_fox",
+      "character": "solid_snake",
+      "stage": "S02",
+      "anchor": "prison.gray_fox_cell",
+      "trigger": "Player breaches, reaches and interacts with Gray Fox",
+      "dramatic_effect": "Regain trust by physically taking risk; no mandatory extra boss",
+      "depends_on": [
+        "fox.prison_clues"
+      ],
+      "implementation": "prison_prototype_source",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "fox.revelation",
+      "character": "gray_fox",
+      "stage": "S02",
+      "anchor": "prison.gray_fox_cell",
+      "trigger": "Rescue commits and Fox describes nuclear Metal Gear threat, names Pettrovich",
+      "dramatic_effect": "New objective: find scientist; preserve original information transfer",
+      "depends_on": [
+        "snake.rescue_fox"
+      ],
+      "implementation": "prison_prototype_source",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "fox.parting",
+      "character": "gray_fox",
+      "stage": "S02",
+      "anchor": "prison.escape_corridor",
+      "trigger": "Snake departs after rescue; Fox's status persists",
+      "dramatic_effect": "No unverified Fox combat partner or second mandatory scene",
+      "depends_on": [
+        "fox.revelation"
+      ],
+      "implementation": "design_only",
+      "provenance": "remake_optional_proposal",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "bosses.shoot_gunner",
+      "character": "outer_heaven_bosses",
+      "stage": "S02",
+      "anchor": "prison.escape_route",
+      "trigger": "Snake escapes confinement and meets Shoot Gunner",
+      "dramatic_effect": "Pressure containment combat with distinct telegraphed shotgun behaviours",
+      "depends_on": [
+        "fox.revelation"
+      ],
+      "implementation": "prototype_design_partial",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "madnar.named",
+      "character": "madnar",
+      "stage": "S02",
+      "anchor": "fox.intel",
+      "trigger": "Fox identifies Metal Gear creator",
+      "dramatic_effect": "Reveal a new human objective rather than merely a GPS marker",
+      "depends_on": [
+        "fox.revelation"
+      ],
+      "implementation": "source_dialogue_partial",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "diane.boss_guidance",
+      "character": "diane",
+      "stage": "S03",
+      "anchor": "boss_arena.radio",
+      "trigger": "Optional specialist advice at named boss encounter",
+      "dramatic_effect": "Give practical counterplay without spoiling all patterns",
+      "depends_on": [
+        "diane.contact"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "bosses.machinegun_kid",
+      "character": "outer_heaven_bosses",
+      "stage": "S03",
+      "anchor": "building_2.heavy_weapon",
+      "trigger": "Encounter heavy suppression specialist",
+      "dramatic_effect": "Arena and weapon distribution teach anti-line-of-fire maneuver",
+      "depends_on": [],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "bosses.fire_trooper",
+      "character": "outer_heaven_bosses",
+      "stage": "S03",
+      "anchor": "building_2.interior",
+      "trigger": "Encounter flame specialist on route to Madnar",
+      "dramatic_effect": "Fire route and spacing test environment rather than hit-point sponge",
+      "depends_on": [],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "jennifer.contact",
+      "character": "jennifer",
+      "stage": "S03",
+      "anchor": "radio.medical",
+      "trigger": "Medical insider establishes secure contact",
+      "dramatic_effect": "First credible clue she is risking her cover",
+      "depends_on": [],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "jennifer.rocket_help",
+      "character": "jennifer",
+      "stage": "S03",
+      "anchor": "building_2.guardian",
+      "trigger": "Jennifer provides access to heavy anti-cyborg weapon",
+      "dramatic_effect": "Tangible physical support and accessible pickup, no magic delivery",
+      "depends_on": [
+        "jennifer.contact"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "madnar.discovered",
+      "character": "madnar",
+      "stage": "S04",
+      "anchor": "building_2.prison",
+      "trigger": "Snake finds engineer captive",
+      "dramatic_effect": "Evidence of coercion carried through room and dialogue",
+      "depends_on": [
+        "madnar.named"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "madnar.condition",
+      "character": "madnar",
+      "stage": "S04",
+      "anchor": "building_2.prison",
+      "trigger": "Engineer refuses to disclose method before Ellen safe",
+      "dramatic_effect": "Respect fatherhood motive and keep objective dependency explicit",
+      "depends_on": [
+        "madnar.discovered"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "ellen.mentioned",
+      "character": "ellen",
+      "stage": "S04",
+      "anchor": "madnar.dialogue",
+      "trigger": "Madnar names his captive daughter",
+      "dramatic_effect": "Player understands the emotional stakes of a return trip",
+      "depends_on": [
+        "madnar.condition"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "ellen.rescue",
+      "character": "ellen",
+      "stage": "S04",
+      "anchor": "building_3.hostage_cell",
+      "trigger": "Snake reaches Ellen and opens prison route",
+      "dramatic_effect": "Avoid treating Ellen as a keycard pickup; direct agency in scene",
+      "depends_on": [
+        "ellen.mentioned"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "ellen.knowledge",
+      "character": "ellen",
+      "stage": "S04",
+      "anchor": "building_3.hostage_cell",
+      "trigger": "Ellen confirms her father was forced to build Metal Gear",
+      "dramatic_effect": "Strengthen truth and moral context",
+      "depends_on": [
+        "ellen.rescue"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "ellen.safety",
+      "character": "ellen",
+      "stage": "S04",
+      "anchor": "building_3.escape_route",
+      "trigger": "Safe handoff acknowledgement or log after Ellen exits danger",
+      "dramatic_effect": "Do not invent obligatory escort across entire game",
+      "depends_on": [
+        "ellen.rescue"
+      ],
+      "implementation": "design_only",
+      "provenance": "remake_optional_proposal",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "snake.madnar_choice",
+      "character": "solid_snake",
+      "stage": "S04",
+      "anchor": "building_2.return",
+      "trigger": "Snake chooses to help Ellen before extracting critical info",
+      "dramatic_effect": "Gives meaningful moral weight to unavoidable source objective",
+      "depends_on": [
+        "madnar.condition"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "madnar.reunion_confirmation",
+      "character": "madnar",
+      "stage": "S04",
+      "anchor": "building_2.return",
+      "trigger": "Confirmation Ellen has been rescued reaches engineer",
+      "dramatic_effect": "Earned emotional pivot, not arbitrary quest timer",
+      "depends_on": [
+        "ellen.rescue"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "madnar.weakness",
+      "character": "madnar",
+      "stage": "S04",
+      "anchor": "building_2.return",
+      "trigger": "Engineer reveals required TX-55 destruction sequence",
+      "dramatic_effect": "Unlock final sabotage objective after source dependency",
+      "depends_on": [
+        "madnar.reunion_confirmation"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "jennifer.brother_reveal",
+      "character": "jennifer",
+      "stage": "S05",
+      "anchor": "building_3.radio",
+      "trigger": "Jennifer reveals captive among Coward Duck hostages",
+      "dramatic_effect": "Player understands lethal friendly-fire consequences",
+      "depends_on": [
+        "jennifer.contact"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "brother.hostage",
+      "character": "jennifer_brother",
+      "stage": "S05",
+      "anchor": "building_3.coward_duck",
+      "trigger": "Coward Duck shields himself with hostages",
+      "dramatic_effect": "Avoid harming noncombatants; allow tactical nonlethal solution",
+      "depends_on": [
+        "jennifer.brother_reveal"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "bosses.coward_duck",
+      "character": "outer_heaven_bosses",
+      "stage": "S05",
+      "anchor": "building_3.coward_duck",
+      "trigger": "Coward Duck encounter triggers",
+      "dramatic_effect": "Area and movement reward careful aim; hostages cannot be mere scenery",
+      "depends_on": [
+        "jennifer.brother_reveal"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "brother.safe_rescue",
+      "character": "jennifer_brother",
+      "stage": "S05",
+      "anchor": "building_3.coward_duck",
+      "trigger": "Captives survive and brother is liberated",
+      "dramatic_effect": "Award escape-related intel; record who survived",
+      "depends_on": [
+        "brother.hostage"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "jennifer.brother_rescue",
+      "character": "jennifer",
+      "stage": "S05",
+      "anchor": "radio.medical",
+      "trigger": "Player confirms brother's survival",
+      "dramatic_effect": "Give emotionally consequential acknowledgment, no invented reunion",
+      "depends_on": [
+        "brother.safe_rescue"
+      ],
+      "implementation": "design_only",
+      "provenance": "remake_optional_proposal",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "boss.misdirection",
+      "character": "big_boss",
+      "stage": "S05",
+      "anchor": "radio.midgame",
+      "trigger": "Some route advice becomes suspect; reveal only when evidence available",
+      "dramatic_effect": "No omniscient guide marking villain prematurely",
+      "depends_on": [
+        "boss.useful_advice"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "boss.useful_advice",
+      "character": "big_boss",
+      "stage": "S02",
+      "anchor": "radio.prison",
+      "trigger": "Big Boss offers apparently helpful gear-recovery advice",
+      "dramatic_effect": "Reinforce authority before conflict",
+      "depends_on": [
+        "boss.briefing"
+      ],
+      "implementation": "source_radio_partial",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "boss.briefing",
+      "character": "big_boss",
+      "stage": "S01",
+      "anchor": "radio.intro",
+      "trigger": "Big Boss assigns mission and establishes contact",
+      "dramatic_effect": "Command is credible to Snake and player",
+      "depends_on": [],
+      "implementation": "source_radio_partial",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "schneider.final_signal",
+      "character": "schneider",
+      "stage": "S05",
+      "anchor": "radio.final_warning",
+      "trigger": "Architect attempts to reveal leadership, transmission cuts",
+      "dramatic_effect": "Unresolved danger; do not falsely confirm a death",
+      "depends_on": [
+        "schneider.route_aid"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "boss.abort_order",
+      "character": "big_boss",
+      "stage": "S05",
+      "anchor": "radio.final_zone",
+      "trigger": "Big Boss explicitly attempts to halt operation",
+      "dramatic_effect": "Player is allowed to continue, breach orders",
+      "depends_on": [
+        "boss.misdirection"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "snake.betrayal_inference",
+      "character": "solid_snake",
+      "stage": "S05",
+      "anchor": "tx55.access",
+      "trigger": "Snake reconciles independent intel with misleading command",
+      "dramatic_effect": "Switch from following orders to evaluating evidence",
+      "depends_on": [
+        "boss.abort_order",
+        "madnar.weakness"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "boss.reveal",
+      "character": "big_boss",
+      "stage": "S06",
+      "anchor": "outer_heaven.final_arena",
+      "trigger": "Final antagonist declares Big Boss identity",
+      "dramatic_effect": "Keep original 1987 dramatic reveal intact",
+      "depends_on": [
+        "snake.betrayal_inference"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "snake.final_choice",
+      "character": "solid_snake",
+      "stage": "S06",
+      "anchor": "outer_heaven.final_arena",
+      "trigger": "Snake commits to destroying Metal Gear and confronting commander",
+      "dramatic_effect": "Resolve conflict through player action, not auto-cinematic",
+      "depends_on": [
+        "boss.reveal"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "boss.confrontation",
+      "character": "big_boss",
+      "stage": "S06",
+      "anchor": "outer_heaven.final_arena",
+      "trigger": "Boss defeat, closing threat and escape begin",
+      "dramatic_effect": "No mandatory later-canon Venom explanation in 1995",
+      "depends_on": [
+        "boss.reveal"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "diane.final_call",
+      "character": "diane",
+      "stage": "S06",
+      "anchor": "radio.before_escape",
+      "trigger": "Diane cannot solve the final fight for Snake",
+      "dramatic_effect": "Sincere human connection without declaring invented relationship",
+      "depends_on": [
+        "diane.boss_guidance"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "jennifer.escape_warning",
+      "character": "jennifer",
+      "stage": "S06",
+      "anchor": "radio.escape",
+      "trigger": "Jennifer warns Snake during imminent escape",
+      "dramatic_effect": "Maintain independent ally voice against command betrayal",
+      "depends_on": [
+        "jennifer.contact"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    },
+    {
+      "id": "snake.escape",
+      "character": "solid_snake",
+      "stage": "S06",
+      "anchor": "outer_heaven.escape",
+      "trigger": "Snake escapes after final confrontation",
+      "dramatic_effect": "Resolve mission survival while leaving later sequel lives future",
+      "depends_on": [
+        "snake.final_choice",
+        "boss.confrontation"
+      ],
+      "implementation": "design_only",
+      "provenance": "msx2_comparative",
+      "source_target": "J2ME 3.3.0 still unverified for this event",
+      "production_gates": [
+        "world_location",
+        "event_state",
+        "presentation",
+        "skip_and_reload",
+        "voice_and_subtitles",
+        "player_agency"
+      ]
+    }
+  ],
+  "policy": [
+    "Never substitute character biography for playable interaction",
+    "Never add mandatory Gray Fox second appearance in 1995 without canonical verification",
+    "In-world characters do not know later-series reveals",
+    "A boss may have personality and environmental history without a fabricated canonical origin",
+    "Tie each critical reveal to a stable event flag, physical location, persistent transcript, and interrupted-play path",
+    "Keep older rescue and radio prototypes but mark unimplemented rest of full-game arcs",
+    "All beats must be reconciled against J2ME before being promoted to original-source verified"
+  ]
+}
