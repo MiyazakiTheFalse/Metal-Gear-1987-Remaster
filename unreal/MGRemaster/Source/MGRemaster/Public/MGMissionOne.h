@@ -25,6 +25,7 @@ public:
     FString GetObjectiveText() const;
     bool CycleLiftDestination(AMGPlayerCharacter* Player);
     int32 GetCurrentFloor() const { return CurrentFloor; }
+    int32 GetSelectedFloor() const { return SelectedFloor; }
     bool IsLiftTravelling() const { return bLiftTravelling; }
     bool HasReachedElevator() const { return bElevatorReached; }
     FVector EntryLocation() const { return FVector(700.f, 700.f, 90.f); }
