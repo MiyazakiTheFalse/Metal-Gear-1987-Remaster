@@ -11,7 +11,8 @@ void UMGEquipmentComponent::BeginPlay()
     Weapons = {
         {FName(TEXT("NONE")), TEXT("NO WEAPON"), 0, true, false},
         {FName(TEXT("STUN")), TEXT("STUN PISTOL [TEST]"), 8, true, false},
-        {FName(TEXT("HANDGUN")), TEXT("HANDGUN"), 0, false, false}
+        {FName(TEXT("HANDGUN")), TEXT("HANDGUN"), 0, false, false},
+        {FName(TEXT("RC_MISSILE")), TEXT("REMOTE-CONTROLLED MISSILE"), 0, false, false}
     };
     Items = {
         {FName(TEXT("NONE")), TEXT("NO ITEM"), 0, true, false},
@@ -254,6 +255,39 @@ void UMGEquipmentComponent::RestoreItemQuantity(FName Id, int32 Quantity)
         if (E.Id == Id)
         {
             E.Quantity = FMath::Clamp(Quantity, 0, 999);
+            return;
+        }
+}
+
+bool UMGEquipmentComponent::IsWeaponEquipped(FName WeaponId) const
+{
+    return !bConfiscated && Weapons.IsValidIndex(EquippedWeapon) &&
+        Weapons[EquippedWeapon].Id == WeaponId && IsAvailable(Weapons[EquippedWeapon]);
+}
+int32 UMGEquipmentComponent::GetWeaponAmmo(FName WeaponId) const
+{
+    for (const FMGEquipmentEntry& Entry : Weapons)
+        if (Entry.Id == WeaponId) return Entry.Quantity;
+    return 0;
+}
+bool UMGEquipmentComponent::ConsumeWeaponAmmo(FName WeaponId)
+{
+    if (!IsWeaponEquipped(WeaponId)) return false;
+    FMGEquipmentEntry& Entry = Weapons[EquippedWeapon];
+    if (Entry.Quantity <= 0)
+    {
+        SetFeedback(TEXT("NO AMMUNITION"));
+        return false;
+    }
+    --Entry.Quantity;
+    return true;
+}
+void UMGEquipmentComponent::RestoreWeaponAmmo(FName WeaponId, int32 Amount)
+{
+    for (FMGEquipmentEntry& Entry : Weapons)
+        if (Entry.Id == WeaponId)
+        {
+            Entry.Quantity = FMath::Clamp(Amount, 0, 999);
             return;
         }
 }
