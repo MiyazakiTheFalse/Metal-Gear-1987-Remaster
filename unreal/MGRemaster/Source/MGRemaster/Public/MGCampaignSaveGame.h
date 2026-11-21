@@ -11,8 +11,11 @@ class MGREMASTER_API UMGCampaignSaveGame : public USaveGame
     GENERATED_BODY()
 public:
     UPROPERTY()
-    int32 Version = 1;
-    // 0: Building One opening; 1: captured / Gray Fox prison; 2: escaped.
+    int32 Version = 2;
+    // One-based player-facing mission number. 1 insertion; 2 Gray Fox; 3 return.
+    UPROPERTY()
+    int32 MissionNumber = 1;
+    // Retained solely for migrating v1 saves (old values 0, 1, 2).
     UPROPERTY()
     int32 Chapter = 0;
     UPROPERTY()
