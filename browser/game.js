@@ -3009,7 +3009,7 @@ if(location.hash==='#retry-checkpoint'){
  if(available)start(true);
 }
 // Console contract for deterministic browser tests, never elevated to source fidelity.
-window.__mgGameDebug={optionalStageHelp,previewRigActors:(time=gameTime)=>activeCastForRig(time),get state(){return {stage,equippedItemName:equippedItemSlot.name,service:{...service},roof:{...roof},b2:{...b2,armed:[...b2.armed]},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
+window.__mgGameDebug={optionalStageHelp,currentServiceAction:()=>serviceAction(),previewRigActors:(time=gameTime)=>activeCastForRig(time),get state(){return {stage,equippedItemName:equippedItemSlot.name,service:{...service},roof:{...roof},b2:{...b2,armed:[...b2.armed]},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
  firstCardEarned,rationEarned,rationRemaining,binocularsEarned,
  rationWorld:originalRationProp.active?{...originalRationTarget}:null,
  binocularsWorld:originalBinocularsProp.active?{...originalBinocularsTarget}:null,
