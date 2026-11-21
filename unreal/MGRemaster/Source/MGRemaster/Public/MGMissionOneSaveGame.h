@@ -11,13 +11,17 @@ class MGREMASTER_API UMGMissionOneSaveGame : public USaveGame
     GENERATED_BODY()
 public:
     UPROPERTY()
-    int32 Version = 1;
+    int32 Version = 2;
     UPROPERTY()
     TArray<FName> CollectedPickupIds;
     UPROPERTY()
     bool bCardDoorOpened = false;
     UPROPERTY()
     bool bElevatorReached = false;
+    UPROPERTY()
+    bool bPOWRescued = false;
+    UPROPERTY()
+    int32 CurrentFloor = 1;
     UPROPERTY()
     FVector LastCheckpoint = FVector(700.f, 700.f, 90.f);
 };
