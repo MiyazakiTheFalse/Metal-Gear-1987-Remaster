@@ -1336,9 +1336,16 @@ float AMGPlayerCharacter::TakeDamage(float Amount, const FDamageEvent& Event,
                                   : TEXT("INJURED — TAKE COVER"), TEXT("hurt"));
     if (Health <= 0.f && GetWorld())
     {
-        // A full failure flow will add death animation/AI reset; checkpoint
-        // reload retains the versioned mission save.
-        UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
+        // Both manual retry (F9) and actual death use EXACTLY the same
+        // lossless save/load pathway. Never delete the user's progress or
+        // request a raw PIE-prefixed map name from the current World.
+        if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+                UGameplayStatics::GetActorOfClass(
+                    this, AMGGrayFoxMission::StaticClass())))
+            Mission->RetryFromCheckpoint();
+        else
+            UGameplayStatics::OpenLevel(this, FName(
+                *UGameplayStatics::GetCurrentLevelName(this, true)));
     }
     return Accepted;
 }
