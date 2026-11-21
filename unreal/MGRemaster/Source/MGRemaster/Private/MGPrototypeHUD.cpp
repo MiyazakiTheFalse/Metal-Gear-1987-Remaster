@@ -4,6 +4,7 @@
 #include "MGGrayFoxMission.h"
 #include "MGMissionOne.h"
 #include "MGGuardActor.h"
+#include "MGSecurityCamera.h"
 #include "MGPlayerCharacter.h"
 #include "Engine/Canvas.h"
 #include "EngineUtils.h"
@@ -89,6 +90,21 @@ void AMGPrototypeHUD::DrawHUD()
         MaxSuspicion = FMath::Max(MaxSuspicion, Guard->GetSuspicion());
     }
 
+    bool bSecurityCameraTracking = false;
+    for (TActorIterator<AMGSecurityCamera> Cam(GetWorld()); Cam; ++Cam)
+    {
+        if (Cam->IsDisabled()) continue;
+        if (Opening && Cam->GetDeck() != Opening->GetCurrentFloor()) continue;
+        MaxSuspicion = FMath::Max(MaxSuspicion, Cam->GetDetectionProgress());
+        if (Cam->GetDetectionProgress() > 0.22f)
+        {
+            bSecurityCameraTracking = true;
+            MaxThreat = FMath::Max(MaxThreat, 1);
+        }
+        if (Cam->IsAlarmActive())
+            MaxThreat = 3;
+    }
+
     const float RadarSize = 170.f * UiScale;
     const float RadarX = Width - Margin - RadarSize;
     const float RadarY = Margin;
@@ -151,6 +167,10 @@ void AMGPrototypeHUD::DrawHUD()
         DrawText(FString::Printf(TEXT("MISSION 01 / BUILDING ONE / %dF"), Opening->GetCurrentFloor()), HudGreen,
                  Margin + 12.f * UiScale, Margin + 120.f * UiScale,
                  nullptr, 0.75f * UiScale, false);
+        if (bSecurityCameraTracking)
+            DrawText(TEXT("CCTV ACQUIRING TARGET"), HudAmber,
+                     RadarX + 9.f * UiScale, RadarY + 72.f * UiScale,
+                     nullptr, .69f * UiScale, false);
         DrawText(Opening->GetObjectiveText(), FLinearColor::White,
                  Margin + 12.f * UiScale, Margin + 149.f * UiScale,
                  nullptr, 0.79f * UiScale, false);
