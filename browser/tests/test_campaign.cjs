@@ -18,7 +18,7 @@ function boot(storage = new Map(),search = '',getGamepads=()=>[],hash = '') {
     if (!elements.has(id)) elements.set(id, { style:{}, dataset:{},
       hidden:id==='menuOptionsPanel'||id==='newGameConfirm',
       tagName:id==='rigToggle'||id==='tipsToggle'||id==='voiceToggle'?'INPUT':'BUTTON',
-      classList:{add:noop},
+      classList:{add:noop}, setAttribute:noop,
       clientWidth:960, clientHeight:540, width:960, height:540,
       addEventListener:noop, getContext:() => gl });
     return elements.get(id);
@@ -30,7 +30,7 @@ function boot(storage = new Map(),search = '',getGamepads=()=>[],hash = '') {
     __MG_TEST__:true };
   runtime.window=runtime;
   vm.createContext(runtime);
-  for (const file of ['dialogue.js','tutorial.js','game.js'])
+  for (const file of ['dialogue.js','tutorial.js','equipment_strip.js','game.js'])
     vm.runInContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),runtime,{filename:file});
   return {game:runtime.__mgGameDebug,button:id=>element(id).onclick(),element,storage,
     get reloads(){return reloads}, get location(){return runtime.location}, 
