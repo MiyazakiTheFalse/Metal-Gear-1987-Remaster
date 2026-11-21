@@ -241,3 +241,19 @@ void UMGEquipmentComponent::RestoreHandgunRounds(int32 Rounds)
             return;
         }
 }
+
+int32 UMGEquipmentComponent::GetItemQuantity(FName Id) const
+{
+    for (const FMGEquipmentEntry& E : Items)
+        if (E.Id == Id) return E.Quantity;
+    return 0;
+}
+void UMGEquipmentComponent::RestoreItemQuantity(FName Id, int32 Quantity)
+{
+    for (FMGEquipmentEntry& E : Items)
+        if (E.Id == Id)
+        {
+            E.Quantity = FMath::Clamp(Quantity, 0, 999);
+            return;
+        }
+}
