@@ -1,0 +1,291 @@
+{
+  "schema_version": 1,
+  "scope": "All 8 proposed 1995 missions; no arbitrary enemy placement",
+  "provenance": "Original J2ME 3.3.0 not yet traced; currently active placements are authored remake greybox only",
+  "principle": "A guard exists because a post or duty exists, not because the designer needs an enemy at an arbitrary coordinate",
+  "rules": [
+    "Each guard must have stable ID, mission/sector, duty, protected asset, work route or fixed observation post, shift/pause, patrol height, local stimulus semantics, alarm response and believable recovery.",
+    "No guard may appear inside a sealed cell, cross between floors without a navigable connector, detect through solid walls, or spawn as a scripted wave solely because an item was picked up.",
+    "Use authored patrol stops for inspecting doors, trucks, machinery or occupied cells; dwell/face/scan at the post without freezing on other decks.",
+    "Any extra guard requires a new documented job that fits architecture, plus valid connected floor/collision path and a source/canon grade.",
+    "After capture, alarm, prisoner rescue, gate opening or revisits, assigned posts may reconfigure; guards do not reset magical knowledge, teleport or repopulate unrelated rooms.",
+    "Guard absence is legitimate: empty corridors, downtime, and opportunities for observation form the pacing between real security stations.",
+    "Do not use randomized enemy counts or scattered spawn transforms as production placements; prototypes can use explicit authored contracts only.",
+    "Save/reload guard defeats, alarm knowledge and changed duties once the persistent security simulation is implemented; current runtime lacks full continuity.",
+    "Every combat guard must have readable detection, hearing, occlusion, route return and a readable attack wind-up; do not require all guards to be engaged.",
+    "Boss arenas have separate specialized duties (detention enforcer, anti-personnel fire, hostage exploitation) and must preserve source-like routes and alternative solutions."
+  ],
+  "current_implemented_posts": [
+    {
+      "id": "G01_Approach",
+      "mission": 1,
+      "area": "Building One insertion",
+      "duty": "PERIMETER_RECON",
+      "protected_asset": "INSERTION_ACCESS",
+      "purpose": "Observe actual inbound route and perform an entry inspection circuit",
+      "response": "Investigate verified movement/sound and return to the perimeter",
+      "patrol": "four-node approach circuit",
+      "implemented": true
+    },
+    {
+      "id": "G02_Trucks",
+      "mission": 1,
+      "area": "Building One first truck yard",
+      "duty": "LOGISTICS_SENTINEL",
+      "protected_asset": "FIRST_TRUCK_LOADING_ZONE",
+      "purpose": "Control routine truck loading, not arbitrary hallway blocking",
+      "response": "Search last observed truck movement and return to work loop",
+      "patrol": "four-node yard inspection",
+      "implemented": true
+    },
+    {
+      "id": "G03_TruckDeparture",
+      "mission": 1,
+      "area": "Building One Card 1 truck",
+      "duty": "LOADING_SHIFT",
+      "protected_asset": "CARD1_TRUCK",
+      "purpose": "Guard / loading staff returning to the centre truck during a work shift",
+      "response": "Respond to actual loading-yard disturbance",
+      "patrol": "short three-node departure loop",
+      "implemented": true
+    },
+    {
+      "id": "G04_SecondYard",
+      "mission": 1,
+      "area": "Building One later trucks",
+      "duty": "VEHICLE_INSPECTION",
+      "protected_asset": "SECOND_TRUCK_COMPOUND",
+      "purpose": "Inspect vehicles and the controlled connection to the lift",
+      "response": "Search last known position then return to inspections",
+      "patrol": "second-yard circuit",
+      "implemented": true
+    },
+    {
+      "id": "G05_Lift",
+      "mission": 1,
+      "area": "Building One lift approach",
+      "duty": "ELEVATOR_ACCESS_CONTROL",
+      "protected_asset": "BUILDING_ONE_LIFT",
+      "purpose": "Restrict access to the lift, not track player across floors",
+      "response": "Check lift access and nearby disturbances",
+      "patrol": "two-point lift approach",
+      "implemented": true
+    },
+    {
+      "id": "G07_SecondFloorCorridor",
+      "mission": 1,
+      "area": "Building One 2F",
+      "duty": "SERVICE_SECURITY",
+      "protected_asset": "2F_MAINTENANCE_ACCESS",
+      "purpose": "Inspect service movement and machinery access",
+      "response": "Local CCTV alerts and real visual/hearing cues",
+      "patrol": "2F work loop",
+      "implemented": true
+    },
+    {
+      "id": "G08_ThirdFloorCameraGallery",
+      "mission": 1,
+      "area": "Building One 3F",
+      "duty": "SURVEILLANCE_MAINTENANCE",
+      "protected_asset": "3F_CCTV_GALLERY",
+      "purpose": "Check CCTV gallery, prisoner approach and camera alarm",
+      "response": "Respond to successful local camera sightings",
+      "patrol": "3F gallery loop",
+      "implemented": true
+    },
+    {
+      "id": "PRISON_G01",
+      "mission": 2,
+      "area": "Prison north holding corridor",
+      "duty": "CELL_BLOCK_WATCH",
+      "protected_asset": "NORTH_HOLDING_BAYS",
+      "purpose": "Observe occupied cells and the confinement corridor, not patrol inside them",
+      "response": "Investigate a real breach or confirmed sighting",
+      "patrol": "two-cell observation circuit",
+      "implemented": true
+    },
+    {
+      "id": "PRISON_G02",
+      "mission": 2,
+      "area": "Prison property and escape corridor",
+      "duty": "PROPERTY_CUSTODY",
+      "protected_asset": "CONFISCATED_GEAR_AND_EXIT",
+      "purpose": "Protect recovered-equipment locker and outgoing detention passage",
+      "response": "Protect legitimate post and pursue observed breakout",
+      "patrol": "gear locker and exit corridor",
+      "implemented": true
+    }
+  ],
+  "prison": {
+    "mission": 2,
+    "area": "Gray Fox secret prison and adjacent barred holding wing",
+    "count_visible_detainees": 4,
+    "people": [
+      {
+        "id": "SNAKE",
+        "actor_kind": "player",
+        "location": "start cell",
+        "canonical": true,
+        "interactive": true,
+        "counts_as_pow_rescue": false,
+        "status": "captured initially"
+      },
+      {
+        "id": "GRAY_FOX",
+        "actor_kind": "named_npc_proxy",
+        "location": "hidden adjacent cell",
+        "canonical": true,
+        "interactive": true,
+        "counts_as_pow_rescue": false,
+        "status": "rescued as source storyline milestone"
+      },
+      {
+        "id": "AMBIENT_DETAINEE_A_UNVERIFIED",
+        "actor_kind": "noninteractable_visual_proxy",
+        "location": "separate north holding bay west",
+        "canonical": false,
+        "source_status": "remake_optional_noncanonical",
+        "interactive": false,
+        "counts_as_pow_rescue": false,
+        "status": "occupied cell; placeholder silhouette only"
+      },
+      {
+        "id": "AMBIENT_DETAINEE_B_UNVERIFIED",
+        "actor_kind": "noninteractable_visual_proxy",
+        "location": "separate north holding bay east",
+        "canonical": false,
+        "source_status": "remake_optional_noncanonical",
+        "interactive": false,
+        "counts_as_pow_rescue": false,
+        "status": "occupied cell; placeholder silhouette only"
+      }
+    ],
+    "not_this_prison": [
+      {
+        "id": "M01_3F_POW",
+        "meaning": "Earlier Building One 3F named-by-role source critical prisoner; separate sector, not counted here"
+      },
+      {
+        "id": "ELLEN",
+        "meaning": "Later source prisoner in Building One basement, separate narrative time and room, not yet implemented in current prison"
+      }
+    ],
+    "design_basis": "Source-verifiable named scene has only Fox as nonplayer captive. Two additional visual figures are remake ambient hypotheses; delete or relocate after J2ME source trace, never award rescues for them."
+  },
+  "mission_authoring": [
+    {
+      "mission": 1,
+      "title": "Operation Intrude N313",
+      "required_posts": [
+        "insertion observation",
+        "truck loading",
+        "Card 1 truck departure",
+        "second yard inspection",
+        "lift access",
+        "2F service security",
+        "3F CCTV gallery"
+      ],
+      "planned_counts": {
+        "authored": 7,
+        "new_posts_pending_source": 0
+      }
+    },
+    {
+      "mission": 2,
+      "title": "The Missing Fox",
+      "required_posts": [
+        "holding bay observation",
+        "property and escape exit guard"
+      ],
+      "planned_counts": {
+        "authored": 2,
+        "new_posts_pending_source": 0
+      }
+    },
+    {
+      "mission": 3,
+      "title": "The Scientist Trail",
+      "required_posts": [
+        "revisit existing posts with changed staffing only when story events justify",
+        "roof air access",
+        "checkpoint disguise and tank road"
+      ],
+      "planned_counts": {
+        "reused_from_mission_1": 7,
+        "additional": "not_final"
+      }
+    },
+    {
+      "mission": 4,
+      "title": "The Outer Defences",
+      "required_posts": [
+        "vehicle control",
+        "research labs and TX-11 security",
+        "weapon cage",
+        "guard response to breached perimeter"
+      ],
+      "planned_counts": {
+        "additional": "not_final"
+      }
+    },
+    {
+      "mission": 5,
+      "title": "The Price of Metal Gear",
+      "required_posts": [
+        "engineer custody with coercion evident",
+        "Ellen hidden cell off main patrol",
+        "building interconnect",
+        "occupied-but-sparse basement"
+      ],
+      "planned_counts": {
+        "additional": "not_final"
+      }
+    },
+    {
+      "mission": 6,
+      "title": "The Cost of Loyalty",
+      "required_posts": [
+        "trapped route and misleading truck",
+        "hostage-blocking specialist guard",
+        "medical undercover presence",
+        "deep complex patrols"
+      ],
+      "planned_counts": {
+        "additional": "not_final"
+      }
+    },
+    {
+      "mission": 7,
+      "title": "Orders and Evidence",
+      "required_posts": [
+        "deep basement prisoner cell",
+        "restricted nuclear facility approaches",
+        "last trustworthy security response"
+      ],
+      "planned_counts": {
+        "additional": "not_final"
+      }
+    },
+    {
+      "mission": 8,
+      "title": "Outer Heaven",
+      "required_posts": [
+        "TX-55 control security",
+        "final commander battle",
+        "evacuation and collapsing patrol state"
+      ],
+      "planned_counts": {
+        "additional": "not_final"
+      }
+    }
+  ],
+  "qa_gates": [
+    "All SpawnActor<AMGGuardActor> in production levels followed by ConfigureDuty and authored ConfigurePatrol",
+    "No active guard with empty DutyId / ProtectedAsset",
+    "Routes avoid walls, vehicles, prisoner cells, trapped props and unrealistic guard through elevator transitions",
+    "Guards keep patrolling while player is on a different floor",
+    "Every inmate has room, role, rescue status, source grade and stable identity if functional",
+    "Background captives never increase rank, issue fake lore or duplicate required source prisoner intel",
+    "Prototype prisoner count = 4 (Snake, Fox, two optional visual-only figures), not a claim about canonical count"
+  ]
+}
