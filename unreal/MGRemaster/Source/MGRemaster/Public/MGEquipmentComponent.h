@@ -58,6 +58,7 @@ public:
     // Designed for eventual room/item pickup and mission SaveGame integration.
     bool AwardItem(FName ItemId, int32 Count);
     bool AwardWeapon(FName WeaponId, int32 Ammo);
+    bool HasItem(FName ItemId) const;
     void SetFeedback(const FString& Message);
 
 private:
