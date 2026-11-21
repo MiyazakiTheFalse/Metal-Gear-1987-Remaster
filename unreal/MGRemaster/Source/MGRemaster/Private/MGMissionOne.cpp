@@ -1,5 +1,7 @@
 #include "MGMissionOne.h"
 #include "MGMissionOneSaveGame.h"
+#include "MGCampaignState.h"
+#include "Engine/GameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "MGGuardActor.h"
 #include "MGSecurityCamera.h"
@@ -185,9 +187,14 @@ void AMGMissionOne::BeginPlay()
         if (bGasDoorOpened && IsValid(GasDoor)) GasDoor->Destroy();
         CurrentFloor = Save->Version >= 2 ? FMath::Clamp(Save->CurrentFloor, 1, 3) : 1;
         SelectedFloor = CurrentFloor == 1 ? 3 : (CurrentFloor == 3 ? 2 : 1);
-        // Checkpoint is kept at the fixed start until source-verified safe
-        // positions are authored; no restart into a solid door or enemy.
+        // Checkpoint resumes from a safe lift landing rather than an unvalidated
+        // corridor position; capture and prison use a separate chapter save.
     }
+    if (bPOWRescued && GetWorld() && GetWorld()->GetGameInstance())
+        if (UMGCampaignState* Story =
+            GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+            Story->RecordBeat(TEXT("snake.early_pow"),
+                TEXT("FIRST PRISONER: An operative was detained. The transfer route is concealed."));
 }
 
 void AMGMissionOne::RestoreSavedEquipment(AMGPlayerCharacter* Player)
@@ -302,7 +309,38 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
     {
         bPOWRescued = true;
         SaveProgress(Player);
-        Player->NotifyFeedback(TEXT("PRISONER CONTACT — SOURCE DIALOGUE PENDING"), TEXT("rescue"));
+        if (GetWorld() && GetWorld()->GetGameInstance())
+            if (UMGCampaignState* Story =
+                GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+                Story->RecordBeat(TEXT("snake.early_pow"),
+                    TEXT("FIRST PRISONER: A missing operative was taken through the transfer route. Check the detention post."));
+        Player->NotifyFeedback(TEXT("PRISONER RESCUED — DETENTION TRANSFER REVEALED"), TEXT("rescue"));
+        return true;
+    }
+    // Voluntary source-comparative capture. No unseen trigger, no forced
+    // teleport when passing by; a rescued POW provides the physical lead.
+    if (CurrentFloor == 3 && IsValid(CaptureMarker) &&
+        FVector::Dist(Player->GetActorLocation(), CaptureMarker->GetActorLocation()) < 220.f)
+    {
+        if (!bPOWRescued)
+        {
+            Player->NotifyFeedback(TEXT("SEALED TRANSFER — SEARCH PRISONER CELLS"), TEXT("denied"));
+            return true;
+        }
+        UMGCampaignState* Story = GetWorld() && GetWorld()->GetGameInstance()
+            ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
+        if (!Story || !Story->AdvanceChapter(1))
+        {
+            Player->NotifyFeedback(TEXT("TRANSFER NOT READY — CHECK INTEL"), TEXT("denied"));
+            return true;
+        }
+        Story->RecordBeat(TEXT("snake.capture"),
+            TEXT("CAPTURED: Snake allows himself to be transferred into the secret prison. Equipment confiscated."));
+        Player->LeaveCover();
+        Player->NotifyFeedback(TEXT("CAPTURE SEQUENCE — PRISON TRANSFER"), TEXT("select"));
+        // The prison is a separate prototype level-space until the verified
+        // Building One basement is authored. The chapter state survives reload.
+        UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
         return true;
     }
     if (IsNearLift(Player)) return StartLift(Player);
@@ -314,8 +352,14 @@ FString AMGMissionOne::GetObjectiveText() const
     if (bLiftTravelling)
         return FString::Printf(TEXT("ELEVATOR / EN ROUTE TO %dF"), DestinationFloor);
     if (CurrentFloor == 3)
-        return bPOWRescued ? TEXT("3F — AVOID CCTV / INVESTIGATE GAS WING")
-            : TEXT("3F — RECOVER AMMO / UNLOCK PRISONER CELL WITH CARD 1");
+    {
+        const UMGCampaignState* Story = GetWorld() && GetWorld()->GetGameInstance()
+            ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
+        if (Story && Story->GetChapter() == 2)
+            return TEXT("GRAY FOX RESCUED — FIND THE SCIENTIST / RETURN ROUTE PENDING");
+        return bPOWRescued ? TEXT("3F — DETENTION TRANSFER MARKER / FIND GRAY FOX")
+            : TEXT("3F — RECOVER AMMO / FREE PRISONER WITH CARD 1");
+    }
     if (CurrentFloor == 2)
         return TEXT("2F — RECONNOITRE CORRIDORS / RETURN TO ELEVATOR");
     bool bCardCollected = false;
@@ -364,6 +408,8 @@ void AMGMissionOne::BuildUpperFloors()
             // and exact shapes remain provisional pending J2ME map recovery.
             Block(TEXT("3F_PrisonerContact"), CM(54.f, 33.f, DeckZ + 90.f),
                   FVector(.6f,.6f,1.8f), false);
+            CaptureMarker = Block(TEXT("3F_DetentionTransfer"),
+                CM(64.f,24.f,DeckZ + 90.f), FVector(.8f,.8f,1.7f), false);
             Block(TEXT("3F_CrateCover"), CM(83.f, 27.f, DeckZ + 70.f),
                   FVector(1.8f,1.3f,1.4f));
             Block(TEXT("3F_CameraBlindCover"), CM(73.f, 23.f, DeckZ + 70.f),
