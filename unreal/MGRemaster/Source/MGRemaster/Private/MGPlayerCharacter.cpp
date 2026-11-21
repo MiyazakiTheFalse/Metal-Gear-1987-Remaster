@@ -1,5 +1,6 @@
 #include "MGPlayerCharacter.h"
 #include "MGGrayFoxMission.h"
+#include "MGMissionOne.h"
 #include "MGGuardActor.h"
 #include "MGEquipmentComponent.h"
 
@@ -350,6 +351,15 @@ float AMGPlayerCharacter::GetVisibilityFactor() const
 
 void AMGPlayerCharacter::Interact()
 {
+    if (AMGMissionOne* Opening = Cast<AMGMissionOne>(
+        UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass())))
+    {
+        if (Opening->TryInteract(this)) return;
+        if (bInCover) LeaveCover();
+        else if (!TryEnterCover())
+            NotifyFeedback(TEXT("NO ACTION AVAILABLE — MOVE CLOSER"), TEXT("denied"));
+        return;
+    }
     if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
     {
