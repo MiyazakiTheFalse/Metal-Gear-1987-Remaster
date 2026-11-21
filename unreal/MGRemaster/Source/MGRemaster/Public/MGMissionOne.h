@@ -48,6 +48,13 @@ private:
     bool bCardDoorOpened = false;
     bool bElevatorReached = false;
     bool bPOWRescued = false;
+    bool bPrisonerDoorOpened = false;
+    bool bGasDoorOpened = false;
+    UPROPERTY()
+    AStaticMeshActor* PrisonerDoor = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* GasDoor = nullptr;
+    float GasWarningCooldown = 0.f;
     bool bLiftTravelling = false;
     float LiftTravelRemaining = 0.f;
     int32 CurrentFloor = 1;
