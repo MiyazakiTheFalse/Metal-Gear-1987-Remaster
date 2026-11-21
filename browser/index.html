@@ -97,6 +97,48 @@ h1{font-size:clamp(26px,4.8vw,42px);line-height:1.08;letter-spacing:-.03em;margi
 .signalLamp{color:#65f6a4;text-shadow:0 0 9px #6fda96}
 @media(max-height:650px){#endPanel{padding:15px 22px}#secureSequence{height:88px}#endPanel p{margin:6px 0}}
 .padReadout{font:11px/1.5 ui-monospace,monospace;color:#b7d0bd;margin:8px 0;overflow-wrap:anywhere}#intro .panel{max-height:92vh;overflow:auto}
+
+/* MGS equipment affordance: scroll rather than a long inventory dump.
+   Real input/equip state is held in game.js, this is a non-interactive view. */
+#equip{bottom:125px;left:22px;right:auto;width:min(630px,calc(100vw - 44px));
+ padding:14px 16px 12px;z-index:5;pointer-events:none;overflow:hidden;
+ background:linear-gradient(125deg,#061113fa,#0c2727f0 78%,#071619fa)}
+#equip[data-category=weapons]{left:auto;right:22px}
+#equip .mg-strip-heading{display:flex;justify-content:space-between;align-items:center;
+ font:700 10px ui-monospace,Consolas,monospace;color:#a9e2b8;letter-spacing:.14em}
+#equip .mg-strip-heading span:last-child{color:#839c8e}
+#equip .mg-strip-track{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+ align-items:center;gap:6px;margin:9px 0 8px;min-height:112px}
+#equip .mg-strip-card{position:relative;text-align:center;min-width:0;min-height:85px;
+ padding:9px 3px 6px;display:flex;flex-direction:column;justify-content:center;
+ border:1px solid #3d665c;background:#102325a8;opacity:.65;filter:saturate(.65);
+ transform:scale(.88);transition:transform .12s ease,background .12s ease,opacity .12s ease}
+#equip .mg-strip-card[data-offset="-2"],#equip .mg-strip-card[data-offset="2"]{
+ opacity:.35;transform:scale(.78)}
+#equip .mg-strip-card[data-current="true"]{opacity:1;transform:scale(1);
+ border:2px solid #d4e9ba;background:#20483b;box-shadow:0 0 15px #75b99a55;
+ filter:none;min-height:108px}
+#equip .mg-strip-card[data-unavailable="true"]{border-style:dashed;filter:grayscale(.9)}
+#equip .mg-strip-icon{font:700 26px ui-monospace,monospace;color:#d6ead2;line-height:1.1}
+#equip .mg-strip-name{font:700 10px ui-monospace,monospace;color:#d6ecd9;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:6px}
+#equip .mg-strip-count{font:10px ui-monospace,monospace;color:#f1dca7;margin-top:4px}
+#equip .mg-strip-footer{font:11px ui-monospace,monospace;line-height:1.4;
+ color:#b4c8ba;border-top:1px solid #385c50;padding-top:7px;min-height:31px}
+#equip .mg-strip-current{text-align:center;font:700 12px ui-monospace,monospace;
+ letter-spacing:.04em;color:#f6e5bb}
+@media(max-width:700px){
+ #equip,#equip[data-category=weapons]{left:9px;right:9px;width:auto;bottom:164px;padding:9px}
+ #equip .mg-strip-track{gap:3px;min-height:90px}
+ #equip .mg-strip-card{padding:5px 0;min-height:65px}
+ #equip .mg-strip-card[data-current="true"]{min-height:89px}
+ #equip .mg-strip-icon{font-size:19px}
+ #equip .mg-strip-name{font-size:8px}
+ #equip .mg-strip-footer{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+ #equip .mg-strip-card{transition:none}
+}
 </style>
 <link rel="stylesheet" href="title_screen.css">
 </head><body>
@@ -202,7 +244,7 @@ h1{font-size:clamp(26px,4.8vw,42px);line-height:1.08;letter-spacing:-.03em;margi
 <p id="propertyOutcome"></p>
 <p><strong>Next objective</strong><br>Locate Dr. Pettrovich, the engineer who designed Metal Gear.</p>
 <button id="finishIntel">REVIEW FOX'S WORDS</button><button class="secondary" id="returnToGame">RETURN TO PLAY</button><button class="secondary" id="retry">RETRY FROM CHECKPOINT</button></div></div>
-<script src="dialogue.js"></script><script src="story_relationships.js"></script><script src="codec_portraits.js"></script><script src="cinematic_director.js"></script><script src="tutorial.js"></script><script src="assets/field_rigs.js"></script><script src="animation_intent.js"></script><script src="field_renderer.js"></script><script src="assets/freight_plates.js"></script><script src="game.js"></script>
+<script src="dialogue.js"></script><script src="story_relationships.js"></script><script src="codec_portraits.js"></script><script src="cinematic_director.js"></script><script src="tutorial.js"></script><script src="assets/field_rigs.js"></script><script src="animation_intent.js"></script><script src="field_renderer.js"></script><script src="assets/freight_plates.js"></script><script src="equipment_strip.js"></script><script src="game.js"></script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.173.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.173.0/examples/jsm/"}}</script>
 <script>
 document.getElementById('rigToggle').addEventListener('change', function() {
