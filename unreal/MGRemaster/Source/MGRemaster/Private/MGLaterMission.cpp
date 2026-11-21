@@ -355,6 +355,8 @@ void AMGLaterMission::Tick(float Dt)
     Super::Tick(Dt);
     DialogueSeconds=FMath::Max(0.f,DialogueSeconds-Dt);
     WrongWeaponCooldown=FMath::Max(0.f,WrongWeaponCooldown-Dt);
+    ChargePlacementRecovery=FMath::Max(0.f,ChargePlacementRecovery-Dt);
+    HandleMissionHazards(Dt);
     UMGCampaignState* State=Story();
     for (FWorldPickup& Pickup:Pickups)
         if (IsValid(Pickup.Marker) && !Pickup.Prerequisite.IsNone())
@@ -658,7 +660,7 @@ bool AMGLaterMission::TryInteract(AMGPlayerCharacter* Player)
             return true;
         }
     }
-    return false;
+    return TryFinaleInteraction(Player);
 }
 FString AMGLaterMission::GetObjectiveText() const
 {
@@ -688,11 +690,55 @@ FString AMGLaterMission::GetObjectiveText() const
             return TEXT("RECOVER ROCKETS / TWO TX-11 UNITS / CARD 7");
         return TEXT("RECOVER CARD 7 / ENTER THE RESEARCH INNER LAB");
     }
+    if (Mission==6)
+    {
+        if (!State->HasBeat(TEXT("m06.card7_gate_open")))
+            return TEXT("DESERT / USE CARD 7 / VERIFY THE COMMAND ROUTE");
+        if (!State->HasBeat(TEXT("m06.oxygen_acquired")))
+            return TEXT("DRAINAGE / RECOVER OXYGEN BEFORE THE WATER PASSAGE");
+        if (!State->HasBeat(TEXT("m06.coward_duck_defeated")))
+            return TEXT("COWARD DUCK / PROTECT THREE HOSTAGES / USE HANDGUN");
+        if (!State->HasBeat(TEXT("m06.card8_acquired")))
+            return TEXT("COWARD DUCK'S SUPPLY CABINET / COLLECT CARD 8");
+        if (!State->HasBeat(TEXT("brother.escape_ladder")) ||
+            !State->HasBeat(TEXT("m06.hostage_left_rescued")) ||
+            !State->HasBeat(TEXT("m06.hostage_right_rescued")))
+            return TEXT("FREE ALL THREE PRISONERS / REMEMBER LEFT LADDER");
+        return TEXT("BUILDING THREE / ENTER THE DEEP BUNKER");
+    }
+    if (Mission==7)
+    {
+        if (!State->HasBeat(TEXT("m07.card8_gate_open")))
+            return TEXT("INNER BUNKER / ACCESS THE WITNESS WITH CARD 8");
+        if (!State->HasBeat(TEXT("pow.final_reveal")))
+            return TEXT("FREE THE PRISONER / INVESTIGATE WHO RUNS OUTER HEAVEN");
+        if (!State->HasBeat(TEXT("snake.disobeys_abort")))
+            return TEXT("COMMAND RELAY / TEST THE ABORT ORDER AGAINST EVIDENCE");
+        if (!State->HasBeat(TEXT("m07.final_security_cleared")))
+            return TEXT("CHOOSE: CARD 8 RELAY OR EXPLOSIVE SERVICE BYPASS");
+        return TEXT("REACTOR ACCESS / ENTER THE TX-55 CONTAINMENT LEVEL");
+    }
+    if (Mission==8)
+    {
+        if (State->HasBeat(TEXT("snake.escaped_outer_heaven")))
+            return TEXT("MISSION COMPLETE / OUTER HEAVEN DESTROYED");
+        if (!State->HasBeat(TEXT("tx55.destruction")))
+            return FString::Printf(
+                TEXT("TX-55 / %d OF 16 FOOT CHARGES PLACED / EXPLOSIVES"),
+                State->GetTX55CorrectCharges());
+        if (!State->HasBeat(TEXT("m08.big_boss_defeated")))
+            return FString::Printf(
+                TEXT("SELF-DESTRUCT %03d SEC / COMMANDER / ROCKET LAUNCHER"),
+                FMath::CeilToInt(State->GetEscapeTimeRemaining()));
+        return FString::Printf(
+            TEXT("SELF-DESTRUCT %03d SEC / USE LEFT LADDER"),
+            FMath::CeilToInt(State->GetEscapeTimeRemaining()));
+    }
     if (!State->HasBeat(TEXT("madnar.condition")))
         return TEXT("FIND THE REAL DR. PETTROVICH MADNAR");
     if (!State->HasBeat(TEXT("ellen.rescue")))
         return TEXT("RETURN VIA SERVICE PASSAGE / FREE ELLEN WITH EXPLOSIVES");
     if (!State->HasBeat(TEXT("madnar.weakness")))
         return TEXT("RETURN TO MADNAR / REPORT ELLEN SAFE");
-    return TEXT("TX-55 WEAKNESS KNOWN / MISSION 06 REQUIRES FURTHER IMPLEMENTATION");
+    return TEXT("TECHNICAL INTEL SECURED / ENTER THE RESEARCH EXIT TO MISSION 06");
 }
