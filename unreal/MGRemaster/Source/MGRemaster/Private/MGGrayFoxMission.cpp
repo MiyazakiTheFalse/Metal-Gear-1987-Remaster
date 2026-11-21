@@ -2189,6 +2189,111 @@ FString AMGGrayFoxMission::GetObjectiveText() const
     return TEXT("Continue through the Card 3 service passage. Scout the kennel and damaged masonry.");
 }
 
+// Context guidance is not a map cheat or a second interaction engine.
+// It calls the EXACT world-reach/occlusion guard used by TryInteract and
+// TryPunchWeakWall. Never advertise a destroyed, already-earned or distant prop.
+FString AMGGrayFoxMission::GetContextActionPrompt(
+    const AMGPlayerCharacter* Player) const
+{
+    if (!bPlayerInitialised || !IsValid(Player)) return FString();
+    const auto Reach = [this, Player](const AActor* Object, float Cm) {
+        return CanReach(Player, Object, Cm);
+    };
+    if (Flags & MG_FOX_SLICE_COMPLETED)
+    {
+        if (bHindDefeated && bRoofActive && Reach(Building2Entry, 180.f))
+            return TEXT("E / A  ENTER BUILDING 2");
+        if (bBuilding2Active && Reach(Building2Return, 180.f))
+            return TEXT("E / A  RETURN TO ROOF");
+        if (bBuilding2Active && !bTankDefeated)
+            for (int32 I = 0; I < TankMineMarkers.Num(); ++I)
+                if (!ArmedTankMineSites.Contains(I) &&
+                    Reach(TankMineMarkers[I], 175.f))
+                    return Building2MinesRemaining > 0 ?
+                        TEXT("E / A  PLACE TRACK MINE") :
+                        TEXT("MINE SUPPLY EXHAUSTED — RETREAT");
+        if (bParachuteTaken && !bRoofActive && Reach(RoofLiftEntry, 185.f))
+            return TEXT("E / A  TAKE WEST LIFT");
+        if (bRoofActive && Reach(RoofReturnLift, 185.f))
+            return TEXT("E / A  RETURN BY LIFT");
+        if (bRoofActive && !bHindDefeated && Reach(RoofLauncher, 185.f))
+            return RoofGrenadesRemaining > 0 ?
+                TEXT("E / A  FIRE GRENADE LAUNCHER") :
+                TEXT("GRENADE RACK EMPTY — RETREAT");
+        if (!bServiceChargeCollected && Reach(ChargeParcel, 185.f))
+            return TEXT("E / A  COLLECT DEMOLITION CHARGE");
+        if (!bServiceWallOpen && Reach(ChargeMarker, 200.f))
+            return bServiceChargeCollected ?
+                TEXT("E / A  PLACE CHARGE ON REPAIR") :
+                TEXT("E / A  INSPECT REPAIRED JOINT");
+        if (bKidDefeated && !bParachuteTaken && Reach(ParachutePack, 165.f))
+            return TEXT("E / A  TAKE PARACHUTE");
+        if (bServiceWallOpen && !bRelayIntel && Reach(RelayDesk, 180.f))
+            return TEXT("E / A  READ RELAY LOG");
+        return FString();
+    }
+    if (!(Flags & MG_FOX_CAPTURED) || (Flags & MG_FOX_GEAR_RECOVERED))
+    {
+        if (!bFirstFloorRationEarned && Reach(FirstFloorRationPickup, 165.f))
+            return TEXT("E / A  TAKE RATION");
+        if (!bFirstFloorCard1Earned && Reach(FirstFloorCard1Pickup, 165.f))
+            return TEXT("E / A  TAKE CARD 1");
+        if (!bFirstFloorBinocularsEarned && Reach(FirstFloorBinocularsPickup, 165.f))
+            return TEXT("E / A  TAKE BINOCULARS");
+    }
+    if (!(Flags & MG_FOX_CAPTURED))
+    {
+        if (!bOwnsCarton && Reach(CartonPickup, 160.f))
+            return TEXT("E / A  TAKE FREIGHT CARTON");
+        if (!bEarlyHandgunAcquired && Reach(EarlyHandgunPickup, 185.f))
+            return TEXT("E / A  TAKE HANDGUN");
+        if (!(Flags & MG_FOX_DETENTION_INTELLIGENCE) &&
+            Reach(POWInformant, 225.f))
+            return TEXT("E / A  SPEAK TO PRISONER");
+        if ((Flags & MG_FOX_DETENTION_INTELLIGENCE) &&
+            IsValid(CustodyMarker) &&
+            FVector::Dist2D(Player->GetActorLocation(),
+                            CustodyMarker->GetActorLocation()) < 270.f)
+        {
+            const bool bReady =
+                (IsValid(CustodyOfficerA) && CustodyOfficerA->CanAcceptDetention(Player)) ||
+                (IsValid(CustodyOfficerB) && CustodyOfficerB->CanAcceptDetention(Player));
+            return bReady ? TEXT("E / A  COMPLY WITH SECURITY") :
+                TEXT("E / A  WAIT FOR GUARD CHALLENGE");
+        }
+        return FString();
+    }
+    if (!(Flags & MG_FOX_FIRST_WALL_BREACHED) && Reach(WeakWall, 190.f))
+        return TEXT("F / X  STRIKE WEAK SEAM");
+    if (!(Flags & MG_FOX_RESCUED) && Reach(FoxProxy, 210.f))
+        return TEXT("E / A  SPEAK TO GRAY FOX");
+    if ((Flags & MG_FOX_RESCUED) && !(Flags & MG_FOX_EXIT_WALL_BREACHED)
+        && Reach(EscapeWall, 190.f))
+        return TEXT("F / X  STRIKE REPAIRED WALL");
+    if ((Flags & MG_FOX_SHOTMAKER_ENCOUNTERED) &&
+        !(Flags & MG_FOX_GEAR_RECOVERED))
+    {
+        if (!bGearDoorOpen && Reach(GearDoor, 210.f))
+            return TEXT("F / X  BREAK RECOVERY DOOR");
+        if (bGearDoorOpen && Reach(GearBag, 200.f))
+            return TEXT("E / A  RECOVER PERSONAL EFFECTS");
+    }
+    if (IsTransmitterActive() && Reach(PlantedTransmitter, 185.f))
+        return TEXT("E / A  REMOVE ENEMY TRANSMITTER");
+    if ((Flags & MG_FOX_SHOTMAKER_DEFEATED) &&
+        !(Flags & MG_FOX_CARD3_RECOVERED))
+    {
+        if (!bCardDoorOpen && Reach(Card2Door, 235.f))
+            return TEXT("E / A  USE CARD 2");
+        if (bCardDoorOpen && Reach(Card3Pickup, 195.f))
+            return TEXT("E / A  TAKE CARD 3");
+    }
+    if ((Flags & MG_FOX_CARD3_RECOVERED) &&
+        !(Flags & MG_FOX_SLICE_COMPLETED) && Reach(ChapterExit, 235.f))
+        return TEXT("E / A  ENTER THE SERVICE WING");
+    return FString();
+}
+
 FString AMGGrayFoxMission::GetPacingHint() const
 {
     const uint32 Level = GetHintLevel();
