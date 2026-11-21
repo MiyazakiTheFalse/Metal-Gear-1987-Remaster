@@ -17,6 +17,12 @@ public:
     virtual float TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent,
                              AController* EventInstigator, AActor* DamageCauser) override;
 
+    // Route waypoints are placed by authored Mission 1 data, not generated at runtime.
+    void ConfigurePatrol(const TArray<FVector>& WorldWaypoints)
+    {
+        PatrolWaypoints = WorldWaypoints;
+        PatrolWaypointIndex = PatrolWaypoints.Num() > 1 ? 1 : 0;
+    }
     bool IsIncapacitated() const { return bIncapacitated; }
     uint32 GetAwarenessState() const { return AwarenessState; }
     float GetSuspicion() const { return Suspicion; }
@@ -41,6 +47,8 @@ private:
     UPROPERTY(VisibleAnywhere, Category="Prototype")
     UStaticMeshComponent* ProxyBody;
 
+    TArray<FVector> PatrolWaypoints;
+    int32 PatrolWaypointIndex = 0;
     FVector PatrolOrigin = FVector::ZeroVector;
     FVector LastKnownPlayerPosition = FVector::ZeroVector;
     bool bPatrolForward = true;
