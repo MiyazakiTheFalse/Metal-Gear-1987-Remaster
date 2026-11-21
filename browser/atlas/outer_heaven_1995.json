@@ -2948,6 +2948,20 @@
       "status": "remake_provisional_connection",
       "connector": "hardened corridor",
       "gate": "late Card gate"
+    },
+    {
+      "from": "B1.B1.PRISON",
+      "to": "B1.B1.SHOT",
+      "status": "remake_provisional_connection",
+      "connector": "secured prison corridor to gunner's firing lane",
+      "gate": "Gray Fox rescued and second wall breached; resolve authentic card gates against MSX2 tiles"
+    },
+    {
+      "from": "B3.B100.OXYGEN",
+      "to": "B3.B100.LASERS",
+      "status": "remake_provisional_connection",
+      "connector": "deep core access airlock",
+      "gate": "Oxygen equipment and late card access; laser state persists on return"
     }
   ],
   "missions": [
