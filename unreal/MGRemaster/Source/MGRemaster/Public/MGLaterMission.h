@@ -86,6 +86,8 @@ private:
     UPROPERTY()
     AStaticMeshActor* TX55RightFoot = nullptr;
     UPROPERTY()
+    AStaticMeshActor* TX55Torso = nullptr;
+    UPROPERTY()
     AStaticMeshActor* LeftEscapeLadder = nullptr;
     UPROPERTY()
     AStaticMeshActor* RightEscapeLadder = nullptr;
