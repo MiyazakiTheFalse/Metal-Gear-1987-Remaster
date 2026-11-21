@@ -5,6 +5,8 @@
 #include "MGMissionOne.h"
 #include "MGGuardActor.h"
 #include "MGSecurityCamera.h"
+#include "MGCampaignState.h"
+#include "Engine/GameInstance.h"
 #include "MGPlayerCharacter.h"
 #include "Engine/Canvas.h"
 #include "EngineUtils.h"
@@ -80,6 +82,8 @@ void AMGPrototypeHUD::DrawHUD()
 
     const AMGMissionOne* Opening = Cast<AMGMissionOne>(
         UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass()));
+    const UMGCampaignState* Story = GetWorld() && GetWorld()->GetGameInstance()
+        ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
     // Actual guard awareness drives radar vs threat overlay.
     int32 MaxThreat = 0;
     float MaxSuspicion = 0.f;
@@ -177,6 +181,37 @@ void AMGPrototypeHUD::DrawHUD()
         DrawText(FString::Printf(TEXT("LIFT: Q CYCLE / E TRAVEL / TARGET %dF"), Opening->GetSelectedFloor()),
                  HudMuted, Margin + 12.f * UiScale, Margin + 179.f * UiScale,
                  nullptr, 0.67f * UiScale, false);
+        if (Player->IsMissionLogVisible() && Story)
+        {
+            // Durable intel is readable after subtitles disappear or a fight
+            // interrupts a conversation. Chunk lines for narrow HUD widths.
+            TArray<FString> Entries;
+            Story->GetIntelLog().ParseIntoArrayLines(Entries, true);
+            TArray<FString> Wrapped;
+            for (const FString& Entry : Entries)
+            {
+                FString Left = Entry;
+                while (!Left.IsEmpty() && Wrapped.Num() < 14)
+                {
+                    const int32 Count = FMath::Min(64, Left.Len());
+                    Wrapped.Add(Left.Left(Count));
+                    Left.RightChopInline(Count, EAllowShrinking::No);
+                }
+                if (Wrapped.Num() >= 14) break;
+            }
+            const float PanelY = Margin + 234.f * UiScale;
+            const float PanelH = (38.f + Wrapped.Num() * 22.f) * UiScale;
+            DrawRect(HudPanel, Margin, PanelY,
+                     FMath::Min(590.f * UiScale, Width - 2.f * Margin), PanelH);
+            DrawText(TEXT("MISSION INTEL / J TO CLOSE"), HudGreen,
+                     Margin + 12.f * UiScale, PanelY + 6.f * UiScale,
+                     nullptr, 0.76f * UiScale, false);
+            for (int32 Index = 0; Index < Wrapped.Num(); ++Index)
+                DrawText(Wrapped[Index], FLinearColor::White,
+                         Margin + 12.f * UiScale,
+                         PanelY + (30.f + 22.f * Index) * UiScale,
+                         nullptr, 0.68f * UiScale, false);
+        }
     }
     if (Mission)
     {
@@ -281,9 +316,7 @@ void AMGPrototypeHUD::DrawHUD()
         const int32 Channel = Player->GetTransceiverChannel();
         const FString Transcript = Mission ?
             Mission->GetTransceiverDialogue(Channel) :
-            (Opening ?
-                TEXT("BIG BOSS: INFILTRATE OUTER HEAVEN. FIND GRAY FOX.\\n")
-                TEXT("REMAKE RADIO TEXT — VOICE RECORDING PENDING.") :
+            (Opening && Story ? Story->GetOpeningRadio(Channel) :
                 TEXT("NO SIGNAL — LOCAL CONTACTS UNAVAILABLE"));
         TArray<FString> Lines;
         Transcript.ParseIntoArrayLines(Lines, true);
