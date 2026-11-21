@@ -801,7 +801,7 @@ void AMGPlayerCharacter::RestartRescue()
     if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
     {
-        Mission->RestartMission();
+        Mission->RetryFromCheckpoint();
     }
 }
 
