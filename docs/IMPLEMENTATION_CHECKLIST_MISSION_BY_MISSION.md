@@ -277,7 +277,7 @@ Current status: **design only**. Original game does not name these missions as c
 ## Cross-cutting systems — must mature in every mission
 
 - [ ] **SYS.CANON** — Original game tile-by-tile full floor atlas, all 8 Cards, sources + J2ME variants. Current: not started.
-- [ ] **SYS.WORLD** — Physical connected Outer Heaven master architecture: 1F/2F/3F/B1/B2/Roof/Deserts/B2/Building3-B100/tunnels. Current: not started.
+- [~] **SYS.WORLD** — Physical connected Outer Heaven master architecture: 1F/2F/3F/B1/B2/Roof/Deserts/B2/Building3-B100/tunnels. Current: **design only** — connected 52-zone/114-beat/11-boss interactive atlas, assumed metre scale/exterior, source uncertainty labels and route connectors documented. **No rebuilt Unreal level, native geometry, 1987 tile-verification or browser/Unreal measured collision proof.**
 - [ ] **SYS.ENEMIES** — Fixed area-level 3D actor coordinates, duty posts, facing, patrol routes, cover and escalation spawn maps. Current: not started.
 - [ ] **SYS.REVISITS** — State-driven return variants: corpses, disposed bodies, doors, camera power, electric units, reinforcements. Current: not started.
 - [ ] **SYS.STEALTH** — Drag unconscious guards, hide them, release when interrupted, guard discovery/report/recovery. Current: not started.
@@ -287,7 +287,7 @@ Current status: **design only**. Original game does not name these missions as c
 - [~] **SYS.COMBAT** — Realistic muzzle flash and actual player/actor hit reactions; enemy weapon-specific physics and fairness. Current: partial source.
 - [~] **SYS.SAVE** — Entire game persistence/mission re-entry with automatic data migration and no flag bypass. Current: partial source.
 - [~] **SYS.SFX** — Original sound design, spatial occlusion, performance VO and adaptive 1995 score. Current: partial source.
-- [~] **SYS.META** — Title, mission dossier, save slots, accessibility, records and noncanon VR separation. Current: partial source.
+- [~] **SYS.META** — Title, mission dossier, save slots, accessibility, records and noncanon VR separation. Current: partial source. MGS hold-scroll-release five-slot item/weapon UI now implemented as source in browser and Unreal, with separate consumable UseItem, controller scroll and offline tests; native UE5.7 UX unverified.
 - [~] **SYS.QA** — Full regression, UE5.7 actual compile and PIE, 720p/4K motion/collision and human testers. Current: **partial source only**: 22-role Unreal import recovery and native clip/skeleton/scale audit scripted, dynamic cook roots corrected, muzzle/cast source regression added, PC build fail-closed. **Not run here:** real Unreal build, Editor script, PIE, packaged game, user test or performance capture.
 
 ## Exact enemy and architectural placement acceptance
