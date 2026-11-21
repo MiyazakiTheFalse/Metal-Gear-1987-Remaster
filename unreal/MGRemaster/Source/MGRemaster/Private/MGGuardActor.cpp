@@ -1,6 +1,7 @@
 #include "MGGuardActor.h"
 
 #include "MGPlayerCharacter.h"
+#include "MGAdaptiveAudioDirector.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "DrawDebugHelpers.h"
@@ -353,6 +354,32 @@ float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEv
 void AMGGuardActor::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    // A real guard emits sound only after travelling a physical stride.
+    // Moving bodies, teleports and immobilized guards never play patrol feet.
+    const FVector Here=GetActorLocation();
+    if (!bFootstepLocationInitialised)
+    {
+        LastFootstepPosition=Here;
+        bFootstepLocationInitialised=true;
+    }
+    else if (!bIncapacitated && !bBodyDragged && !bBeingChoked &&
+             MeleeKnockdownSeconds <= 0.f)
+    {
+        const float Travel=FVector::Dist2D(Here,LastFootstepPosition);
+        if (Travel<300.f)
+        {
+            TravelSinceStep+=Travel;
+            if (TravelSinceStep>=115.f)
+            {
+                TravelSinceStep=FMath::Fmod(TravelSinceStep,115.f);
+                if (AMGAdaptiveAudioDirector* Audio=Cast<AMGAdaptiveAudioDirector>(
+                        UGameplayStatics::GetActorOfClass(this,
+                            AMGAdaptiveAudioDirector::StaticClass())))
+                    Audio->PlayCue(TEXT("step_concrete"),Here,false);
+            }
+        }
+    }
+    LastFootstepPosition=Here;
     if (bIncapacitated || !GetWorld()) return;
     if (MeleeKnockdownSeconds > 0.f)
     {
