@@ -41,4 +41,5 @@ private:
     float Windup = -1.f;
     bool bDefeated = false;
     FVector DefensiveFocus = FVector::ZeroVector;
+    float MoveClock = 0.f;
 };
