@@ -578,6 +578,13 @@ void AMGPlayerCharacter::SprintStart()
 void AMGPlayerCharacter::SprintStop() { bSprinting = false; UpdateMovementState(); }
 void AMGPlayerCharacter::CrouchToggle()
 {
+    // Xbox B serves as "skip" during an actual presentation. Input bindings
+    // also invoke CrouchToggle on that same physical button: do not leave
+    // Snake unexpectedly crouched when a filmed event is dismissed.
+    if (const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+            UGameplayStatics::GetActorOfClass(
+                this, AMGGrayFoxMission::StaticClass())))
+        if (Mission->IsStoryCinematicPlaying()) return;
     if (DraggedBody.IsValid()) return; // Remain crouched while pulling.
     bSprinting = false;
     if (bIsProne)
