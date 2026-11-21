@@ -151,6 +151,20 @@ void AMGLaterMission::BuildBuildingTwo()
                        FVector(8000,2200,165),FVector(.6f,44.f,3.7f));
     PassageGateC=Block(TEXT("M04_TX11SecurityShutter"),
                        FVector(13200,2200,165),FVector(.6f,44.f,3.7f));
+    // The rocket store has its own Card 6 door. Jennifer arranges the weapon
+    // but Snake still has to enter a physically secured room and collect it.
+    Block(TEXT("M04_RocketStoreNorthWall"),FVector(10400,3800,150),
+          FVector(22,.5f,3.5f));
+    Block(TEXT("M04_RocketStoreWestWall"),FVector(9300,3400,150),
+          FVector(.5f,8.f,3.5f));
+    Block(TEXT("M04_RocketStoreEastWall"),FVector(11500,3400,150),
+          FVector(.5f,8.f,3.5f));
+    Block(TEXT("M04_RocketStoreSouthSegmentWest"),FVector(9700,3000,150),
+          FVector(8,.5f,3.5f));
+    Block(TEXT("M04_RocketStoreSouthSegmentEast"),FVector(11100,3000,150),
+          FVector(8,.5f,3.5f));
+    RocketRoomDoor=Block(TEXT("M04_RocketStoreCard6Door"),
+          FVector(10400,3000,150),FVector(.5f,6.f,3.5f));
     SpawnBoss(TEXT("m04.bulldozer_defeated"),FVector(2700,2200,95),
               TEXT("GRENADE_LAUNCHER"),160.f,1100.f,1.8f,22.f);
     SpawnBoss(TEXT("m04.fire_trooper_defeated"),FVector(6600,2300,95),
@@ -240,6 +254,8 @@ void AMGLaterMission::RemoveDefeatedGates()
     }
     if (Mission==4)
     {
+        if (Story()->HasBeat(TEXT("m04.rocket_room_open")) &&
+            IsValid(RocketRoomDoor)) RocketRoomDoor->Destroy();
         if (Story()->HasBeat(TEXT("m04.bulldozer_defeated")) && IsValid(PassageGateA))
             PassageGateA->Destroy();
         if (Story()->HasBeat(TEXT("m04.fire_trooper_defeated")) && IsValid(PassageGateB))
@@ -374,6 +390,13 @@ bool AMGLaterMission::ClaimPickup(FWorldPickup& Pickup,AMGPlayerCharacter* Playe
 {
     if (!Player || !Player->GetEquipment() || Pickup.bTaken ||
         !IsValid(Pickup.Marker) || !IsWithin(Player,Pickup.Marker)) return false;
+    if ((Pickup.Kind==TEXT("ROCKET_LAUNCHER") ||
+         Pickup.Kind==TEXT("ROCKET_AMMO")) &&
+        (!Story() || !Story()->HasBeat(TEXT("m04.rocket_room_open"))))
+    {
+        Player->NotifyFeedback(TEXT("ENTER THE CARD 6 WEAPON STORE"),TEXT("denied"));
+        return true;
+    }
     if (!Pickup.Prerequisite.IsNone() &&
         (!Story() || !Story()->HasBeat(Pickup.Prerequisite)))
     {
@@ -445,6 +468,22 @@ bool AMGLaterMission::TryInteract(AMGPlayerCharacter* Player)
     }
     if (Mission==4)
     {
+        if (IsWithin(Player,RocketRoomDoor,250.f))
+        {
+            if (!Player->GetEquipment()->HasItem(TEXT("CARD6")))
+            {
+                Player->NotifyFeedback(TEXT("RESEARCH ARMOURY / CARD 6 REQUIRED"),
+                                       TEXT("denied"));
+                return true;
+            }
+            if (State->RecordBeat(TEXT("m04.rocket_room_open"),
+                TEXT("Card 6 opened the physical research weapons store.")))
+            {
+                RocketRoomDoor->Destroy();
+                Player->NotifyFeedback(TEXT("CARD 6 / WEAPON ROOM OPEN"),TEXT("select"));
+            }
+            return true;
+        }
         if (IsWithin(Player,ResearchPrisoner))
             return RescuePOW(ResearchPrisoner,TEXT("fake_madnar.basement_lure"),
                 TEXT("PRISONER: This is not Dr. Pettrovich. Search the protected laboratory."),
