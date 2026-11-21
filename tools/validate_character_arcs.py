@@ -70,7 +70,8 @@ def validate(data):
     for node in beats:
         visit(node)
     required = ("solid_snake", "gray_fox", "big_boss", "schneider", "diane",
-                "jennifer", "madnar", "ellen", "jennifer_brother", "outer_heaven_bosses")
+                "jennifer", "madnar", "ellen", "jennifer_brother",
+                "shoot_gunner", "machinegun_kid", "fire_trooper", "coward_duck")
     for cid in required:
         if cid not in characters:
             errors.append(f"Missing core character arc {cid}")
