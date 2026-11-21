@@ -1,0 +1,581 @@
+{
+  "schema_version": 1,
+  "authority": "Connect2Media J2ME target not yet traced; MSX2 source comparison and later-canon boundaries",
+  "campaign_name": "Operation Intrude N313",
+  "year": 1995,
+  "mission_count": 8,
+  "currently_in_runtime": [
+    1,
+    2,
+    3
+  ],
+  "mission_progression": "One-based labels. Missions are story arcs inside one connected Outer Heaven; prior rooms are revisited with persistent world state. No false claim that 4–8 are playable.",
+  "mapping_note": "Mission boundaries are proposed remake pacing divisions, not official original 1987 mission numbering",
+  "missions": [
+    {
+      "number": 1,
+      "id": "M01",
+      "title": "Operation Intrude N313",
+      "status": "unreal_source_partial_uncompiled",
+      "first": "N00_PRELUDE",
+      "last": "N06_DEEPENED_INFO",
+      "world": [
+        "Building One 1F, 2F, 3F"
+      ],
+      "return_purpose": "Facility establishes landmarks that acquire new meaning after Fox's rescue and Ellen's discovery",
+      "signature_character_scene": "3F POW shares detention-transfer evidence and Diane frequency; never automatic mission success",
+      "revisit_changes": [
+        "3F prisoner stays rescued",
+        "Card 1 and collected supplies remain acquired",
+        "radio availability persists",
+        "transfer route discoverable"
+      ],
+      "required_gate": "snake.early_pow",
+      "next_transition": "Player intentionally initiates the detention transfer",
+      "scenes": [
+        "N00_PRELUDE",
+        "N01_INSERTION",
+        "N02_FIRST_LOOT",
+        "N03_GAS_AND_CONTACT",
+        "N04_SECOND_TRUCKS",
+        "N05_UPPER_FLOOR",
+        "N06_DEEPENED_INFO"
+      ],
+      "playable_in_repo": true,
+      "story_threads": [
+        {
+          "between": [
+            "solid_snake",
+            "big_boss"
+          ],
+          "opening": "Rookie accepts credible instruction from senior commander",
+          "turn": "First independent gear and prisoner discoveries supplement the orders",
+          "payoff": "Snake can compare what his commander says with people he has physically rescued",
+          "event_ids": [
+            "snake.mission_start",
+            "snake.early_pow"
+          ]
+        },
+        {
+          "between": [
+            "solid_snake",
+            "gray_fox"
+          ],
+          "opening": "Gray Fox is an admired missing professional, not yet a face-to-face ally",
+          "turn": "Prisoners indicate the operative is alive but inaccessible",
+          "payoff": "Snake chooses to expose himself to capture rather than abandon the search",
+          "event_ids": [
+            "fox.missing",
+            "snake.early_pow"
+          ]
+        },
+        {
+          "between": [
+            "solid_snake",
+            "schneider",
+            "diane"
+          ],
+          "opening": "Resistance voices cannot automatically command Snake's trust",
+          "turn": "Schneider's structural knowledge can be checked; a freed POW gives Diane's frequency",
+          "payoff": "Player earns optional, differentiated radio allies through exploration",
+          "event_ids": [
+            "schneider.contact",
+            "diane.contact"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "id": "M02",
+      "title": "The Missing Fox",
+      "status": "unreal_source_partial_uncompiled",
+      "first": "N07_CAPTURE",
+      "last": "N10_RECOVER_AND_SHOTMAKER",
+      "world": [
+        "Building One secret prison prototype; basement position provisional"
+      ],
+      "return_purpose": "First prison walls establish language later used for Ellen's concealed cell",
+      "signature_character_scene": "Gray Fox's nuclear warning is committed at rescue interaction, not at end of dialogue playback",
+      "revisit_changes": [
+        "broken prison walls remain breached",
+        "locker stays recovered",
+        "Fox intelligence persists",
+        "original ammo and rations carry through"
+      ],
+      "required_gate": "fox.intel_persists",
+      "next_transition": "After actual escape and gear reclaim, return to Building One",
+      "scenes": [
+        "N07_CAPTURE",
+        "N08_CELL_BREACH",
+        "N09_FOX_TRUTH",
+        "N10_RECOVER_AND_SHOTMAKER"
+      ],
+      "playable_in_repo": true,
+      "story_threads": [
+        {
+          "between": [
+            "solid_snake",
+            "gray_fox"
+          ],
+          "opening": "Rookie is vulnerable as the captured veteran was",
+          "turn": "Snake physically breaches the cell and meets a capable but exhausted Fox",
+          "payoff": "Fox entrusts nuclear-warning and scientist lead; Snake carries his knowledge forward",
+          "event_ids": [
+            "snake.capture",
+            "snake.rescue_fox",
+            "fox.revelation"
+          ]
+        },
+        {
+          "between": [
+            "solid_snake",
+            "big_boss"
+          ],
+          "opening": "Commander remains an apparently helpful professional during crisis",
+          "turn": "Correct suggestions build apparent credibility, though not supernatural insight",
+          "payoff": "Later false orders will hurt because these earlier instructions proved useful",
+          "event_ids": [
+            "boss.fox_recovery_advice",
+            "boss.useful_advice"
+          ]
+        },
+        {
+          "between": [
+            "solid_snake",
+            "outer_heaven_security"
+          ],
+          "opening": "Prison removes Snake's agency and equipment",
+          "turn": "Physical wall breaches and locker recovery restore it",
+          "payoff": "Escape means surviving actual sentries with recovered resources, not just finishing a conversation",
+          "event_ids": [
+            "snake.gear_recovery",
+            "fox.intel_persists"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "id": "M03",
+      "title": "The Scientist Trail",
+      "status": "unreal_source_partial_uncompiled",
+      "first": "N11_FIRST_REVISIT",
+      "last": "N14_TANK_CHECKPOINT",
+      "world": [
+        "Building One revisit, roof and exterior checkpoint; latter unimplemented"
+      ],
+      "return_purpose": "Areas first explored for gear now support independent searching and source-based backtracking",
+      "signature_character_scene": "On returning to Building One, the mission status reflects Fox's warning and the resistance calls change",
+      "revisit_changes": [
+        "all previously opened doors and pickups persist",
+        "elevator remains bidirectional",
+        "guard occupancy can later react to an escape"
+      ],
+      "required_gate": "fox.revelation",
+      "next_transition": "Building Two route is not yet implemented",
+      "scenes": [
+        "N11_FIRST_REVISIT",
+        "N12_MACHINEGUN_KID",
+        "N13_AIR_AND_ROOF",
+        "N14_TANK_CHECKPOINT"
+      ],
+      "playable_in_repo": true,
+      "story_threads": [
+        {
+          "between": [
+            "solid_snake",
+            "gray_fox"
+          ],
+          "opening": "Fox is no longer present but his report is durable",
+          "turn": "Snake tests the report against scientist leads and guarded research routes",
+          "payoff": "The next objective arises from Fox's truth rather than an omniscient waypoint",
+          "event_ids": [
+            "fox.revelation",
+            "madnar.named"
+          ]
+        },
+        {
+          "between": [
+            "solid_snake",
+            "schneider"
+          ],
+          "opening": "Schneider was correct about altered walls but lacked prison plans",
+          "turn": "He admits gaps in his drawings and points Snake toward actual infrastructure",
+          "payoff": "Snake respects advice without surrendering his own observations",
+          "event_ids": [
+            "schneider.route_aid",
+            "schneider.uniform_route"
+          ]
+        },
+        {
+          "between": [
+            "solid_snake",
+            "diane",
+            "big_boss"
+          ],
+          "opening": "Diane knows defenders; Big Boss still offers sometimes useful operational advice",
+          "turn": "Specialist enemy counterplay makes each voice distinct",
+          "payoff": "Different kinds of knowledge, rather than a universal hint voice",
+          "event_ids": [
+            "diane.boss_guidance",
+            "boss.radio_frequency_shift"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "id": "M04",
+      "title": "The Outer Defences",
+      "status": "planned_not_runtime",
+      "first": "N15_BULLDOZER",
+      "last": "N19_ROCKET_AND_TX11",
+      "world": [
+        "Roadway, Building Two approach, research defences"
+      ],
+      "return_purpose": "Architectural knowledge, tactical aid and persistent prisoner rescues unlock an occupied research complex",
+      "signature_character_scene": "Jennifer's aid has a physical delivery/access consequence; not an inventory teleport or purely optional radio",
+      "revisit_changes": [
+        "disabled androids remain defeated",
+        "rank/POW relationships persist",
+        "opened protected doors remain accessible"
+      ],
+      "required_gate": "jennifer.rocket_help",
+      "next_transition": "Find actual Dr. Pettrovich",
+      "scenes": [
+        "N15_BULLDOZER",
+        "N16_FIRE_TROOPER",
+        "N17_FALSE_SCIENTIST",
+        "N18_JENNIFER_RANK",
+        "N19_ROCKET_AND_TX11"
+      ],
+      "playable_in_repo": false,
+      "story_threads": [
+        {
+          "between": [
+            "solid_snake",
+            "jennifer"
+          ],
+          "opening": "Medical insider has an independent reason to conceal her identity",
+          "turn": "Rescue-earned access supports the critical weapon/door assistance",
+          "payoff": "Jennifer proves trustworthy through a real delivered tool at personal risk",
+          "event_ids": [
+            "jennifer.contact",
+            "jennifer.rocket_help"
+          ]
+        },
+        {
+          "between": [
+            "solid_snake",
+            "diane"
+          ],
+          "opening": "Reports of specialists on secured routes",
+          "turn": "Diane's actionable advice helps interpret suppression and fire patterns",
+          "payoff": "Successful counterplay makes the resistance relationship credible",
+          "event_ids": [
+            "diane.boss_guidance",
+            "bosses.fire_trooper"
+          ]
+        },
+        {
+          "between": [
+            "solid_snake",
+            "madnar"
+          ],
+          "opening": "The engineer exists only as Fox's lead",
+          "turn": "False directions and TX-11 machines establish the lengths to which Outer Heaven goes to conceal him",
+          "payoff": "Finding the true engineer becomes a personal investigation",
+          "event_ids": [
+            "fake_madnar.basement_lure",
+            "madnar.tx11_legacy"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "id": "M05",
+      "title": "The Price of Metal Gear",
+      "status": "planned_not_runtime",
+      "first": "N20_ACTUAL_MADNAR",
+      "last": "N25_TECHNICAL_CODE",
+      "world": [
+        "Building Two Madnar cell → Building One hidden basement → Building Two return"
+      ],
+      "return_purpose": "The earlier prison becomes the site of Ellen's rescue; player reinterprets confinement architecture",
+      "signature_character_scene": "Ellen found in Building One basement, then Snake physically returns to Madnar in Building Two",
+      "revisit_changes": [
+        "newly breached basement wall remains open",
+        "Ellen remains freed",
+        "Madnar dialogue and technical intel update",
+        "no arbitrary resets to earlier rooms"
+      ],
+      "required_gate": "ellen.rescue",
+      "next_transition": "Building Three and TX-55 route",
+      "scenes": [
+        "N20_ACTUAL_MADNAR",
+        "N21_ELLEN_RETRACE",
+        "N22_HIDDEN_ELLEN",
+        "N23_ELLEN_TESTIMONY",
+        "N24_RETURN_TO_SCIENTIST",
+        "N25_TECHNICAL_CODE"
+      ],
+      "playable_in_repo": false,
+      "story_threads": [
+        {
+          "between": [
+            "solid_snake",
+            "madnar"
+          ],
+          "opening": "The coerced scientist refuses technical information until his daughter is safe",
+          "turn": "Snake chooses to return through danger to rescue Ellen",
+          "payoff": "Madnar's trust yields a specific TX-55 destruction method",
+          "event_ids": [
+            "madnar.condition",
+            "madnar.weakness"
+          ]
+        },
+        {
+          "between": [
+            "ellen",
+            "madnar",
+            "solid_snake"
+          ],
+          "opening": "Separated father and daughter are two people, not a single quest key",
+          "turn": "Ellen is found beyond a hidden wall and speaks for herself",
+          "payoff": "Her confirmed safety changes Madnar's behaviour; no invented on-screen reunion",
+          "event_ids": [
+            "ellen.rescue",
+            "ellen.knowledge",
+            "madnar.reunion_confirmation"
+          ]
+        },
+        {
+          "between": [
+            "solid_snake",
+            "gray_fox"
+          ],
+          "opening": "Snake follows the lead Fox risked his freedom to convey",
+          "turn": "Coercion explains the machine's origin",
+          "payoff": "Fox's warning is vindicated and connected to a real human cost",
+          "event_ids": [
+            "fox.revelation",
+            "madnar.tx55_sequence"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "id": "M06",
+      "title": "The Cost of Loyalty",
+      "status": "planned_not_runtime",
+      "first": "N26_DESERT_REENTRY",
+      "last": "N31_BROTHER_FREED",
+      "world": [
+        "Desert return, Building Three, Coward Duck hostages"
+      ],
+      "return_purpose": "Earlier advice becomes suspect, and a personal rescue becomes crucial escape knowledge",
+      "signature_character_scene": "Hostage-safe Coward Duck victory carries Jennifer's family story into the ending",
+      "revisit_changes": [
+        "rescued brother and hostages remain safe",
+        "Card 8 and radio clues persist",
+        "trapped routes reflect Big Boss's misinformation"
+      ],
+      "required_gate": "brother.safe_rescue",
+      "next_transition": "Search deep bunker for the real commander",
+      "scenes": [
+        "N26_DESERT_REENTRY",
+        "N27_BIG_BOSS_TRUCK_TRAP",
+        "N28_DEEP_BUNKER_DETOUR",
+        "N29_SCHNEIDER_LAST_CALL",
+        "N30_COWARD_DUCK_ROOM",
+        "N31_BROTHER_FREED"
+      ],
+      "playable_in_repo": false,
+      "story_threads": [
+        {
+          "between": [
+            "solid_snake",
+            "big_boss"
+          ],
+          "opening": "The commander previously provided true and false-access-resistant advice",
+          "turn": "Specific truck and door instructions become unsafe; the player can check reality",
+          "payoff": "Skepticism has mechanical value before the formal betrayal reveal",
+          "event_ids": [
+            "boss.wrong_truck",
+            "boss.false_door"
+          ]
+        },
+        {
+          "between": [
+            "jennifer",
+            "jennifer_brother",
+            "solid_snake"
+          ],
+          "opening": "Undercover ally finally reveals the family member she is risking everything to save",
+          "turn": "Coward Duck shields himself with hostages; precision and restraint matter",
+          "payoff": "Rescued brother gives a left-ladder escape clue that matters during the final evacuation",
+          "event_ids": [
+            "jennifer.brother_reveal",
+            "brother.safe_rescue",
+            "brother.escape_ladder"
+          ]
+        },
+        {
+          "between": [
+            "solid_snake",
+            "schneider"
+          ],
+          "opening": "Architect's knowledge has repeatedly helped",
+          "turn": "He tries to disclose the fortress leader before his line is cut off",
+          "payoff": "Silence generates fear and uncertainty, but not a fabricated confirmed death",
+          "event_ids": [
+            "schneider.final_signal",
+            "schneider.interrupted_reveal"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "id": "M07",
+      "title": "Orders and Evidence",
+      "status": "planned_not_runtime",
+      "first": "N32_OWNERSHIP_REVEALED",
+      "last": "N34_FINAL_SECURITY",
+      "world": [
+        "Building Three deep basement, prisoner witness, final security"
+      ],
+      "return_purpose": "A person previously rescued supplies proof that changes how command radio is understood",
+      "signature_character_scene": "Big Boss's command to stop follows witness evidence, not a premature cinematic spoiler",
+      "revisit_changes": [
+        "previous trust cues reframe as possible deception",
+        "final-access equipment remains earned"
+      ],
+      "required_gate": "snake.disobeys_abort",
+      "next_transition": "Reach and destroy TX-55",
+      "scenes": [
+        "N32_OWNERSHIP_REVEALED",
+        "N33_ABORT_ORDER",
+        "N34_FINAL_SECURITY"
+      ],
+      "playable_in_repo": false,
+      "story_threads": [
+        {
+          "between": [
+            "solid_snake",
+            "big_boss"
+          ],
+          "opening": "Snake has growing empirical doubts about his mentor",
+          "turn": "A prisoner identifies Big Boss as the mastermind; the voice orders Snake to abort",
+          "payoff": "Snake acts on corroborated evidence over institutional authority",
+          "event_ids": [
+            "pow.final_reveal",
+            "boss.abort_order",
+            "snake.disobeys_abort"
+          ]
+        },
+        {
+          "between": [
+            "solid_snake",
+            "jennifer",
+            "diane"
+          ],
+          "opening": "Resistance voices previously earned trust",
+          "turn": "They provide limited practical knowledge without claiming omniscience",
+          "payoff": "The player enters the core with independent allies and earned abilities",
+          "event_ids": [
+            "jennifer.oxygen_hint",
+            "diane.boss_guidance"
+          ]
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "id": "M08",
+      "title": "Outer Heaven",
+      "status": "planned_not_runtime",
+      "first": "N35_TX55_SABOTAGE",
+      "last": "N39_CLOSING_BROADCAST",
+      "world": [
+        "TX-55 chamber, commander's final room, escape shafts, exterior"
+      ],
+      "return_purpose": "All earlier choices and relationships pay off under self-destruct pressure",
+      "signature_character_scene": "TX-55 destruction precedes final commander fight, then physical escape under countdown",
+      "revisit_changes": [
+        "fortress shifts to collapse/evacuation state",
+        "mission-ending survival flags and original closing message remain durable"
+      ],
+      "required_gate": "tx55.destruction",
+      "next_transition": "1995 mission complete; later-series context not inserted",
+      "scenes": [
+        "N35_TX55_SABOTAGE",
+        "N36_SELF_DESTRUCT",
+        "N37_FINAL_BIG_BOSS",
+        "N38_ESCAPE_LEFT_LADDER",
+        "N39_CLOSING_BROADCAST"
+      ],
+      "playable_in_repo": false,
+      "story_threads": [
+        {
+          "between": [
+            "solid_snake",
+            "madnar",
+            "gray_fox"
+          ],
+          "opening": "Fox exposed the threat; Madnar provided the precise means of stopping it",
+          "turn": "Snake destroys TX-55 by executing the earned demolition sequence",
+          "payoff": "Earlier prisoner and family rescues give the finale a clear cause and effect",
+          "event_ids": [
+            "tx55.destruction",
+            "snake.tx55_detonation"
+          ]
+        },
+        {
+          "between": [
+            "solid_snake",
+            "big_boss",
+            "venom_snake"
+          ],
+          "opening": "The radio mentor and apparent fortress commander converge in Snake's perception",
+          "turn": "Final confrontation occurs only after destruction starts the self-destruct sequence",
+          "payoff": "Snake rejects compromised command; later Venom identity remains unknowable to 1995 Snake",
+          "event_ids": [
+            "boss.reveal",
+            "boss.confrontation",
+            "venom.falls"
+          ]
+        },
+        {
+          "between": [
+            "solid_snake",
+            "jennifer",
+            "jennifer_brother",
+            "diane"
+          ],
+          "opening": "Rescued brother's left-ladder advice and the resistance's care remain alive",
+          "turn": "Player remembers the correct escape route while Diane admits uncertainty",
+          "payoff": "Survival is a consequence of helping people, not an arbitrary cutscene",
+          "event_ids": [
+            "snake.left_ladder_escape",
+            "jennifer.escape_warning",
+            "diane.final_call"
+          ]
+        }
+      ]
+    }
+  ],
+  "required_character_dynamics": [
+    "BIG_BOSS_INITIAL_RELIABILITY_BEFORE_MISDIRECTION",
+    "FOX_INTEL_REMAINS_RELEVANT_AFTER_RESCUE",
+    "SCHNEIDER_KNOWS_ARCHITECTURE_NOT_SECRET_COMMAND",
+    "DIANE_SPECIALIST_HELP_NOT_OMNISCIENT",
+    "JENNIFER_BROTHER_HOSTAGE_INTEGRITY",
+    "ELLEN_FATHER_RESCUE_DEPENDENCY",
+    "NO_VENOM_IDENTITY_SPOILER_TO_1995_SNAKE",
+    "SCENES_UPDATE_REVISITED_WORLD"
+  ]
+}
