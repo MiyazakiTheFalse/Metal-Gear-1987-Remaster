@@ -4,6 +4,7 @@
 #include "MGCampaignState.h"
 #include "Engine/GameInstance.h"
 #include "MGGuardActor.h"
+#include "MGBodyHidingSpot.h"
 #include "MGEquipmentComponent.h"
 #include "MGRemoteMissile.h"
 
@@ -96,6 +97,8 @@ void AMGPlayerCharacter::BeginPlay()
 
 void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    if (ChokedGuard.IsValid()) ChokedGuard->ReleaseChoke(false);
+    if (DraggedGuard.IsValid()) DraggedGuard->SetBodyDragged(false);
     // Ensure a checkpoint restart cannot inherit a slowed or paused world.
     if (GetWorld())
     {
@@ -108,6 +111,7 @@ void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void AMGPlayerCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    UpdateStealthInteractions(DeltaSeconds);
     CombatNoiseTimer = FMath::Max(0.f, CombatNoiseTimer - DeltaSeconds);
     MeleeVisualTimer = FMath::Max(0.f, MeleeVisualTimer - DeltaSeconds);
     WallKnockVisualTimer = FMath::Max(0.f, WallKnockVisualTimer - DeltaSeconds);
@@ -206,6 +210,7 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
     Input->BindAction("Fire", IE_Pressed, this, &AMGPlayerCharacter::FireStun);
     Input->BindAction("GraphicsPreset", IE_Pressed, this, &AMGPlayerCharacter::CycleGraphicsQuality);
     Input->BindAction("Interact", IE_Pressed, this, &AMGPlayerCharacter::Interact);
+    Input->BindAction("Interact", IE_Released, this, &AMGPlayerCharacter::ReleaseInteract);
     Input->BindAction("RestartRescue", IE_Pressed, this, &AMGPlayerCharacter::RestartRescue);
     Input->BindAction("MissionLog", IE_Pressed, this, &AMGPlayerCharacter::ToggleMissionLog);
     Input->BindAction("WeaponWindow", IE_Pressed, this, &AMGPlayerCharacter::WeaponWindowStart);
@@ -299,7 +304,8 @@ void AMGPlayerCharacter::AimStart()
 void AMGPlayerCharacter::AimStop() { bAiming = false; UpdateMovementState(); }
 void AMGPlayerCharacter::SprintStart()
 {
-    if (!bAiming && !bIsCrouched && !bIsProne)
+    if (!bAiming && !bIsCrouched && !bIsProne &&
+        !ChokedGuard.IsValid() && !DraggedGuard.IsValid())
     {
         if (bInCover) LeaveCover();
         bSprinting = true;
@@ -348,7 +354,7 @@ void AMGPlayerCharacter::UpdateMovementState()
     Movement->bOrientRotationToMovement = !bAiming && !bInCover;
     Movement->bUseControllerDesiredRotation = bAiming && !bInCover;
     Movement->MaxWalkSpeed = bIsProne ? 95.f :
-        (bInCover ? 120.f : (bIsCrouched ? 170.f :
+        (bInCover || DraggedGuard.IsValid() ? 120.f : (bIsCrouched ? 170.f :
             (bAiming ? 210.f : (bSprinting ? 600.f : 350.f))));
     // Crouched/prone cover must not bypass the current slow movement cap.
     Movement->MaxWalkSpeedCrouched = bIsProne ? 95.f : (bInCover ? 120.f : 170.f);
@@ -373,6 +379,51 @@ float AMGPlayerCharacter::GetVisibilityFactor() const
 
 void AMGPlayerCharacter::Interact()
 {
+    bInteractHeld = true;
+    if (ChokedGuard.IsValid()) return; // E held: maintain grip
+    if (DraggedGuard.IsValid())
+    {
+        if (AMGBodyHidingSpot* Locker = FindBodyLocker())
+        {
+            if (Locker->TryStow(DraggedGuard.Get()))
+            {
+                DraggedGuard.Reset();
+                UpdateMovementState();
+                NotifyFeedback(TEXT("BODY STOWED — CLOSE THE LOCKER"), TEXT("select"));
+                return;
+            }
+        }
+        StopBodyDrag();
+        NotifyFeedback(TEXT("BODY RELEASED"), TEXT("select"));
+        return;
+    }
+    if (AMGGuardActor* Guard = FindRearChokeCandidate())
+    {
+        LeaveCover();
+        bAiming = false;
+        bSprinting = false;
+        ChokedGuard = Guard;
+        ChokeHoldTime = 0.f;
+        ChokeStruggleTime = 0.f;
+        if (Guard->BeginChoke(this))
+        {
+            UpdateMovementState();
+            NotifyFeedback(TEXT("HOLD E — RESTRAIN GUARD / DO NOT RELEASE"), TEXT("select"));
+            return;
+        }
+        ChokedGuard.Reset();
+    }
+    if (AMGGuardActor* Body = FindUnconsciousBody())
+    {
+        bAiming = false;
+        bSprinting = false;
+        if (bInCover) LeaveCover();
+        DraggedGuard = Body;
+        Body->SetBodyDragged(true);
+        UpdateMovementState();
+        NotifyFeedback(TEXT("DRAG BODY — WALK SLOWLY / E TO RELEASE"), TEXT("select"));
+        return;
+    }
     if (AMGMissionOne* Opening = Cast<AMGMissionOne>(
         UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass())))
     {
@@ -410,6 +461,158 @@ void AMGPlayerCharacter::ToggleMissionLog()
     if (!bCodecOpen) bShowMissionLog = !bShowMissionLog;
 }
 
+void AMGPlayerCharacter::ReleaseInteract()
+{
+    bInteractHeld = false;
+    if (!ChokedGuard.IsValid()) return;
+    ChokedGuard->ReleaseChoke(true);
+    ChokedGuard.Reset();
+    ChokeHoldTime = 0.f;
+    UpdateMovementState();
+    NotifyFeedback(TEXT("CHOKEHOLD RELEASED — GUARD ALERTED"), TEXT("denied"));
+}
+AMGGuardActor* AMGPlayerCharacter::FindRearChokeCandidate() const
+{
+    if (!GetWorld() || bIsProne || bAiming || IsCombatAlertActive()) return nullptr;
+    AMGGuardActor* Candidate = nullptr;
+    float Best = 142.f;
+    const FVector Facing = GetActorForwardVector().GetSafeNormal2D();
+    for (TActorIterator<AMGGuardActor> Guard(GetWorld()); Guard; ++Guard)
+    {
+        if (Guard->IsIncapacitated() || Guard->IsBeingChoked() ||
+            Guard->GetAwarenessState() >= 2) continue;
+        const FVector Offset = GetActorLocation() - Guard->GetActorLocation();
+        if (FMath::Abs(Offset.Z) > 80.f) continue;
+        const float Range = Offset.Size2D();
+        if (Range > Best || Range < 42.f) continue;
+        const FVector FromGuard = Offset.GetSafeNormal2D();
+        if (FVector::DotProduct(Guard->GetActorForwardVector().GetSafeNormal2D(),
+                                FromGuard) > -0.68f) continue;
+        if (FVector::DotProduct(Facing, -FromGuard) < 0.48f) continue;
+        FHitResult Hit;
+        FCollisionQueryParams Q(SCENE_QUERY_STAT(MGChokeLineOfSight), false, this);
+        if (GetWorld()->LineTraceSingleByChannel(Hit,
+            GetActorLocation()+FVector(0.f,0.f,52.f),
+            Guard->GetActorLocation()+FVector(0.f,0.f,52.f),
+            ECC_Visibility, Q) && Hit.GetActor() != *Guard) continue;
+        Candidate = *Guard;
+        Best = Range;
+    }
+    return Candidate;
+}
+AMGGuardActor* AMGPlayerCharacter::FindUnconsciousBody() const
+{
+    if (!GetWorld()) return nullptr;
+    AMGGuardActor* Candidate = nullptr;
+    float Best = 150.f;
+    for (TActorIterator<AMGGuardActor> Guard(GetWorld()); Guard; ++Guard)
+    {
+        if (!Guard->IsDiscoverableBody() || Guard->IsBodyDragged()) continue;
+        const FVector Diff = Guard->GetActorLocation() - GetActorLocation();
+        if (FMath::Abs(Diff.Z) > 80.f || Diff.Size2D() >= Best) continue;
+        FHitResult Hit;
+        FCollisionQueryParams Q(SCENE_QUERY_STAT(MGBodyContact), false, this);
+        if (GetWorld()->LineTraceSingleByChannel(Hit,
+            GetActorLocation()+FVector(0.f,0.f,32.f),
+            Guard->GetActorLocation()+FVector(0.f,0.f,18.f),
+            ECC_Visibility, Q) && Hit.GetActor() != *Guard) continue;
+        Best = Diff.Size2D();
+        Candidate = *Guard;
+    }
+    return Candidate;
+}
+AMGBodyHidingSpot* AMGPlayerCharacter::FindBodyLocker() const
+{
+    if (!GetWorld()) return nullptr;
+    for (TActorIterator<AMGBodyHidingSpot> Locker(GetWorld()); Locker; ++Locker)
+    {
+        if (!Locker->IsAccessible()) continue;
+        const FVector Offset = Locker->GetActorLocation() - GetActorLocation();
+        if (FMath::Abs(Offset.Z) <= 90.f && Offset.Size2D() < 190.f)
+            return *Locker;
+    }
+    return nullptr;
+}
+FString AMGPlayerCharacter::GetStealthInteractionPrompt() const
+{
+    if (ChokedGuard.IsValid())
+        return FString::Printf(TEXT("HOLD E — CHOKEHOLD %d%%"),
+            FMath::RoundToInt(GetChokeProgress()*100.f));
+    if (DraggedGuard.IsValid())
+        return FindBodyLocker() ? TEXT("E — HIDE BODY IN SERVICE LOCKER")
+                                : TEXT("DRAGGING BODY — E TO RELEASE");
+    if (FindRearChokeCandidate())
+        return TEXT("HOLD E — CHOKE GUARD FROM BEHIND");
+    if (FindUnconsciousBody())
+        return TEXT("E — DRAG UNCONSCIOUS GUARD");
+    return FString();
+}
+void AMGPlayerCharacter::StopBodyDrag()
+{
+    if (DraggedGuard.IsValid()) DraggedGuard->SetBodyDragged(false);
+    DraggedGuard.Reset();
+    UpdateMovementState();
+}
+void AMGPlayerCharacter::UpdateStealthInteractions(float DeltaSeconds)
+{
+    if (ChokedGuard.IsValid())
+    {
+        AMGGuardActor* Guard = ChokedGuard.Get();
+        const FVector Diff = Guard->GetActorLocation() - GetActorLocation();
+        const bool bGripValid = bInteractHeld && Health > 0.f &&
+            Diff.Size2D() < 175.f && FMath::Abs(Diff.Z) < 90.f &&
+            !bCodecOpen && !bIsProne;
+        if (!bGripValid)
+        {
+            Guard->ReleaseChoke(true);
+            ChokedGuard.Reset();
+            ChokeHoldTime = 0.f;
+            UpdateMovementState();
+            NotifyFeedback(TEXT("GRIP BROKEN — GUARD CALLS ALERT"), TEXT("denied"));
+        }
+        else
+        {
+            ChokeHoldTime += DeltaSeconds;
+            bSprinting = false;
+            GetCharacterMovement()->StopMovementImmediately();
+            // Keep Snake behind the enemy rather than snapping through him.
+            const FVector Look = (Guard->GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
+            if (!Look.IsNearlyZero())
+                SetActorRotation(FMath::RInterpTo(
+                    GetActorRotation(), Look.Rotation(), DeltaSeconds, 12.f));
+            if (ChokeHoldTime >= 1.35f)
+            {
+                Guard->CompleteChoke();
+                ChokedGuard.Reset();
+                ChokeHoldTime = 0.f;
+                UpdateMovementState();
+                NotifyFeedback(TEXT("GUARD UNCONSCIOUS — BODY REMAINS VISIBLE"), TEXT("select"));
+            }
+        }
+    }
+    if (DraggedGuard.IsValid())
+    {
+        AMGGuardActor* Guard = DraggedGuard.Get();
+        if (!Guard->IsIncapacitated() || bIsProne || bSprinting || bCodecOpen)
+        {
+            StopBodyDrag();
+            return;
+        }
+        // With a rig, this drives a backstep/arm constraint. The current proxy
+        // body is moved only if the physical space is large enough.
+        const FVector Behind = GetActorLocation() - GetActorForwardVector()*90.f;
+        const FVector BodyPosition(Behind.X,Behind.Y,Guard->GetActorLocation().Z);
+        if (!Guard->MoveDraggedBody(BodyPosition, DeltaSeconds))
+        {
+            if (FVector::Dist2D(Guard->GetActorLocation(),GetActorLocation()) > 230.f)
+            {
+                StopBodyDrag();
+                NotifyFeedback(TEXT("BODY CAUGHT ON OBSTACLE — GRIP LOST"), TEXT("denied"));
+            }
+        }
+    }
+}
+
 void AMGPlayerCharacter::RestartRescue()
 {
 #if !UE_BUILD_SHIPPING
@@ -439,6 +642,8 @@ void AMGPlayerCharacter::RestartRescue()
 FString AMGPlayerCharacter::GetPostureText() const
 {
     if (bIsProne) return TEXT("PRONE");
+    if (ChokedGuard.IsValid()) return TEXT("GRAPPLING");
+    if (DraggedGuard.IsValid()) return TEXT("DRAGGING");
     if (bInCover) return TEXT("WALL COVER");
     if (bIsCrouched) return TEXT("CROUCHED");
     return TEXT("STANDING");
