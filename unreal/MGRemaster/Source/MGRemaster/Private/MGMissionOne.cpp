@@ -193,8 +193,12 @@ void AMGMissionOne::BeginPlay()
     if (bPOWRescued && GetWorld() && GetWorld()->GetGameInstance())
         if (UMGCampaignState* Story =
             GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+        {
             Story->RecordBeat(TEXT("snake.early_pow"),
-                TEXT("FIRST PRISONER: An operative was detained. The transfer route is concealed."));
+                TEXT("PRISONER: A FOXHOUND agent was transferred through a concealed detention post."));
+            Story->RecordBeat(TEXT("diane.contact"),
+                TEXT("PRISONER: Resistance contact Diane can be reached on 120.33."));
+        }
 }
 
 void AMGMissionOne::RestoreSavedEquipment(AMGPlayerCharacter* Player)
@@ -312,8 +316,18 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
         if (GetWorld() && GetWorld()->GetGameInstance())
             if (UMGCampaignState* Story =
                 GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+            {
                 Story->RecordBeat(TEXT("snake.early_pow"),
-                    TEXT("FIRST PRISONER: A missing operative was taken through the transfer route. Check the detention post."));
+                    TEXT("PRISONER: A FOXHOUND agent was transferred through a concealed detention post."));
+                Story->RecordBeat(TEXT("diane.contact"),
+                    TEXT("PRISONER: Resistance contact Diane can be reached on 120.33."));
+            }
+        // Optional character material: the player has control throughout,
+        // and the durable intel is recoverable if a patrol interrupts.
+        BeatSubtitle = TEXT("PRISONER: They took one of your operatives.\n"
+                            "SNAKE: Where?\n"
+                            "PRISONER: The detention transfer. Diane may help—120.33.");
+        BeatSubtitleTime = 9.f;
         Player->NotifyFeedback(TEXT("PRISONER RESCUED — DETENTION TRANSFER REVEALED"), TEXT("rescue"));
         return true;
     }
@@ -354,12 +368,18 @@ FString AMGMissionOne::GetObjectiveText() const
 {
     if (bLiftTravelling)
         return FString::Printf(TEXT("ELEVATOR / EN ROUTE TO %dF"), DestinationFloor);
+    // Mission 3 begins after Fox's rescue; revisiting these floors is part of
+    // the story, not an accidental restart of Mission 1's objective.
+    const UMGCampaignState* CurrentStory = GetWorld() && GetWorld()->GetGameInstance()
+        ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
+    if (CurrentStory && CurrentStory->GetMissionNumber() == 3)
+        return TEXT("FOLLOW FOX'S REPORT — FIND DR. PETTROVICH");
     if (CurrentFloor == 3)
     {
         const UMGCampaignState* Story = GetWorld() && GetWorld()->GetGameInstance()
             ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
         if (Story && Story->GetMissionNumber() == 3)
-            return TEXT("GRAY FOX RESCUED — FIND THE SCIENTIST / RETURN ROUTE PENDING");
+            return TEXT("FOLLOW FOX'S LEAD — FIND DR. PETTROVICH");
         return bPOWRescued ? TEXT("3F — DETENTION TRANSFER MARKER / FIND GRAY FOX")
             : TEXT("3F — RECOVER AMMO / FREE PRISONER WITH CARD 1");
     }
@@ -499,6 +519,7 @@ bool AMGMissionOne::StartLift(AMGPlayerCharacter* Player)
 void AMGMissionOne::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    BeatSubtitleTime = FMath::Max(0.f, BeatSubtitleTime - DeltaSeconds);
     // Gas is a readable environmental threat, not a binary inventory gate.
     // The real equipped GASMASK protects; holding one in inventory does not.
     GasWarningCooldown = FMath::Max(0.f, GasWarningCooldown - DeltaSeconds);
