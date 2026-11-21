@@ -336,6 +336,7 @@ void AMGPlayerCharacter::LookUpRate(float Value)
 
 void AMGPlayerCharacter::AimStart()
 {
+    if (bMeleeInProgress) return;
     bAiming = true;
     bSprinting = false;
     UpdateMovementState();
@@ -344,7 +345,7 @@ void AMGPlayerCharacter::AimStop() { bAiming = false; UpdateMovementState(); }
 void AMGPlayerCharacter::SprintStart()
 {
     if (!bAiming && !bIsCrouched && !bIsProne &&
-        !ChokedGuard.IsValid() && !DraggedGuard.IsValid())
+        !bMeleeInProgress && !ChokedGuard.IsValid() && !DraggedGuard.IsValid())
     {
         if (bInCover) LeaveCover();
         bSprinting = true;
@@ -433,6 +434,7 @@ float AMGPlayerCharacter::GetVisibilityFactor() const
 
 void AMGPlayerCharacter::Interact()
 {
+    if (bMeleeInProgress) return; // No simultaneous grapple/loot mid-strike.
     bInteractHeld = true;
     if (ChokedGuard.IsValid()) return; // E held: maintain grip
     if (DraggedGuard.IsValid())
@@ -939,7 +941,7 @@ void AMGPlayerCharacter::ToggleCover()
 
 void AMGPlayerCharacter::FireStun()
 {
-    if (!GetWorld() || !Controller) return;
+    if (!GetWorld() || !Controller || bMeleeInProgress) return;
     if (!bAiming)
     {
         NotifyFeedback(TEXT("HOLD AIM BEFORE FIRING"), TEXT("denied"));
@@ -1211,6 +1213,7 @@ void AMGPlayerCharacter::StartMeleeStrike(int32 Strike)
     MeleeStrikeIndex=Strike;
     MeleePhaseSeconds=0.f;
     CombatNoiseTimer=.20f;
+    bAiming=false;
     bSprinting=false;
     UpdateMovementState();
 
