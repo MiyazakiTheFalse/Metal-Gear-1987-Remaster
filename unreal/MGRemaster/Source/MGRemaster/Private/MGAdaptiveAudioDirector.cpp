@@ -94,12 +94,17 @@ FName AMGAdaptiveAudioDirector::DetermineMusic(
     const int32 Mission=Story->GetMissionNumber();
     if (Mission==8)
     {
+        if (Story->HasBeat(TEXT("snake.escaped_outer_heaven")))
+            return TEXT("music_ending");
         if (Story->HasBeat(TEXT("tx55.destruction"))) return TEXT("music_escape");
         return TEXT("music_metalgear");
     }
     if (Mission==7) return TEXT("music_betrayal");
     if (Mission==6) return TEXT("music_desert");
     if (Mission==5) return TEXT("music_revelation");
+    if (Mission==2 && Story->HasBeat(TEXT("fox.revelation")) &&
+        !Story->HasBeat(TEXT("snake.gear_recovery")))
+        return TEXT("music_revelation");
     int32 Awareness=0;
     if (Snake && !Snake->IsTitleScreenActive())
         for (TActorIterator<AMGGuardActor> Guard(GetWorld());Guard;++Guard)
