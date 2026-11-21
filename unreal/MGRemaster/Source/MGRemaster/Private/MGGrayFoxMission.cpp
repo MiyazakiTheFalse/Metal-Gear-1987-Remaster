@@ -150,7 +150,8 @@ void AMGGrayFoxMission::SpawnPerimeterGuards()
     {
         CellGuard->ConfigureDuty(TEXT("PRISON_G01"), TEXT("CELL_BLOCK_WATCH"),
                                  TEXT("NORTH_HOLDING_BAYS"),
-                                 FVector(840.f,345.f,-11.f), 2.8f);
+                                 FVector(840.f,345.f,-11.f), 2.8f,
+                                 FVector(975.f,500.f,-11.f));
         CellGuard->ConfigurePatrol({
             FVector(840.f,345.f,-11.f), FVector(1080.f,345.f,-11.f),
             FVector(1080.f,365.f,-11.f), FVector(840.f,365.f,-11.f)
@@ -161,7 +162,8 @@ void AMGGrayFoxMission::SpawnPerimeterGuards()
     {
         PropertyGuard->ConfigureDuty(TEXT("PRISON_G02"), TEXT("PROPERTY_CUSTODY"),
                                      TEXT("CONFISCATED_GEAR_AND_EXIT"),
-                                     FVector(1120.f,-340.f,-11.f), 1.7f);
+                                     FVector(1120.f,-340.f,-11.f), 1.7f,
+                                     FVector(725.f,-220.f,-11.f));
         PropertyGuard->ConfigurePatrol({
             FVector(1120.f,-340.f,-11.f), FVector(960.f,-340.f,-11.f),
             FVector(760.f,-340.f,-11.f), FVector(960.f,-340.f,-11.f)
