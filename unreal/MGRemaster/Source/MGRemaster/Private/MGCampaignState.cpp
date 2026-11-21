@@ -276,6 +276,8 @@ bool UMGCampaignState::AdvanceMission(int32 NextMissionNumber)
     if (NextMissionNumber == 7 &&
         (!HasBeat(TEXT("m06.coward_duck_defeated")) ||
          !HasBeat(TEXT("brother.escape_ladder")) ||
+         !HasBeat(TEXT("m06.hostage_left_rescued")) ||
+         !HasBeat(TEXT("m06.hostage_right_rescued")) ||
          !HasBeat(TEXT("m06.card8_acquired")))) return false;
     if (NextMissionNumber == 8 &&
         (!HasBeat(TEXT("pow.final_reveal")) ||
@@ -305,6 +307,22 @@ FString UMGCampaignState::GetIntelLog() const
 }
 FString UMGCampaignState::GetCurrentObjective() const
 {
+    if (GetMissionNumber() == 8)
+        return HasBeat(TEXT("snake.escaped_outer_heaven")) ?
+            TEXT("MISSION COMPLETE / OUTER HEAVEN ESCAPED") :
+            HasBeat(TEXT("tx55.destruction")) ?
+            TEXT("COUNTDOWN / DEFEAT THE COMMANDER / FIND LEFT LADDER") :
+            TEXT("TX-55: PLACE CHARGES ON THE LEFT/RIGHT FEET IN SEQUENCE");
+    if (GetMissionNumber() == 7)
+        return HasBeat(TEXT("m07.final_security_cleared")) ?
+            TEXT("INNER BUNKER OPEN / REACH THE FINAL SHAFT") :
+            HasBeat(TEXT("pow.final_reveal")) ?
+            TEXT("VERIFY THE RADIO ORDERS / DISABLE SECURITY") :
+            TEXT("CARD 8 / RESCUE THE LAST WITNESS");
+    if (GetMissionNumber() == 6)
+        return HasBeat(TEXT("m06.coward_duck_defeated")) ?
+            TEXT("SAVE THREE HOSTAGES / COLLECT CARD 8") :
+            TEXT("DESERT / FIND OXYGEN / DEFEAT COWARD DUCK");
     if (GetMissionNumber() == 5)
         return HasBeat(TEXT("ellen.rescue")) ?
             TEXT("RETURN FROM BUILDING ONE BASEMENT / MADNAR AWAITS") :
