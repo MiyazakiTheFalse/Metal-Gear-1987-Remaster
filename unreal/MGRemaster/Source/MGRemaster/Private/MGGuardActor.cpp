@@ -199,6 +199,10 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     Frame.hearing_range_m = 11.f;
     Frame.visibility = Player->GetVisibilityFactor();
     Frame.noise = Player->GetNoiseFactor();
+    // Basic structural attenuation: solid geometry dampens ordinary footsteps.
+    // The native Rust perception model receives the same attenuated input
+    // as the Unreal fallback. This is not a full propagated acoustic graph.
+    if (!bHasLineOfSight) Frame.noise *= 0.18f;
     Frame.suspicion = Suspicion;
     Frame.delta_seconds = DeltaSeconds;
     Frame.line_of_sight = bHasLineOfSight ? 1u : 0u;
@@ -209,8 +213,12 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     {
         Suspicion = Result.suspicion;
         AwarenessState = Result.state;
-        if (Result.sees_player || Result.hears_player)
+        if (Result.sees_player)
             LastKnownPlayerPosition = Player->GetActorLocation();
+        else if (Result.hears_player)
+            LastKnownPlayerPosition = Player->GetActorLocation() +
+                FVector(180.f * FMath::Sin(GetActorLocation().X * .001f),
+                        180.f * FMath::Cos(GetActorLocation().Y * .001f), 0.f);
     }
 #else
     // Reduced fallback for editor prototyping only; use the Rust native ABI
@@ -223,7 +231,10 @@ void AMGGuardActor::Tick(float DeltaSeconds)
          (bAudible ? Frame.noise * 0.40f : 0.f) -
          ((!bVisible && !bAudible) ? 0.12f : 0.f)), 0.f, 1.f);
     AwarenessState = Suspicion >= 0.99f ? 3 : Suspicion >= 0.68f ? 2 : Suspicion >= 0.22f ? 1 : 0;
-    if (bVisible || bAudible) LastKnownPlayerPosition = Player->GetActorLocation();
+    if (bVisible) LastKnownPlayerPosition = Player->GetActorLocation();
+    else if (bAudible) LastKnownPlayerPosition = Player->GetActorLocation() +
+        FVector(180.f * FMath::Sin(GetActorLocation().X * .001f),
+                180.f * FMath::Cos(GetActorLocation().Y * .001f), 0.f);
 #endif
 
     // Enemy attack only after an actual alert and physical approach.
