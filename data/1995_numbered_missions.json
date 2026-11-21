@@ -175,8 +175,8 @@
         "elevator remains bidirectional",
         "guard occupancy can later react to an escape"
       ],
-      "required_gate": "fox.revelation",
-      "next_transition": "Building Two route is not yet implemented",
+      "required_gate": "m03.route.confirmed",
+      "next_transition": "Building Two approach is known after any one clue, but Mission 4 level does not yet exist; optional clue/cache/security revisits remain available",
       "scenes": [
         "N11_FIRST_REVISIT",
         "N12_MACHINEGUN_KID",
@@ -226,7 +226,69 @@
           ]
         }
       ],
-      "guard_assignment_required": true
+      "guard_assignment_required": true,
+      "multiple_progression_routes": [
+        {
+          "id": "m03.route.manifest",
+          "location": "Building One 1F original second truck yard",
+          "requirements": [
+            "Fox rescue"
+          ],
+          "optional_prior_spoils": [],
+          "status": "unreal_source_uncompiled",
+          "gate": "One of three leads is sufficient",
+          "failure_recovery": "Available independently if no optional gear found"
+        },
+        {
+          "id": "m03.route.survey",
+          "location": "Building One 2F observation station",
+          "requirements": [
+            "Fox rescue",
+            "BINOCULARS equipped"
+          ],
+          "optional_prior_spoils": [
+            "BINOCULARS from first truck yard"
+          ],
+          "status": "unreal_source_uncompiled",
+          "gate": "Alternative lead, not mandatory",
+          "failure_recovery": "Can retrieve binoculars on return or choose another clue"
+        },
+        {
+          "id": "m03.route.archive",
+          "location": "Building One 3F hazardous archive",
+          "requirements": [
+            "Fox rescue",
+            "Survive real gas exposure"
+          ],
+          "optional_prior_spoils": [
+            "GASMASK from Card 1 room",
+            "RATION survival supplies"
+          ],
+          "status": "unreal_source_uncompiled",
+          "gate": "Alternative lead, not mandatory",
+          "failure_recovery": "Use gasmask, ration, or investigate another route"
+        }
+      ],
+      "optional_divergent_payoffs": [
+        {
+          "id": "m03.cache.claimed",
+          "trigger": "Any two independent clues",
+          "effect": "One-time 2F chest awards ration and eight handgun rounds",
+          "status": "unreal_source_uncompiled"
+        },
+        {
+          "id": "m03.security.power_disabled",
+          "trigger": "Approach 2F service breaker",
+          "effect": "Persistent loss of active CCTV surveillance across Building One; guards still patrol",
+          "status": "unreal_source_uncompiled"
+        },
+        {
+          "id": "combat_cctv",
+          "trigger": "Previously acquired handgun and ammo",
+          "effect": "Disable camera by spending ammunition, without using service breaker",
+          "status": "existing_source_uncompiled"
+        }
+      ]
     },
     {
       "number": 4,
