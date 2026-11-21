@@ -34,6 +34,7 @@ private:
     UAudioComponent* MusicB = nullptr;
     FName ActiveMusic = NAME_None;
     TMap<FName,double> CueLastPlayed;
+    UPROPERTY(Transient)
     TMap<FName,USoundBase*> Cache;
     float MusicGain = 0.23f;
     float EffectsGain = 0.75f;
