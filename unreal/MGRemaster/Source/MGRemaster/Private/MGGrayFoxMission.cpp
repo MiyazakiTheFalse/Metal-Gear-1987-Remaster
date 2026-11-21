@@ -2,6 +2,8 @@
 
 #include "MGGuardActor.h"
 #include "MGGrayFoxSaveGame.h"
+#include "MGCampaignState.h"
+#include "Engine/GameInstance.h"
 #include "MGPlayerCharacter.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SceneComponent.h"
@@ -153,6 +155,19 @@ void AMGGrayFoxMission::BeginPlay()
     }
     RestoreVisualState();
     InitializePlayerIfReady();
+    // Recover from a save taken after the exit flag was committed but before
+    // the return transition. The narrative transaction must not repeat.
+    if ((Flags & MG_FOX_LEFT_PRISON) && GetWorld() && GetWorld()->GetGameInstance())
+    {
+        if (UMGCampaignState* Story =
+            GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+        {
+            Story->RecordBeat(TEXT("fox.revelation"),
+                TEXT("GRAY FOX: Metal Gear is nuclear-capable. Find Dr. Pettrovich."));
+            Story->AdvanceChapter(2);
+        }
+        ReturnToOuterHeavenSeconds = 0.1f;
+    }
 }
 
 void AMGGrayFoxMission::RestoreVisualState()
@@ -237,6 +252,34 @@ bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
         Dialogue = TEXT("PRISON ESCAPED — Gray Fox rescued. Checkpoint secured.");
         break;
     default: break;
+    }
+    // Commit narrative knowledge at the same moment as the durable gameplay
+    // flag, not when text/voice playback happens to finish.
+    if (GetWorld() && GetWorld()->GetGameInstance())
+    {
+        if (UMGCampaignState* Story =
+            GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+        {
+            if (Action == MG_FOX_CAPTURE)
+                Story->RecordBeat(TEXT("snake.capture"),
+                    TEXT("CAPTURED: Snake enters the secret detention wing without his equipment."));
+            else if (Action == MG_FOX_RESCUE)
+            {
+                Story->RecordBeat(TEXT("snake.rescue_fox"),
+                    TEXT("GRAY FOX RESCUED: The missing FOXHOUND operative is alive."));
+                Story->RecordBeat(TEXT("fox.revelation"),
+                    TEXT("GRAY FOX: Metal Gear is a nuclear-armed walking weapon. Find Dr. Pettrovich."));
+                Story->RecordBeat(TEXT("madnar.named"),
+                    TEXT("NEW LEAD: Dr. Pettrovich, designer of Metal Gear."));
+            }
+            else if (Action == MG_FOX_ESCAPE)
+            {
+                Story->RecordBeat(TEXT("fox.intel_persists"),
+                    TEXT("PRISON ESCAPED: Gray Fox's report remains in the mission log."));
+                if (Story->AdvanceChapter(2))
+                    ReturnToOuterHeavenSeconds = 1.35f;
+            }
+        }
     }
     // Short subtitle holds are placeholder reading windows; dialogue never locks control.
     DialogueTimeRemaining = Action == MG_FOX_RESCUE ? 7.f : 4.5f;
@@ -443,6 +486,13 @@ void AMGGrayFoxMission::Tick(float Dt)
     Super::Tick(Dt);
     InitializePlayerIfReady();
     if (!bPlayerInitialised) return;
+    if (ReturnToOuterHeavenSeconds >= 0.f)
+    {
+        ReturnToOuterHeavenSeconds -= FMath::Max(0.f, Dt);
+        if (ReturnToOuterHeavenSeconds <= 0.f)
+            UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
+        return;
+    }
     ElapsedSinceBeat += FMath::Max(0.f, Dt);
     DialogueTimeRemaining = FMath::Max(0.f, DialogueTimeRemaining - Dt);
     UpdateGuardAlert();
