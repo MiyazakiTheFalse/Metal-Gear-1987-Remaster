@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "mission_id": "mission_01",
-  "title": "Outer Heaven approach — provisional adaptation",
-  "status": "design_data_only_not_spawned",
-  "source_priority": "J2ME 3.3.0 actual event graph then MSX2 comparison; do not equate remaster geometry to canon",
+  "title": "Outer Heaven Building One arrival — comparative source-alignment pass",
+  "status": "comparative_msx2_reference_pending_j2me_source_trace_not_gameplay",
+  "source_priority": "J2ME 3.3.0 authoritative when decoded; MSX2 1987 comparative reference, never conflated",
   "units": "metres for remake greybox only; not inferred from source tiles",
   "coordinate_space": "shared horizontal XY local layout; rectangle [x,y,width,height]",
   "doctrines": [
@@ -17,7 +17,7 @@
   "rooms": [
     {
       "id": "m01.insertion",
-      "name": "Insertion perimeter",
+      "name": "Outer Heaven insertion corridor",
       "bounds_xywh_m": [
         0,
         0,
@@ -29,14 +29,14 @@
         "m01.drainage",
         "m01.checkpoint"
       ],
-      "description": "Open southern shadowed apron, split into culvert and checkpoint approach",
+      "description": "Early patrol-and-crate approach; no contrived drainage entrance is essential to the original route",
       "geometry_status": "provisional_remake_blockout",
-      "source_alignment": "pending_j2me_trace",
+      "source_alignment": "msx2_comparative_not_j2me_confirmed",
       "camera_clearance": "verify_both_shoulders_30_60_120fps"
     },
     {
       "id": "m01.drainage",
-      "name": "Drainage approach",
+      "name": "Optional maintenance transition",
       "bounds_xywh_m": [
         24,
         0,
@@ -48,14 +48,14 @@
         "m01.insertion",
         "m01.service"
       ],
-      "description": "Low crawl pipe; grate conceals line of sight, footfall carries beyond mouth",
+      "description": "Remake-only service transition, disabled until checked against J2ME original; cannot skip canonical trucks",
       "geometry_status": "provisional_remake_blockout",
-      "source_alignment": "pending_j2me_trace",
+      "source_alignment": "remake_optional_transition_pending_approval",
       "camera_clearance": "verify_both_shoulders_30_60_120fps"
     },
     {
       "id": "m01.checkpoint",
-      "name": "Outer checkpoint",
+      "name": "First three-truck yard",
       "bounds_xywh_m": [
         0,
         18,
@@ -67,14 +67,14 @@
         "m01.insertion",
         "m01.service"
       ],
-      "description": "Gatehouse, truck blind spot, lit barrier and staffed desk",
+      "description": "Original-comparative cluster: western ration, centre Card 1, eastern binoculars; guard exits truck",
       "geometry_status": "provisional_remake_blockout",
-      "source_alignment": "pending_j2me_trace",
+      "source_alignment": "msx2_comparative_not_j2me_confirmed",
       "camera_clearance": "verify_both_shoulders_30_60_120fps"
     },
     {
       "id": "m01.service",
-      "name": "Service store",
+      "name": "Card 1 side room and gas-mask store",
       "bounds_xywh_m": [
         24,
         18,
@@ -87,14 +87,14 @@
         "m01.checkpoint",
         "m01.security"
       ],
-      "description": "Shelving blocks vision and allows concealed resupply",
+      "description": "Card 1-accessible room; original-comparative resting guard and gas mask, not mandatory firearm",
       "geometry_status": "provisional_remake_blockout",
-      "source_alignment": "pending_j2me_trace",
+      "source_alignment": "msx2_comparative_not_j2me_confirmed",
       "camera_clearance": "verify_both_shoulders_30_60_120fps"
     },
     {
       "id": "m01.security",
-      "name": "Internal security",
+      "name": "Second truck and lift approach",
       "bounds_xywh_m": [
         48,
         18,
@@ -107,14 +107,14 @@
         "m01.facility",
         "m01.maintenance"
       ],
-      "description": "Offset two-lane hall, glass booth, raised observation catwalk",
+      "description": "Original-comparative later handgun truck, guard-filled truck, mined truck, and guarded elevator route",
       "geometry_status": "provisional_remake_blockout",
-      "source_alignment": "pending_j2me_trace",
+      "source_alignment": "msx2_comparative_not_j2me_confirmed",
       "camera_clearance": "verify_both_shoulders_30_60_120fps"
     },
     {
       "id": "m01.maintenance",
-      "name": "Maintenance bypass",
+      "name": "Optional transitional maintenance",
       "bounds_xywh_m": [
         48,
         42,
@@ -126,14 +126,14 @@
         "m01.security",
         "m01.facility"
       ],
-      "description": "Optional noisy generator passage; ladder to high return balcony",
+      "description": "Remake-only transitional geometry, never a shortcut past Card 1 or lift progression",
       "geometry_status": "provisional_remake_blockout",
-      "source_alignment": "pending_j2me_trace",
+      "source_alignment": "remake_optional_transition_pending_approval",
       "camera_clearance": "verify_both_shoulders_30_60_120fps"
     },
     {
       "id": "m01.facility",
-      "name": "Main facility antechamber",
+      "name": "Building One elevator transition",
       "bounds_xywh_m": [
         72,
         18,
@@ -145,9 +145,9 @@
         "m01.security",
         "m01.maintenance"
       ],
-      "description": "Durable mission boundary; three future gated facility connections",
+      "description": "Continue vertically to Building One upper floors; do not treat as finale of entire original mission",
       "geometry_status": "provisional_remake_blockout",
-      "source_alignment": "pending_j2me_trace",
+      "source_alignment": "msx2_comparative_not_j2me_confirmed",
       "camera_clearance": "verify_both_shoulders_30_60_120fps"
     }
   ],
@@ -172,7 +172,7 @@
       "from": "m01.drainage",
       "to": "m01.service",
       "kind": "grate",
-      "gate": "interact_from_drainage",
+      "gate": "optional_transition_not_available_in_source_fidelity_mode",
       "notes": "Quiet grate opening leaves durable open state",
       "bidirectional": true
     },
@@ -180,7 +180,7 @@
       "from": "m01.checkpoint",
       "to": "m01.service",
       "kind": "service_door",
-      "gate": "always",
+      "gate": "card_1",
       "notes": "Guarded direct route; door blocks vision when closed",
       "bidirectional": true
     },
@@ -196,7 +196,7 @@
       "from": "m01.security",
       "to": "m01.maintenance",
       "kind": "ladder",
-      "gate": "always",
+      "gate": "optional_transition_not_available_in_source_fidelity_mode",
       "notes": "Raised route, one-at-a-time traversal; no combat on ladder",
       "bidirectional": true
     },
@@ -204,7 +204,7 @@
       "from": "m01.security",
       "to": "m01.facility",
       "kind": "security_gate",
-      "gate": "clearance_from_terminal",
+      "gate": "elevator_access_world_state_not_arbitrary_terminal",
       "notes": "Gate requires readable terminal interaction, no hidden timer",
       "bidirectional": true
     },
@@ -212,7 +212,7 @@
       "from": "m01.maintenance",
       "to": "m01.facility",
       "kind": "high_vent",
-      "gate": "always",
+      "gate": "optional_transition_not_available_in_source_fidelity_mode",
       "notes": "Alternate passage bypasses gate but not mission intel",
       "bidirectional": true
     }
@@ -244,8 +244,8 @@
         ]
       ],
       "facing_deg": 90,
-      "role": "single_baseline_patrol",
-      "response": "Investigate localized gravel/footfall noises; never know Snake position from sound alone",
+      "role": "opening_crate_route_patrol",
+      "response": "Perimeter observation: inspect actual contact or noise, call in verified intruder, retain plausible sight/hearing occlusion",
       "recovery": "Resume last patrol waypoint after search"
     },
     {
@@ -274,8 +274,8 @@
         ]
       ],
       "facing_deg": 0,
-      "role": "barrier_sentry",
-      "response": "Faces barrier during truck inspection; radio actual visual confirmation",
+      "role": "first_truck_yard_sentry",
+      "response": "Access control near trucks; investigate actual activity rather than guarding arbitrary empty floor",
       "recovery": "Search booth and truck perimeter before reset"
     },
     {
@@ -300,8 +300,8 @@
         ]
       ],
       "facing_deg": 180,
-      "role": "checkpoint_rover",
-      "response": "Offset phase from G02 so a readable crossing window exists",
+      "role": "centre_truck_departing_guard",
+      "response": "Scripted departure silhouette before Card 1 recovery; adapts the original truck guard beat with interruptible motion",
       "recovery": "Returns to desk after sound investigation"
     },
     {
@@ -330,8 +330,8 @@
         ]
       ],
       "facing_deg": 90,
-      "role": "hall_patrol",
-      "response": "Coordinates only on witnessed alert/radio; cannot see through shelving",
+      "role": "second_truck_yard_rover",
+      "response": "Visible routine around vehicles, supply control and guarded lift access; no supernatural detection",
       "recovery": "Checks last known location then patrol"
     },
     {
@@ -352,8 +352,8 @@
         ]
       ],
       "facing_deg": 180,
-      "role": "booth_sentry",
-      "response": "Overlooks hall but not maintenance blind corner; raised sightline",
+      "role": "elevator_access_guard",
+      "response": "Posted by the lift; assigned access-control job rather than aimless patrol",
       "recovery": "Holds booth until support request"
     },
     {
@@ -378,8 +378,8 @@
         ]
       ],
       "facing_deg": 0,
-      "role": "maintenance_inspector",
-      "response": "Generator intermittently masks footsteps, but loud actions carry",
+      "role": "maintenance_staff_security",
+      "response": "Optional transition patrol only, does not replace or add unavoidable original critical-path guards",
       "recovery": "Checks generator access then returns"
     }
   ],
@@ -387,68 +387,74 @@
     {
       "id": "P01",
       "item": "ration",
-      "room": "m01.insertion",
+      "room": "m01.checkpoint",
       "xy_m": [
         5,
-        4
+        23
       ],
-      "access": "optional",
-      "purpose": "Low-risk discovery; supports recovery without forcing tutorial"
+      "access": "west_truck_interaction",
+      "purpose": "First-truck ration, MSX2 comparative",
+      "source_alignment": "msx2_comparative_pending_j2me"
     },
     {
       "id": "P02",
-      "item": "first_aid",
+      "item": "card_1",
       "room": "m01.checkpoint",
       "xy_m": [
-        6,
-        31
+        12,
+        25
       ],
-      "access": "guarded_optional",
-      "purpose": "Reward for reading G02 and G03 patrol offsets"
+      "access": "center_truck_after_guard_departure",
+      "purpose": "Source critical progression and first meaningful keycard",
+      "source_alignment": "msx2_comparative_pending_j2me"
     },
     {
       "id": "P03",
-      "item": "handgun",
+      "item": "binoculars",
+      "room": "m01.checkpoint",
+      "xy_m": [
+        20,
+        23
+      ],
+      "access": "east_truck_interaction",
+      "purpose": "Optional original reconnaissance pickup",
+      "source_alignment": "msx2_comparative_pending_j2me"
+    },
+    {
+      "id": "P04",
+      "item": "gas_mask",
       "room": "m01.service",
       "xy_m": [
         31,
         25
       ],
-      "access": "visible_from_cover",
-      "purpose": "First lethal option after stealth has already been taught; ammo scarce"
-    },
-    {
-      "id": "P04",
-      "item": "handgun_ammo",
-      "room": "m01.service",
-      "xy_m": [
-        42,
-        31
-      ],
-      "access": "optional_rear_shelf",
-      "purpose": "Reward full exploration with limited ammunition"
+      "access": "door_requires_card_1",
+      "purpose": "Preserve original gas-mask dependency",
+      "source_alignment": "msx2_comparative_pending_j2me"
     },
     {
       "id": "P05",
-      "item": "ration",
-      "room": "m01.maintenance",
+      "item": "handgun",
+      "room": "m01.security",
       "xy_m": [
-        65,
-        48
+        55,
+        26
       ],
-      "access": "noisy_detour",
-      "purpose": "Trade exposure/noise against supplies"
+      "access": "later_west_truck",
+      "purpose": "Original delayed gun acquisition, no starting ammunition",
+      "source_alignment": "msx2_comparative_pending_j2me"
     },
     {
       "id": "P06",
-      "item": "key_intel",
-      "room": "m01.facility",
+      "item": "land_mines",
+      "room": "m01.security",
       "xy_m": [
-        92,
-        26
+        66,
+        32
       ],
-      "access": "mandatory",
-      "purpose": "Mark next objective without falsely equating to unverified source key card"
+      "access": "guarded_east_truck",
+      "purpose": "Original later-truck risk/reward encounter",
+      "source_alignment": "msx2_comparative_pending_j2me"
     }
   ],
   "beats": [
@@ -456,44 +462,37 @@
       "id": "M01.B01",
       "room": "m01.insertion",
       "trigger": "player_spawn",
-      "interaction": "Movement, optional radio and first observational cover",
-      "agency": "Immediate control; no compulsory exposition",
+      "interaction": "Transceiver-only arrival, observe early crate-guard pattern",
+      "agency": "Control immediately; optional call",
       "checkpoint": true
     },
     {
       "id": "M01.B02",
-      "room": "m01.drainage",
-      "trigger": "enter_crawl",
-      "interaction": "Choose concealment versus slower travel",
-      "agency": "Return or proceed without one-way lock"
+      "room": "m01.checkpoint",
+      "trigger": "reach_first_truck_cluster",
+      "interaction": "Read centre truck guard departure and collect Card 1; ration and binoculars optional",
+      "agency": "Do not force taking optional items"
     },
     {
       "id": "M01.B03",
-      "room": "m01.checkpoint",
-      "trigger": "approach_barrier",
-      "interaction": "Observe G02/G03 rhythm then sneak, distract or fight",
-      "agency": "No random guard spawns"
+      "room": "m01.service",
+      "trigger": "use_card_1_door",
+      "interaction": "Find gas mask after sleeping/resting guard, preserve progression route",
+      "agency": "Resting guard can wake from justified noise"
     },
     {
       "id": "M01.B04",
-      "room": "m01.service",
-      "trigger": "pick_up_handgun",
-      "interaction": "Equip only if player chooses; limited ammo",
-      "agency": "No mandatory weapon use"
+      "room": "m01.security",
+      "trigger": "reach_second_truck_cluster",
+      "interaction": "Delayed handgun acquisition without ammo; dangerous truck guarded; land mines optional",
+      "agency": "No compulsory violence"
     },
     {
       "id": "M01.B05",
-      "room": "m01.security",
-      "trigger": "cross_security_hall",
-      "interaction": "Interlocking cones and sound-dependent investigation",
-      "agency": "Main route or maintenance detour"
-    },
-    {
-      "id": "M01.B06",
       "room": "m01.facility",
-      "trigger": "collect_key_intel",
-      "interaction": "Stage completion and future connections",
-      "agency": "Backtrack while persistent door/item states remain",
+      "trigger": "enter_elevator",
+      "interaction": "Elevator progresses to Building One upper floor routes",
+      "agency": "No fabricated mission end; preserve floor and return topology",
       "checkpoint": true
     }
   ],
@@ -505,6 +504,7 @@
     "guard_alert_memory_by_area"
   ],
   "release_gates": [
+    "J2ME archive remains target edition: validate all MSX2-comparative content before treating it as canon",
     "Trace source first mission entrances and pickup dependencies",
     "Unreal procedural spawn from shared data pending",
     "Browser world load from shared data pending",
@@ -519,6 +519,57 @@
     "Save/load before and after pickups",
     "Revisit does not duplicate items",
     "Shoulder swap and crawl/grate collision",
-    "Camera from upper route cannot see through geometry"
+    "Camera from upper route cannot see through geometry",
+    "Handgun is not found before first three-truck group",
+    "Card 1 pickup opens gas mask room but cannot be duplicated",
+    "No handgun ammunition is smuggled into later truck pickup",
+    "Elevator preserves Building One multi-floor continuity"
+  ],
+  "source_evidence": [
+    {
+      "source": "konami_official_mg1",
+      "url": "https://metalgear.konami.net/manual/mc1/mg1_msx/pc/en/page02.html",
+      "supports": "Snake arrives alone with transceiver, ordered to find Gray Fox and investigate Metal Gear",
+      "evidence_status": "official_msx2"
+    },
+    {
+      "source": "snake_soup_msx_walkthrough",
+      "url": "https://thesnakesoup.org/metal-gear-msx-walkthrough/",
+      "supports": "Opening guard/crate zone, first three truck item order, Card 1 gas mask door, later truck handgun and mines, elevator and third floor ammo",
+      "evidence_status": "community_msx2_comparative"
+    },
+    {
+      "source": "vgmaps_msx_atlas",
+      "url": "https://www.vgmaps.com/Atlas/MSX/",
+      "supports": "Building One floor structure and transitions to later buildings; reference atlas not metric reconstruction",
+      "evidence_status": "community_msx2_map"
+    },
+    {
+      "source": "us_army_tc_3_22_6",
+      "url": "https://rdl.train.army.mil/catalog-ws/view/100.ATSC/4E331B92-38E9-4E79-96DE-DD65C598169A-1484743106809/tc3_22x6c1.pdf",
+      "supports": "Assigned guard roles, observation, communications, guard duty; not literal patrol coordinates",
+      "evidence_status": "public_military_doctrine"
+    },
+    {
+      "source": "us_army_attp_3_39_32",
+      "url": "https://irp.fas.org/doddir/army/attp3-39-32.pdf",
+      "supports": "Security-post duties and access control; used as believability reference only",
+      "evidence_status": "public_military_doctrine"
+    }
+  ],
+  "future_source_critical_placements": [
+    {
+      "id": "F01",
+      "item": "handgun_ammo",
+      "area": "building_1_floor_3",
+      "location": "western opening",
+      "status": "not_yet_mapped_source_comparative"
+    },
+    {
+      "id": "F02",
+      "item": "pow_rescue",
+      "area": "building_1_floor_3",
+      "status": "not_yet_mapped_source_comparative"
+    }
   ]
 }
