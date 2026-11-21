@@ -385,6 +385,9 @@ assert.equal(freightGame.state.freight.reported,false);
 freightGame.teleport(-21.85,-3.1);
 selectItem(4);
 assert.equal(freightGame.state.freight.boxed,false);
+assert.equal(freightGame.state.freight.smokeX,0,
+ 'selecting cigarettes alone does not leak a smoke trail');
+freightGame.act('useitem');
 assert.equal(freightGame.state.freight.smokeX,-21.85);
 freightGame.teleport(-19.2,-4.15);
 freightGame.act('interact');
