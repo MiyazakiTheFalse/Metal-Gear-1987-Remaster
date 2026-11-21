@@ -1,0 +1,130 @@
+#include "MGSetpieceBoss.h"
+#include "MGLaterMission.h"
+#include "MGOrdnance.h"
+#include "MGPlayerCharacter.h"
+#include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "UObject/ConstructorHelpers.h"
+#include "Engine/World.h"
+
+AMGSetpieceBoss::AMGSetpieceBoss()
+{
+    PrimaryActorTick.bCanEverTick = true;
+    Body = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BossVisualCollision"));
+    SetRootComponent(Body);
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(
+        TEXT("/Engine/BasicShapes/Cube.Cube"));
+    if (Cube.Succeeded()) Body->SetStaticMesh(Cube.Object);
+    Body->SetCollisionProfileName(TEXT("BlockAll"));
+    Body->SetWorldScale3D(FVector(2.2f,1.4f,2.2f));
+}
+void AMGSetpieceBoss::ConfigureEncounter(
+    AMGLaterMission* Mission, FName EncounterId, FName RequiredOrdnance,
+    float HitPoints, float AttackRadius, float Telegraph, float AttackDamage,
+    const FVector& Focus)
+{
+    Director = Mission;
+    Id = EncounterId;
+    WeaponRequirement = RequiredOrdnance;
+    Health = FMath::Max(1.f, HitPoints);
+    AlertRange = FMath::Max(280.f, AttackRadius);
+    TelegraphTime = FMath::Clamp(Telegraph,.5f,3.5f);
+    AttackPower = FMath::Max(1.f, AttackDamage);
+    DefensiveFocus = Focus;
+    Tags.AddUnique(Id);
+    Tags.AddUnique(TEXT("AUTHORED_BOSS_POST"));
+    // Distinct readable silhouettes even until licensed art is mounted.
+    if (Id == TEXT("M03_HIND_D"))
+        Body->SetWorldScale3D(FVector(3.7f,5.2f,2.f));
+    else if (Id == TEXT("M03_TANK") || Id == TEXT("M04_BULLDOZER"))
+        Body->SetWorldScale3D(FVector(5.f,3.5f,2.6f));
+    else if (Id.ToString().Contains(TEXT("TX11")))
+        Body->SetWorldScale3D(FVector(1.8f,1.3f,2.7f));
+    else
+        Body->SetWorldScale3D(FVector(1.3f,1.3f,2.1f));
+}
+float AMGSetpieceBoss::TakeDamage(float Damage, const FDamageEvent& Event,
+                                  AController* Instigator, AActor* Causer)
+{
+    if (bDefeated || Damage <= 0.f) return 0.f;
+    FName Source = TEXT("HANDGUN");
+    if (const AMGOrdnance* Ordnance = Cast<AMGOrdnance>(Causer))
+        Source = Ordnance->GetOrdnanceId();
+    // Enemy-specific counterplay, not a generic 100-health-hit sponge.
+    // Air vehicle -> grenades, tank -> mines, TX-11 -> rockets.
+    if (Source != WeaponRequirement)
+    {
+        if (Director.IsValid()) Director->NotifyWrongWeapon(Id, WeaponRequirement);
+        return 0.f;
+    }
+    Health = FMath::Max(0.f, Health - Damage);
+    if (Health <= 0.f)
+    {
+        bDefeated = true;
+        if (Director.IsValid()) Director->OnBossDefeated(Id);
+        Destroy();
+    }
+    else Windup = -1.f;
+    return Damage;
+}
+void AMGSetpieceBoss::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+    if (bDefeated || !GetWorld()) return;
+    AMGPlayerCharacter* Snake = Cast<AMGPlayerCharacter>(
+        UGameplayStatics::GetPlayerCharacter(this,0));
+    if (!Snake) return;
+    const FVector Offset = Snake->GetActorLocation() - GetActorLocation();
+    if (FMath::Abs(Offset.Z) > 340.f || Offset.Size2D() > AlertRange)
+    {
+        Windup = -1.f;
+        Cooldown = FMath::Max(0.f,Cooldown - DeltaSeconds);
+        return;
+    }
+    FHitResult Sight;
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(MGBossSight),false,this);
+    const bool bBlocked = GetWorld()->LineTraceSingleByChannel(
+        Sight, GetActorLocation()+FVector(0.f,0.f,120.f),
+        Snake->GetActorLocation()+FVector(0.f,0.f,55.f),
+        ECC_Visibility,Params) && Sight.GetActor()!=Snake;
+    if (bBlocked)
+    {
+        Windup = -1.f;
+        Cooldown = FMath::Max(0.f,Cooldown - DeltaSeconds);
+        return;
+    }
+    Cooldown = FMath::Max(0.f,Cooldown - DeltaSeconds);
+    if (Windup < 0.f && Cooldown <= 0.f)
+    {
+        Windup = TelegraphTime;
+        Snake->NotifyFeedback(
+            FString::Printf(TEXT("%s / ATTACK WINDUP — MOVE INTO COVER"),*Id.ToString()),
+            TEXT("denied"));
+    }
+    if (Windup >= 0.f)
+    {
+        // Fixed facing/tracking with a visible turn; attack does not warp to Snake.
+        const FRotator Target = Offset.GetSafeNormal2D().Rotation();
+        SetActorRotation(FMath::RInterpTo(GetActorRotation(),Target,
+                                          DeltaSeconds,1.8f));
+        Windup -= DeltaSeconds;
+        if (Windup <= 0.f)
+        {
+            // Check after telegraph: hiding behind physically blocking scenery
+            // must work and distance can be exploited.
+            const FVector AtRelease = Snake->GetActorLocation()-GetActorLocation();
+            FHitResult Hit;
+            const bool Occluded = GetWorld()->LineTraceSingleByChannel(
+                Hit,GetActorLocation()+FVector(0.f,0.f,120.f),
+                Snake->GetActorLocation()+FVector(0.f,0.f,55.f),
+                ECC_Visibility,Params) && Hit.GetActor()!=Snake;
+            if (!Occluded && AtRelease.Size2D() <= AlertRange &&
+                FVector::DotProduct(GetActorForwardVector().GetSafeNormal2D(),
+                                    AtRelease.GetSafeNormal2D()) > .55f)
+                UGameplayStatics::ApplyDamage(Snake,AttackPower,nullptr,this,
+                    UDamageType::StaticClass());
+            Windup = -1.f;
+            Cooldown = 2.15f;
+        }
+    }
+}
