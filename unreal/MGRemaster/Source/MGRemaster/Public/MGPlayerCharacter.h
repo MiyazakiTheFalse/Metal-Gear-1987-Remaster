@@ -8,6 +8,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UStaticMeshComponent;
 class UMGEquipmentComponent;
+class AMGRemoteMissile;
 
 UCLASS()
 class MGREMASTER_API AMGPlayerCharacter : public ACharacter
@@ -81,6 +82,7 @@ private:
     bool bSprinting = false;
     float ShoulderSign = 1.f;
     int32 QualityPreset = 0;
+    TWeakObjectPtr<AMGRemoteMissile> ControlledMissile;
     float Health = 100.f;
     float MeleeNextTime = 0.f;
     float LastMeleeTime = -100.f;
