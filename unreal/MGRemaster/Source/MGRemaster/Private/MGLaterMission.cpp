@@ -5,6 +5,7 @@
 #include "MGEquipmentComponent.h"
 #include "MGMissionOneSaveGame.h"
 #include "MGGuardActor.h"
+#include "MGBodyHidingSpot.h"
 #include "MGArtResolver.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMeshActor.h"
@@ -130,6 +131,21 @@ void AMGLaterMission::BuildExterior()
               FVector(8900,1200,95),6);
     AddPickup(TEXT("L03_RATION"),TEXT("RATION"),
               FVector(10400,3400,95),1);
+    // Security staffing follows actual posts. No sudden random reinforcement
+    // appears just because a boss has been damaged.
+    if (AMGGuardActor* Guard=GetWorld()->SpawnActor<AMGGuardActor>(
+        FVector(9400,3800,90),FRotator(0.f,-100.f,0.f)))
+    {
+        Guard->ConfigureDuty(TEXT("M03_CHECKPOINT_AUX"),
+            TEXT("EXTERIOR_GATE_PATROL"),TEXT("TANK_ROAD_ACCESS"),
+            FVector(9400,3800,90),2.0f,FVector(10300,2400,90));
+        Guard->ConfigurePatrol(TArray<FVector>{
+            FVector(9400,3800,90),FVector(10600,3800,90),
+            FVector(10600,3100,90)});
+    }
+    if (AMGBodyHidingSpot* Locker=GetWorld()->SpawnActor<AMGBodyHidingSpot>(
+            FVector(5300,3500,95),FRotator(0.f,180.f,0.f)))
+        Locker->SetFacilityLabel(TEXT("ROOFTOP SERVICE / 03"));
     TransitionMarker=Block(TEXT("M03_BuildingTwoCheckpoint"),
                             FVector(13300,2200,90),FVector(.8f,.8f,1.7f),false);
     Block(TEXT("M03_ReturnToBuildingOne"),FVector(350,2200,90),
@@ -164,7 +180,7 @@ void AMGLaterMission::BuildBuildingTwo()
     Block(TEXT("M04_RocketStoreSouthSegmentEast"),FVector(11100,3000,150),
           FVector(8,.5f,3.5f));
     RocketRoomDoor=Block(TEXT("M04_RocketStoreCard6Door"),
-          FVector(10400,3000,150),FVector(.5f,6.f,3.5f));
+          FVector(10400,3000,150),FVector(6.f,.5f,3.5f));
     SpawnBoss(TEXT("m04.bulldozer_defeated"),FVector(2700,2200,95),
               TEXT("GRENADE_LAUNCHER"),160.f,1100.f,1.8f,22.f);
     SpawnBoss(TEXT("m04.fire_trooper_defeated"),FVector(6600,2300,95),
@@ -197,6 +213,28 @@ void AMGLaterMission::BuildBuildingTwo()
     if (Story() && Story()->HasBeat(TEXT("tx11.rocket_defeat")))
         AddPickup(TEXT("L04_CARD7"),TEXT("CARD7"),
                   FVector(12600,2200,95),1);
+    if (AMGGuardActor* Warden=GetWorld()->SpawnActor<AMGGuardActor>(
+        FVector(8650,2450,90),FRotator(0.f,70.f,0.f)))
+    {
+        Warden->ConfigureDuty(TEXT("M04_RESEARCH_WARDEN"),
+            TEXT("PRISONER_CUSTODY"),TEXT("BUILDING_TWO_MEDICAL_CELL"),
+            FVector(8650,2450,90),2.2f,FVector(9250,3000,90));
+        Warden->ConfigurePatrol(TArray<FVector>{
+            FVector(8650,2450,90),FVector(9500,2450,90),
+            FVector(9450,2750,90)});
+    }
+    if (AMGGuardActor* Custodian=GetWorld()->SpawnActor<AMGGuardActor>(
+        FVector(10300,2550,90),FRotator(0.f,90.f,0.f)))
+    {
+        Custodian->ConfigureDuty(TEXT("M04_WEAPON_CUSTODIAN"),
+            TEXT("SECURE_AMMUNITION"),TEXT("ROCKET_STORE_CARD6_DOOR"),
+            FVector(10300,2550,90),1.8f,FVector(10400,3000,90));
+        Custodian->ConfigurePatrol(TArray<FVector>{
+            FVector(10300,2550,90),FVector(11300,2500,90)});
+    }
+    if (AMGBodyHidingSpot* Locker=GetWorld()->SpawnActor<AMGBodyHidingSpot>(
+        FVector(8300,1200,95),FRotator(0.f,90.f,0.f)))
+        Locker->SetFacilityLabel(TEXT("BUILDING TWO / UTILITY"));
     TransitionMarker=Block(TEXT("M04_ResearchInnerGate"),
                            FVector(14000,2200,90),FVector(.8f,.8f,1.7f),false);
     SpawnPoint=FVector(650,2200,90);
