@@ -178,6 +178,9 @@ void AMGLaterMission::BuildBuildingTwo()
               TEXT("ROCKET_LAUNCHER"),125.f,1050.f,1.3f,20.f);
     SpawnBoss(TEXT("M04_TX11_B"),FVector(12450,3150,95),
               TEXT("ROCKET_LAUNCHER"),125.f,1050.f,1.3f,20.f);
+    if (Story() && Story()->HasBeat(TEXT("tx11.rocket_defeat")))
+        AddPickup(TEXT("L04_CARD7"),TEXT("CARD7"),
+                  FVector(12600,2200,95),1);
     TransitionMarker=Block(TEXT("M04_ResearchInnerGate"),
                            FVector(14000,2200,90),FVector(.8f,.8f,1.7f),false);
     SpawnPoint=FVector(650,2200,90);
@@ -290,7 +293,7 @@ bool AMGLaterMission::SavePickupState(FName Id,AMGPlayerCharacter* Player)
             UMGMissionOneSaveGame::StaticClass()));
     if (!Save) return false;
     Save->Version=FMath::Max(7,Save->Version);
-    Save->LaterCollectedPickupIds.AddUnique(Id);
+    if (!Id.IsNone()) Save->LaterCollectedPickupIds.AddUnique(Id);
     if (Player && Player->GetEquipment())
     {
         for (const FMGEquipmentEntry& Entry:Player->GetEquipment()->GetWeapons())
