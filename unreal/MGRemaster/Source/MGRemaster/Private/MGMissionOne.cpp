@@ -12,6 +12,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
 #include "UObject/ConstructorHelpers.h"
 
 namespace
@@ -296,6 +297,16 @@ void AMGMissionOne::BuildMissionThreeInvestigation()
     if (!bMissionThreeCacheClaimed)
         M03Cache = Block(TEXT("M03_CorroborationCache"),
                          CM(86.f,35.f,665.f), FVector(1.f,.9f,1.1f), false);
+    if (!Story->HasBeat(TEXT("m03.security.power_disabled")))
+        M03Breaker = Block(TEXT("M03_ServiceBreaker"),
+                           CM(54.f,35.f,665.f), FVector(.8f,.6f,1.3f), false);
+    else
+    {
+        // The successful intervention is a persistent campaign event.
+        // Shot-out cameras without this event remain a separate save TODO.
+        for (TActorIterator<AMGSecurityCamera> Camera(GetWorld()); Camera; ++Camera)
+            Camera->DisableForService();
+    }
 }
 
 bool AMGMissionOne::TryMissionThreeInvestigation(
@@ -359,6 +370,27 @@ bool AMGMissionOne::TryMissionThreeInvestigation(
     if (CheckLead(M03Archive, TEXT("m03.route.archive"),
         TEXT("ARCHIVE: A service diagram connects the outer building to research."),
         false)) return true;
+
+    // Fourth option: nonviolent, persistent surveillance shutdown through a
+    // real 2F circuit. It does not award mission-critical intel or auto-unlock
+    // doors; combat/shooting/stealth remain independent choices.
+    if (IsValid(M03Breaker) &&
+        FVector::Dist(Player->GetActorLocation(), M03Breaker->GetActorLocation()) <= 220.f)
+    {
+        if (!Story->RecordBeat(TEXT("m03.security.power_disabled"),
+                TEXT("2F MAINTENANCE: Building One surveillance circuit isolated.")))
+        {
+            Player->NotifyFeedback(TEXT("BREAKER SAVE FAILED — RETRY"), TEXT("denied"));
+            return true;
+        }
+        for (TActorIterator<AMGSecurityCamera> Camera(GetWorld()); Camera; ++Camera)
+            Camera->DisableForService();
+        M03Breaker->Destroy();
+        BeatSubtitle = TEXT("SNAKE: Camera power is cut. The guards still have their posts.");
+        BeatSubtitleTime = 6.5f;
+        Player->NotifyFeedback(TEXT("CCTV POWER DISABLED / GUARDS STILL ACTIVE"), TEXT("select"));
+        return true;
+    }
 
     if (IsValid(M03Cache) &&
         FVector::Dist(Player->GetActorLocation(), M03Cache->GetActorLocation()) <= 220.f)
