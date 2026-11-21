@@ -8,6 +8,8 @@
 #include "MGEquipmentComponent.h"
 #include "MGRemoteMissile.h"
 #include "MGOrdnance.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimMontage.h"
 #include "MGLaterMission.h"
 
 #include "Camera/CameraComponent.h"
@@ -53,6 +55,28 @@ AMGPlayerCharacter::AMGPlayerCharacter()
     PrototypeBody->SetRelativeScale3D(FVector(0.7f, 0.7f, 1.78f));
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
     if (Cylinder.Succeeded()) PrototypeBody->SetStaticMesh(Cylinder.Object);
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> LimbCube(
+        TEXT("/Engine/BasicShapes/Cube.Cube"));
+    const auto MakeLimb = [this, &LimbCube](
+        const TCHAR* Name, const FVector& Location, const FVector& Scale)
+            -> UStaticMeshComponent*
+    {
+        UStaticMeshComponent* Part=CreateDefaultSubobject<UStaticMeshComponent>(Name);
+        Part->SetupAttachment(GetCapsuleComponent());
+        if (LimbCube.Succeeded()) Part->SetStaticMesh(LimbCube.Object);
+        Part->SetRelativeLocation(Location);
+        Part->SetRelativeScale3D(Scale);
+        Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        return Part;
+    };
+    ProxyLeftArm=MakeLimb(TEXT("LeftArmProxy"),
+        FVector(1.f,-31.f,20.f),FVector(.17f,.17f,.55f));
+    ProxyRightArm=MakeLimb(TEXT("RightArmProxy"),
+        FVector(1.f,31.f,20.f),FVector(.17f,.17f,.55f));
+    ProxyLeftLeg=MakeLimb(TEXT("LeftLegProxy"),
+        FVector(0.f,-19.f,-49.f),FVector(.20f,.20f,.72f));
+    ProxyRightLeg=MakeLimb(TEXT("RightLegProxy"),
+        FVector(0.f,19.f,-49.f),FVector(.20f,.20f,.72f));
 
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
@@ -115,7 +139,7 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     UpdateStealthInteractions(DeltaSeconds);
     CombatNoiseTimer = FMath::Max(0.f, CombatNoiseTimer - DeltaSeconds);
-    MeleeVisualTimer = FMath::Max(0.f, MeleeVisualTimer - DeltaSeconds);
+    AdvanceMeleeCombo(DeltaSeconds);
     WallKnockVisualTimer = FMath::Max(0.f, WallKnockVisualTimer - DeltaSeconds);
     CoverReattachCooldown = FMath::Max(0.f, CoverReattachCooldown - DeltaSeconds);
     // Start prone only once CharacterMovement has established a valid crouch
@@ -124,7 +148,13 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
         EnterProneAfterCrouch();
 
     if (GetMesh())
-        PrototypeBody->SetVisibility(GetMesh()->GetSkeletalMeshAsset() == nullptr, true);
+    {
+        const bool bUsePlaceholder = GetMesh()->GetSkeletalMeshAsset() == nullptr;
+        PrototypeBody->SetVisibility(bUsePlaceholder, true);
+        for (UStaticMeshComponent* Limb : {
+             ProxyLeftArm,ProxyRightArm,ProxyLeftLeg,ProxyRightLeg})
+            if (Limb) Limb->SetVisibility(bUsePlaceholder,true);
+    }
 
     // A temporary prone/cover camera uses real collision and interpolated
     // pivot/shoulder geometry. Artists can replace the cylinder with a rig.
@@ -158,18 +188,25 @@ void AMGPlayerCharacter::Tick(float DeltaSeconds)
     const FVector TargetProxyScale = bIsProne ?
         FVector(0.50f, 0.50f, 1.48f) :
         FVector(0.7f, 0.7f, bIsCrouched ? 1.10f : 1.78f);
-    const FRotator ProxyRotation = bIsProne ? FRotator(88.f, 0.f, 0.f) : FRotator::ZeroRotator;
+    const float MeleePose= bMeleeInProgress ?
+        FMath::Sin(GetMeleeStrikeAlpha()*PI) : 0.f;
+    const float MeleeTurn=MeleeStrikeIndex==1 ? -13.f :
+        (MeleeStrikeIndex==2 ? 13.f : 22.f);
+    const FRotator ProxyRotation = bIsProne ? FRotator(88.f,0.f,0.f) :
+        FRotator(0.f,MeleePose*MeleeTurn,MeleePose*4.f);
     PrototypeBody->SetRelativeRotation(FMath::RInterpTo(
         PrototypeBody->GetRelativeRotation(), ProxyRotation, DeltaSeconds, 12.f));
     PrototypeBody->SetRelativeScale3D(FMath::VInterpTo(PrototypeBody->GetRelativeScale3D(), TargetProxyScale, DeltaSeconds, 12.f));
-    // Clear visual windup/recovery cue until a source-accurate animation rig exists.
-    const float AttackOffset = MeleeVisualTimer > 0.f ?
-        17.f * FMath::Sin(FMath::Clamp(MeleeVisualTimer / 0.22f, 0.f, 1.f) * PI) : 0.f;
+    // The lightweight proxy has its own left/right/kick silhouettes while
+    // real skeletal rigs consume the same state through optional montages.
+    const float AttackOffset = MeleePose *
+        (MeleeStrikeIndex==3 ? 20.f : 12.f);
     const float KnockOffset = WallKnockVisualTimer > 0.f ?
         4.f * FMath::Sin(FMath::Clamp(WallKnockVisualTimer / 0.30f, 0.f, 1.f) * PI) : 0.f;
     PrototypeBody->SetRelativeLocation(FMath::VInterpTo(
         PrototypeBody->GetRelativeLocation(), FVector(AttackOffset, 0.f, 0.f) + CoverNormal * KnockOffset,
         DeltaSeconds, 19.f));
+    UpdateMeleePresentation(DeltaSeconds);
     CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, TargetLength, DeltaSeconds, 10.f);
     CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetSocket, DeltaSeconds, 10.f);
     FollowCamera->SetFieldOfView(FMath::FInterpTo(FollowCamera->FieldOfView, TargetFOV, DeltaSeconds, 11.f));
@@ -370,9 +407,9 @@ void AMGPlayerCharacter::UpdateMovementState()
     UCharacterMovementComponent* Movement = GetCharacterMovement();
     Movement->bOrientRotationToMovement = !bAiming && !bInCover;
     Movement->bUseControllerDesiredRotation = bAiming && !bInCover;
-    Movement->MaxWalkSpeed = bIsProne ? 95.f :
+    Movement->MaxWalkSpeed = bMeleeInProgress ? 100.f : (bIsProne ? 95.f :
         (bInCover || DraggedGuard.IsValid() ? 120.f : (bIsCrouched ? 170.f :
-            (bAiming ? 210.f : (bSprinting ? 600.f : 350.f))));
+            (bAiming ? 210.f : (bSprinting ? 600.f : 350.f)))));
     // Crouched/prone cover must not bypass the current slow movement cap.
     Movement->MaxWalkSpeedCrouched = bIsProne ? 95.f : (bInCover ? 120.f : 170.f);
 }
@@ -1149,54 +1186,176 @@ void AMGPlayerCharacter::UseItem()
     }
     else NotifyFeedback(TEXT("EQUIP A RATION FIRST"), TEXT("denied"));
 }
+namespace
+{
+    // Three deliberate attacks, no hidden extra strike or animation-time
+    // instant damage. All times are seconds and are defined for the same
+    // 30/60/120 Hz gameplay even when an AnimMontage isn't yet imported.
+    constexpr float MeleeDurations[3] = {.34f,.36f,.56f};
+    constexpr float MeleeContactStart[3] = {.105f,.125f,.235f};
+    constexpr float MeleeContactEnd[3] = {.19f,.21f,.34f};
+    constexpr float MeleeDamage[3] = {24.f,26.f,36.f};
+}
+float AMGPlayerCharacter::GetMeleeStrikeAlpha() const
+{
+    return bMeleeInProgress && MeleeStrikeIndex>=1 && MeleeStrikeIndex<=3 ?
+        FMath::Clamp(MeleePhaseSeconds/MeleeDurations[MeleeStrikeIndex-1],
+                     0.f,1.f) : 0.f;
+}
+void AMGPlayerCharacter::StartMeleeStrike(int32 Strike)
+{
+    if (!GetWorld() || Strike<1 || Strike>3) return;
+    bMeleeInProgress=true;
+    bMeleeHitResolved=false;
+    bMeleeHitWindow=false;
+    MeleeStrikeIndex=Strike;
+    MeleePhaseSeconds=0.f;
+    CombatNoiseTimer=.20f;
+    bSprinting=false;
+    UpdateMovementState();
+
+    // Finished licensed rig/animation blueprint can provide exactly three
+    // authored montages. Until then the active proxy animates four limbs.
+    UAnimMontage* Montage = Strike==1 ? LeftPunchMontage :
+        (Strike==2 ? RightPunchMontage : FinisherKickMontage);
+    if (Montage && GetMesh() && GetMesh()->GetSkeletalMeshAsset())
+        if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
+            Anim->Montage_Play(Montage,1.f);
+}
 void AMGPlayerCharacter::MeleeAttack()
 {
     if (!GetWorld() || !Controller) return;
+    // In wall cover the original contextual button knocks, rather than
+    // punching an invisible target through the solid surface.
     if (bInCover) { KnockOnWall(); return; }
-    if (bIsProne)
+    if (bIsProne || ChokedGuard.IsValid() || DraggedGuard.IsValid() ||
+        bCodecOpen || ControlledMissile.IsValid() || Health<=0.f)
+        return;
+    if (bMeleeInProgress)
     {
-        NotifyFeedback(TEXT("UNABLE TO STRIKE WHILE PRONE"), TEXT("denied"));
+        // Rapid triple input works: two presses may be buffered before the
+        // first animation completes; inputs past the third are discarded.
+        const int32 Remaining=3-MeleeStrikeIndex-MeleeQueuedInputs;
+        if (Remaining>0) ++MeleeQueuedInputs;
         return;
     }
-    const float Now = GetWorld()->GetTimeSeconds();
-    if (Now < MeleeNextTime) return;
-    MeleeNextTime = Now + 0.35f;
-    MeleeComboStep = (Now - LastMeleeTime > 1.0f) ? 1 : (MeleeComboStep % 3) + 1;
-    LastMeleeTime = Now;
-    MeleeVisualTimer = 0.22f;
-    CombatNoiseTimer = 0.45f;
-    const FVector Forward = FRotator(0.f, Controller->GetControlRotation().Yaw, 0.f).Vector();
-    const FVector Origin = GetActorLocation();
-    AMGGuardActor* Target = nullptr;
-    float Best = 165.f;
-    for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
+    if (MeleeRecoverySeconds>0.f) return;
+    MeleeQueuedInputs=0;
+    StartMeleeStrike(1);
+}
+void AMGPlayerCharacter::AdvanceMeleeCombo(float DeltaSeconds)
+{
+    MeleeRecoverySeconds=FMath::Max(0.f,MeleeRecoverySeconds-DeltaSeconds);
+    if (!bMeleeInProgress || MeleeStrikeIndex<1 || MeleeStrikeIndex>3)
+        return;
+    MeleePhaseSeconds+=FMath::Max(0.f,DeltaSeconds);
+    const int32 Beat=MeleeStrikeIndex-1;
+    bMeleeHitWindow=MeleePhaseSeconds>=MeleeContactStart[Beat] &&
+                    MeleePhaseSeconds<=MeleeContactEnd[Beat];
+    // Resolve once at the authored contact time even if a hitch skips the
+    // entire active window. Never apply a second hit from the same strike.
+    if (!bMeleeHitResolved && MeleePhaseSeconds>=MeleeContactStart[Beat])
     {
-        AMGGuardActor* Guard = *It;
+        bMeleeHitResolved=true;
+        ResolveMeleeContact();
+    }
+    if (MeleePhaseSeconds>=MeleeDurations[Beat])
+    {
+        if (MeleeStrikeIndex<3 && MeleeQueuedInputs>0)
+        {
+            --MeleeQueuedInputs;
+            StartMeleeStrike(MeleeStrikeIndex+1);
+        }
+        else
+        {
+            bMeleeInProgress=false;
+            bMeleeHitWindow=false;
+            MeleeQueuedInputs=0;
+            MeleePhaseSeconds=0.f;
+            MeleeRecoverySeconds=MeleeStrikeIndex==3 ? .25f : .17f;
+            MeleeStrikeIndex=0;
+            UpdateMovementState();
+        }
+    }
+}
+void AMGPlayerCharacter::ResolveMeleeContact()
+{
+    if (!GetWorld() || MeleeStrikeIndex<1 || MeleeStrikeIndex>3)
+        return;
+    const bool bKick=MeleeStrikeIndex==3;
+    const float Range=bKick ? 194.f : 161.f;
+    // Facing is based on Snake's physical torso, not the camera snapping
+    // target acquisition to something behind or through a wall.
+    const FVector Forward=GetActorForwardVector().GetSafeNormal2D();
+    const FVector Origin=GetActorLocation();
+    AMGGuardActor* Target=nullptr;
+    float Best=Range;
+    for (TActorIterator<AMGGuardActor> It(GetWorld());It;++It)
+    {
+        AMGGuardActor* Guard=*It;
         if (!IsValid(Guard) || Guard->IsIncapacitated()) continue;
-        const FVector Diff = Guard->GetActorLocation() - Origin;
-        const float Distance = Diff.Size2D();
-        if (Distance >= Best || Distance < 20.f) continue;
-        if (FVector::DotProduct(Forward.GetSafeNormal2D(), Diff.GetSafeNormal2D()) < 0.58f)
+        const FVector Delta=Guard->GetActorLocation()-Origin;
+        if (FMath::Abs(Delta.Z)>85.f) continue;
+        const float Dist=Delta.Size2D();
+        if (Dist>=Best || Dist<28.f) continue;
+        if (FVector::DotProduct(Forward,Delta.GetSafeNormal2D())<.58f)
             continue;
         FHitResult Hit;
-        FCollisionQueryParams Query(SCENE_QUERY_STAT(MGUnarmedLOS), false, this);
-        const bool bBlocked = GetWorld()->LineTraceSingleByChannel(Hit,
-            Origin + FVector(0.f, 0.f, 44.f),
-            Guard->GetActorLocation() + FVector(0.f, 0.f, 44.f),
-            ECC_Visibility, Query);
-        if (bBlocked && Hit.GetActor() != Guard) continue;
-        Target = Guard;
-        Best = Distance;
+        FCollisionQueryParams Query(SCENE_QUERY_STAT(MGMeleeContact),false,this);
+        const bool bObstructed=GetWorld()->LineTraceSingleByChannel(Hit,
+            Origin+FVector(0,0,44.f),
+            Guard->GetActorLocation()+FVector(0,0,44.f),
+            ECC_Visibility,Query);
+        if (bObstructed && Hit.GetActor()!=Guard) continue;
+        Target=Guard;
+        Best=Dist;
     }
-    if (Target)
+    if (!Target)
     {
-        const float ComboDamage[3] = {35.f, 35.f, 40.f};
-        UGameplayStatics::ApplyDamage(Target, ComboDamage[MeleeComboStep - 1],
-            Controller, this, UDamageType::StaticClass());
-        NotifyFeedback(Target->IsIncapacitated() ?
-            TEXT("GUARD INCAPACITATED") : TEXT("MELEE IMPACT"), TEXT("impact"));
+        NotifyFeedback(bKick ? TEXT("FINISHING KICK — MISSED") :
+                               TEXT("PUNCH — MISSED"),TEXT("whoosh"));
+        return;
     }
-    else NotifyFeedback(TEXT("UNARMED STRIKE — NO TARGET"), TEXT("whoosh"));
+    UGameplayStatics::ApplyDamage(Target,MeleeDamage[MeleeStrikeIndex-1],
+        Controller,this,UDamageType::StaticClass());
+    if (!Target->IsIncapacitated())
+        Target->ReactToMeleeStrike(bKick,Origin);
+    NotifyFeedback(Target->IsIncapacitated() ?
+        TEXT("GUARD INCAPACITATED") :
+        (bKick ? TEXT("FINISHING KICK — KNOCKDOWN") :
+                 TEXT("PUNCH CONNECTED")),TEXT("impact"));
+}
+void AMGPlayerCharacter::UpdateMeleePresentation(float DeltaSeconds)
+{
+    if (!ProxyLeftArm || !ProxyRightArm || !ProxyRightLeg || !ProxyLeftLeg)
+        return;
+    const float Arc=bMeleeInProgress ?
+        FMath::Sin(GetMeleeStrikeAlpha()*PI) : 0.f;
+    const bool bLeft=bMeleeInProgress && MeleeStrikeIndex==1;
+    const bool bRight=bMeleeInProgress && MeleeStrikeIndex==2;
+    const bool bKick=bMeleeInProgress && MeleeStrikeIndex==3;
+    // Actual distinct visual strokes: rear hand braces, leading arm thrusts;
+    // third hit rotates hips and extends the right foot toward the enemy.
+    const FRotator LeftTarget( bLeft ? -76.f*Arc : 0.f,
+                               bLeft ? -12.f*Arc : 0.f, 0.f);
+    const FRotator RightTarget((bRight ? -76.f*Arc :
+                               (bKick ? -28.f*Arc : 0.f)),
+                               bRight ? 12.f*Arc : 0.f,0.f);
+    const FRotator KickTarget(bKick ? -82.f*Arc : 0.f,
+                               bKick ? 18.f*Arc : 0.f,0.f);
+    ProxyLeftArm->SetRelativeRotation(FMath::RInterpTo(
+        ProxyLeftArm->GetRelativeRotation(),LeftTarget,DeltaSeconds,19.f));
+    ProxyRightArm->SetRelativeRotation(FMath::RInterpTo(
+        ProxyRightArm->GetRelativeRotation(),RightTarget,DeltaSeconds,19.f));
+    ProxyRightLeg->SetRelativeRotation(FMath::RInterpTo(
+        ProxyRightLeg->GetRelativeRotation(),KickTarget,DeltaSeconds,16.f));
+    ProxyLeftLeg->SetRelativeRotation(FMath::RInterpTo(
+        ProxyLeftLeg->GetRelativeRotation(),
+        FRotator(bKick ? 10.f*Arc : 0.f,0.f,0.f),DeltaSeconds,12.f));
+    ProxyRightLeg->SetRelativeLocation(FMath::VInterpTo(
+        ProxyRightLeg->GetRelativeLocation(),
+        FVector(bKick ? 28.f*Arc : 0.f,19.f,
+                -49.f+(bKick ? 29.f*Arc : 0.f)),DeltaSeconds,17.f));
 }
 float AMGPlayerCharacter::TakeDamage(float Amount, const FDamageEvent& Event,
                                      AController* Instigator, AActor* Causer)
