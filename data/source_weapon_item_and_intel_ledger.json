@@ -1,0 +1,309 @@
+{
+  "schema_version": 1,
+  "name": "Metal Gear source-graded equipment, prisoner and boss-preparation placement ledger",
+  "target_edition": "Connect2Media J2ME 3.3.0 a1 — not traced",
+  "comparison": "1987 MSX2 Konami original manual and restored walkthrough",
+  "source_urls": [
+    "https://metalgear.konami.net/manual/mc1/mg1_msx/pc/en/page10.html",
+    "https://thesnakesoup.org/metal-gear-msx-walkthrough/",
+    "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/65155"
+  ],
+  "rules": [
+    "Never present a tentative J2ME pickup coordinate as verified; all Unreal coordinates remain greybox approximations",
+    "Give no free rockets/launcher on Mission 1: Jennifer arranges the rocket launcher in Building Two once ranking and contact requirements are met",
+    "Separate ownership from ammunition and preserve exact spent quantities across capture and mission returns",
+    "No weapon pickup is marked mechanically complete until its corresponding attack/interaction exists",
+    "Diane frequency is given by the prisoner beyond the electrified-floor route, not the first 3F POW",
+    "Fox-location and deliberate-capture prisoner information follows Building One return via the source-compatible route",
+    "Gray Fox provides nuclear/Dr Pettrovich intelligence at rescue; he does not become an unverified permanent radio contact",
+    "Missing items cannot be silently inserted before a boss; author recoverable route or explicitly show why entry is blocked"
+  ],
+  "entries": [
+    {
+      "id": "M01-01",
+      "item": "RATION",
+      "location": "Building One 1F western first truck",
+      "access": "none",
+      "purpose": "sustain health",
+      "source_context": "first truck, west",
+      "runtime": "implemented",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-02",
+      "item": "CARD1",
+      "location": "Building One 1F center first truck",
+      "access": "truck patrol timing",
+      "purpose": "access gas mask and first cells",
+      "source_context": "center first truck",
+      "runtime": "implemented",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-03",
+      "item": "BINOCULARS",
+      "location": "Building One 1F eastern first truck",
+      "access": "none",
+      "purpose": "reconnaissance; remake return survey",
+      "source_context": "eastern first truck",
+      "runtime": "implemented",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-04",
+      "item": "GASMASK",
+      "location": "Building One 1F Card 1 store",
+      "access": "CARD1",
+      "purpose": "cross hazardous gas rooms",
+      "source_context": "locked equipment store",
+      "runtime": "implemented",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-05",
+      "item": "HANDGUN",
+      "location": "Building One 1F western second truck",
+      "access": "truck guards",
+      "purpose": "basic armed defence (without starting ammo)",
+      "source_context": "western second truck",
+      "runtime": "implemented",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-06",
+      "item": "MINES",
+      "location": "Building One 1F eastern second truck",
+      "access": "guard timing",
+      "purpose": "tank encounter later",
+      "source_context": "eastern second truck",
+      "runtime": "implemented_as_inventory_no_mine_placement_yet",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-07",
+      "item": "HANDGUN_AMMO",
+      "location": "Building One 3F west route",
+      "access": "CCTV stealth",
+      "purpose": "fire handgun and prison protection",
+      "source_context": "first accessible 3F firearm ammo",
+      "runtime": "implemented",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-08",
+      "item": "PLASTIC_EXPLOSIVE",
+      "location": "Building One 3F moving hazard side route",
+      "access": "pillar avoidance",
+      "purpose": "break hollow walls; later TX-55",
+      "source_context": "near rolling pillar",
+      "runtime": "design_only_pending_mechanics",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-09",
+      "item": "CARD2",
+      "location": "Building One 3F guarded southeast side room",
+      "access": "CARD1",
+      "purpose": "remote missiles, future equipment rooms",
+      "source_context": "Card 1 locked room",
+      "runtime": "source_comparative_runtime_pass",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-10",
+      "item": "RC_MISSILE",
+      "location": "Building One 3F western Card 2 room",
+      "access": "CARD2",
+      "purpose": "disable energized-floor controller; Shoot Gunner alternative",
+      "source_context": "Card 2 cache west",
+      "runtime": "source_comparative_runtime_pass",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-11",
+      "item": "CARDBOARD_BOX",
+      "location": "Building One 3F northern Card 2 room",
+      "access": "CARD2",
+      "purpose": "pass CCTV and guard sectors",
+      "source_context": "northern storage",
+      "runtime": "design_only",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-12",
+      "item": "SILENCER",
+      "location": "Building One 3F optional four-guard encounter",
+      "access": "four-guard combat OR bypass",
+      "purpose": "reduce handgun noise later",
+      "source_context": "guard room",
+      "runtime": "design_only",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-13",
+      "item": "GRENADE_LAUNCHER",
+      "location": "Building One 3F eastern Card 1 weapon room",
+      "access": "CARD1",
+      "purpose": "Hind D and bulldozer",
+      "source_context": "accessible after bypass/combat",
+      "runtime": "design_only_pending_projectiles",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-14",
+      "item": "POW_DIANE_FREQUENCY",
+      "location": "Building One 3F beyond electrified floor",
+      "access": "electric controller disabled",
+      "purpose": "unlock Diane at 120.33",
+      "source_context": "prisoner",
+      "runtime": "source_comparative_runtime_pass",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-15",
+      "item": "POW_FOX_LOCATION",
+      "location": "Building One 1F revisited Card 2 cell",
+      "access": "CARD2",
+      "purpose": "learn Fox is in secret solitary cell",
+      "source_context": "prisoner",
+      "runtime": "source_comparative_runtime_pass",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M01-16",
+      "item": "POW_CAPTURE_METHOD",
+      "location": "Building One 1F revisited Card 1 cell",
+      "access": "CARD1",
+      "purpose": "learn capture route",
+      "source_context": "prisoner",
+      "runtime": "source_comparative_runtime_pass",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M02-01",
+      "item": "CONFISCATED_EQUIPMENT",
+      "location": "Building One basement prison equipment room",
+      "access": "Gray Fox rescue; breach",
+      "purpose": "restore actual prior inventory",
+      "source_context": "hidden locker/punched door",
+      "runtime": "implemented_provisional_location",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M02-02",
+      "item": "CARD3",
+      "location": "Building One basement after Shoot Gunner",
+      "access": "Shoot Gunner cleared",
+      "purpose": "further prison and building access",
+      "source_context": "post-boss room",
+      "runtime": "design_only",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M02-03",
+      "item": "ENEMY_UNIFORM",
+      "location": "Building One basement hidden room",
+      "access": "plastic explosive",
+      "purpose": "checkpoint infiltration",
+      "source_context": "breached wall storage",
+      "runtime": "design_only",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M03-01",
+      "item": "GRENADE_AMMO",
+      "location": "Building One revisits and supply rooms",
+      "access": "launcher acquired",
+      "purpose": "Hind D/bulldozer counter",
+      "source_context": "source-local ammo rooms",
+      "runtime": "design_only",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M03-02",
+      "item": "LAND_MINES_RESTOCK",
+      "location": "Building One exit/exterior route",
+      "access": "ordinary access",
+      "purpose": "tank preparation",
+      "source_context": "restock before tank",
+      "runtime": "design_only",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M04-01",
+      "item": "ROCKET_LAUNCHER",
+      "location": "Building Two 2F room accessible by CARD6",
+      "access": "Jennifer call at 120.48 and rescue-earned rank",
+      "purpose": "TX-11 Arnold pair",
+      "source_context": "Jennifer-arranged cache",
+      "runtime": "design_only",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M04-02",
+      "item": "ROCKET_AMMO",
+      "location": "Building Two 2F western store",
+      "access": "rocket launcher + route access",
+      "purpose": "Arnold pair and final boss",
+      "source_context": "ammo before confrontation",
+      "runtime": "design_only",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M04-03",
+      "item": "CARD7",
+      "location": "Building Two 2F Arnold arena",
+      "access": "defeat both Arnold units",
+      "purpose": "further hostage route",
+      "source_context": "last Arnold drops",
+      "runtime": "design_only",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M05-01",
+      "item": "COMPASS",
+      "location": "Building Two 2F room opened by Jennifer",
+      "access": "Jennifer second call",
+      "purpose": "desert traversal",
+      "source_context": "Jennifer opens room",
+      "runtime": "design_only",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    },
+    {
+      "id": "M08-01",
+      "item": "PLASTIC_EXPLOSIVE_SUPPLY",
+      "location": "Building Three deep basement",
+      "access": "previously acquired, restocked",
+      "purpose": "TX-55 foot charge sequence",
+      "source_context": "supply before finale",
+      "runtime": "design_only",
+      "provenance": "1987_MSX2_walkthrough_comparative",
+      "j2me_confirmed": false
+    }
+  ]
+}
