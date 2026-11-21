@@ -131,10 +131,10 @@ void AMGMissionOne::SpawnGuards()
     // Waypoints authored in provisional remake metres, all within their zones.
     const TArray<FGuardRoute> Routes = {
         {TEXT("G01_Approach"), {CM(11,12),CM(17,12),CM(17,15),CM(11,15)}},
-        {TEXT("G02_Trucks"), {CM(8,26),CM(19,26),CM(19,31),CM(8,31)}},
+        {TEXT("G02_Trucks"), {CM(8,27),CM(19,27),CM(19,31),CM(8,31)}},
         {TEXT("G03_TruckDeparture"), {CM(18,33),CM(13,33),CM(13,29)}},
         {TEXT("G04_SecondYard"), {CM(53,29),CM(65,29),CM(65,34),CM(53,34)}},
-        {TEXT("G05_Lift"), {CM(67,24),CM(67,36)}},
+        {TEXT("G05_Lift"), {CM(70,24),CM(70,36)}},
         {TEXT("G06_OptionalMaintenance"), {CM(59,46),CM(66,46),CM(66,51)}}
     };
     for (const FGuardRoute& Route : Routes)
