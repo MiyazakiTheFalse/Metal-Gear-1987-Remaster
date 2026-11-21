@@ -17,6 +17,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SceneComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "CollisionShape.h"
@@ -57,26 +58,43 @@ AMGPlayerCharacter::AMGPlayerCharacter()
     if (Cylinder.Succeeded()) PrototypeBody->SetStaticMesh(Cylinder.Object);
     static ConstructorHelpers::FObjectFinder<UStaticMesh> LimbCube(
         TEXT("/Engine/BasicShapes/Cube.Cube"));
+    // Shoulder and hip joints make the four placeholder limbs articulate
+    // from credible body pivots rather than spinning around their own centre.
+    ProxyLeftShoulder=CreateDefaultSubobject<USceneComponent>(
+        TEXT("LeftShoulderJoint"));
+    ProxyLeftShoulder->SetupAttachment(GetCapsuleComponent());
+    ProxyLeftShoulder->SetRelativeLocation(FVector(0.f,-30.f,50.f));
+    ProxyRightShoulder=CreateDefaultSubobject<USceneComponent>(
+        TEXT("RightShoulderJoint"));
+    ProxyRightShoulder->SetupAttachment(GetCapsuleComponent());
+    ProxyRightShoulder->SetRelativeLocation(FVector(0.f,30.f,50.f));
+    ProxyLeftHip=CreateDefaultSubobject<USceneComponent>(TEXT("LeftHipJoint"));
+    ProxyLeftHip->SetupAttachment(GetCapsuleComponent());
+    ProxyLeftHip->SetRelativeLocation(FVector(0.f,-19.f,-15.f));
+    ProxyRightHip=CreateDefaultSubobject<USceneComponent>(TEXT("RightHipJoint"));
+    ProxyRightHip->SetupAttachment(GetCapsuleComponent());
+    ProxyRightHip->SetRelativeLocation(FVector(0.f,19.f,-15.f));
     const auto MakeLimb = [this, &LimbCube](
-        const TCHAR* Name, const FVector& Location, const FVector& Scale)
+        const TCHAR* Name, USceneComponent* Joint,
+        const FVector& LocalCenter, const FVector& Scale)
             -> UStaticMeshComponent*
     {
         UStaticMeshComponent* Part=CreateDefaultSubobject<UStaticMeshComponent>(Name);
-        Part->SetupAttachment(GetCapsuleComponent());
+        Part->SetupAttachment(Joint);
         if (LimbCube.Succeeded()) Part->SetStaticMesh(LimbCube.Object);
-        Part->SetRelativeLocation(Location);
+        Part->SetRelativeLocation(LocalCenter);
         Part->SetRelativeScale3D(Scale);
         Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         return Part;
     };
-    ProxyLeftArm=MakeLimb(TEXT("LeftArmProxy"),
-        FVector(1.f,-31.f,20.f),FVector(.17f,.17f,.55f));
-    ProxyRightArm=MakeLimb(TEXT("RightArmProxy"),
-        FVector(1.f,31.f,20.f),FVector(.17f,.17f,.55f));
-    ProxyLeftLeg=MakeLimb(TEXT("LeftLegProxy"),
-        FVector(0.f,-19.f,-49.f),FVector(.20f,.20f,.72f));
-    ProxyRightLeg=MakeLimb(TEXT("RightLegProxy"),
-        FVector(0.f,19.f,-49.f),FVector(.20f,.20f,.72f));
+    ProxyLeftArm=MakeLimb(TEXT("LeftArmProxy"),ProxyLeftShoulder,
+        FVector(1.f,0.f,-29.f),FVector(.17f,.17f,.55f));
+    ProxyRightArm=MakeLimb(TEXT("RightArmProxy"),ProxyRightShoulder,
+        FVector(1.f,0.f,-29.f),FVector(.17f,.17f,.55f));
+    ProxyLeftLeg=MakeLimb(TEXT("LeftLegProxy"),ProxyLeftHip,
+        FVector(0.f,0.f,-35.f),FVector(.20f,.20f,.72f));
+    ProxyRightLeg=MakeLimb(TEXT("RightLegProxy"),ProxyRightHip,
+        FVector(0.f,0.f,-35.f),FVector(.20f,.20f,.72f));
 
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
@@ -1330,36 +1348,38 @@ void AMGPlayerCharacter::ResolveMeleeContact()
 }
 void AMGPlayerCharacter::UpdateMeleePresentation(float DeltaSeconds)
 {
-    if (!ProxyLeftArm || !ProxyRightArm || !ProxyRightLeg || !ProxyLeftLeg)
+    if (!ProxyLeftShoulder || !ProxyRightShoulder ||
+        !ProxyLeftHip || !ProxyRightHip || !ProxyRightLeg)
         return;
     const float Arc=bMeleeInProgress ?
         FMath::Sin(GetMeleeStrikeAlpha()*PI) : 0.f;
     const bool bLeft=bMeleeInProgress && MeleeStrikeIndex==1;
     const bool bRight=bMeleeInProgress && MeleeStrikeIndex==2;
     const bool bKick=bMeleeInProgress && MeleeStrikeIndex==3;
-    // Actual distinct visual strokes: rear hand braces, leading arm thrusts;
-    // third hit rotates hips and extends the right foot toward the enemy.
-    const FRotator LeftTarget( bLeft ? -76.f*Arc : 0.f,
-                               bLeft ? -12.f*Arc : 0.f, 0.f);
-    const FRotator RightTarget((bRight ? -76.f*Arc :
-                               (bKick ? -28.f*Arc : 0.f)),
-                               bRight ? 12.f*Arc : 0.f,0.f);
-    const FRotator KickTarget(bKick ? -68.f*Arc : 0.f,
-                               bKick ? 62.f*Arc : 0.f,0.f);
-    ProxyLeftArm->SetRelativeRotation(FMath::RInterpTo(
-        ProxyLeftArm->GetRelativeRotation(),LeftTarget,DeltaSeconds,19.f));
-    ProxyRightArm->SetRelativeRotation(FMath::RInterpTo(
-        ProxyRightArm->GetRelativeRotation(),RightTarget,DeltaSeconds,19.f));
-    ProxyRightLeg->SetRelativeRotation(FMath::RInterpTo(
-        ProxyRightLeg->GetRelativeRotation(),KickTarget,DeltaSeconds,16.f));
-    ProxyLeftLeg->SetRelativeRotation(FMath::RInterpTo(
-        ProxyLeftLeg->GetRelativeRotation(),
-        FRotator(bKick ? 10.f*Arc : 0.f,0.f,0.f),DeltaSeconds,12.f));
+    // Articulated shoulder and hip proxies. A committed skeletal asset uses
+    // the montage slots/AnimBP instead, with these blockout pieces hidden.
+    // Each punch extends a different arm from its shoulder joint. The
+    // roundhouse has a planted left leg and right-hip rotation across the arc.
+    const FRotator LeftTarget(bLeft ? -77.f*Arc : 0.f,
+        bLeft ? -14.f*Arc : 0.f,bLeft ? -9.f*Arc : 0.f);
+    const FRotator RightTarget((bRight ? -78.f*Arc :
+        (bKick ? -24.f*Arc : 0.f)),
+        bRight ? 15.f*Arc : 0.f,bRight ? 9.f*Arc : 0.f);
+    const FRotator RightHipTarget(bKick ? -68.f*Arc : 0.f,
+        bKick ? 62.f*Arc : 0.f,bKick ? -12.f*Arc : 0.f);
+    ProxyLeftShoulder->SetRelativeRotation(FMath::RInterpTo(
+        ProxyLeftShoulder->GetRelativeRotation(),LeftTarget,DeltaSeconds,21.f));
+    ProxyRightShoulder->SetRelativeRotation(FMath::RInterpTo(
+        ProxyRightShoulder->GetRelativeRotation(),RightTarget,DeltaSeconds,21.f));
+    ProxyRightHip->SetRelativeRotation(FMath::RInterpTo(
+        ProxyRightHip->GetRelativeRotation(),RightHipTarget,DeltaSeconds,16.f));
+    ProxyLeftHip->SetRelativeRotation(FMath::RInterpTo(
+        ProxyLeftHip->GetRelativeRotation(),
+        FRotator(bKick ? 10.f*Arc : 0.f,0.f,0.f),DeltaSeconds,13.f));
     ProxyRightLeg->SetRelativeLocation(FMath::VInterpTo(
         ProxyRightLeg->GetRelativeLocation(),
-        FVector(bKick ? 27.f*Arc : 0.f,
-                19.f-(bKick ? 21.f*Arc : 0.f),
-                -49.f+(bKick ? 29.f*Arc : 0.f)),DeltaSeconds,17.f));
+        FVector(bKick ? 20.f*Arc : 0.f,0.f,
+                -35.f+(bKick ? 20.f*Arc : 0.f)),DeltaSeconds,17.f));
 }
 float AMGPlayerCharacter::TakeDamage(float Amount, const FDamageEvent& Event,
                                      AController* Instigator, AActor* Causer)
