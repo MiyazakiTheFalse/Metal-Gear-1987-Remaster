@@ -96,10 +96,12 @@ void AMGGrayFoxMission::CreateGreybox()
     SpawnBlock(TEXT("HoldingWingEastWall"), FVector(1300.f,750.f,90.f), FVector(.4f,5.f,3.8f), true);
     SpawnBlock(TEXT("HoldingWingPartition"), FVector(975.f,750.f,90.f), FVector(.4f,5.f,3.8f), true);
     SpawnBlock(TEXT("HoldingWingBarsUpper"), FVector(975.f,500.f,235.f), FVector(6.5f,.14f,.24f), true);
-    SpawnBlock(TEXT("HoldingWingBarsLower"), FVector(975.f,500.f,35.f), FVector(6.5f,.14f,.24f), true);
-    for (const float BarX : {675.f,745.f,815.f,885.f,955.f,1025.f,1095.f,1165.f,1235.f,1295.f})
-        SpawnBlock(TEXT("HoldingWingBar"), FVector(BarX,500.f,140.f),
-                   FVector(.12f,.14f,2.1f), true);
+    SpawnBlock(TEXT("HoldingWingBarsLower"), FVector(975.f,500.f,-70.f), FVector(6.5f,.14f,.24f), true);
+    // Every bar physically spans floor to overhead support. Close spacing
+    // blocks both upright and prone collision; there is no free crawl shortcut.
+    for (float BarX = 675.f; BarX <= 1275.f; BarX += 50.f)
+        SpawnBlock(TEXT("HoldingWingBar"), FVector(BarX,500.f,90.f),
+                   FVector(.12f,.14f,3.8f), true);
     SpawnBlock(TEXT("HoldingWingBed"), FVector(805.f,850.f,-62.f),
                FVector(1.8f,.9f,.75f), true);
     SpawnBlock(TEXT("HoldingWingBed"), FVector(1115.f,850.f,-62.f),
