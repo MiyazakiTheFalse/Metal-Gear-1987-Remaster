@@ -295,7 +295,8 @@ function b2Action(){
  if(!b2.active)return '';
  if(dist(player,{x:98.5,z:0})<1.6)return 'RETURN TO ROOF';
  const i=b2Sites.findIndex((v,j)=>dist(player,v)<1.6&&!b2.armed.includes(j));
- if(i>=0&&!b2.defeated)return b2.mines?'PLANT MINE':'NO MINES';
+ if(i>=0&&!b2.defeated)return b2.mines<=0?'NO MINES':
+  Math.abs(b2.x-b2Sites[i].x)<2?'TRACK OCCUPIED':'PLANT MINE';
  return '';
 }
 function b2Interact(cmd){
@@ -308,6 +309,7 @@ function b2Interact(cmd){
   syncB2();roofSync();save();return;
  }
  if(cmd==='NO MINES'){popup('Mines exhausted. Return to the rooftop.',2);return;}
+ if(cmd==='TRACK OCCUPIED'){popup('Track occupied. Wait for tank to pass.',2);return;}
  if(cmd==='PLANT MINE'&&b2.mines){
   const i=b2Sites.findIndex((v,j)=>dist(player,v)<1.6&&!b2.armed.includes(j));
   if(i<0)return;
@@ -366,11 +368,12 @@ function roofAction(){
  if(!roof.active)return '';
  if(dist(player,roofReturn)<1.55)return 'RETURN TO WEST LIFT';
  if(!roof.defeated&&dist(player,roofLauncher)<1.55)
-  return roof.grenades>0?'FIRE ROOFTOP GRENADE':'LAUNCHER EMPTY';
+  return roof.grenades<=0?'LAUNCHER EMPTY':
+   roof.phase==='evasive'?'HIND EVADING':'FIRE ROOFTOP GRENADE';
  return '';
 }
 function roofInteract(action){
- if(['DESCEND TO BUILDING 2','RETURN TO ROOF','PLANT MINE','NO MINES'].includes(action)){b2Interact(action);return;}
+ if(['DESCEND TO BUILDING 2','RETURN TO ROOF','PLANT MINE','NO MINES','TRACK OCCUPIED'].includes(action)){b2Interact(action);return;}
  if(action==='TAKE LIFT TO BUILDING 1 ROOF'){
   stage=9;roof.active=true;player.x=72.3;player.z=0;roofSync();
   popup('Building 1 roof · rotor signature approaching',3);playCue('rack',roofLift);save();return;
@@ -379,6 +382,7 @@ function roofInteract(action){
   roof.active=false;player.x=62.5;player.z=0;roofSync();save();return;
  }
  if(action==='LAUNCHER EMPTY'){popup('No grenades left. Regroup at the west lift.',3);return;}
+ if(action==='HIND EVADING'){popup('Hind D evading. Wait for clear firing approach.',2);return;}
  if(action==='FIRE ROOFTOP GRENADE'&&roof.grenades>0){
   roof.grenades--;playCue('breach',roofLauncher);
   // Physical roof obstruction and current aircraft position govern the hit.
@@ -446,7 +450,8 @@ function serviceAction(){
  if(stage!==8)return '';
  if(service.kidDown&&!service.parachute&&dist(player,canopy)<1.6)return 'TAKE PARACHUTE';
  if(!service.charge&&dist(player,serviceParcel)<1.65)return 'TAKE PLASTIC EXPLOSIVE';
- if(!service.open&&dist(player,seamMark)<1.8)return service.charge?'PLACE CHARGE':'INSPECT MASONRY';
+ if(!service.open&&dist(player,seamMark)<1.8)return service.fuse>=0?'CHARGE TICKING':
+  service.charge?'PLACE CHARGE':'INSPECT MASONRY';
  if(service.open&&dist(player,relayDesk)<1.65)return 'READ DUTY LOG';
  return '';
 }
@@ -458,9 +463,10 @@ function syncService(){
  serviceParcel.active=!service.charge;
 }
 function useService(action){
- if(['TAKE LIFT TO BUILDING 1 ROOF','RETURN TO WEST LIFT','FIRE ROOFTOP GRENADE','LAUNCHER EMPTY','DESCEND TO BUILDING 2','RETURN TO ROOF','PLANT MINE','NO MINES'].includes(action)){roofInteract(action);return;}
+ if(['TAKE LIFT TO BUILDING 1 ROOF','RETURN TO WEST LIFT','FIRE ROOFTOP GRENADE','LAUNCHER EMPTY','HIND EVADING','DESCEND TO BUILDING 2','RETURN TO ROOF','PLANT MINE','NO MINES','TRACK OCCUPIED'].includes(action)){roofInteract(action);return;}
  if(action==='TAKE PLASTIC EXPLOSIVE'){service.charge=true;playCue('card');popup('Plastic explosive recovered. One charge.');}
  if(action==='INSPECT MASONRY')popup('A patched joint. A fist will do nothing here.');
+ if(action==='CHARGE TICKING'){popup('Charge armed. Move to cover.',2);return;}
  if(action==='PLACE CHARGE'&&service.fuse<0){service.fuse=2.4;playCue('select');popup('Charge ticking.');}
  if(action==='TAKE PARACHUTE'){service.parachute=true;playCue('card');popup('Parachute recovered. The lift goes to the roof.');}
  if(action==='READ DUTY LOG'){service.intel=true;
