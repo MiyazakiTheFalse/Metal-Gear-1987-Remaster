@@ -34,11 +34,78 @@ void AMGGuardActor::BeginPlay()
     PatrolOrigin = GetActorLocation();
 }
 
+void AMGGuardActor::ConfigureDuty(FName DutyId, FName DutyName,
+                                 FName ProtectedObject, const FVector& Assignment,
+                                 float StopSeconds)
+{
+    if (DutyId.IsNone() || DutyName.IsNone() || ProtectedObject.IsNone())
+    {
+        UE_LOG(LogTemp, Error,
+               TEXT("Guard duty missing an assignment: %s"), *GetName());
+        return;
+    }
+    AssignedDutyId = DutyId;
+    AssignedDutyName = DutyName;
+    AssignedObject = ProtectedObject;
+    AssignmentAnchor = Assignment;
+    DutyPauseSeconds = FMath::Clamp(StopSeconds, 0.f, 6.f);
+    Tags.AddUnique(DutyId);
+    Tags.AddUnique(DutyName);
+}
+
+void AMGGuardActor::AdvanceAssignedRoutine(float DeltaSeconds)
+{
+    // When Snake is elsewhere, guards still work their posts. No invisible
+    // proximity-based freezing of all other floors.
+    if (AwarenessState > 0 || bIncapacitated || StaggerSeconds > 0.f) return;
+    if (AssignedDutyId.IsNone())
+    {
+        // Fail closed instead of allowing unspecified +/-180cm placeholder
+        // wandering to look like a designed guard placement.
+        return;
+    }
+    if (DutyPauseRemaining > 0.f)
+    {
+        DutyPauseRemaining = FMath::Max(0.f, DutyPauseRemaining - DeltaSeconds);
+        const float Scan = 12.f * FMath::Sin(GetWorld()->GetTimeSeconds() * 1.1f);
+        SetActorRotation(FRotator(0.f, GetActorRotation().Yaw + Scan * DeltaSeconds, 0.f));
+        return;
+    }
+    const FVector Point = PatrolWaypoints.IsEmpty() ? AssignmentAnchor :
+        PatrolWaypoints[PatrolWaypointIndex];
+    const float Before = FVector::Dist2D(Point, GetActorLocation());
+    if (Before <= 35.f)
+    {
+        if (!PatrolWaypoints.IsEmpty())
+            PatrolWaypointIndex = (PatrolWaypointIndex + 1) % PatrolWaypoints.Num();
+        DutyPauseRemaining = DutyPauseSeconds;
+        DutyBlockedSeconds = 0.f;
+        return;
+    }
+    MoveToward(Point, 90.f, DeltaSeconds);
+    const float After = FVector::Dist2D(Point, GetActorLocation());
+    DutyBlockedSeconds = After >= Before - 1.f ?
+        DutyBlockedSeconds + DeltaSeconds : 0.f;
+    if (DutyBlockedSeconds > 2.5f)
+    {
+        // The patrol is blocked by real world geometry. Do not teleport.
+        // Move to another authored waypoint and log where content needs repair.
+        UE_LOG(LogTemp, Warning,
+               TEXT("Guard %s duty %s blocked; check route to %s"),
+               *GetName(), *AssignedDutyId.ToString(), *Point.ToString());
+        if (!PatrolWaypoints.IsEmpty())
+            PatrolWaypointIndex = (PatrolWaypointIndex + 1) % PatrolWaypoints.Num();
+        DutyBlockedSeconds = 0.f;
+        DutyPauseRemaining = DutyPauseSeconds;
+    }
+}
+
 void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, const FVector& WallNormal, float HearingRadius, AActor* SoundInstigator)
 {
     if (bIncapacitated || !GetWorld() || AwarenessState >= 3) return;
     const float Distance = FVector::Dist2D(GetActorLocation(), SoundLocation);
-    if (Distance > HearingRadius) return;
+    if (Distance > HearingRadius ||
+        FMath::Abs(GetActorLocation().Z - SoundLocation.Z) > 260.f) return;
     const FVector GuardSide = (GetActorLocation() - SoundLocation).GetSafeNormal2D();
 
     // Concrete obstacles attenuate a knock. A guard hears a location, not a
@@ -194,7 +261,15 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     // through several metres of reinforced deck; floor isolation is mandatory
     // until a real stair/elevator traversal and NavMesh handoff exists.
     if (FMath::Abs(Player->GetActorLocation().Z - GetActorLocation().Z) > 260.f)
+    {
+        // On a different deck, maintain local routine, but do not see, hear,
+        // receive a magical pursuit target or deal damage through ceilings.
+        CameraAlertSeconds = 0.f;
+        Suspicion = FMath::Max(0.f, Suspicion - 0.2f * DeltaSeconds);
+        if (Suspicion < 0.22f) AwarenessState = 0;
+        AdvanceAssignedRoutine(DeltaSeconds);
         return;
+    }
     const FVector ToPlayer = Player->GetActorLocation() - GetActorLocation();
     const float Distance = ToPlayer.Size2D();
 
@@ -292,22 +367,7 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     }
     else
     {
-        const FVector Point = PatrolWaypoints.IsEmpty() ?
-            PatrolOrigin + FVector(bPatrolForward ? 180.f : -180.f, 0.f, 0.f) :
-            PatrolWaypoints[PatrolWaypointIndex];
-        const FVector Diff = Point - GetActorLocation();
-        if (Diff.Size2D() < 20.f)
-        {
-            if (!PatrolWaypoints.IsEmpty())
-                PatrolWaypointIndex = (PatrolWaypointIndex + 1) % PatrolWaypoints.Num();
-            else bPatrolForward = !bPatrolForward;
-        }
-        else
-        {
-            const FVector Step = Diff.GetSafeNormal2D();
-            SetActorLocation(GetActorLocation() + Step * 90.f * DeltaSeconds, true);
-            SetActorRotation(Step.Rotation());
-        }
+        AdvanceAssignedRoutine(DeltaSeconds);
     }
 
 #if !UE_BUILD_SHIPPING
