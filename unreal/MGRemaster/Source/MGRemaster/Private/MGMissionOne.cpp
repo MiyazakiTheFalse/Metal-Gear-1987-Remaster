@@ -357,7 +357,7 @@ bool AMGMissionOne::SaveProgress(AMGPlayerCharacter* Player)
     Save->bPrisonerDoorOpened = bPrisonerDoorOpened;
     Save->bGasDoorOpened = bGasDoorOpened;
     Save->CurrentFloor = CurrentFloor;
-    Save->Version = 6;
+    Save->Version = 7;
     Save->bMissionThreeCacheClaimed = bMissionThreeCacheClaimed;
     if (Player && Player->GetEquipment())
     {
