@@ -173,3 +173,23 @@ bool UMGEquipmentComponent::HasItem(FName ItemId) const
             return true;
     return false;
 }
+
+void UMGEquipmentComponent::InitialiseMissionOneLoadout()
+{
+    bConfiscated = false;
+    EquippedWeapon = EquippedItem = WeaponSelection = ItemSelection = 0;
+    bWeaponWindowOpen = bItemWindowOpen = false;
+    for (FMGEquipmentEntry& Entry : Weapons)
+    {
+        if (Entry.Id == TEXT("NONE")) continue;
+        Entry.bOwned = false;
+        Entry.Quantity = 0;
+    }
+    for (FMGEquipmentEntry& Entry : Items)
+    {
+        if (Entry.Id == TEXT("NONE")) continue;
+        Entry.bOwned = false;
+        Entry.Quantity = 0;
+    }
+    SetFeedback(TEXT("MISSION START — NO WEAPONS OR EQUIPMENT"));
+}
