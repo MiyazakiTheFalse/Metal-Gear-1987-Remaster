@@ -32,7 +32,7 @@ The prior implementation could leave a new player uncertain which object respond
 | Intel dossier | D-pad Up | D-pad Up | J |
 | Transceiver | View / Back | View / Back | C |
 | Skip an active cinematic | B | B or Escape | Escape or Space in browser |
-| Retry from checkpoint | Pause button | F9 | R in browser; F9 Unreal |
+| Retry from checkpoint | R or pause-menu Retry | F9 | Browser R / Unreal F9 |
 
 The source controls are not evidence of physical controller input timings. Test actual XInput and keyboard simultaneously. Unreal's B skip now has a true Input mapping, and `CrouchToggle` checks active cinematic state so skipping one does not also force Snake to crouch.
 
