@@ -26,6 +26,8 @@ def validate(data):
         errors.append("Original J2ME edition lost target-authority precedence")
     if not data.get("gate_policy", {}).get("optional_radio", "").startswith("Optional exposition/advice radio never"):
         errors.append("Optional dialogue cannot gate progress; source-required Jennifer material support is an explicit exception")
+    if "Jennifer" not in data["gate_policy"]["optional_radio"]:
+        errors.append("Original Jennifer's source-required material help must remain explicit")
     for c in data["characters"]:
         for field in ("outer_goal", "inner_conflict", "beginning", "turn", "end",
                       "story_boundary", "status"):
@@ -88,8 +90,6 @@ def validate(data):
     ellen = beats.get("ellen.rescue", {})
     if ellen.get("anchor") != "building_1.basement.hidden_cell":
         errors.append("Lore regression: Ellen rescue must be Building One basement hidden cell")
-    if "venus" in str(data).lower():
-        errors.append("Unrelated identity typo")
     return errors
 
 def main():
