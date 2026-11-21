@@ -45,6 +45,61 @@ void AMGPrototypeHUD::DrawHUD()
 
     const float Width = Canvas->ClipX;
     const float Height = Canvas->ClipY;
+    // MGS1-inspired screen grammar, not a copied Konami image, soundtrack,
+    // typeface, voice recording, or extracted visual asset. Always present
+    // the player with a real choice: never auto-restart behind the screen.
+    if (Player->IsGameOver() || Player->IsTitleScreenActive())
+    {
+        const bool bTitle=Player->IsTitleScreenActive();
+        const float Elapsed=Player->GetGameOverElapsed();
+        const float U=FMath::Clamp(Height/900.f,.65f,1.35f);
+        const FLinearColor Background(.008f,.023f,.018f,1.f);
+        const FLinearColor Signal(.56f,.80f,.60f,1.f);
+        const FLinearColor Faint(.26f,.42f,.32f,1.f);
+        const FLinearColor Emergency(.86f,.29f,.28f,1.f);
+        DrawRect(Background,0.f,0.f,Width,Height);
+        // Thin phosphor-style raster bands and structural framing.
+        for (float Y=0.f;Y<Height;Y+=11.f*U)
+            DrawRect(FLinearColor(.16f,.27f,.19f,.09f),
+                     0.f,Y,Width,1.4f*U);
+        const float Left=Width*.17f;
+        const float Right=Width*.83f;
+        DrawRect(Faint,Left,Height*.25f,Right-Left,1.5f*U);
+        DrawText(bTitle ? TEXT("OUTER HEAVEN") : TEXT("GAME OVER"),
+            bTitle ? Signal : Emergency,
+            Width*.31f,Height*.30f,nullptr,2.6f*U,false);
+        DrawText(bTitle ? TEXT("OPERATION INTRUDE N313") :
+            TEXT("MISSION TERMINATED / FOXHOUND LINK LOST"),
+            Faint,Left,Height*.45f,nullptr,.85f*U,false);
+        if (!bTitle)
+        {
+            if (Elapsed>=.35f)
+                DrawText(Player->GetDeathRadioLine(),
+                    Signal,Left,Height*.51f,nullptr,.94f*U,false);
+            if (Elapsed<1.65f)
+            {
+                DrawText(TEXT("SIGNAL LOST ..."),Emergency,
+                         Left,Height*.67f,nullptr,.80f*U,false);
+                return; // reveal the choice after the radio-loss sting
+            }
+        }
+        const float MenuY=Height*.65f;
+        const FString Primary=bTitle ? TEXT("START / CONTINUE") :
+                                      TEXT("CONTINUE");
+        const FString Secondary=bTitle ? TEXT("QUIT GAME") :
+                                        TEXT("EXIT TO TITLE");
+        const int32 Choice=Player->GetFailureMenuSelection();
+        DrawText(Choice==0 ? FString(TEXT(">  "))+Primary : Primary,
+                 Choice==0 ? Signal : Faint,
+                 Left,MenuY,nullptr,1.2f*U,false);
+        DrawText(Choice==1 ? FString(TEXT(">  "))+Secondary : Secondary,
+                 Choice==1 ? Signal : Faint,
+                 Left,MenuY+48.f*U,nullptr,1.2f*U,false);
+        DrawRect(Faint,Left,MenuY+100.f*U,Right-Left,1.f*U);
+        DrawText(TEXT("UP / DOWN: SELECT    ENTER / E / A: CONFIRM"),
+                 Faint,Left,MenuY+116.f*U,nullptr,.71f*U,false);
+        return;
+    }
     // A dark cabin mask lets the elevator later hide asynchronous sublevel
     // loads. At present it only obscures a short authored floor transition.
     if (const AMGMissionOne* Lift = Cast<AMGMissionOne>(
