@@ -130,7 +130,7 @@ void AMGSetpieceBoss::Tick(float DeltaSeconds)
         Windup = TelegraphTime;
         Snake->NotifyFeedback(
             FString::Printf(TEXT("%s / ATTACK WINDUP — MOVE INTO COVER"),*Id.ToString()),
-            TEXT("denied"));
+            TEXT("boss_windup"));
     }
     if (Windup >= 0.f)
     {
@@ -149,6 +149,8 @@ void AMGSetpieceBoss::Tick(float DeltaSeconds)
                 Hit,GetActorLocation()+FVector(0.f,0.f,120.f),
                 Snake->GetActorLocation()+FVector(0.f,0.f,55.f),
                 ECC_Visibility,Params) && Hit.GetActor()!=Snake;
+            Snake->NotifyFeedback(TEXT("ENEMY ATTACK / CLEAR THE FIRE LINE"),
+                                  TEXT("boss_attack"));
             if (!Occluded && AtRelease.Size2D() <= AlertRange &&
                 FVector::DotProduct(GetActorForwardVector().GetSafeNormal2D(),
                                     AtRelease.GetSafeNormal2D()) > .55f)
