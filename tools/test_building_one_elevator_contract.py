@@ -41,9 +41,9 @@ class BuildingOneElevatorContractTests(unittest.TestCase):
             self.assertGreaterEqual(len(guard["waypoints_xy_m"]), 2)
 
     def test_save_schema_and_rescue_event(self):
-        self.assertIn("Save->Version = 2;", CPP)
+        self.assertIn("Save->Version = 4;", CPP)
         self.assertIn("Save->bPOWRescued = bPOWRescued;", CPP)
-        self.assertIn("PRISONER CONTACT", CPP)
+        self.assertIn("PRISONER RESCUED", CPP)
 
 
 if __name__ == "__main__":
