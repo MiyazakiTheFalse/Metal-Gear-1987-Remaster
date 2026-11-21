@@ -2209,21 +2209,28 @@ FString AMGGrayFoxMission::GetContextActionPrompt(
             for (int32 I = 0; I < TankMineMarkers.Num(); ++I)
                 if (!ArmedTankMineSites.Contains(I) &&
                     Reach(TankMineMarkers[I], 175.f))
-                    return Building2MinesRemaining > 0 ?
-                        TEXT("E / A  PLACE TRACK MINE") :
-                        TEXT("MINE SUPPLY EXHAUSTED — RETREAT");
+                {
+                    if (Building2MinesRemaining <= 0)
+                        return TEXT("MINE SUPPLY EXHAUSTED — RETREAT");
+                    if (FMath::Abs(TankPatrolX-(12100.f+800.f*I))<200.f)
+                        return TEXT("TANK OCCUPIES TRACK — HOLD MINE");
+                    return TEXT("E / A  PLACE TRACK MINE");
+                }
         if (bParachuteTaken && !bRoofActive && Reach(RoofLiftEntry, 185.f))
             return TEXT("E / A  TAKE WEST LIFT");
         if (bRoofActive && Reach(RoofReturnLift, 185.f))
             return TEXT("E / A  RETURN BY LIFT");
         if (bRoofActive && !bHindDefeated && Reach(RoofLauncher, 185.f))
-            return RoofGrenadesRemaining > 0 ?
-                TEXT("E / A  FIRE GRENADE LAUNCHER") :
-                TEXT("GRENADE RACK EMPTY — RETREAT");
+            return RoofGrenadesRemaining <= 0 ?
+                TEXT("GRENADE RACK EMPTY — RETREAT") :
+                HindPhase == 3 ? TEXT("HELICOPTER EVADING — HOLD FIRE") :
+                TEXT("E / A  FIRE GRENADE LAUNCHER");
         if (!bServiceChargeCollected && Reach(ChargeParcel, 185.f))
             return TEXT("E / A  COLLECT DEMOLITION CHARGE");
         if (!bServiceWallOpen && Reach(ChargeMarker, 200.f))
-            return bServiceChargeCollected ?
+            return BreachRemaining >= 0.f ?
+                TEXT("CHARGE TICKING — MOVE TO COVER") :
+                bServiceChargeCollected ?
                 TEXT("E / A  PLACE CHARGE ON REPAIR") :
                 TEXT("E / A  INSPECT REPAIRED JOINT");
         if (bKidDefeated && !bParachuteTaken && Reach(ParachutePack, 165.f))
