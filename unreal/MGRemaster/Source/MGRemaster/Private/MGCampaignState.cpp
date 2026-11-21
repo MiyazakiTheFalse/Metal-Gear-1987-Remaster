@@ -90,6 +90,7 @@ int32 UMGCampaignState::GetRadioContactCount() const
 {
     // Diane must first be introduced by a rescued prisoner. Her voice is
     // optional character texture, not a required unlock for prison capture.
+    if (HasBeat(TEXT("jennifer.contact"))) return 4;
     return HasBeat(TEXT("diane.contact")) ? 3 : 2;
 }
 
@@ -99,6 +100,8 @@ FString UMGCampaignState::GetRadioContactLabel(int32 Channel) const
     if (Channel == 1) return TEXT("BIG BOSS / 120.85");
     if (Channel == 2 && GetRadioContactCount() > 2)
         return TEXT("DIANE / 120.33");
+    if (Channel == 3 && GetRadioContactCount() > 3)
+        return TEXT("JENNIFER / 120.48");
     return TEXT("NO SIGNAL");
 }
 
@@ -239,6 +242,14 @@ FString UMGCampaignState::GetOpeningRadio(int32 Channel) const
 {
     // Original 1995 characters, remake-authored paraphrase. Dialogue responds
     // to earned first-hand events, not a prewritten mission-completion timer.
+    if (Channel == 3 && HasBeat(TEXT("jennifer.contact")))
+        return HasBeat(TEXT("jennifer.rocket_help")) ?
+            TEXT("JENNIFER: I've put the rocket launcher in the next store.\n"
+                 "JENNIFER: Take the rockets before you face the machines.\n"
+                 "SNAKE: Understood. Thank you.") :
+            TEXT("JENNIFER: Those machines are armoured. I can help.\n"
+                 "JENNIFER: Stay close to the research supply room.\n"
+                 "SNAKE: I'll collect what you've arranged.");
     if (Channel == 2 && GetMissionNumber() >= 4)
         return HasBeat(TEXT("jennifer.contact")) ?
             TEXT("DIANE: Jennifer knows the research facility.\n"
