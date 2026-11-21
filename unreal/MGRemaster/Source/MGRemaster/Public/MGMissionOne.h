@@ -21,6 +21,8 @@ public:
     virtual void BeginPlay() override;
     bool TryInteract(AMGPlayerCharacter* Player);
     void RestoreSavedEquipment(AMGPlayerCharacter* Player);
+    FString GetObjectiveText() const;
+    bool HasReachedElevator() const { return bElevatorReached; }
     FVector EntryLocation() const { return FVector(700.f, 700.f, 90.f); }
 private:
     struct FPickup
