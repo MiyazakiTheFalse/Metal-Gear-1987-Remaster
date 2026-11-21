@@ -364,32 +364,79 @@ void AMGPrototypeHUD::DrawHUD()
 
         if (Equip->IsItemWindowOpen() || Equip->IsWeaponWindowOpen())
         {
+            // Five-card visual strip, centered on the actual inventory
+            // selection. Rendering reads gameplay state but NEVER equips or
+            // consumes anything. Inputs are hold / scroll / release in the
+            // equipment component. No separate Blueprint inventory state.
             const bool bWeapon = Equip->IsWeaponWindowOpen();
             const TArray<FMGEquipmentEntry>& Entries =
                 bWeapon ? Equip->GetWeapons() : Equip->GetItems();
             const int32 Selection = bWeapon ?
                 Equip->GetWeaponSelection() : Equip->GetItemSelection();
-            const float X = bWeapon ? WeaponX : Margin;
-            const float Y = Height - (270.f + 38.f * Entries.Num()) * UiScale;
-            DrawRect(HudPanel, X, Y, BoxWidth, (33.f + 31.f * Entries.Num()) * UiScale);
-            DrawText(bWeapon ? TEXT("HOLD RB / SELECT WEAPON")
-                             : TEXT("HOLD LB / SELECT ITEM"), HudGreen,
-                     X + 8.f * UiScale, Y + 8.f * UiScale,
-                     nullptr, 0.72f * UiScale, false);
-            for (int32 Index = 0; Index < Entries.Num(); ++Index)
+            const int32 Count = Entries.Num();
+            if (Count > 0)
             {
-                const FMGEquipmentEntry& Entry = Entries[Index];
-                const bool bAvailable = Entry.bOwned &&
-                    (!Equip->IsConfiscated() || Entry.Id == FName(TEXT("NONE"))) &&
-                    (!Entry.bConsumable || Entry.Quantity > 0);
-                const FString Text = FString::Printf(TEXT("%s %s%s"),
-                    Index == Selection ? TEXT(">") : TEXT(" "),
-                    *Entry.Label,
-                    bAvailable ? TEXT("") : TEXT(" [LOCKED]"));
-                DrawText(Text, !bAvailable ? HudRed :
-                         (Index == Selection ? HudAmber : FLinearColor::White),
-                         X + 8.f * UiScale,
-                         Y + (40.f + Index * 31.f) * UiScale, nullptr, 0.75f * UiScale, false);
+                const float PanelW = FMath::Min(630.f * UiScale, Width - 2.f * Margin);
+                const float PanelX = bWeapon ?
+                    Width - Margin - PanelW : Margin;
+                // Below mission objectives, but well above subtitles.
+                const float PanelY = Height * .46f;
+                const float PanelH = 158.f * UiScale;
+                DrawRect(HudPanel, PanelX, PanelY, PanelW, PanelH);
+                DrawRect(HudGreen, PanelX, PanelY, PanelW, 2.f * UiScale);
+                DrawText(bWeapon ? TEXT("RB / G    WEAPONS") :
+                                  TEXT("LB / TAB    EQUIPMENT"),
+                         HudGreen, PanelX + 12.f * UiScale,
+                         PanelY + 8.f * UiScale,
+                         nullptr, .72f * UiScale, false);
+                DrawText(TEXT("HOLD   SCROLL   RELEASE"),
+                         HudMuted, PanelX + PanelW - 219.f * UiScale,
+                         PanelY + 8.f * UiScale,
+                         nullptr, .63f * UiScale, false);
+                const float CardStep = (PanelW - 22.f * UiScale) / 5.f;
+                for (int32 Offset = -2; Offset <= 2; ++Offset)
+                {
+                    const int32 Index = ((Selection + Offset) % Count + Count) % Count;
+                    const FMGEquipmentEntry& Entry = Entries[Index];
+                    const bool bAvailable = Entry.bOwned &&
+                        (!Equip->IsConfiscated() || Entry.Id == TEXT("NONE")) &&
+                        (!Entry.bConsumable || Entry.Quantity > 0);
+                    const bool bFocused = Offset == 0;
+                    const float CardX = PanelX + 11.f * UiScale +
+                        static_cast<float>(Offset + 2) * CardStep;
+                    const float CardY = PanelY + (bFocused ? 31.f : 39.f) * UiScale;
+                    const float CardH = (bFocused ? 88.f : 73.f) * UiScale;
+                    const float CardW = CardStep - 5.f * UiScale;
+                    DrawRect(bFocused ?
+                        FLinearColor(.11f,.30f,.23f,.98f) :
+                        FLinearColor(.055f,.13f,.13f,.88f),
+                        CardX, CardY, CardW, CardH);
+                    DrawRect(bFocused ? HudAmber : HudMuted, CardX, CardY,
+                             CardW, (bFocused ? 3.f : 1.f) * UiScale);
+                    const FString Label = bAvailable ?
+                        Entry.Label.Left(15) : TEXT("UNAVAILABLE");
+                    const FString CountText = Entry.Id == TEXT("HANDGUN") ?
+                        FString::Printf(TEXT("%d RD"), Entry.Quantity) :
+                        Entry.bConsumable ?
+                        FString::Printf(TEXT("x%d"), Entry.Quantity) :
+                        Entry.Id == TEXT("NONE") ? TEXT("UNEQUIPPED") :
+                        bAvailable ? TEXT("EQUIPPED") : TEXT("LOCKED");
+                    const FLinearColor Tint = !bAvailable ? HudRed :
+                        bFocused ? HudAmber : HudGreen;
+                    DrawText(bFocused ? TEXT("[ SELECT ]") : TEXT("  /  "),
+                        Tint, CardX + 6.f * UiScale, CardY + 6.f * UiScale,
+                        nullptr, .63f * UiScale, false);
+                    DrawText(Label, Tint, CardX + 6.f * UiScale,
+                        CardY + 28.f * UiScale,
+                        nullptr, (bFocused ? .76f : .67f) * UiScale, false);
+                    DrawText(CountText, HudMuted, CardX + 6.f * UiScale,
+                        CardY + 52.f * UiScale,
+                        nullptr, .63f * UiScale, false);
+                }
+                DrawText(TEXT("STICK / DPAD / WHEEL / [ ]: SCROLL | RELEASE: EQUIP | Y / DOWN: USE"),
+                    HudMuted, PanelX + 12.f * UiScale,
+                    PanelY + PanelH - 22.f * UiScale,
+                    nullptr, .62f * UiScale, false);
             }
         }
 
