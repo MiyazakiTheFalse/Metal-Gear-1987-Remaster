@@ -19,6 +19,7 @@ public:
     AMGSecurityCamera();
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaSeconds) override;
+    bool DisableForService();
     virtual float TakeDamage(float DamageAmount, const FDamageEvent& Event,
                              AController* Instigator, AActor* DamageCauser) override;
     void Configure(FName StableId, int32 DeckNumber, float SweepDegrees = 42.f);
