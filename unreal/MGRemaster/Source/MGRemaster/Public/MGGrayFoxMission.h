@@ -44,8 +44,11 @@ private:
     AStaticMeshActor* FoxProxy = nullptr;
     UPROPERTY(Transient)
     AStaticMeshActor* ExitMarker = nullptr;
+    UPROPERTY(Transient)
+    AStaticMeshActor* GearLocker = nullptr;
 
     uint32 Flags = 0;
+    bool bGearRecovered = false;
     bool bPlayerInitialised = false;
     bool bHasLoadedSave = false;
     bool bUnderAlert = false;
@@ -68,6 +71,7 @@ private:
     bool ApplyAction(uint32 Action, AMGPlayerCharacter* Player);
     void RestoreVisualState();
     void SaveProgress(AMGPlayerCharacter* Player);
+    void RestoreCapturedGear(AMGPlayerCharacter* Player);
     bool CanReach(const AMGPlayerCharacter* Player, const AActor* Target,
                   float MaxDistanceCm) const;
     uint32 GetPacingPhase() const;
