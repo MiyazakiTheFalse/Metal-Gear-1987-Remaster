@@ -83,7 +83,8 @@
             "diane.contact"
           ]
         }
-      ]
+      ],
+      "guard_assignment_required": true
     },
     {
       "number": 2,
@@ -153,7 +154,9 @@
             "fox.intel_persists"
           ]
         }
-      ]
+      ],
+      "guard_assignment_required": true,
+      "provisional_prison_detainee_count": 4
     },
     {
       "number": 3,
@@ -222,7 +225,8 @@
             "boss.radio_frequency_shift"
           ]
         }
-      ]
+      ],
+      "guard_assignment_required": true
     },
     {
       "number": 4,
@@ -291,7 +295,8 @@
             "madnar.tx11_legacy"
           ]
         }
-      ]
+      ],
+      "guard_assignment_required": true
     },
     {
       "number": 5,
@@ -364,7 +369,8 @@
             "madnar.tx55_sequence"
           ]
         }
-      ]
+      ],
+      "guard_assignment_required": true
     },
     {
       "number": 6,
@@ -436,7 +442,8 @@
             "schneider.interrupted_reveal"
           ]
         }
-      ]
+      ],
+      "guard_assignment_required": true
     },
     {
       "number": 7,
@@ -491,7 +498,8 @@
             "diane.boss_guidance"
           ]
         }
-      ]
+      ],
+      "guard_assignment_required": true
     },
     {
       "number": 8,
@@ -565,7 +573,8 @@
             "diane.final_call"
           ]
         }
-      ]
+      ],
+      "guard_assignment_required": true
     }
   ],
   "required_character_dynamics": [
@@ -577,5 +586,7 @@
     "ELLEN_FATHER_RESCUE_DEPENDENCY",
     "NO_VENOM_IDENTITY_SPOILER_TO_1995_SNAKE",
     "SCENES_UPDATE_REVISITED_WORLD"
-  ]
+  ],
+  "guard_duty_contract": "data/1995_guard_duty_and_prison_occupancy_contract.json",
+  "prisoner_visibility_contract": "Mission 02 secret prison: four visible including Snake and Fox, plus two noncanonical ambient visual-only detainees in adjacent barred wing"
 }
