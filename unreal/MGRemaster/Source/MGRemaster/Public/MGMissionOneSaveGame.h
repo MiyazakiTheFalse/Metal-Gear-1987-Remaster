@@ -11,7 +11,7 @@ class MGREMASTER_API UMGMissionOneSaveGame : public USaveGame
     GENERATED_BODY()
 public:
     UPROPERTY()
-    int32 Version = 4;
+    int32 Version = 5;
     UPROPERTY()
     TArray<FName> CollectedPickupIds;
     UPROPERTY()
@@ -24,6 +24,9 @@ public:
     bool bPrisonerDoorOpened = false;
     UPROPERTY()
     bool bGasDoorOpened = false;
+    // v5: one-time cross-mission cache reward, separate from optional story intel.
+    UPROPERTY()
+    bool bMissionThreeCacheClaimed = false;
     UPROPERTY()
     int32 CurrentFloor = 1;
     UPROPERTY()
