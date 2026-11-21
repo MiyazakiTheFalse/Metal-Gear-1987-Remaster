@@ -1,6 +1,8 @@
 #include "MGPlayerCharacter.h"
 #include "MGGrayFoxMission.h"
 #include "MGMissionOne.h"
+#include "MGCampaignState.h"
+#include "Engine/GameInstance.h"
 #include "MGGuardActor.h"
 #include "MGEquipmentComponent.h"
 
@@ -395,11 +397,27 @@ void AMGPlayerCharacter::ToggleMissionLog()
 
 void AMGPlayerCharacter::RestartRescue()
 {
-    if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+#if !UE_BUILD_SHIPPING
+    // Deliberately developer-only: F9 in the opening/return area starts a
+    // genuinely fresh 1995 campaign, including clearing old slice checkpoints.
+    // In the prison slice, F9 retries that scene without erasing chapter 0.
+    if (AMGGrayFoxMission* Prison = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
     {
-        Mission->RestartMission();
+        Prison->RestartMission();
+        return;
     }
+    if (!GetWorld() ||
+        !UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass()))
+        return;
+    if (GetWorld()->GetGameInstance())
+        if (UMGCampaignState* Story =
+            GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+            Story->ResetForDevelopment();
+    UGameplayStatics::DeleteGameInSlot(TEXT("MissionOneV1"), 0);
+    UGameplayStatics::DeleteGameInSlot(TEXT("GrayFoxSliceV1"), 0);
+    UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
+#endif
 }
 
 
