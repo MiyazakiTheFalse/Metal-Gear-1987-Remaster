@@ -31,6 +31,10 @@ public:
     UPROPERTY()
     bool bRCStoreDoorOpened = false;
     UPROPERTY()
+    bool bCardTwoDoorOpened = false;
+    UPROPERTY()
+    bool bDianeDoorOpened = false;
+    UPROPERTY()
     bool bFoxLocationDoorOpened = false;
     UPROPERTY()
     bool bCaptureMethodDoorOpened = false;
