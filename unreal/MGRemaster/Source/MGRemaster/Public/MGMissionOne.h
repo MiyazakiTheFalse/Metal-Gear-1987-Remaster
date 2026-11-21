@@ -21,6 +21,8 @@ public:
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaSeconds) override;
     bool TryInteract(AMGPlayerCharacter* Player);
+    // Called after ammunition use/consumable use to persist spent stock.
+    void PersistInventory(AMGPlayerCharacter* Player) { SaveProgress(Player); }
     void RestoreSavedEquipment(AMGPlayerCharacter* Player);
     FString GetObjectiveText() const;
     bool CycleLiftDestination(AMGPlayerCharacter* Player);
@@ -55,6 +57,9 @@ private:
     UPROPERTY()
     AStaticMeshActor* GasDoor = nullptr;
     float GasWarningCooldown = 0.f;
+    float GasDamageAccum = 0.f;
+    int32 SavedHandgunRounds = -1;
+    int32 SavedRationsRemaining = -1;
     bool bLiftTravelling = false;
     float LiftTravelRemaining = 0.f;
     int32 CurrentFloor = 1;
