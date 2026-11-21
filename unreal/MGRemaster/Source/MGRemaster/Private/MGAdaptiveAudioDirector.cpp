@@ -9,6 +9,7 @@
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundBase.h"
+#include "Sound/SoundAttenuation.h"
 
 AMGAdaptiveAudioDirector::AMGAdaptiveAudioDirector()
 {
@@ -18,6 +19,16 @@ AMGAdaptiveAudioDirector::AMGAdaptiveAudioDirector()
 void AMGAdaptiveAudioDirector::BeginPlay()
 {
     Super::BeginPlay();
+    // Runtime-reproducible 3D attenuation, rather than requiring every WAV to
+    // have an editor-assigned attenuation asset. This lives through GC.
+    SpatialAttenuation=NewObject<USoundAttenuation>(this);
+    if (SpatialAttenuation)
+    {
+        SpatialAttenuation->Attenuation.bSpatialize=true;
+        SpatialAttenuation->Attenuation.bAttenuate=true;
+        SpatialAttenuation->Attenuation.AttenuationShapeExtents=FVector(125.f,0.f,0.f);
+        SpatialAttenuation->Attenuation.FalloffDistance=1850.f;
+    }
     TransitionTo(DetermineMusic(Cast<AMGPlayerCharacter>(
         UGameplayStatics::GetPlayerCharacter(this,0))));
 }
@@ -78,7 +89,8 @@ bool AMGAdaptiveAudioDirector::PlayCue(FName CueId,FVector Origin,bool bSpatial)
             const float Dist=FVector::Dist(Listener->GetActorLocation(),Origin);
             Gain*=FMath::Clamp(1.f/(1.f+FMath::Square(Dist/850.f)),.025f,1.f);
         }
-        UGameplayStatics::PlaySoundAtLocation(this,Sound,Origin,Gain);
+        UGameplayStatics::PlaySoundAtLocation(
+            this,Sound,Origin,Gain,1.f,0.f,SpatialAttenuation);
     }
     else UGameplayStatics::PlaySound2D(this,Sound,EffectsGain*.64f);
     return true;
