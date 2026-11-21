@@ -22,6 +22,19 @@ assert.equal(model[2].count,2);
 assert.equal(model[3].available,false);
 assert.equal(strip.inventoryLabel(model[3]),'UNAVAILABLE');
 assert.equal(strip.windowSlots([],0).length,0);
-assert.equal(strip.windowSlots([{name:'HANDGUN',usable:true}],4).length,5);
+const one=strip.windowSlots([{name:'HANDGUN',usable:true}],4);
+assert.equal(one.length,5);
+assert.equal(one.filter(x=>!x.blank).length,1,
+ 'one weapon should not render five visible duplicate weapons');
+const three=strip.windowSlots([
+ {name:'BARE HANDS',usable:true},
+ {name:'HANDGUN',usable:true},
+ {name:'SUPPRESSOR',usable:false}
+],0);
+assert.equal(three.filter(x=>!x.blank).length,3);
+assert.equal(three[2].blank,false);
+assert.equal(three[3].name,'HANDGUN');
+assert.equal(three[0].blank,true);
+assert.equal(strip.inventoryLabel(three[0]),'');
 assert.equal(strip.windowSlots(inventory,0)[2].icon,'Ø');
 console.log('PASS: five-card hold-scroll-release strip, wrapping, counters, empty/unowned and centered selection.');
