@@ -19,6 +19,8 @@ public:
     UPROPERTY()
     TArray<FName> LaterCollectedPickupIds;
     UPROPERTY()
+    TArray<FName> ExtraOwnedItems;
+    UPROPERTY()
     bool bCardDoorOpened = false;
     UPROPERTY()
     bool bElevatorReached = false;
