@@ -230,6 +230,19 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
         UE_LOG(LogTemp, Warning, TEXT("Gray Fox: could not save mission checkpoint"));
 }
 
+void AMGGrayFoxMission::PersistRecoveredInventory(AMGPlayerCharacter* Player)
+{
+    if (!bGearRecovered || !Player || !Player->GetEquipment()) return;
+    UMGMissionOneSaveGame* OpeningSave = Cast<UMGMissionOneSaveGame>(
+        UGameplayStatics::LoadGameFromSlot(TEXT("MissionOneV1"), 0));
+    if (!OpeningSave) return;
+    OpeningSave->Version = FMath::Max(4, OpeningSave->Version);
+    OpeningSave->HandgunRounds = Player->GetEquipment()->GetHandgunRounds();
+    OpeningSave->RationsRemaining = Player->GetEquipment()->GetItemQuantity(TEXT("RATION"));
+    if (!UGameplayStatics::SaveGameToSlot(OpeningSave, TEXT("MissionOneV1"), 0))
+        UE_LOG(LogTemp, Warning, TEXT("Prison gear usage was not persisted to Building One"));
+}
+
 void AMGGrayFoxMission::RestoreCapturedGear(AMGPlayerCharacter* Player)
 {
     if (!Player || !Player->GetEquipment()) return;
