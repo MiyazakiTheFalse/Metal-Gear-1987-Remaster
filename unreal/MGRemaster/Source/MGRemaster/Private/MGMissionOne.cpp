@@ -334,13 +334,40 @@ void AMGMissionOne::RestoreSavedEquipment(AMGPlayerCharacter* Player)
     }
     if (SavedMineCount >= 0)
         Equipment->RestoreItemQuantity(TEXT("MINES"), SavedMineCount);
+    if (Saved)
+    {
+        for (const FName Item : Saved->ExtraOwnedItems)
+            Equipment->AwardItem(Item,1);
+        for (const FName LaterId : Saved->LaterCollectedPickupIds)
+        {
+            if (LaterId == TEXT("L03_GRENADE_LAUNCHER"))
+                Equipment->AwardWeapon(TEXT("GRENADE_LAUNCHER"),0);
+            if (LaterId == TEXT("L04_ROCKET_LAUNCHER"))
+                Equipment->AwardWeapon(TEXT("ROCKET_LAUNCHER"),0);
+            if (LaterId == TEXT("L05_PLASTIC_EXPLOSIVE"))
+                Equipment->AwardItem(TEXT("PLASTIC_EXPLOSIVE"),1);
+        }
+        // Quantities, including zero spent rounds, always come last.
+        if (Saved->Version >= 6)
+        {
+            for (const TPair<FName,int32>& Entry : Saved->WeaponRounds)
+                Equipment->RestoreWeaponAmmo(Entry.Key,Entry.Value);
+            for (const TPair<FName,int32>& Entry : Saved->ItemQuantities)
+                Equipment->RestoreItemQuantity(Entry.Key,Entry.Value);
+        }
+    }
 }
 
 bool AMGMissionOne::SaveProgress(AMGPlayerCharacter* Player)
 {
     UMGMissionOneSaveGame* Save = Cast<UMGMissionOneSaveGame>(
-        UGameplayStatics::CreateSaveGameObject(UMGMissionOneSaveGame::StaticClass()));
+        UGameplayStatics::LoadGameFromSlot(TEXT("MissionOneV1"),0));
+    if (!Save)
+        Save = Cast<UMGMissionOneSaveGame>(
+            UGameplayStatics::CreateSaveGameObject(UMGMissionOneSaveGame::StaticClass()));
     if (!Save) return false;
+    // Reopening Building One must never erase later mission pickups or
+    // card recovery from the captured Gray Fox section.
     for (const FPickup& P : Pickups)
         if (P.bTaken) Save->CollectedPickupIds.Add(P.Id);
     Save->bCardDoorOpened = bCardDoorOpened;
