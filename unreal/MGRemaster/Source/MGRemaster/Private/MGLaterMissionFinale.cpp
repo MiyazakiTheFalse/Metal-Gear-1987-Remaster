@@ -6,6 +6,10 @@
 #include "MGPlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/World.h"
+#include "GameFramework/DamageType.h"
+#include "MGEquipmentComponent.h"
+#include "MGSetpieceBoss.h"
+#include "EngineUtils.h"
 
 // Later 1995 mission shells share the same spatial scale and item economy.
 // Geometry and exact timings are source-comparative prototypes, NOT verified
@@ -219,4 +223,379 @@ void AMGLaterMission::BuildTX55Finale()
             IsValid(PassageGateB))
             PassageGateB->Destroy();
     }
+}
+
+
+void AMGLaterMission::HandleMissionHazards(float DeltaSeconds)
+{
+    UMGCampaignState* State=Story();
+    AMGPlayerCharacter* Snake=Cast<AMGPlayerCharacter>(
+        UGameplayStatics::GetPlayerCharacter(this,0));
+    if (!State || !Snake || Snake->IsGameOver()) return;
+    if (Mission==6)
+    {
+        // The passage has a physical footprint. An oxygen tank found earlier
+        // changes it from hazardous to traversable; it does not warp Snake.
+        const FVector P=Snake->GetActorLocation();
+        const bool bInWater=P.X>=7750.f && P.X<=9250.f &&
+            P.Y>250.f && P.Y<4150.f;
+        if (bInWater && !Snake->GetEquipment()->HasItem(TEXT("OXYGEN_TANK")))
+        {
+            WaterDamageAccumulator+=DeltaSeconds;
+            if (WaterDamageAccumulator>=1.0f)
+            {
+                WaterDamageAccumulator=FMath::Fmod(WaterDamageAccumulator,1.f);
+                Snake->NotifyFeedback(TEXT("UNDERWATER / FIND OXYGEN TANK"),
+                                      TEXT("denied"));
+                UGameplayStatics::ApplyDamage(Snake,17.f,nullptr,this,
+                                              UDamageType::StaticClass());
+            }
+            if (!State->HasBeat(TEXT("m06.water_hazard_discovered")))
+                State->RecordBeat(TEXT("m06.water_hazard_discovered"),
+                    TEXT("Water passage requires breathing equipment."));
+        }
+        else WaterDamageAccumulator=0.f;
+    }
+    if (Mission!=8 || !State->HasBeat(TEXT("tx55.destruction")) ||
+        State->HasBeat(TEXT("snake.escaped_outer_heaven"))) return;
+    // Countdown starts at TX-55 demolition, persists over reloads, and only
+    // advances when the player is in this real mission world and alive.
+    EscapeSaveAccumulator+=FMath::Max(0.f,DeltaSeconds);
+    if (EscapeSaveAccumulator>=.5f)
+    {
+        const float Remaining=FMath::Max(0.f,
+            State->GetEscapeTimeRemaining()-EscapeSaveAccumulator);
+        EscapeSaveAccumulator=0.f;
+        if (!State->SetEscapeTimeRemaining(Remaining)) return;
+        if (Remaining<=0.f)
+        {
+            Snake->NotifyFeedback(TEXT("OUTER HEAVEN SELF-DESTRUCT / TOO LATE"),
+                                  TEXT("game_over_sting"));
+            UGameplayStatics::ApplyDamage(Snake,10000.f,nullptr,this,
+                                          UDamageType::StaticClass());
+        }
+        else if (FMath::FloorToInt(Remaining)==30 ||
+                FMath::FloorToInt(Remaining)==10)
+        {
+            Snake->NotifyFeedback(FString::Printf(
+                TEXT("SELF-DESTRUCT / %d SECONDS LEFT"),
+                FMath::CeilToInt(Remaining)),TEXT("alarm"));
+        }
+    }
+}
+bool AMGLaterMission::TryFinaleInteraction(AMGPlayerCharacter* Player)
+{
+    if (!Player || !Player->GetEquipment() || !Story()) return false;
+    UMGCampaignState* State=Story();
+    UMGEquipmentComponent* E=Player->GetEquipment();
+    if (Mission==5 && IsWithin(Player,TransitionMarker))
+    {
+        if (!State->HasBeat(TEXT("madnar.weakness")))
+            Player->NotifyFeedback(
+                TEXT("RETURN TO THE DOCTOR / ELLEN MUST BE SAFE FIRST"),
+                TEXT("denied"));
+        else
+        {
+            PersistPlayerEquipment(Player);
+            AdvanceAndReload(6);
+        }
+        return true;
+    }
+    if (Mission==6)
+    {
+        if (IsWithin(Player,DecisionPost,265.f))
+        {
+            State->RecordBeat(TEXT("boss.false_truck"),
+                TEXT("The commander's truck directions were inconsistent with the real route."));
+            SetSubtitle(TEXT("BIG BOSS: Check that truck.\n"
+                "SNAKE: A dead end? The security road goes another way."));
+            Player->NotifyFeedback(TEXT("COMMAND ROUTE CONTRADICTION"),
+                                   TEXT("radio"));
+            return true;
+        }
+        if (IsWithin(Player,PassageGateA,250.f))
+        {
+            if (!E->HasItem(TEXT("CARD7")))
+                Player->NotifyFeedback(TEXT("DESERT SECURITY GATE / CARD 7"),
+                                       TEXT("denied"));
+            else if (State->RecordBeat(TEXT("m06.card7_gate_open"),
+                TEXT("Card 7 unlocked the Building Three desert checkpoint.")))
+            {
+                PassageGateA->Destroy();
+                Player->NotifyFeedback(TEXT("CARD 7 / GATE UNLOCKED"),
+                                       TEXT("unlock"));
+            }
+            return true;
+        }
+        if (IsWithin(Player,PassageGateB,250.f))
+        {
+            if (!E->HasItem(TEXT("CARD7")))
+                Player->NotifyFeedback(TEXT("HOSTAGE HOLDING WING / CARD 7"),
+                                       TEXT("denied"));
+            else if (State->RecordBeat(TEXT("m06.hostage_wing_open"),
+                TEXT("Building Three's hostage wing security unlocked.")))
+            {
+                PassageGateB->Destroy();
+                Player->NotifyFeedback(TEXT("CARD 7 / HOSTAGE WING OPEN"),
+                                       TEXT("unlock"));
+            }
+            return true;
+        }
+        if (IsWithin(Player,JenniferBrother))
+        {
+            if (!State->HasBeat(TEXT("m06.coward_duck_defeated")))
+            {
+                Player->NotifyFeedback(
+                    TEXT("COWARD DUCK IS HOLDING THE PRISONERS AT GUNPOINT"),
+                    TEXT("denied"));
+                return true;
+            }
+            return RescuePOW(JenniferBrother,TEXT("brother.escape_ladder"),
+                TEXT("JENNIFER'S BROTHER: During the escape, take the LEFT ladder."),
+                Player);
+        }
+        if (IsWithin(Player,HostageLeft))
+        {
+            if (!State->HasBeat(TEXT("m06.coward_duck_defeated")))
+            {
+                Player->NotifyFeedback(TEXT("HOSTAGE STILL THREATENED"),
+                                       TEXT("denied"));
+                return true;
+            }
+            return RescuePOW(HostageLeft,TEXT("m06.hostage_left_rescued"),
+                TEXT("PRISONER: The commander keeps secrets deeper than this wing."),
+                Player);
+        }
+        if (IsWithin(Player,HostageRight))
+        {
+            if (!State->HasBeat(TEXT("m06.coward_duck_defeated")))
+            {
+                Player->NotifyFeedback(TEXT("HOSTAGE STILL THREATENED"),
+                                       TEXT("denied"));
+                return true;
+            }
+            return RescuePOW(HostageRight,TEXT("m06.hostage_right_rescued"),
+                TEXT("PRISONER: A final detention sector guards the research shaft."),
+                Player);
+        }
+        if (IsWithin(Player,TransitionMarker,300.f))
+        {
+            if (!State->HasBeat(TEXT("brother.escape_ladder")) ||
+                !State->HasBeat(TEXT("m06.hostage_left_rescued")) ||
+                !State->HasBeat(TEXT("m06.hostage_right_rescued")) ||
+                !State->HasBeat(TEXT("m06.card8_acquired")))
+                Player->NotifyFeedback(
+                    TEXT("RESCUE ALL THREE / TAKE CARD 8 / THEN ENTER"),
+                    TEXT("denied"));
+            else
+            {
+                PersistPlayerEquipment(Player);
+                AdvanceAndReload(7);
+            }
+            return true;
+        }
+    }
+    if (Mission==7)
+    {
+        if (IsWithin(Player,PassageGateA,250.f))
+        {
+            if (!E->HasItem(TEXT("CARD8")))
+                Player->NotifyFeedback(TEXT("INNER SECURITY / CARD 8 REQUIRED"),
+                                       TEXT("denied"));
+            else if (State->RecordBeat(TEXT("m07.card8_gate_open"),
+                TEXT("Card 8 opened the final interrogation wing.")))
+            {
+                PassageGateA->Destroy();
+                Player->NotifyFeedback(TEXT("CARD 8 / ACCESS GRANTED"),
+                                       TEXT("unlock"));
+            }
+            return true;
+        }
+        if (IsWithin(Player,FinalWitness))
+            return RescuePOW(FinalWitness,TEXT("pow.final_reveal"),
+                TEXT("FINAL PRISONER: The man behind Outer Heaven is Big Boss."),
+                Player);
+        if (IsWithin(Player,DecisionPost,260.f))
+        {
+            if (!State->HasBeat(TEXT("pow.final_reveal")))
+            {
+                Player->NotifyFeedback(TEXT("INVESTIGATE THE PRISONER'S CLAIM"),
+                                       TEXT("denied"));
+                return true;
+            }
+            if (!State->HasBeat(TEXT("boss.abort_order")))
+            {
+                State->RecordBeat(TEXT("boss.abort_order"),
+                    TEXT("BIG BOSS: Abandon the mission at once."));
+                SetSubtitle(TEXT("BIG BOSS: Abort the operation. Immediately."));
+                Player->NotifyFeedback(TEXT("ABORT ORDER / CONTRADICTS EVIDENCE"),
+                                       TEXT("radio"));
+            }
+            else if (!State->HasBeat(TEXT("snake.disobeys_abort")))
+            {
+                State->RecordBeat(TEXT("snake.disobeys_abort"),
+                    TEXT("SNAKE: No. I've seen what this place is doing."));
+                SetSubtitle(TEXT("SNAKE: I can't follow that order. Not now."));
+                Player->NotifyFeedback(TEXT("SNAKE CHOOSES TO CONTINUE"),
+                                       TEXT("radio"));
+            }
+            return true;
+        }
+        if (IsWithin(Player,PassageGateD,270.f))
+        {
+            if (!State->HasBeat(TEXT("snake.disobeys_abort")))
+            {
+                Player->NotifyFeedback(TEXT("CHECK YOUR RADIO EVIDENCE FIRST"),
+                                       TEXT("denied"));
+                return true;
+            }
+            if (State->RecordBeat(TEXT("m07.final_security_cleared"),
+                TEXT("CARD 8 OVERRIDE: Snake disabled the final bunker shutter.")))
+            {
+                if (IsValid(PassageGateB)) PassageGateB->Destroy();
+                SetSubtitle(TEXT("SCHNEIDER'S PLANS: The relay has a service override."));
+                Player->NotifyFeedback(TEXT("SECURITY RELAY DISABLED"),
+                                       TEXT("select"));
+            }
+            return true;
+        }
+        if (IsWithin(Player,WeakWall,250.f))
+        {
+            if (!State->HasBeat(TEXT("snake.disobeys_abort")))
+            {
+                Player->NotifyFeedback(TEXT("NO REASON TO BREAK THE SERVICE WALL YET"),
+                                       TEXT("denied"));
+                return true;
+            }
+            if (E->GetItemQuantity(TEXT("PLASTIC_EXPLOSIVE"))<1)
+            {
+                Player->NotifyFeedback(TEXT("MAINTENANCE BYPASS / EXPLOSIVE REQUIRED"),
+                                       TEXT("denied"));
+                return true;
+            }
+            if (State->RecordBeat(TEXT("m07.final_security_cleared"),
+                TEXT("SERVICE BYPASS: Snake spent a charge rather than use the watched relay.")))
+            {
+                E->ConsumeItem(TEXT("PLASTIC_EXPLOSIVE"),1);
+                PersistPlayerEquipment(Player);
+                WeakWall->Destroy();
+                if (IsValid(PassageGateB)) PassageGateB->Destroy();
+                Player->NotifyFeedback(TEXT("MAINTENANCE ROUTE OPENED"),
+                                       TEXT("breach"));
+            }
+            return true;
+        }
+        if (IsWithin(Player,TransitionMarker,290.f))
+        {
+            if (!State->HasBeat(TEXT("m07.final_security_cleared")) ||
+                !State->HasBeat(TEXT("pow.final_reveal")) ||
+                !State->HasBeat(TEXT("snake.disobeys_abort")))
+                Player->NotifyFeedback(TEXT("INNER SECURITY STILL ACTIVE"),
+                                       TEXT("denied"));
+            else
+            {
+                PersistPlayerEquipment(Player);
+                AdvanceAndReload(8);
+            }
+            return true;
+        }
+    }
+    if (Mission!=8) return false;
+    if (!State->HasBeat(TEXT("tx55.destruction")))
+    {
+        for (int32 Foot=0;Foot<2;++Foot)
+        {
+            AStaticMeshActor* Target=Foot==0?TX55RightFoot:TX55LeftFoot;
+            if (!IsWithin(Player,Target,230.f)) continue;
+            if (ChargePlacementRecovery>0.f)
+            {
+                Player->NotifyFeedback(TEXT("CHARGE IS STILL ARMING"),
+                                       TEXT("denied"));
+                return true;
+            }
+            if (!State->HasBeat(TEXT("madnar.tx55_sequence")))
+            {
+                Player->NotifyFeedback(TEXT("MADNAR'S FOOT-SEQUENCE INTEL REQUIRED"),
+                                       TEXT("denied"));
+                return true;
+            }
+            if (E->GetItemQuantity(TEXT("PLASTIC_EXPLOSIVE"))<1)
+            {
+                Player->NotifyFeedback(TEXT("NO PLASTIC EXPLOSIVES / CHECK THE ENTRY CACHE"),
+                                       TEXT("denied"));
+                return true;
+            }
+            const bool bRight=Foot==0;
+            if (!State->RecordTX55Charge(bRight))
+            {
+                Player->NotifyFeedback(TEXT("WRONG FOOT / RECALL MADNAR'S SEQUENCE"),
+                                       TEXT("denied"));
+                return true;
+            }
+            E->ConsumeItem(TEXT("PLASTIC_EXPLOSIVE"),1);
+            PersistPlayerEquipment(Player);
+            ChargePlacementRecovery=.75f;
+            Player->NotifyFeedback(FString::Printf(
+                TEXT("TX-55 CHARGE %d/16 / %s FOOT"),
+                State->GetTX55CorrectCharges(),bRight?TEXT("RIGHT"):TEXT("LEFT")),
+                TEXT("mine"));
+            if (State->GetTX55CorrectCharges()>=16)
+            {
+                if (State->RecordBeat(TEXT("tx55.destruction"),
+                    TEXT("The sixteenth foot charge destroyed TX-55. Outer Heaven self-destruct has started.")))
+                {
+                    if (IsValid(TX55LeftFoot)) TX55LeftFoot->Destroy();
+                    if (IsValid(TX55RightFoot)) TX55RightFoot->Destroy();
+                    if (IsValid(PassageGateA)) PassageGateA->Destroy();
+                    for (TActorIterator<AMGSecurityCamera> Camera(GetWorld());Camera;++Camera)
+                        Camera->DisableForService();
+                    SpawnBoss(TEXT("m08.big_boss_defeated"),
+                        FVector(10700,2200,100),TEXT("ROCKET_LAUNCHER"),
+                        260.f,1200.f,1.3f,23.f);
+                    SetSubtitle(TEXT("BIG BOSS: Snake... this isn't over.\n"
+                        "SNAKE: You've been giving me orders all along."));
+                    Player->NotifyFeedback(TEXT("TX-55 DESTROYED / SELF-DESTRUCT ACTIVE"),
+                                           TEXT("alarm"));
+                }
+            }
+            return true;
+        }
+    }
+    if (IsWithin(Player,RightEscapeLadder,270.f))
+    {
+        Player->NotifyFeedback(TEXT("RIGHT LADDER / DEAD END — REMEMBER THE HOSTAGE"),
+                               TEXT("denied"));
+        return true;
+    }
+    if (IsWithin(Player,LeftEscapeLadder,270.f))
+    {
+        if (!State->HasBeat(TEXT("tx55.destruction")) ||
+            !State->HasBeat(TEXT("m08.big_boss_defeated")))
+        {
+            Player->NotifyFeedback(TEXT("THE CONFRONTATION IS NOT OVER"),
+                                   TEXT("denied"));
+            return true;
+        }
+        if (!State->HasBeat(TEXT("brother.escape_ladder")))
+        {
+            Player->NotifyFeedback(TEXT("LADDER ROUTE NOT VERIFIED"),
+                                   TEXT("denied"));
+            return true;
+        }
+        if (State->GetEscapeTimeRemaining()<=0.f)
+        {
+            Player->NotifyFeedback(TEXT("COUNTDOWN EXPIRED"),TEXT("denied"));
+            return true;
+        }
+        if (State->RecordBeat(TEXT("snake.escaped_outer_heaven"),
+            TEXT("Snake used the left escape ladder Jennifer's brother described and survived.")))
+        {
+            SetSubtitle(TEXT("SNAKE: Outer Heaven's finished.\n"
+                "RADIO: ...Snake? Can you hear me?"));
+            Player->NotifyFeedback(TEXT("OPERATION INTRUDE N313 / COMPLETE"),
+                                   TEXT("win"));
+        }
+        return true;
+    }
+    return false;
 }
