@@ -24,6 +24,11 @@ public:
     // exterior return connector instead of locking away earlier discoveries.
     UPROPERTY()
     bool bMissionThreeExteriorActive = false;
+    // TX-55 foot demolition progress persists through interruption/reload.
+    UPROPERTY()
+    int32 TX55CorrectCharges = 0;
+    UPROPERTY()
+    float EscapeSecondsRemaining = 120.f;
     UPROPERTY()
     TArray<FString> IntelLines;
 };
