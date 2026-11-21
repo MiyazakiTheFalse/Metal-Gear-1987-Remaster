@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SEQUENCE = ROOT / "data" / "1995_campaign_sequence.json"
 REGISTRY = ROOT / "data" / "character_arc_registry.json"
+INDIVIDUAL = ROOT / "data" / "1995_individual_character_timelines.json"
 
 
 def validate(sequence, registry):
@@ -86,10 +87,36 @@ def validate(sequence, registry):
     return errors
 
 
+def validate_individual(individual, sequence, registry):
+    errors = []
+    by_id = {step["id"]: step for step in sequence["sequence"]}
+    by_char = {c["id"]: c for c in registry["characters"]}
+    timelines = individual["character_timelines"]
+    if len(timelines) != len(by_char):
+        errors.append("Individual timeline coverage differs from cast registry")
+    for person in timelines:
+        cid = person["id"]
+        if cid not in by_char:
+            errors.append(f"Unknown individual timeline: {cid}")
+            continue
+        actual = [step for step in sequence["sequence"] if cid in step["cast"]]
+        declared = person["sequence"]
+        if [s["scene_id"] for s in declared] != [s["id"] for s in actual]:
+            errors.append(f"Lost or reordered story reference for {cid}")
+        if [s["order"] for s in declared] != sorted(s["order"] for s in declared):
+            errors.append(f"Nonchronological individual story for {cid}")
+        if person["final_1995_status"] != by_char[cid]["end"]:
+            errors.append(f"Final 1995 state diverged for {cid}")
+        if person["beat_ids"] != by_char[cid]["beats"]:
+            errors.append(f"Individual beat IDs diverged for {cid}")
+    return errors
+
+
 def main():
     sequence = json.loads(SEQUENCE.read_text(encoding="utf-8"))
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
-    errors = validate(sequence, registry)
+    individual = json.loads(INDIVIDUAL.read_text(encoding="utf-8"))
+    errors = validate(sequence, registry) + validate_individual(individual, sequence, registry)
     if errors:
         for issue in errors:
             print("FAIL:", issue)
