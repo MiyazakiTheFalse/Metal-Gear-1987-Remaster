@@ -56,7 +56,7 @@ void AMGRemasterGameMode::StartPlay()
             Snake->SetActorLocation(Mission->EntryLocation(), false, nullptr,
                                     ETeleportType::TeleportPhysics);
             if (UMGEquipmentComponent* Inventory = Snake->GetEquipment())
-                Inventory->SetConfiscated(false);
+                Inventory->InitialiseMissionOneLoadout();
             Snake->NotifyFeedback(TEXT("OPERATION INTRUDE N313 — INFILTRATE OUTER HEAVEN"),
                                   TEXT("select"));
         }
