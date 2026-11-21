@@ -150,11 +150,11 @@ void AMGGrayFoxMission::SpawnPerimeterGuards()
     if (AMGGuardActor* CellGuard = GetWorld()->SpawnActor<AMGGuardActor>(
             FVector(840.f, 345.f, -11.f), FRotator(0.f, -90.f, 0.f)))
     {
-        CellGuard->ConfigureDuty(TEXT("PRISON_G01"), TEXT("CELL_BLOCK_WATCH"),
-                                 TEXT("NORTH_HOLDING_BAYS"),
+        CellGuard->ConfigureDuty(FName(TEXT("PRISON_G01")), FName(TEXT("CELL_BLOCK_WATCH")),
+                                 FName(TEXT("NORTH_HOLDING_BAYS")),
                                  FVector(840.f,345.f,-11.f), 2.8f,
                                  FVector(975.f,500.f,-11.f));
-        CellGuard->ConfigurePatrol({
+        CellGuard->ConfigurePatrol(TArray<FVector>{
             FVector(840.f,345.f,-11.f), FVector(1080.f,345.f,-11.f),
             FVector(1080.f,365.f,-11.f), FVector(840.f,365.f,-11.f)
         });
@@ -162,11 +162,11 @@ void AMGGrayFoxMission::SpawnPerimeterGuards()
     if (AMGGuardActor* PropertyGuard = GetWorld()->SpawnActor<AMGGuardActor>(
             FVector(1120.f,-340.f,-11.f), FRotator(0.f,180.f,0.f)))
     {
-        PropertyGuard->ConfigureDuty(TEXT("PRISON_G02"), TEXT("PROPERTY_CUSTODY"),
-                                     TEXT("CONFISCATED_GEAR_AND_EXIT"),
+        PropertyGuard->ConfigureDuty(FName(TEXT("PRISON_G02")), FName(TEXT("PROPERTY_CUSTODY")),
+                                     FName(TEXT("CONFISCATED_GEAR_AND_EXIT")),
                                      FVector(1120.f,-340.f,-11.f), 1.7f,
                                      FVector(725.f,-220.f,-11.f));
-        PropertyGuard->ConfigurePatrol({
+        PropertyGuard->ConfigurePatrol(TArray<FVector>{
             FVector(1120.f,-340.f,-11.f), FVector(960.f,-340.f,-11.f),
             FVector(760.f,-340.f,-11.f), FVector(960.f,-340.f,-11.f)
         });
