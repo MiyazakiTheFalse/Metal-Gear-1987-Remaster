@@ -353,6 +353,7 @@ bool AMGMissionOne::StartLift(AMGPlayerCharacter* Player)
 {
     if (!IsNearLift(Player) || bLiftTravelling || SelectedFloor == CurrentFloor)
         return false;
+    Player->LeaveCover();
     LiftPassenger = Player;
     bLiftTravelling = true;
     DestinationFloor = SelectedFloor;
