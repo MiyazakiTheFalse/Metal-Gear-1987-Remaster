@@ -1,6 +1,8 @@
 #include "MGRemasterGameMode.h"
 
 #include "MGGrayFoxMission.h"
+#include "MGMissionOne.h"
+#include "MGEquipmentComponent.h"
 #include "MGPlayerCharacter.h"
 #include "MGPrototypeHUD.h"
 #include "Components/StaticMeshComponent.h"
@@ -34,17 +36,29 @@ void AMGRemasterGameMode::StartPlay()
     Super::StartPlay();
     if (!GetWorld()) return;
 
-    // The rescue is the current runnable mission slice; other greybox
-    // environments are added only after original J2ME map verification.
+    // Start with the Outer Heaven arrival. The Gray Fox prison prototype remains
+    // available as a separate source actor and is not erased by this pass.
     if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
     {
         if (!PC->GetPawn())
         {
             AMGPlayerCharacter* Pawn = GetWorld()->SpawnActor<AMGPlayerCharacter>(
-                FVector(-950.f, 0.f, -11.f), FRotator::ZeroRotator);
+                FVector(700.f, 700.f, 90.f), FRotator::ZeroRotator);
             if (Pawn) PC->Possess(Pawn);
         }
     }
-    GetWorld()->SpawnActor<AMGGrayFoxMission>(AMGGrayFoxMission::StaticClass(),
-                                            FVector::ZeroVector, FRotator::ZeroRotator);
+    if (AMGMissionOne* Mission = GetWorld()->SpawnActor<AMGMissionOne>(
+            AMGMissionOne::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator))
+    {
+        if (AMGPlayerCharacter* Snake = Cast<AMGPlayerCharacter>(
+                UGameplayStatics::GetPlayerCharacter(this, 0)))
+        {
+            Snake->SetActorLocation(Mission->EntryLocation(), false, nullptr,
+                                    ETeleportType::TeleportPhysics);
+            if (UMGEquipmentComponent* Inventory = Snake->GetEquipment())
+                Inventory->SetConfiscated(false);
+            Snake->NotifyFeedback(TEXT("OPERATION INTRUDE N313 — INFILTRATE OUTER HEAVEN"),
+                                  TEXT("select"));
+        }
+    }
 }
