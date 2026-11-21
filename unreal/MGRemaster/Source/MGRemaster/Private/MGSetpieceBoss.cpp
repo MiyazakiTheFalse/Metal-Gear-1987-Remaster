@@ -37,9 +37,10 @@ void AMGSetpieceBoss::ConfigureEncounter(
     Tags.AddUnique(Id);
     Tags.AddUnique(TEXT("AUTHORED_BOSS_POST"));
     // Distinct readable silhouettes even until licensed art is mounted.
-    if (Id == TEXT("M03_HIND_D"))
+    if (Id == TEXT("m03.hind_d_defeated"))
         Body->SetWorldScale3D(FVector(3.7f,5.2f,2.f));
-    else if (Id == TEXT("M03_TANK") || Id == TEXT("M04_BULLDOZER"))
+    else if (Id == TEXT("m03.tank_defeated") ||
+             Id == TEXT("m04.bulldozer_defeated"))
         Body->SetWorldScale3D(FVector(5.f,3.5f,2.6f));
     else if (Id.ToString().Contains(TEXT("TX11")))
         Body->SetWorldScale3D(FVector(1.8f,1.3f,2.7f));
@@ -47,6 +48,11 @@ void AMGSetpieceBoss::ConfigureEncounter(
         Body->SetWorldScale3D(FVector(1.6f,1.2f,2.2f));
     else
         Body->SetWorldScale3D(FVector(1.3f,1.3f,2.1f));
+    // Keep every cover collision above the floor rather than inserting the
+    // root cube through a platform and letting Unreal change spawn placement.
+    FVector At=GetActorLocation();
+    At.Z=10.f+Body->GetComponentScale().Z*50.f;
+    SetActorLocation(At,false);
 }
 float AMGSetpieceBoss::TakeDamage(float Damage, const FDamageEvent& Event,
                                   AController* Instigator, AActor* Causer)
