@@ -108,6 +108,32 @@ assert.equal(afterRetry.storage.get('mg1987.grayfox.browser.v1'),beforePauseRetr
  'pause Retry does not delete inventory, world flags or earned progress');
 console.log('PASS: browser R and pause Retry reload checkpoints without destructive progress loss.');
 
+// Broken checkpoints must be recoverable, never silently replaced by a fresh
+// mission when the user selects Continue. Preserve bytes until they approve
+// the title's destructive New Operation confirmation.
+const damagedStorage=new Map([['mg1987.grayfox.browser.v1','{broken-json']]);
+const damaged=boot(damagedStorage);
+assert.equal(damaged.element('resume').disabled,false,
+ 'the title surfaces a present but not-yet-parsed checkpoint');
+damaged.button('resume');
+assert.equal(damaged.game.state.started,false,
+ 'bad Continue returns to title rather than auto-starting a new game');
+assert.equal(damaged.storage.get('mg1987.grayfox.browser.v1'),'{broken-json',
+ 'unreadable save bytes remain available for manual recovery');
+assert.equal(damaged.element('resume').disabled,true);
+damaged.button('start');
+assert.equal(damaged.element('newGameConfirm').hidden,false,
+ 'replacing a broken checkpoint still requires explicit user confirmation');
+damaged.button('cancelNewGame');
+assert.equal(damaged.storage.get('mg1987.grayfox.browser.v1'),'{broken-json');
+damaged.button('start');
+damaged.button('confirmNewGame');
+assert.equal(damaged.game.state.started,true);
+assert.notEqual(damaged.storage.get('mg1987.grayfox.browser.v1'),'{broken-json',
+ 'only explicit New Operation consent replaces the unreadable checkpoint');
+console.log('PASS: corrupt Continue never mutates the old save or launches an unintended New Game.');
+
+
 
 // The original 1987 three-truck discovery loop is available before custody.
 // These are physical props with independent pickups, save state and useful items.
