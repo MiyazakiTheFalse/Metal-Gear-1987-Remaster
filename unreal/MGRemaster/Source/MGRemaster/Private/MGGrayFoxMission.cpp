@@ -84,7 +84,32 @@ void AMGGrayFoxMission::CreateGreybox()
     // Unreal's basic cube is 100cm at scale 1. Floor top is -100cm.
     // Three functional areas: prison cell, Fox cell, guarded escape corridor.
     SpawnBlock(TEXT("Floor"), FVector(75.f, 0.f, -150.f), FVector(26.5f, 10.f, 1.f), true);
-    SpawnBlock(TEXT("NorthBoundary"), FVector(75.f, 500.f, 90.f), FVector(26.5f, 0.4f, 3.8f), true);
+    // The solitary cells remain isolated; an adjacent, separate barred wing
+    // shows the detention facility has other human occupants. The two anonymous
+    // figures are optional remake ambience, NOT original-source POW rewards.
+    // Remove or reconcile them when exact J2ME prison maps are recovered.
+    SpawnBlock(TEXT("NorthBoundary"), FVector(-300.f, 500.f, 90.f), FVector(19.f,0.4f,3.8f), true);
+    SpawnBlock(TEXT("NorthBoundary"), FVector(1350.f,500.f,90.f), FVector(1.f,0.4f,3.8f), true);
+    SpawnBlock(TEXT("HoldingWingFloor"), FVector(975.f,750.f,-150.f), FVector(6.5f,5.f,1.f), true);
+    SpawnBlock(TEXT("HoldingWingRearWall"), FVector(975.f,1000.f,90.f), FVector(6.5f,.4f,3.8f), true);
+    SpawnBlock(TEXT("HoldingWingWestWall"), FVector(650.f,750.f,90.f), FVector(.4f,5.f,3.8f), true);
+    SpawnBlock(TEXT("HoldingWingEastWall"), FVector(1300.f,750.f,90.f), FVector(.4f,5.f,3.8f), true);
+    SpawnBlock(TEXT("HoldingWingPartition"), FVector(975.f,750.f,90.f), FVector(.4f,5.f,3.8f), true);
+    SpawnBlock(TEXT("HoldingWingBarsUpper"), FVector(975.f,500.f,235.f), FVector(6.5f,.14f,.24f), true);
+    SpawnBlock(TEXT("HoldingWingBarsLower"), FVector(975.f,500.f,35.f), FVector(6.5f,.14f,.24f), true);
+    for (const float BarX : {675.f,745.f,815.f,885.f,955.f,1025.f,1095.f,1165.f,1235.f,1295.f})
+        SpawnBlock(TEXT("HoldingWingBar"), FVector(BarX,500.f,140.f),
+                   FVector(.12f,.14f,2.1f), true);
+    SpawnBlock(TEXT("HoldingWingBed"), FVector(805.f,850.f,-62.f),
+               FVector(1.8f,.9f,.75f), true);
+    SpawnBlock(TEXT("HoldingWingBed"), FVector(1115.f,850.f,-62.f),
+               FVector(1.8f,.9f,.75f), true);
+    // Ambient prisoners cannot be farmed for rank, cards or dialogue. Their
+    // non-interactive provisional silhouettes have stable per-cell identities.
+    SpawnBlock(TEXT("AMBIENT_DETAINEE_A_UNVERIFIED"), FVector(800.f,745.f,-11.f),
+               FVector(.42f,.42f,1.7f), false);
+    SpawnBlock(TEXT("AMBIENT_DETAINEE_B_UNVERIFIED"), FVector(1130.f,780.f,-11.f),
+               FVector(.42f,.42f,1.7f), false);
     SpawnBlock(TEXT("SouthBoundary"), FVector(75.f, -500.f, 90.f), FVector(26.5f, 0.4f, 3.8f), true);
     SpawnBlock(TEXT("WestBoundary"), FVector(-1250.f, 0.f, 90.f), FVector(0.4f, 10.f, 3.8f), true);
     SpawnBlock(TEXT("EastBoundary"), FVector(1400.f, 0.f, 90.f), FVector(0.4f, 10.f, 3.8f), true);
@@ -117,12 +142,31 @@ void AMGGrayFoxMission::CreateGreybox()
 
 void AMGGrayFoxMission::SpawnPerimeterGuards()
 {
-    // Existing hostile patrols outside confinement. No surprise wave on rescue.
+    // Two staff with genuine jobs, not arbitrary corridor sentries. Patrols
+    // never enter cells or appear as sudden waves on Gray Fox's rescue.
     if (!GetWorld()) return;
-    GetWorld()->SpawnActor<AMGGuardActor>(FVector(840.f, 360.f, -11.f),
-                                           FRotator(0.f, 180.f, 0.f));
-    GetWorld()->SpawnActor<AMGGuardActor>(FVector(1120.f, -340.f, -11.f),
-                                           FRotator(0.f, 180.f, 0.f));
+    if (AMGGuardActor* CellGuard = GetWorld()->SpawnActor<AMGGuardActor>(
+            FVector(840.f, 345.f, -11.f), FRotator(0.f, -90.f, 0.f)))
+    {
+        CellGuard->ConfigureDuty(TEXT("PRISON_G01"), TEXT("CELL_BLOCK_WATCH"),
+                                 TEXT("NORTH_HOLDING_BAYS"),
+                                 FVector(840.f,345.f,-11.f), 2.8f);
+        CellGuard->ConfigurePatrol({
+            FVector(840.f,345.f,-11.f), FVector(1080.f,345.f,-11.f),
+            FVector(1080.f,365.f,-11.f), FVector(840.f,365.f,-11.f)
+        });
+    }
+    if (AMGGuardActor* PropertyGuard = GetWorld()->SpawnActor<AMGGuardActor>(
+            FVector(1120.f,-340.f,-11.f), FRotator(0.f,180.f,0.f)))
+    {
+        PropertyGuard->ConfigureDuty(TEXT("PRISON_G02"), TEXT("PROPERTY_CUSTODY"),
+                                     TEXT("CONFISCATED_GEAR_AND_EXIT"),
+                                     FVector(1120.f,-340.f,-11.f), 1.7f);
+        PropertyGuard->ConfigurePatrol({
+            FVector(1120.f,-340.f,-11.f), FVector(960.f,-340.f,-11.f),
+            FVector(760.f,-340.f,-11.f), FVector(960.f,-340.f,-11.f)
+        });
+    }
 }
 
 void AMGGrayFoxMission::BeginPlay()
