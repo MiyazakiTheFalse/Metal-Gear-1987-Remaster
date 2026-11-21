@@ -3,6 +3,7 @@
 #include "MGEquipmentComponent.h"
 #include "MGGrayFoxMission.h"
 #include "MGMissionOne.h"
+#include "MGLaterMission.h"
 #include "MGGuardActor.h"
 #include "MGSecurityCamera.h"
 #include "MGCampaignState.h"
@@ -82,6 +83,8 @@ void AMGPrototypeHUD::DrawHUD()
 
     const AMGMissionOne* Opening = Cast<AMGMissionOne>(
         UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass()));
+    const AMGLaterMission* Later = Cast<AMGLaterMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGLaterMission::StaticClass()));
     const UMGCampaignState* Story = GetWorld() && GetWorld()->GetGameInstance()
         ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
     // Actual guard awareness drives radar vs threat overlay.
@@ -140,19 +143,19 @@ void AMGPrototypeHUD::DrawHUD()
         DrawRect(FLinearColor(0.05f, 0.13f, 0.13f, 1.f), X0, Y0, RW, RH);
         // Mission One uses provisional 100m x 54m layout. Prison uses the
         // original prototype radar. These are *not* source-verified maps.
-        const float SpanX = Opening ? 10000.f : 2660.f;
-        const float SpanY = Opening ? 5400.f : 1000.f;
-        if (!Opening) for (const float DividerWorldX : {-410.f, 450.f})
+        const float SpanX = Opening ? 10000.f : (Later ? 15000.f : 2660.f);
+        const float SpanY = Opening ? 5400.f : (Later ? 4400.f : 1000.f);
+        if (!Opening && !Later) for (const float DividerWorldX : {-410.f, 450.f})
         {
             const float V = X0 + FMath::Clamp((DividerWorldX + 1250.f) / SpanX, 0.f, 1.f) * RW;
             DrawRect(HudMuted, V, Y0, 2.f * UiScale, RH * 0.34f);
             DrawRect(HudMuted, V, Y0 + RH * 0.66f, 2.f * UiScale, RH * 0.34f);
         }
-        auto MarkPoint = [this, X0, Y0, RW, RH, UiScale, Opening](const FVector& World,
+        auto MarkPoint = [this, X0, Y0, RW, RH, UiScale, Opening, Later](const FVector& World,
                         const FLinearColor& Tint, float Size)
         {
-            const float Px = X0 + FMath::Clamp((World.X + (Opening ? 0.f : 1250.f)) / (Opening ? 10000.f : 2660.f), 0.f, 1.f) * RW;
-            const float Py = Y0 + FMath::Clamp((World.Y + (Opening ? 0.f : 500.f)) / (Opening ? 5400.f : 1000.f), 0.f, 1.f) * RH;
+            const float Px = X0 + FMath::Clamp((World.X + ((Opening || Later) ? 0.f : 1250.f)) / (Opening ? 10000.f : (Later ? 15000.f : 2660.f)), 0.f, 1.f) * RW;
+            const float Py = Y0 + FMath::Clamp((World.Y + ((Opening || Later) ? 0.f : 500.f)) / (Opening ? 5400.f : (Later ? 4400.f : 1000.f)), 0.f, 1.f) * RH;
             DrawRect(Tint, Px - Size * 0.5f * UiScale, Py - Size * 0.5f * UiScale,
                      Size * UiScale, Size * UiScale);
         };
@@ -277,6 +280,30 @@ void AMGPrototypeHUD::DrawHUD()
         }
     }
 
+    if (Later)
+    {
+        DrawRect(HudPanel,Margin,Margin+113.f*UiScale,
+                 FMath::Min(640.f*UiScale,Width-2.f*Margin),115.f*UiScale);
+        DrawText(Story ? Story->GetMissionTitle() : TEXT("OUTER HEAVEN / LATER MISSION"),
+                 HudGreen,Margin+12.f*UiScale,Margin+121.f*UiScale,
+                 nullptr,.79f*UiScale,false);
+        DrawText(Later->GetObjectiveText(),FLinearColor::White,
+                 Margin+12.f*UiScale,Margin+151.f*UiScale,
+                 nullptr,.76f*UiScale,false);
+        if (Player->IsMissionLogVisible() && Story)
+            DrawText(Story->GetIntelLog(),HudMuted,
+                     Margin+12.f*UiScale,Margin+201.f*UiScale,
+                     nullptr,.68f*UiScale,false);
+        const FString Recent=Later->GetRecentDialogue();
+        if (!Recent.IsEmpty())
+        {
+            DrawRect(HudPanel,Margin,Height-141.f*UiScale,
+                     Width-2.f*Margin,45.f*UiScale);
+            DrawText(Recent,FLinearColor::White,Margin+12.f*UiScale,
+                     Height-131.f*UiScale,nullptr,.78f*UiScale,false);
+        }
+    }
+
     // Show actual selected equipment. The inventory lives in the component,
     // and unavailable slots cannot become equipped just because selected.
     if (Equip)
@@ -342,7 +369,7 @@ void AMGPrototypeHUD::DrawHUD()
         const int32 Channel = Player->GetTransceiverChannel();
         const FString Transcript = Mission ?
             Mission->GetTransceiverDialogue(Channel) :
-            (Opening && Story ? Story->GetOpeningRadio(Channel) :
+            ((Opening || Later) && Story ? Story->GetOpeningRadio(Channel) :
                 TEXT("NO SIGNAL — LOCAL CONTACTS UNAVAILABLE"));
         TArray<FString> Lines;
         Transcript.ParseIntoArrayLines(Lines, true);
