@@ -2,6 +2,8 @@
 
 #include "MGGuardActor.h"
 #include "MGGrayFoxSaveGame.h"
+#include "MGMissionOneSaveGame.h"
+#include "MGEquipmentComponent.h"
 #include "MGCampaignState.h"
 #include "Engine/GameInstance.h"
 #include "MGPlayerCharacter.h"
@@ -109,6 +111,8 @@ void AMGGrayFoxMission::CreateGreybox()
     SpawnBlock(TEXT("GuardCover"), FVector(1200.f, -200.f, -40.f),
                FVector(1.8f, 0.7f, 1.2f), true);
     ExitMarker = SpawnBlock(TEXT("EscapeMarker"), ExitPoint, FVector(0.5f,0.5f,1.2f), false);
+    GearLocker = SpawnBlock(TEXT("ConfiscatedGearLocker"),
+        FVector(725.f, -220.f, -11.f), FVector(1.2f,.65f,1.3f), false);
 }
 
 void AMGGrayFoxMission::SpawnPerimeterGuards()
@@ -145,12 +149,13 @@ void AMGGrayFoxMission::BeginPlay()
             // A stale save must not place the player beyond a solid, unopened wall.
             && ((F & MG_FOX_FIRST_WALL_BREACHED) || P.X < -350.f)
             && ((F & MG_FOX_EXIT_WALL_BREACHED) || P.X < 420.f);
-        if (bValid && bPositionSafe && Save->SchemaVersion == 1
+        if (bValid && bPositionSafe && (Save->SchemaVersion == 1 || Save->SchemaVersion == 2)
             && (F & MG_FOX_CAPTURED))
         {
             Flags = F;
             SavedPosition = Save->CheckpointLocation;
             bHasLoadedSave = true;
+            bGearRecovered = Save->SchemaVersion >= 2 && Save->bGearRecovered;
         }
     }
     RestoreVisualState();
@@ -178,6 +183,8 @@ void AMGGrayFoxMission::RestoreVisualState()
         WeakWall->Destroy();
     if ((Flags & MG_FOX_EXIT_WALL_BREACHED) && IsValid(EscapeWall))
         EscapeWall->Destroy();
+    if (bGearRecovered && IsValid(GearLocker))
+        GearLocker->Destroy();
 }
 
 void AMGGrayFoxMission::InitializePlayerIfReady()
@@ -191,6 +198,8 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
     if (APlayerController* PC = Cast<APlayerController>(Player->GetController()))
         PC->SetControlRotation(FRotator(-8.f, 0.f, 0.f));
     bPlayerInitialised = true;
+    if (bGearRecovered)
+        RestoreCapturedGear(Player);
 
     if (!bHasLoadedSave)
     {
@@ -210,11 +219,37 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
         UGameplayStatics::CreateSaveGameObject(UMGGrayFoxSaveGame::StaticClass()));
     if (!Save) return;
-    Save->SchemaVersion = 1;
+    Save->SchemaVersion = 2;
+    Save->bGearRecovered = bGearRecovered;
     Save->MissionFlags = Flags;
     Save->CheckpointLocation = Player ? Player->GetActorLocation() : CellStart;
     if (!UGameplayStatics::SaveGameToSlot(Save, SaveSlot, 0))
         UE_LOG(LogTemp, Warning, TEXT("Gray Fox: could not save mission checkpoint"));
+}
+
+void AMGGrayFoxMission::RestoreCapturedGear(AMGPlayerCharacter* Player)
+{
+    if (!Player || !Player->GetEquipment()) return;
+    UMGEquipmentComponent* Equipment = Player->GetEquipment();
+    Equipment->InitialiseMissionOneLoadout();
+    const UMGMissionOneSaveGame* OpeningSave = Cast<UMGMissionOneSaveGame>(
+        UGameplayStatics::LoadGameFromSlot(TEXT("MissionOneV1"), 0));
+    if (!OpeningSave) return;
+    for (const FName Id : OpeningSave->CollectedPickupIds)
+    {
+        if (Id == TEXT("P01")) Equipment->AwardItem(TEXT("RATION"), 1);
+        else if (Id == TEXT("P02")) Equipment->AwardItem(TEXT("CARD1"), 1);
+        else if (Id == TEXT("P03")) Equipment->AwardItem(TEXT("BINOCULARS"), 1);
+        else if (Id == TEXT("P04")) Equipment->AwardItem(TEXT("GASMASK"), 1);
+        else if (Id == TEXT("P05")) Equipment->AwardWeapon(TEXT("HANDGUN"), 0);
+        else if (Id == TEXT("P06")) Equipment->AwardItem(TEXT("MINES"), 1);
+        else if (Id == TEXT("P07")) Equipment->AwardAmmunition(TEXT("HANDGUN"), 12);
+    }
+    if (OpeningSave->Version >= 4)
+    {
+        Equipment->RestoreHandgunRounds(FMath::Max(0, OpeningSave->HandgunRounds));
+        Equipment->RestoreItemQuantity(TEXT("RATION"), FMath::Max(0, OpeningSave->RationsRemaining));
+    }
 }
 
 bool AMGGrayFoxMission::ApplyAction(uint32 Action, AMGPlayerCharacter* Player)
@@ -324,6 +359,22 @@ bool AMGGrayFoxMission::TryInteract(AMGPlayerCharacter* Player)
     if ((Flags & MG_FOX_EXIT_WALL_BREACHED) == 0
         && CanReach(Player, EscapeWall, 240.f))
         return ApplyAction(MG_FOX_BREACH_EXIT_WALL, Player);
+    if ((Flags & MG_FOX_EXIT_WALL_BREACHED) && !bGearRecovered &&
+        CanReach(Player, GearLocker, 220.f))
+    {
+        bGearRecovered = true;
+        RestoreCapturedGear(Player);
+        if (IsValid(GearLocker)) GearLocker->Destroy();
+        SaveProgress(Player);
+        if (GetWorld() && GetWorld()->GetGameInstance())
+            if (UMGCampaignState* Story =
+                GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+                Story->RecordBeat(TEXT("snake.gear_recovery"),
+                    TEXT("EQUIPMENT RECOVERED: The prison locker held Snake's confiscated supplies."));
+        Dialogue = TEXT("GEAR RECLAIMED — CHECK EQUIPMENT BEFORE ESCAPING");
+        DialogueTimeRemaining = 4.5f;
+        return true;
+    }
     return false;
 }
 
@@ -403,7 +454,9 @@ FString AMGGrayFoxMission::GetObjectiveText() const
     if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
         return TEXT("Find a route into the outer passage.");
     if (!(Flags & MG_FOX_LEFT_PRISON))
-        return TEXT("Get past the guards and reach the far side of the corridor.");
+        return bGearRecovered ?
+            TEXT("Get past the guards and reach the far side of the corridor.") :
+            TEXT("Recover confiscated equipment from the corridor locker.");
     return TEXT("Gray Fox rescued. You have escaped the prison.");
 }
 
@@ -420,6 +473,9 @@ FString AMGGrayFoxMission::GetPacingHint() const
     if (!(Flags & MG_FOX_EXIT_WALL_BREACHED))
         return Level == 1 ? TEXT("Old work and new repairs might meet again.")
                           : TEXT("Investigate the unusual section of the next barrier.");
+    if (!bGearRecovered)
+        return Level == 1 ? TEXT("Equipment may be stored near the guard route.")
+                          : TEXT("Inspect the marked locker along the south wall.");
     return Level == 1 ? TEXT("Keep low and use the obstacles to break line of sight.")
                       : TEXT("Move east to the end of the passage, beyond the guards.");
 }
@@ -428,8 +484,9 @@ FString AMGGrayFoxMission::GetMissionLogText() const
 {
     if (!(Flags & MG_FOX_RESCUED)) return FString();
     // Temporary paraphrase; not a verbatim line from the licensed J2ME script.
-    return TEXT("GRAY FOX INTEL: Metal Gear is real. Seek the scientist who designed it. "
-                "Your equipment is still missing. Continue the infiltration.");
+    return bGearRecovered ?
+        TEXT("GRAY FOX INTEL: Metal Gear is real. Seek its scientist. Equipment recovered.") :
+        TEXT("GRAY FOX INTEL: Metal Gear is real. Seek its scientist. Recover equipment.");
 }
 
 FString AMGGrayFoxMission::GetRecentDialogue() const
@@ -517,7 +574,7 @@ void AMGGrayFoxMission::Tick(float Dt)
         LastObservedViewRotation = View;
         bHasObservedPlayer = true;
     }
-    if (Player && (Flags & MG_FOX_EXIT_WALL_BREACHED) &&
+    if (Player && bGearRecovered && (Flags & MG_FOX_EXIT_WALL_BREACHED) &&
         !(Flags & MG_FOX_LEFT_PRISON) &&
         FVector::Dist2D(Player->GetActorLocation(), ExitPoint) < 190.f)
     {
