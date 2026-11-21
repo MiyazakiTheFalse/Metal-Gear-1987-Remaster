@@ -11,8 +11,8 @@ class MGREMASTER_API UMGCampaignSaveGame : public USaveGame
     GENERATED_BODY()
 public:
     UPROPERTY()
-    int32 Version = 2;
-    // One-based player-facing mission number. 1 insertion; 2 Gray Fox; 3 return.
+    int32 Version = 3;
+    // One-based player-facing mission number; world expansion supports 1–5.
     UPROPERTY()
     int32 MissionNumber = 1;
     // Retained solely for migrating v1 saves (old values 0, 1, 2).
