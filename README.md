@@ -29,6 +29,10 @@ The [Building One → Gray Fox prison → Building One runtime bridge](docs/1995
 
 **Current truth:** Unreal and Rust source committed, **not compiled** or playtested; physical detention approach and missing building connections remain provisional until J2ME verification. Do not call this a complete playable game or a verified source level. A developer-only F9 reset from the Building One area clears test checkpoints and restarts at the beginning.
 
+## Solid Snake's playable identity
+
+The [1995 Solid Snake character/gameplay doctrine](docs/SOLID_SNAKE_1995_PLAYABLE_IDENTITY.md) contrasts the first-mission rookie with Naked Snake's MGS3 wilderness-survival style while preserving shared CQC knowledge and the source-faithful weapon/prisoner loop. The [eight-trait identity contract](data/solid_snake_1995_playstyle_contract.json) assigns concrete character expressions to each numbered mission. **Character-direction work is not a substitute for real rigging, animation, engine compilation or playtesting.**
+
 ## Character stories — 1995 campaign
 
 The [complete 1995 campaign narrative and cast timeline](docs/1995_FULL_CAST_NARRATIVE_AND_TIMELINE.md), [40-sequence storyboard](data/1995_campaign_sequence.json), [individual per-character chronological timelines](data/1995_individual_character_timelines.json), and [22-character/group / 105-beat planning registry](data/character_arc_registry.json) now map the core ensemble from first radio contact through Outer Heaven's finale, including individual boss encounters. This is **narrative design only**, except the separate source-level Gray Fox prison prototype and opening radio/mission code. All character beats remain unverified against the target Connect2Media J2ME edition. Narrative `depends_on` links are *not* hard mission gates. Check with `python tools/validate_character_arcs.py` and `python tools/validate_1995_sequence.py`.
