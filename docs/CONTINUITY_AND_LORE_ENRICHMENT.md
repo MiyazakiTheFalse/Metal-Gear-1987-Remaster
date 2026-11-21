@@ -22,6 +22,8 @@
 | 1995 vs future military technology | *MGS4* depicts later PMC/SOP/nanomachine infrastructure | Borrow **gameplay feel**, not timeline-inappropriate technology: dynamic cover, search coordination, suppressors, camera response | Do not place MGS4 SOP soldier-control systems or late-era hardware into Outer Heaven |
 | Outer Heaven's human cost | Later lore deepens the consequences of private armies and war | Optional witness testimony, environmental storytelling, logistics and civilian consequences | Respect the original hostages and events; no speculative atrocities asserted as canon |
 
+The full 1995 character arc and beat-stage plan is tracked in [CHARACTER_STORY_BIBLE_1995.md](CHARACTER_STORY_BIBLE_1995.md) and the machine-readable [character arc registry](../data/character_arc_registry.json). This continuity file is a source filter, **not** itself a scene-by-scene narrative bible.
+
 ## Implementation filter (mandatory)
 
 For every lore addition, enter it in a story change log with fields:
