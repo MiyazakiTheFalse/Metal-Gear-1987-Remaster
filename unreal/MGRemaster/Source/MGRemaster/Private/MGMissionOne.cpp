@@ -187,7 +187,7 @@ void AMGMissionOne::BeginPlay()
     SpawnGuards();
     const UMGMissionOneSaveGame* Save = Cast<UMGMissionOneSaveGame>(
         UGameplayStatics::LoadGameFromSlot(TEXT("MissionOneV1"), 0));
-    if (Save && (Save->Version >= 1 && Save->Version <= 4))
+    if (Save && (Save->Version >= 1 && Save->Version <= 5))
     {
         for (FPickup& P : Pickups)
             if (Save->CollectedPickupIds.Contains(P.Id))
@@ -203,6 +203,7 @@ void AMGMissionOne::BeginPlay()
         bGasDoorOpened = Save->Version >= 3 && Save->bGasDoorOpened;
         SavedHandgunRounds = Save->Version >= 4 ? Save->HandgunRounds : -1;
         SavedRationsRemaining = Save->Version >= 4 ? Save->RationsRemaining : -1;
+        bMissionThreeCacheClaimed = Save->Version >= 5 && Save->bMissionThreeCacheClaimed;
         if (bPrisonerDoorOpened && IsValid(PrisonerDoor)) PrisonerDoor->Destroy();
         if (bGasDoorOpened && IsValid(GasDoor)) GasDoor->Destroy();
         CurrentFloor = Save->Version >= 2 ? FMath::Clamp(Save->CurrentFloor, 1, 3) : 1;
@@ -219,6 +220,13 @@ void AMGMissionOne::BeginPlay()
             Story->RecordBeat(TEXT("diane.contact"),
                 TEXT("PRISONER: Resistance contact Diane can be reached on 120.33."));
         }
+    // Return to previously explored architecture only after Fox's rescue.
+    // No new evidence props are available during Mission 1's initial passage.
+    if (GetWorld() && GetWorld()->GetGameInstance())
+        if (UMGCampaignState* Story =
+            GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+            if (Story->GetMissionNumber() == 3)
+                BuildMissionThreeInvestigation();
 }
 
 void AMGMissionOne::RestoreSavedEquipment(AMGPlayerCharacter* Player)
@@ -239,11 +247,11 @@ void AMGMissionOne::RestoreSavedEquipment(AMGPlayerCharacter* Player)
         Equipment->RestoreItemQuantity(TEXT("RATION"), SavedRationsRemaining);
 }
 
-void AMGMissionOne::SaveProgress(AMGPlayerCharacter* Player)
+bool AMGMissionOne::SaveProgress(AMGPlayerCharacter* Player)
 {
     UMGMissionOneSaveGame* Save = Cast<UMGMissionOneSaveGame>(
         UGameplayStatics::CreateSaveGameObject(UMGMissionOneSaveGame::StaticClass()));
-    if (!Save) return;
+    if (!Save) return false;
     for (const FPickup& P : Pickups)
         if (P.bTaken) Save->CollectedPickupIds.Add(P.Id);
     Save->bCardDoorOpened = bCardDoorOpened;
@@ -252,20 +260,155 @@ void AMGMissionOne::SaveProgress(AMGPlayerCharacter* Player)
     Save->bPrisonerDoorOpened = bPrisonerDoorOpened;
     Save->bGasDoorOpened = bGasDoorOpened;
     Save->CurrentFloor = CurrentFloor;
-    Save->Version = 4;
+    Save->Version = 5;
+    Save->bMissionThreeCacheClaimed = bMissionThreeCacheClaimed;
     if (Player && Player->GetEquipment())
     {
         Save->HandgunRounds = Player->GetEquipment()->GetHandgunRounds();
         Save->RationsRemaining = Player->GetEquipment()->GetItemQuantity(TEXT("RATION"));
     }
     if (!UGameplayStatics::SaveGameToSlot(Save, TEXT("MissionOneV1"), 0))
+    {
         UE_LOG(LogTemp, Warning, TEXT("Mission One checkpoint save failed"));
+        return false;
+    }
+    return true;
+}
+
+void AMGMissionOne::BuildMissionThreeInvestigation()
+{
+    if (!GetWorld() || !GetWorld()->GetGameInstance()) return;
+    const UMGCampaignState* Story =
+        GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>();
+    if (!Story || Story->GetMissionNumber() != 3) return;
+    // These are remake-authored investigative props in already authored spaces,
+    // NOT claims that they occur in the original MSX2 or target J2ME maps.
+    // Seeing these in M03 makes prior knowledge and floor exploration useful.
+    if (!Story->HasBeat(TEXT("m03.route.manifest")))
+        M03Manifest = Block(TEXT("M03_LogisticsManifest"),
+                           CM(58.f,27.f,65.f), FVector(.8f,.5f,.6f), false);
+    if (!Story->HasBeat(TEXT("m03.route.survey")))
+        M03Survey = Block(TEXT("M03_ObservationStation"),
+                         CM(55.f,24.f,665.f), FVector(.9f,.6f,.7f), false);
+    if (!Story->HasBeat(TEXT("m03.route.archive")))
+        M03Archive = Block(TEXT("M03_GasWingArchive"),
+                          CM(74.f,37.f,1265.f), FVector(.8f,.5f,.6f), false);
+    if (!bMissionThreeCacheClaimed)
+        M03Cache = Block(TEXT("M03_CorroborationCache"),
+                         CM(86.f,35.f,665.f), FVector(1.f,.9f,1.1f), false);
+}
+
+bool AMGMissionOne::TryMissionThreeInvestigation(
+    AMGPlayerCharacter* Player, UMGCampaignState* Story)
+{
+    if (!Player || !Story || Story->GetMissionNumber() != 3 ||
+        !Player->GetEquipment()) return false;
+    UMGEquipmentComponent* Equipment = Player->GetEquipment();
+
+    const auto CheckLead =
+        [this, Player, Story, Equipment](
+            AStaticMeshActor* Marker, FName BeatId,
+            const TCHAR* Lead, bool bNeedsOptics) -> bool
+    {
+        if (!IsValid(Marker) ||
+            FVector::Dist(Player->GetActorLocation(),
+                          Marker->GetActorLocation()) > 200.f) return false;
+        if (bNeedsOptics && !Equipment->IsItemEquipped(TEXT("BINOCULARS")))
+        {
+            Player->NotifyFeedback(
+                TEXT("LONG-RANGE SURVEY — EQUIP THE BINOCULARS FIRST"),
+                TEXT("denied"));
+            return true;
+        }
+        if (!Story->HasBeat(BeatId))
+        {
+            if (!Story->RecordBeat(BeatId, FString(Lead)))
+            {
+                Player->NotifyFeedback(TEXT("INTEL SAVE FAILED — RETRY"), TEXT("denied"));
+                return true;
+            }
+            // Record a narrative result, never an irreversible teleport into
+            // an unimplemented future mission.
+            Story->RecordBeat(TEXT("m03.route.confirmed"),
+                TEXT("FOX'S LEAD FOLLOWED: Building Two has a service-route approach."));
+            BeatSubtitle = FString(Lead);
+            BeatSubtitleTime = 8.f;
+            Marker->Destroy();
+            const int32 Leads = Story->GetMissionThreeIntelCount();
+            Player->NotifyFeedback(FString::Printf(
+                TEXT("SCIENTIST TRAIL FOUND / %d OF 3 INVESTIGATIONS"), Leads),
+                TEXT("select"));
+        }
+        return true;
+    };
+
+    // First route: return to the guarded truck yard, read its logistics docket.
+    // Accessible without any optional prior tool.
+    if (CheckLead(M03Manifest, TEXT("m03.route.manifest"),
+        TEXT("MANIFEST: Research crates transferred through Building Two's service entry."),
+        false)) return true;
+
+    // Second route: previously found binoculars enable distant observation
+    // from a real 2F vantage. A missed M01 tool may be retrieved on the return.
+    if (CheckLead(M03Survey, TEXT("m03.route.survey"),
+        TEXT("SNAKE: Through the binoculars, a secured route serves the research wing."),
+        true)) return true;
+
+    // Third route: the 3F gas wing contains a redundant maintenance archive.
+    // No mask = genuine time/health risk, not a hard equipment softlock.
+    if (CheckLead(M03Archive, TEXT("m03.route.archive"),
+        TEXT("ARCHIVE: A service diagram connects the outer building to research."),
+        false)) return true;
+
+    if (IsValid(M03Cache) &&
+        FVector::Dist(Player->GetActorLocation(), M03Cache->GetActorLocation()) <= 220.f)
+    {
+        if (Story->GetMissionThreeIntelCount() < 2)
+        {
+            Player->NotifyFeedback(
+                TEXT("SUPPLY LOCKER — CROSS-CHECK TWO INDEPENDENT LEADS"),
+                TEXT("denied"));
+            return true;
+        }
+        if (bMissionThreeCacheClaimed) return true;
+        const int32 BeforeAmmo = Equipment->GetHandgunRounds();
+        const int32 BeforeRations = Equipment->GetItemQuantity(TEXT("RATION"));
+        if (!Equipment->AwardAmmunition(TEXT("HANDGUN"), 8) ||
+            !Equipment->AwardItem(TEXT("RATION"), 1))
+        {
+            Equipment->RestoreHandgunRounds(BeforeAmmo);
+            Equipment->RestoreItemQuantity(TEXT("RATION"), BeforeRations);
+            Player->NotifyFeedback(TEXT("CACHE UNAVAILABLE — INVENTORY ERROR"), TEXT("denied"));
+            return true;
+        }
+        bMissionThreeCacheClaimed = true;
+        if (!SaveProgress(Player))
+        {
+            bMissionThreeCacheClaimed = false;
+            Equipment->RestoreHandgunRounds(BeforeAmmo);
+            Equipment->RestoreItemQuantity(TEXT("RATION"), BeforeRations);
+            Player->NotifyFeedback(TEXT("CACHE SAVE FAILED — RETRY"), TEXT("denied"));
+            return true;
+        }
+        M03Cache->Destroy();
+        Story->RecordBeat(TEXT("m03.cache.claimed"),
+            TEXT("RECONCILED INTEL: Recovered one ration and eight handgun rounds from 2F supplies."));
+        BeatSubtitle = TEXT("SNAKE: Two sources agreed. The service store was worth returning for.");
+        BeatSubtitleTime = 7.f;
+        Player->NotifyFeedback(TEXT("2F CACHE — RATION + 8 HANDGUN ROUNDS"), TEXT("select"));
+        return true;
+    }
+    return false;
 }
 
 bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
 {
     if (!Player || !Player->GetEquipment()) return false;
     UMGEquipmentComponent* Equipment = Player->GetEquipment();
+    if (GetWorld() && GetWorld()->GetGameInstance())
+        if (UMGCampaignState* Story =
+            GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+            if (TryMissionThreeInvestigation(Player, Story)) return true;
     for (FPickup& P : Pickups)
     {
         if (P.bTaken || FVector::Dist(Player->GetActorLocation(), P.Location) > 190.f)
@@ -356,6 +499,14 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
     if (CurrentFloor == 3 && IsValid(CaptureMarker) &&
         FVector::Dist(Player->GetActorLocation(), CaptureMarker->GetActorLocation()) < 220.f)
     {
+        if (GetWorld() && GetWorld()->GetGameInstance())
+            if (UMGCampaignState* Story =
+                GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+                if (Story->GetMissionNumber() >= 3)
+                {
+                    Player->NotifyFeedback(TEXT("TRANSFER USED — FOX ALREADY RESCUED"), TEXT("select"));
+                    return true;
+                }
         if (!bPOWRescued)
         {
             Player->NotifyFeedback(TEXT("SEALED TRANSFER — SEARCH PRISONER CELLS"), TEXT("denied"));
@@ -393,7 +544,16 @@ FString AMGMissionOne::GetObjectiveText() const
     const UMGCampaignState* CurrentStory = GetWorld() && GetWorld()->GetGameInstance()
         ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
     if (CurrentStory && CurrentStory->GetMissionNumber() == 3)
-        return TEXT("FOLLOW FOX'S REPORT — FIND DR. PETTROVICH");
+    {
+        const int32 Leads = CurrentStory->GetMissionThreeIntelCount();
+        if (Leads == 0)
+            return TEXT("MISSION 03 — 1F MANIFEST / 2F SURVEY / 3F GAS ARCHIVE");
+        if (Leads >= 2 && !bMissionThreeCacheClaimed)
+            return TEXT("ROUTE FOUND — OPTIONAL 2F SUPPLY CACHE NOW ACCESSIBLE");
+        if (Leads >= 2)
+            return TEXT("ROUTE VERIFIED / SCIENTIST TRAIL — SEEK BUILDING TWO");
+        return TEXT("BUILDING TWO LEAD FOUND — EXPLORE FOR MORE OPTIONS");
+    }
     if (CurrentFloor == 3)
     {
         const UMGCampaignState* Story = GetWorld() && GetWorld()->GetGameInstance()
