@@ -1,0 +1,524 @@
+{
+  "schema_version": 1,
+  "mission_id": "mission_01",
+  "title": "Outer Heaven approach — provisional adaptation",
+  "status": "design_data_only_not_spawned",
+  "source_priority": "J2ME 3.3.0 actual event graph then MSX2 comparison; do not equate remaster geometry to canon",
+  "units": "metres for remake greybox only; not inferred from source tiles",
+  "coordinate_space": "shared horizontal XY local layout; rectangle [x,y,width,height]",
+  "doctrines": [
+    "DOCTRINE_000",
+    "DOCTRINE_003",
+    "DOCTRINE_004",
+    "DOCTRINE_005"
+  ],
+  "entry_area": "m01.insertion",
+  "exit_area": "m01.facility",
+  "rooms": [
+    {
+      "id": "m01.insertion",
+      "name": "Insertion perimeter",
+      "bounds_xywh_m": [
+        0,
+        0,
+        24,
+        18
+      ],
+      "pressure": "arrival",
+      "neighbors": [
+        "m01.drainage",
+        "m01.checkpoint"
+      ],
+      "description": "Open southern shadowed apron, split into culvert and checkpoint approach",
+      "geometry_status": "provisional_remake_blockout",
+      "source_alignment": "pending_j2me_trace",
+      "camera_clearance": "verify_both_shoulders_30_60_120fps"
+    },
+    {
+      "id": "m01.drainage",
+      "name": "Drainage approach",
+      "bounds_xywh_m": [
+        24,
+        0,
+        18,
+        12
+      ],
+      "pressure": "low",
+      "neighbors": [
+        "m01.insertion",
+        "m01.service"
+      ],
+      "description": "Low crawl pipe; grate conceals line of sight, footfall carries beyond mouth",
+      "geometry_status": "provisional_remake_blockout",
+      "source_alignment": "pending_j2me_trace",
+      "camera_clearance": "verify_both_shoulders_30_60_120fps"
+    },
+    {
+      "id": "m01.checkpoint",
+      "name": "Outer checkpoint",
+      "bounds_xywh_m": [
+        0,
+        18,
+        24,
+        18
+      ],
+      "pressure": "medium",
+      "neighbors": [
+        "m01.insertion",
+        "m01.service"
+      ],
+      "description": "Gatehouse, truck blind spot, lit barrier and staffed desk",
+      "geometry_status": "provisional_remake_blockout",
+      "source_alignment": "pending_j2me_trace",
+      "camera_clearance": "verify_both_shoulders_30_60_120fps"
+    },
+    {
+      "id": "m01.service",
+      "name": "Service store",
+      "bounds_xywh_m": [
+        24,
+        18,
+        24,
+        18
+      ],
+      "pressure": "relief",
+      "neighbors": [
+        "m01.drainage",
+        "m01.checkpoint",
+        "m01.security"
+      ],
+      "description": "Shelving blocks vision and allows concealed resupply",
+      "geometry_status": "provisional_remake_blockout",
+      "source_alignment": "pending_j2me_trace",
+      "camera_clearance": "verify_both_shoulders_30_60_120fps"
+    },
+    {
+      "id": "m01.security",
+      "name": "Internal security",
+      "bounds_xywh_m": [
+        48,
+        18,
+        24,
+        24
+      ],
+      "pressure": "high",
+      "neighbors": [
+        "m01.service",
+        "m01.facility",
+        "m01.maintenance"
+      ],
+      "description": "Offset two-lane hall, glass booth, raised observation catwalk",
+      "geometry_status": "provisional_remake_blockout",
+      "source_alignment": "pending_j2me_trace",
+      "camera_clearance": "verify_both_shoulders_30_60_120fps"
+    },
+    {
+      "id": "m01.maintenance",
+      "name": "Maintenance bypass",
+      "bounds_xywh_m": [
+        48,
+        42,
+        24,
+        12
+      ],
+      "pressure": "medium",
+      "neighbors": [
+        "m01.security",
+        "m01.facility"
+      ],
+      "description": "Optional noisy generator passage; ladder to high return balcony",
+      "geometry_status": "provisional_remake_blockout",
+      "source_alignment": "pending_j2me_trace",
+      "camera_clearance": "verify_both_shoulders_30_60_120fps"
+    },
+    {
+      "id": "m01.facility",
+      "name": "Main facility antechamber",
+      "bounds_xywh_m": [
+        72,
+        18,
+        28,
+        24
+      ],
+      "pressure": "resolution",
+      "neighbors": [
+        "m01.security",
+        "m01.maintenance"
+      ],
+      "description": "Durable mission boundary; three future gated facility connections",
+      "geometry_status": "provisional_remake_blockout",
+      "source_alignment": "pending_j2me_trace",
+      "camera_clearance": "verify_both_shoulders_30_60_120fps"
+    }
+  ],
+  "portals": [
+    {
+      "from": "m01.insertion",
+      "to": "m01.drainage",
+      "kind": "crawl",
+      "gate": "always",
+      "notes": "Low, slow, visually concealed; cannot be traversed while standing",
+      "bidirectional": true
+    },
+    {
+      "from": "m01.insertion",
+      "to": "m01.checkpoint",
+      "kind": "open",
+      "gate": "always",
+      "notes": "Fast, lit and seen by G02 at parts of patrol",
+      "bidirectional": true
+    },
+    {
+      "from": "m01.drainage",
+      "to": "m01.service",
+      "kind": "grate",
+      "gate": "interact_from_drainage",
+      "notes": "Quiet grate opening leaves durable open state",
+      "bidirectional": true
+    },
+    {
+      "from": "m01.checkpoint",
+      "to": "m01.service",
+      "kind": "service_door",
+      "gate": "always",
+      "notes": "Guarded direct route; door blocks vision when closed",
+      "bidirectional": true
+    },
+    {
+      "from": "m01.service",
+      "to": "m01.security",
+      "kind": "security_door",
+      "gate": "always",
+      "notes": "First compound guard crossing; cover lip before entry",
+      "bidirectional": true
+    },
+    {
+      "from": "m01.security",
+      "to": "m01.maintenance",
+      "kind": "ladder",
+      "gate": "always",
+      "notes": "Raised route, one-at-a-time traversal; no combat on ladder",
+      "bidirectional": true
+    },
+    {
+      "from": "m01.security",
+      "to": "m01.facility",
+      "kind": "security_gate",
+      "gate": "clearance_from_terminal",
+      "notes": "Gate requires readable terminal interaction, no hidden timer",
+      "bidirectional": true
+    },
+    {
+      "from": "m01.maintenance",
+      "to": "m01.facility",
+      "kind": "high_vent",
+      "gate": "always",
+      "notes": "Alternate passage bypasses gate but not mission intel",
+      "bidirectional": true
+    }
+  ],
+  "guards": [
+    {
+      "id": "G01",
+      "room": "m01.insertion",
+      "spawn_xy_m": [
+        11,
+        12
+      ],
+      "patrol_xy_m": [
+        [
+          11,
+          12
+        ],
+        [
+          17,
+          12
+        ],
+        [
+          17,
+          15
+        ],
+        [
+          11,
+          15
+        ]
+      ],
+      "facing_deg": 90,
+      "role": "single_baseline_patrol",
+      "response": "Investigate localized gravel/footfall noises; never know Snake position from sound alone",
+      "recovery": "Resume last patrol waypoint after search"
+    },
+    {
+      "id": "G02",
+      "room": "m01.checkpoint",
+      "spawn_xy_m": [
+        8,
+        26
+      ],
+      "patrol_xy_m": [
+        [
+          8,
+          26
+        ],
+        [
+          19,
+          26
+        ],
+        [
+          19,
+          31
+        ],
+        [
+          8,
+          31
+        ]
+      ],
+      "facing_deg": 0,
+      "role": "barrier_sentry",
+      "response": "Faces barrier during truck inspection; radio actual visual confirmation",
+      "recovery": "Search booth and truck perimeter before reset"
+    },
+    {
+      "id": "G03",
+      "room": "m01.checkpoint",
+      "spawn_xy_m": [
+        18,
+        33
+      ],
+      "patrol_xy_m": [
+        [
+          18,
+          33
+        ],
+        [
+          13,
+          33
+        ],
+        [
+          13,
+          29
+        ]
+      ],
+      "facing_deg": 180,
+      "role": "checkpoint_rover",
+      "response": "Offset phase from G02 so a readable crossing window exists",
+      "recovery": "Returns to desk after sound investigation"
+    },
+    {
+      "id": "G04",
+      "room": "m01.security",
+      "spawn_xy_m": [
+        53,
+        29
+      ],
+      "patrol_xy_m": [
+        [
+          53,
+          29
+        ],
+        [
+          65,
+          29
+        ],
+        [
+          65,
+          34
+        ],
+        [
+          53,
+          34
+        ]
+      ],
+      "facing_deg": 90,
+      "role": "hall_patrol",
+      "response": "Coordinates only on witnessed alert/radio; cannot see through shelving",
+      "recovery": "Checks last known location then patrol"
+    },
+    {
+      "id": "G05",
+      "room": "m01.security",
+      "spawn_xy_m": [
+        67,
+        24
+      ],
+      "patrol_xy_m": [
+        [
+          67,
+          24
+        ],
+        [
+          67,
+          36
+        ]
+      ],
+      "facing_deg": 180,
+      "role": "booth_sentry",
+      "response": "Overlooks hall but not maintenance blind corner; raised sightline",
+      "recovery": "Holds booth until support request"
+    },
+    {
+      "id": "G06",
+      "room": "m01.maintenance",
+      "spawn_xy_m": [
+        59,
+        46
+      ],
+      "patrol_xy_m": [
+        [
+          59,
+          46
+        ],
+        [
+          66,
+          46
+        ],
+        [
+          66,
+          51
+        ]
+      ],
+      "facing_deg": 0,
+      "role": "maintenance_inspector",
+      "response": "Generator intermittently masks footsteps, but loud actions carry",
+      "recovery": "Checks generator access then returns"
+    }
+  ],
+  "pickups": [
+    {
+      "id": "P01",
+      "item": "ration",
+      "room": "m01.insertion",
+      "xy_m": [
+        5,
+        4
+      ],
+      "access": "optional",
+      "purpose": "Low-risk discovery; supports recovery without forcing tutorial"
+    },
+    {
+      "id": "P02",
+      "item": "first_aid",
+      "room": "m01.checkpoint",
+      "xy_m": [
+        6,
+        31
+      ],
+      "access": "guarded_optional",
+      "purpose": "Reward for reading G02 and G03 patrol offsets"
+    },
+    {
+      "id": "P03",
+      "item": "handgun",
+      "room": "m01.service",
+      "xy_m": [
+        31,
+        25
+      ],
+      "access": "visible_from_cover",
+      "purpose": "First lethal option after stealth has already been taught; ammo scarce"
+    },
+    {
+      "id": "P04",
+      "item": "handgun_ammo",
+      "room": "m01.service",
+      "xy_m": [
+        42,
+        31
+      ],
+      "access": "optional_rear_shelf",
+      "purpose": "Reward full exploration with limited ammunition"
+    },
+    {
+      "id": "P05",
+      "item": "ration",
+      "room": "m01.maintenance",
+      "xy_m": [
+        65,
+        48
+      ],
+      "access": "noisy_detour",
+      "purpose": "Trade exposure/noise against supplies"
+    },
+    {
+      "id": "P06",
+      "item": "key_intel",
+      "room": "m01.facility",
+      "xy_m": [
+        92,
+        26
+      ],
+      "access": "mandatory",
+      "purpose": "Mark next objective without falsely equating to unverified source key card"
+    }
+  ],
+  "beats": [
+    {
+      "id": "M01.B01",
+      "room": "m01.insertion",
+      "trigger": "player_spawn",
+      "interaction": "Movement, optional radio and first observational cover",
+      "agency": "Immediate control; no compulsory exposition",
+      "checkpoint": true
+    },
+    {
+      "id": "M01.B02",
+      "room": "m01.drainage",
+      "trigger": "enter_crawl",
+      "interaction": "Choose concealment versus slower travel",
+      "agency": "Return or proceed without one-way lock"
+    },
+    {
+      "id": "M01.B03",
+      "room": "m01.checkpoint",
+      "trigger": "approach_barrier",
+      "interaction": "Observe G02/G03 rhythm then sneak, distract or fight",
+      "agency": "No random guard spawns"
+    },
+    {
+      "id": "M01.B04",
+      "room": "m01.service",
+      "trigger": "pick_up_handgun",
+      "interaction": "Equip only if player chooses; limited ammo",
+      "agency": "No mandatory weapon use"
+    },
+    {
+      "id": "M01.B05",
+      "room": "m01.security",
+      "trigger": "cross_security_hall",
+      "interaction": "Interlocking cones and sound-dependent investigation",
+      "agency": "Main route or maintenance detour"
+    },
+    {
+      "id": "M01.B06",
+      "room": "m01.facility",
+      "trigger": "collect_key_intel",
+      "interaction": "Stage completion and future connections",
+      "agency": "Backtrack while persistent door/item states remain",
+      "checkpoint": true
+    }
+  ],
+  "persistence": [
+    "pickup_collected_ids",
+    "portal_open_ids",
+    "security_terminal_used",
+    "mission_01_complete",
+    "guard_alert_memory_by_area"
+  ],
+  "release_gates": [
+    "Trace source first mission entrances and pickup dependencies",
+    "Unreal procedural spawn from shared data pending",
+    "Browser world load from shared data pending",
+    "Navmesh, sightline/camera and traversability tests pending",
+    "Check all nonlethal/no-pickup/no-alert routes in builds"
+  ],
+  "qa_scenarios": [
+    "Direct checkpoint stealth route",
+    "Drainage-only opening then service",
+    "No weapon pickup completion",
+    "Full alert with plausible retreat",
+    "Save/load before and after pickups",
+    "Revisit does not duplicate items",
+    "Shoulder swap and crawl/grate collision",
+    "Camera from upper route cannot see through geometry"
+  ]
+}
