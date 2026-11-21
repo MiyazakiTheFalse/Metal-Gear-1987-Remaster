@@ -2,6 +2,7 @@
 
 #include "MGEquipmentComponent.h"
 #include "MGGrayFoxMission.h"
+#include "MGMissionOne.h"
 #include "MGGuardActor.h"
 #include "MGPlayerCharacter.h"
 #include "Engine/Canvas.h"
@@ -61,6 +62,8 @@ void AMGPrototypeHUD::DrawHUD()
              Margin + 12.f * UiScale, Margin + 62.f * UiScale,
              nullptr, 0.78f * UiScale, false);
 
+    const AMGMissionOne* Opening = Cast<AMGMissionOne>(
+        UGameplayStatics::GetActorOfClass(this, AMGMissionOne::StaticClass()));
     // Actual guard awareness drives radar vs threat overlay.
     int32 MaxThreat = 0;
     float MaxSuspicion = 0.f;
@@ -100,20 +103,21 @@ void AMGPrototypeHUD::DrawHUD()
         const float RW = RadarSize - 26.f * UiScale;
         const float RH = 91.f * UiScale;
         DrawRect(FLinearColor(0.05f, 0.13f, 0.13f, 1.f), X0, Y0, RW, RH);
-        // Provisional prison topology; replace with verified original map data.
-        const float SpanX = 26.6f * 100.f;
-        const float SpanY = 10.f * 100.f;
-        for (const float DividerWorldX : {-410.f, 450.f})
+        // Mission One uses provisional 100m x 54m layout. Prison uses the
+        // original prototype radar. These are *not* source-verified maps.
+        const float SpanX = Opening ? 10000.f : 2660.f;
+        const float SpanY = Opening ? 5400.f : 1000.f;
+        if (!Opening) for (const float DividerWorldX : {-410.f, 450.f})
         {
             const float V = X0 + FMath::Clamp((DividerWorldX + 1250.f) / SpanX, 0.f, 1.f) * RW;
             DrawRect(HudMuted, V, Y0, 2.f * UiScale, RH * 0.34f);
             DrawRect(HudMuted, V, Y0 + RH * 0.66f, 2.f * UiScale, RH * 0.34f);
         }
-        auto MarkPoint = [this, X0, Y0, RW, RH, UiScale](const FVector& World,
+        auto MarkPoint = [this, X0, Y0, RW, RH, UiScale, Opening](const FVector& World,
                         const FLinearColor& Tint, float Size)
         {
-            const float Px = X0 + FMath::Clamp((World.X + 1250.f) / 2660.f, 0.f, 1.f) * RW;
-            const float Py = Y0 + FMath::Clamp((World.Y + 500.f) / 1000.f, 0.f, 1.f) * RH;
+            const float Px = X0 + FMath::Clamp((World.X + (Opening ? 0.f : 1250.f)) / (Opening ? 10000.f : 2660.f), 0.f, 1.f) * RW;
+            const float Py = Y0 + FMath::Clamp((World.Y + (Opening ? 0.f : 500.f)) / (Opening ? 5400.f : 1000.f), 0.f, 1.f) * RH;
             DrawRect(Tint, Px - Size * 0.5f * UiScale, Py - Size * 0.5f * UiScale,
                      Size * UiScale, Size * UiScale);
         };
@@ -125,6 +129,17 @@ void AMGPrototypeHUD::DrawHUD()
 
     const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
+    if (Opening)
+    {
+        DrawRect(HudPanel, Margin, Margin + 113.f * UiScale,
+                 FMath::Min(590.f * UiScale, Width - 2.f * Margin), 88.f * UiScale);
+        DrawText(TEXT("MISSION 01 / OPERATION INTRUDE N313"), HudGreen,
+                 Margin + 12.f * UiScale, Margin + 120.f * UiScale,
+                 nullptr, 0.75f * UiScale, false);
+        DrawText(Opening->GetObjectiveText(), FLinearColor::White,
+                 Margin + 12.f * UiScale, Margin + 149.f * UiScale,
+                 nullptr, 0.79f * UiScale, false);
+    }
     if (Mission)
     {
         DrawRect(HudPanel, Margin, Margin + 113.f * UiScale,
@@ -228,7 +243,10 @@ void AMGPrototypeHUD::DrawHUD()
         const int32 Channel = Player->GetTransceiverChannel();
         const FString Transcript = Mission ?
             Mission->GetTransceiverDialogue(Channel) :
-            TEXT("NO SIGNAL — LOCAL CONTACTS UNAVAILABLE");
+            (Opening ?
+                TEXT("BIG BOSS: INFILTRATE OUTER HEAVEN. FIND GRAY FOX.\\n")
+                TEXT("REMAKE RADIO TEXT — VOICE RECORDING PENDING.") :
+                TEXT("NO SIGNAL — LOCAL CONTACTS UNAVAILABLE"));
         TArray<FString> Lines;
         Transcript.ParseIntoArrayLines(Lines, true);
         const float PanelWidth = FMath::Min(580.f * UiScale, Width - 2.f * Margin);
