@@ -7,6 +7,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UStaticMeshComponent;
+class UAnimMontage;
 class UMGEquipmentComponent;
 class AMGRemoteMissile;
 class AMGGuardActor;
@@ -51,7 +52,17 @@ public:
     bool IsWallKnocking() const { return WallKnockVisualTimer > 0.f; }
     UFUNCTION(BlueprintPure, Category="Stealth|Wall")
     float GetCoverShuffleDirection() const { return CoverShuffleDirection; }
-    FString GetPostureText() const;
+    // MGS-style source-inspired input sequence: left punch, right punch,
+    // finishing kick. Blueprint animation graph can read these live values.
+    UFUNCTION(BlueprintPure, Category="Animation|Melee")
+    int32 GetMeleeStrikeIndex() const { return bMeleeInProgress ? MeleeStrikeIndex : 0; }
+    UFUNCTION(BlueprintPure, Category="Animation|Melee")
+    float GetMeleeStrikeAlpha() const;
+    UFUNCTION(BlueprintPure, Category="Animation|Melee")
+    bool IsMeleeComboActive() const { return bMeleeInProgress; }
+    UFUNCTION(BlueprintPure, Category="Animation|Melee")
+    bool IsMeleeHitWindow() const { return bMeleeInProgress && bMeleeHitWindow; }
+        FString GetPostureText() const;
     bool TryEnterCover();
     void LeaveCover();
     UMGEquipmentComponent* GetEquipment() const { return Equipment; }
@@ -99,11 +110,29 @@ private:
     float ChokeStruggleTime = 0.f;
     bool bInteractHeld = false;
     float Health = 100.f;
-    float MeleeNextTime = 0.f;
-    float LastMeleeTime = -100.f;
-    float MeleeVisualTimer = 0.f;
+    // Authoritative melee state runs on real seconds and applies hit damage
+    // only at the active frame, never at the initial button press.
+    bool bMeleeInProgress = false;
+    bool bMeleeHitWindow = false;
+    bool bMeleeHitResolved = false;
+    int32 MeleeStrikeIndex = 0; // 1=left, 2=right, 3=kick
+    int32 MeleeQueuedInputs = 0; // buffer up to two quick successive taps
+    float MeleePhaseSeconds = 0.f;
+    float MeleeRecoverySeconds = 0.f;
     float CombatNoiseTimer = 0.f;
-    int32 MeleeComboStep = 0;
+    // Distinct physical fallback body parts for the current non-rigged proxy.
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    UStaticMeshComponent* ProxyLeftArm = nullptr;
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    UStaticMeshComponent* ProxyRightArm = nullptr;
+    UPROPERTY(VisibleAnywhere, Category="Prototype|Melee")
+    UStaticMeshComponent* ProxyRightLeg = nullptr;
+    UPROPERTY(EditDefaultsOnly, Category="Animation|Melee")
+    UAnimMontage* LeftPunchMontage = nullptr;
+    UPROPERTY(EditDefaultsOnly, Category="Animation|Melee")
+    UAnimMontage* RightPunchMontage = nullptr;
+    UPROPERTY(EditDefaultsOnly, Category="Animation|Melee")
+    UAnimMontage* FinisherKickMontage = nullptr;
 
     void MoveForward(float Value);
     void MoveRight(float Value);
@@ -136,6 +165,10 @@ private:
     void SelectionNext();
     void UseItem();
     void MeleeAttack();
+    void StartMeleeStrike(int32 Strike);
+    void AdvanceMeleeCombo(float DeltaSeconds);
+    void ResolveMeleeContact();
+    void UpdateMeleePresentation(float DeltaSeconds);
     void ToggleProne();
     void ToggleCover();
     void EnterProneAfterCrouch();
