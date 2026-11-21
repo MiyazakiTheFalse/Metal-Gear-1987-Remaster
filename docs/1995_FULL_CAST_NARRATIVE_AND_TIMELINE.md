@@ -3,7 +3,7 @@
 
 > **Scope:** Only events during or immediately framing the **1995 Outer Heaven uprising and this game**. This is a comprehensive **narrative specification**, not 105 implemented scenes. The dates of individual events, hours of infiltration, exact age/height of most supporting actors, off-screen deaths and named identities of ordinary soldiers are not established by the 1987 source and must not be fabricated.
 
-**Required reading / machine-readable contracts:** [Character Arc Registry](../data/character_arc_registry.json) (22 actors or meaningful groups; 105 story beats); [40-scene campaign chronology](../data/1995_campaign_sequence.json); [Game-wide event doctrine](DOCTRINE_002_EVENTS.md); [Spatial doctrine](DOCTRINE_005_SPATIAL_STRUCTURE.md). This document supersedes earlier conjectures in [CHARACTER_STORY_BIBLE_1995.md](CHARACTER_STORY_BIBLE_1995.md) where location, ordering or cast are corrected below.
+**Required reading / machine-readable contracts:** [Character Arc Registry](../data/character_arc_registry.json) (22 actors or meaningful groups; 105 story beats); [40-scene campaign chronology](../data/1995_campaign_sequence.json); [individual ordered 1995 character timelines](../data/1995_individual_character_timelines.json) (128 cross-linked scene appearances, including offscreen references); [Game-wide event doctrine](DOCTRINE_002_EVENTS.md); [Spatial doctrine](DOCTRINE_005_SPATIAL_STRUCTURE.md). This document supersedes earlier conjectures in [CHARACTER_STORY_BIBLE_1995.md](CHARACTER_STORY_BIBLE_1995.md) where location, ordering or cast are corrected below.
 
 ### Canon and source discipline
 
