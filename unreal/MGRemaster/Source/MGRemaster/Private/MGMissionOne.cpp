@@ -5,6 +5,7 @@
 #include "MGPlayerCharacter.h"
 #include "MGEquipmentComponent.h"
 #include "Components/SceneComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/World.h"
@@ -17,7 +18,7 @@ namespace
 
 AMGMissionOne::AMGMissionOne()
 {
-    PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = true;
     RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
     if (Cube.Succeeded()) BlockMesh = Cube.Object;
@@ -42,7 +43,7 @@ void AMGMissionOne::AddPickup(FName Id, FName Item, FVector Metres, bool bWeapon
     FPickup P;
     P.Id = Id;
     P.Item = Item;
-    P.Location = CM(Metres.X, Metres.Y, 65.f);
+    P.Location = CM(Metres.X, Metres.Y, 65.f + Metres.Z * 100.f);
     P.bWeapon = bWeapon;
     P.Marker = Block(Id, P.Location, FVector(.65f, .65f, .45f), false);
     Pickups.Add(P);
@@ -121,6 +122,7 @@ void AMGMissionOne::Build()
     AddPickup(TEXT("P04"), TEXT("GASMASK"), FVector(31.f, 25.f, 0.f), false);
     AddPickup(TEXT("P05"), TEXT("HANDGUN"), FVector(55.f, 29.5f, 0.f), true);
     AddPickup(TEXT("P06"), TEXT("MINES"), FVector(67.f, 29.5f, 0.f), false);
+    BuildUpperFloors();
 }
 
 void AMGMissionOne::SpawnGuards()
@@ -136,7 +138,9 @@ void AMGMissionOne::SpawnGuards()
         {TEXT("G02_Trucks"), {CM(8,27),CM(19,27),CM(19,31),CM(8,31)}},
         {TEXT("G03_TruckDeparture"), {CM(18,33),CM(13,33),CM(13,29)}},
         {TEXT("G04_SecondYard"), {CM(53,29),CM(65,29),CM(65,34),CM(53,34)}},
-        {TEXT("G05_Lift"), {CM(70,24),CM(70,36)}}
+        {TEXT("G05_Lift"), {CM(70,24),CM(70,36)}},
+        {TEXT("G07_SecondFloorCorridor"), {CM(58,29,690),CM(69,29,690),CM(69,35,690)}},
+        {TEXT("G08_ThirdFloorCameraGallery"), {CM(65,28,1290),CM(76,28,1290),CM(76,36,1290)}}
         // G06's optional maintenance wing is sealed in source-fidelity mode.
         // It remains authored in the JSON contract but must not spawn here.
     };
@@ -160,7 +164,7 @@ void AMGMissionOne::BeginPlay()
     SpawnGuards();
     const UMGMissionOneSaveGame* Save = Cast<UMGMissionOneSaveGame>(
         UGameplayStatics::LoadGameFromSlot(TEXT("MissionOneV1"), 0));
-    if (Save && Save->Version == 1)
+    if (Save && (Save->Version == 1 || Save->Version == 2))
     {
         for (FPickup& P : Pickups)
             if (Save->CollectedPickupIds.Contains(P.Id))
@@ -171,6 +175,9 @@ void AMGMissionOne::BeginPlay()
         bCardDoorOpened = Save->bCardDoorOpened;
         if (bCardDoorOpened && IsValid(CardDoor)) CardDoor->Destroy();
         bElevatorReached = Save->bElevatorReached;
+        bPOWRescued = Save->Version >= 2 && Save->bPOWRescued;
+        CurrentFloor = Save->Version >= 2 ? FMath::Clamp(Save->CurrentFloor, 1, 3) : 1;
+        SelectedFloor = CurrentFloor == 1 ? 3 : (CurrentFloor == 3 ? 2 : 1);
         // Checkpoint is kept at the fixed start until source-verified safe
         // positions are authored; no restart into a solid door or enemy.
     }
@@ -183,7 +190,9 @@ void AMGMissionOne::RestoreSavedEquipment(AMGPlayerCharacter* Player)
     for (const FPickup& P : Pickups)
         if (P.bTaken)
         {
-            if (P.bWeapon) Equipment->AwardWeapon(P.Item, 0);
+            if (P.Item == TEXT("HANDGUN_AMMO"))
+                Equipment->AwardAmmunition(TEXT("HANDGUN"), 12);
+            else if (P.bWeapon) Equipment->AwardWeapon(P.Item, 0);
             else Equipment->AwardItem(P.Item, 1);
         }
 }
@@ -197,6 +206,9 @@ void AMGMissionOne::SaveProgress(AMGPlayerCharacter* Player)
         if (P.bTaken) Save->CollectedPickupIds.Add(P.Id);
     Save->bCardDoorOpened = bCardDoorOpened;
     Save->bElevatorReached = bElevatorReached;
+    Save->bPOWRescued = bPOWRescued;
+    Save->CurrentFloor = CurrentFloor;
+    Save->Version = 2;
     if (!UGameplayStatics::SaveGameToSlot(Save, TEXT("MissionOneV1"), 0))
         UE_LOG(LogTemp, Warning, TEXT("Mission One checkpoint save failed"));
 }
@@ -214,9 +226,10 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
             Player->NotifyFeedback(TEXT("CARD 1 REQUIRED"), TEXT("denied"));
             return true;
         }
-        const bool bAwarded = P.bWeapon ?
-            Equipment->AwardWeapon(P.Item, 0) :
-            Equipment->AwardItem(P.Item, 1);
+        const bool bAwarded = P.Item == TEXT("HANDGUN_AMMO") ?
+            Equipment->AwardAmmunition(TEXT("HANDGUN"), 12) :
+            (P.bWeapon ? Equipment->AwardWeapon(P.Item, 0) :
+            Equipment->AwardItem(P.Item, 1));
         if (!bAwarded) return false;
         P.bTaken = true;
         if (IsValid(P.Marker)) P.Marker->Destroy();
@@ -238,25 +251,146 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
         }
         return true;
     }
-    if (!bElevatorReached &&
-        FVector::Dist2D(Player->GetActorLocation(), CM(92.f, 26.f)) < 230.f)
+    if (CurrentFloor == 3 && !bPOWRescued &&
+        FVector::Dist(Player->GetActorLocation(), CM(54.f, 33.f, 1290.f)) < 240.f)
     {
-        bElevatorReached = true;
+        bPOWRescued = true;
         SaveProgress(Player);
-        Player->NotifyFeedback(TEXT("BUILDING ONE — UPPER FLOORS NOT YET AUTHOR-VERIFIED"), TEXT("select"));
+        Player->NotifyFeedback(TEXT("PRISONER CONTACT — SOURCE DIALOGUE PENDING"), TEXT("rescue"));
         return true;
     }
+    if (IsNearLift(Player)) return StartLift(Player);
     return false;
 }
 
 FString AMGMissionOne::GetObjectiveText() const
 {
-    if (bElevatorReached) return TEXT("BUILDING ONE — UPPER FLOORS AWAIT IMPLEMENTATION");
+    if (bLiftTravelling)
+        return FString::Printf(TEXT("ELEVATOR / EN ROUTE TO %dF"), DestinationFloor);
+    if (CurrentFloor == 3)
+        return bPOWRescued ? TEXT("3F — SEARCH CAMERA GALLERY / RETURN VIA ELEVATOR")
+            : TEXT("3F — FIND HANDGUN AMMO AND THE PRISONER");
+    if (CurrentFloor == 2)
+        return TEXT("2F — RECONNOITRE CORRIDORS / RETURN TO ELEVATOR");
     bool bCardCollected = false;
     for (const FPickup& P : Pickups)
         if (P.Item == FName(TEXT("CARD1")) && P.bTaken)
             bCardCollected = true;
     if (!bCardCollected) return TEXT("INFILTRATE THE TRUCK YARD — FIND ACCESS CARD 1");
     if (!bCardDoorOpened) return TEXT("ACCESS THE CARD 1 ROOM — INVESTIGATE ITS CONTENTS");
-    return TEXT("REACH THE BUILDING ONE ELEVATOR — AVOID DETECTION");
+    return FString::Printf(TEXT("1F — REACH ELEVATOR / Q SELECTS %dF"), SelectedFloor);
+}
+
+void AMGMissionOne::BuildUpperFloors()
+{
+    // Separate persistent decks share a vertical shaft; they are not detached
+    // unrelated maps. 600 cm deck separation is an authored remake hypothesis.
+    for (int32 Floor = 2; Floor <= 3; ++Floor)
+    {
+        const float DeckZ = (Floor - 1) * 600.f;
+        Block(FName(*FString::Printf(TEXT("B1_%dF_Deck"), Floor)),
+              CM(71.f, 30.f, DeckZ - 75.f), FVector(58.f, 24.f, 1.5f));
+        auto Perimeter = [this, DeckZ](float X, float Y, float SX, float SY)
+        {
+            Block(TEXT("UpperBoundary"), CM(X, Y, DeckZ + 165.f),
+                  FVector(SX, SY, 3.3f));
+        };
+        Perimeter(42.f,30.f,.35f,24.f);
+        Perimeter(100.f,30.f,.35f,24.f);
+        Perimeter(71.f,18.f,58.f,.35f);
+        Perimeter(71.f,42.f,58.f,.35f);
+        // Distinct visual landmarks: service crates on 2F and monitored
+        // gallery / prisoner threshold on 3F. Cameras are visual proxies
+        // until they have actual detection/traversal behaviour.
+        if (Floor == 2)
+        {
+            Block(TEXT("2F_ServiceCrates"), CM(61.f, 34.f, DeckZ + 85.f),
+                  FVector(2.2f, 1.4f, 1.7f));
+            Block(TEXT("2F_PatrolCover"), CM(76.f, 23.f, DeckZ + 65.f),
+                  FVector(2.0f, 1.1f, 1.3f));
+        }
+        else
+        {
+            Block(TEXT("3F_CameraProxy"), CM(79.f, 39.f, DeckZ + 265.f),
+                  FVector(.7f,.7f,.4f), false);
+            Block(TEXT("3F_CameraProxy"), CM(68.f, 39.f, DeckZ + 265.f),
+                  FVector(.7f,.7f,.4f), false);
+            Block(TEXT("3F_PrisonerContact"), CM(54.f, 33.f, DeckZ + 90.f),
+                  FVector(.6f,.6f,1.8f), false);
+            Block(TEXT("3F_CrateCover"), CM(73.f, 34.f, DeckZ + 70.f),
+                  FVector(1.8f,1.3f,1.4f));
+        }
+        Block(FName(*FString::Printf(TEXT("B1_%dF_Lift"), Floor)),
+              CM(92.f, 26.f, DeckZ + 90.f), FVector(1.f,1.f,1.8f), false);
+    }
+    AddPickup(TEXT("P07"), TEXT("HANDGUN_AMMO"), FVector(78.f, 28.f, 12.f), false);
+}
+
+FVector AMGMissionOne::FloorLiftLocation(int32 Floor)
+{
+    return CM(92.f, 26.f, 90.f + (Floor - 1) * 600.f);
+}
+
+bool AMGMissionOne::IsNearLift(const AMGPlayerCharacter* Player) const
+{
+    return Player && FVector::Dist(Player->GetActorLocation(), FloorLiftLocation(CurrentFloor)) <= 320.f;
+}
+
+bool AMGMissionOne::CycleLiftDestination(AMGPlayerCharacter* Player)
+{
+    if (!IsNearLift(Player) || bLiftTravelling) return false;
+    // Q cycles only among *other* floors, giving players deliberate control
+    // without adding a menu that seizes the camera.
+    do { SelectedFloor = SelectedFloor == 3 ? 1 : SelectedFloor + 1; }
+    while (SelectedFloor == CurrentFloor);
+    Player->NotifyFeedback(FString::Printf(
+        TEXT("ELEVATOR DESTINATION %dF — PRESS E TO TRAVEL"), SelectedFloor),
+        TEXT("select"));
+    return true;
+}
+
+bool AMGMissionOne::StartLift(AMGPlayerCharacter* Player)
+{
+    if (!IsNearLift(Player) || bLiftTravelling || SelectedFloor == CurrentFloor)
+        return false;
+    LiftPassenger = Player;
+    bLiftTravelling = true;
+    DestinationFloor = SelectedFloor;
+    // Temporary simulated closed-door phase. When streamed floor sublevels
+    // exist, start an async load here and complete only after readiness.
+    LiftTravelRemaining = 0.85f;
+    if (UCharacterMovementComponent* Movement = Player->GetCharacterMovement())
+        Movement->DisableMovement();
+    Player->NotifyFeedback(FString::Printf(
+        TEXT("ELEVATOR / %dF — TRANSIT"), DestinationFloor), TEXT("select"));
+    return true;
+}
+
+void AMGMissionOne::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+    if (!bLiftTravelling) return;
+    LiftTravelRemaining -= FMath::Max(0.f, DeltaSeconds);
+    if (LiftTravelRemaining <= 0.f) FinishLift();
+}
+
+void AMGMissionOne::FinishLift()
+{
+    AMGPlayerCharacter* Player = LiftPassenger.Get();
+    bLiftTravelling = false;
+    LiftPassenger.Reset();
+    if (!IsValid(Player)) return;
+    const FVector Arrival = FloorLiftLocation(DestinationFloor);
+    // All three arrival platforms are authored floors. Teleport once only
+    // after the closed-door phase; don't alter other mission state.
+    Player->SetActorLocation(Arrival, false, nullptr, ETeleportType::TeleportPhysics);
+    if (UCharacterMovementComponent* Movement = Player->GetCharacterMovement())
+        Movement->SetMovementMode(MOVE_Walking);
+    CurrentFloor = DestinationFloor;
+    SelectedFloor = CurrentFloor == 1 ? 3 : (CurrentFloor == 3 ? 2 : 1);
+    bElevatorReached = true;
+    SaveProgress(Player);
+    Player->NotifyFeedback(FString::Printf(
+        TEXT("BUILDING ONE / %dF — Q CHANGE LIFT DESTINATION"), CurrentFloor),
+        TEXT("select"));
 }
