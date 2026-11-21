@@ -22,7 +22,7 @@
 | 1995 vs future military technology | *MGS4* depicts later PMC/SOP/nanomachine infrastructure | Borrow **gameplay feel**, not timeline-inappropriate technology: dynamic cover, search coordination, suppressors, camera response | Do not place MGS4 SOP soldier-control systems or late-era hardware into Outer Heaven |
 | Outer Heaven's human cost | Later lore deepens the consequences of private armies and war | Optional witness testimony, environmental storytelling, logistics and civilian consequences | Respect the original hostages and events; no speculative atrocities asserted as canon |
 
-The full 1995 character arc and beat-stage plan is tracked in [CHARACTER_STORY_BIBLE_1995.md](CHARACTER_STORY_BIBLE_1995.md) and the machine-readable [character arc registry](../data/character_arc_registry.json). This continuity file is a source filter, **not** itself a scene-by-scene narrative bible.
+The complete 1995 chronology and personal cast arcs are in [1995_FULL_CAST_NARRATIVE_AND_TIMELINE.md](1995_FULL_CAST_NARRATIVE_AND_TIMELINE.md), with a [40-scene production sequence](../data/1995_campaign_sequence.json) and the [22-character/group, 105-beat registry](../data/character_arc_registry.json). This continuity file is a source filter, **not** the scene-by-scene bible. Canon-critical corrections: Ellen is in Building One basement; TX-55 destruction precedes Big Boss's final confrontation; all original MSX2 events remain comparison-only until the J2ME build is traced.
 
 ## Implementation filter (mandatory)
 
