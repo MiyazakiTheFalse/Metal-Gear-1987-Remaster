@@ -22,7 +22,7 @@ class EquipmentMenuContracts(unittest.TestCase):
         self.assertIn("item.blank=seen.has(item.index)", script)
         self.assertIn("window.MGEquipmentStrip.windowSlots", game)
         self.assertIn("MGEquipmentStrip.wrapped", game)
-        self.assertIn('data-current="'+"" , game) if False else None
+        self.assertIn('data-current', game)
         for signature in ("mg-strip-track", "mg-strip-card", "mg-strip-current",
                           "data-empty", "prefers-reduced-motion"):
             self.assertIn(signature, html + game)
