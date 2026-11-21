@@ -110,6 +110,8 @@ private:
     AStaticMeshActor* M03Cache = nullptr;
     UPROPERTY()
     AStaticMeshActor* M03Breaker = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* M03ExteriorConnector = nullptr;
     bool bLiftTravelling = false;
     float LiftTravelRemaining = 0.f;
     int32 CurrentFloor = 1;
