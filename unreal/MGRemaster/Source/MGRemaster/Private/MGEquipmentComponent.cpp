@@ -206,3 +206,38 @@ bool UMGEquipmentComponent::AwardAmmunition(FName WeaponId, int32 Count)
         }
     return false;
 }
+
+bool UMGEquipmentComponent::IsItemEquipped(FName ItemId) const
+{
+    return !bConfiscated && Items.IsValidIndex(EquippedItem) &&
+        Items[EquippedItem].Id == ItemId && IsAvailable(Items[EquippedItem]);
+}
+bool UMGEquipmentComponent::IsHandgunEquipped() const
+{
+    return !bConfiscated && Weapons.IsValidIndex(EquippedWeapon) &&
+        Weapons[EquippedWeapon].Id == FName(TEXT("HANDGUN")) &&
+        IsAvailable(Weapons[EquippedWeapon]);
+}
+int32 UMGEquipmentComponent::GetHandgunRounds() const
+{
+    for (const FMGEquipmentEntry& E : Weapons)
+        if (E.Id == FName(TEXT("HANDGUN"))) return E.Quantity;
+    return 0;
+}
+bool UMGEquipmentComponent::ConsumeHandgunRound()
+{
+    if (!IsHandgunEquipped()) return false;
+    FMGEquipmentEntry& Slot = Weapons[EquippedWeapon];
+    if (Slot.Quantity <= 0) { SetFeedback(TEXT("HANDGUN EMPTY")); return false; }
+    --Slot.Quantity;
+    return true;
+}
+void UMGEquipmentComponent::RestoreHandgunRounds(int32 Rounds)
+{
+    for (FMGEquipmentEntry& E : Weapons)
+        if (E.Id == FName(TEXT("HANDGUN")))
+        {
+            E.Quantity = FMath::Clamp(Rounds, 0, 999);
+            return;
+        }
+}
