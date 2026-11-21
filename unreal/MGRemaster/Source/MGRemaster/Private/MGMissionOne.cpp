@@ -63,6 +63,38 @@ void AMGMissionOne::Build()
         Block(FName(R.Id), CM(R.X + R.W/2.f, R.Y + R.H/2.f, -75.f),
               FVector(R.W, R.H, 1.5f));
 
+    // Authored circulation: wall sections stop shortcuts across key-card
+    // dependencies. Door-sized gaps remain at the actual crossing points.
+    // These boundaries are provisional and must be replaced after J2ME tracing.
+    auto WallX = [this](float X, float FromY, float ToY)
+    {
+        Block(TEXT("Boundary"), CM(X, (FromY + ToY)/2.f, 165.f),
+              FVector(.35f, ToY - FromY, 3.3f));
+    };
+    auto WallY = [this](float Y, float FromX, float ToX)
+    {
+        Block(TEXT("Boundary"), CM((FromX + ToX)/2.f, Y, 165.f),
+              FVector(ToX - FromX, .35f, 3.3f));
+    };
+    // Main playable route: insertion -> three trucks -> Card 1 store ->
+    // later trucks -> elevator. Optional unverified connectors are sealed.
+    WallY(0.f, 0.f, 42.f);
+    WallX(0.f, 0.f, 36.f);
+    WallY(18.f, 0.f, 9.5f); WallY(18.f, 14.5f, 42.f);
+    WallX(24.f, 0.f, 18.f);
+    WallX(42.f, 0.f, 18.f);
+    WallY(36.f, 0.f, 48.f);
+    WallX(24.f, 18.f, 25.4f); WallX(24.f, 28.6f, 36.f);
+    WallX(48.f, 18.f, 26.5f); WallX(48.f, 29.5f, 36.f);
+    WallY(18.f, 24.f, 100.f);
+    WallY(42.f, 48.f, 78.f);
+    WallX(48.f, 36.f, 54.f);
+    WallY(54.f, 48.f, 78.f);
+    WallX(78.f, 42.f, 54.f);
+    WallX(72.f, 18.f, 28.f); WallX(72.f, 32.f, 42.f);
+    WallY(42.f, 78.f, 100.f);
+    WallX(100.f, 18.f, 42.f);
+
     // Original-comparative truck groups. Separate volumes and approach vectors
     // make discovery readable. These are placeholder solid props, not final trucks.
     for (float X : {5.f, 12.f, 20.f})
