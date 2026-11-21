@@ -3,18 +3,98 @@
 #include "GameFramework/SaveGame.h"
 #include "MGGrayFoxSaveGame.generated.h"
 
-/** Durable slice state. A production save will extend this with mission inventory. */
+/** Stable KO/corpse state across old corridor returns and checkpoint loads.
+ * New additive V4 field; historic V4 saves have an empty body list.
+ */
+USTRUCT(BlueprintType)
+struct FMGPersistedGuardBody
+{
+    GENERATED_BODY()
+
+    UPROPERTY(SaveGame)
+    FName Id = NAME_None;
+    UPROPERTY(SaveGame)
+    FVector WorldPosition = FVector::ZeroVector;
+    UPROPERTY(SaveGame)
+    bool bUnconscious = false;
+};
+
+/** V5 adds roof encounter progress while preserving all V1–V4 checkpoint fields. */
 UCLASS()
 class MGREMASTER_API UMGGrayFoxSaveGame : public USaveGame
 {
     GENERATED_BODY()
 public:
     UPROPERTY(SaveGame)
-    uint32 SchemaVersion = 1;
+    uint32 SchemaVersion = 7;
 
     UPROPERTY(SaveGame)
     uint32 MissionFlags = 0;
 
     UPROPERTY(SaveGame)
     FVector CheckpointLocation = FVector(-950.f, 0.f, -11.f);
+
+    // Only actual committed ammunition is saved, not a fresh default each death.
+    UPROPERTY(SaveGame)
+    int32 HandgunRounds = 0;
+    UPROPERTY(SaveGame)
+    int32 StunRounds = 0; // Legacy V3 field; no active campaign stun slot.
+    UPROPERTY(SaveGame)
+    bool bEarnedHandgun = false;
+    // Additive V4 source-authentic first-floor supply caches. All default
+    // false for older saves; captivity confiscates but never forgets them.
+    UPROPERTY(SaveGame)
+    bool bEarnedCard1 = false;
+    UPROPERTY(SaveGame)
+    bool bEarnedTruckRation = false;
+    UPROPERTY(SaveGame)
+    bool bEarnedBinoculars = false;
+    // V7: finite supply-ration inventory, not recreated on every reload.
+    UPROPERTY(SaveGame)
+    int32 TruckRationsRemaining = 0;
+    // Additive fields default to the original state in older V4 saves.
+    UPROPERTY(SaveGame)
+    bool bPrisonCameraOffline = false;
+    UPROPERTY(SaveGame)
+    bool bKennelCameraOffline = false;
+    UPROPERTY(SaveGame)
+    bool bHeardFoxFollowup = false;
+    UPROPERTY(SaveGame)
+    bool bOwnsCarton = false;
+    UPROPERTY(SaveGame)
+    bool bHeardFreightClerk = false; // Optional scene, no canon mission flag.
+    UPROPERTY(SaveGame)
+    bool bDispatchCameraOffline = false;
+    UPROPERTY(SaveGame)
+    bool bServiceChargeCollected = false;
+    UPROPERTY(SaveGame)
+    bool bServiceWallOpen = false;
+    UPROPERTY(SaveGame)
+    bool bRelayIntel = false;
+    UPROPERTY(SaveGame)
+    bool bKidDefeated = false;
+    UPROPERTY(SaveGame)
+    bool bParachuteTaken = false;
+    UPROPERTY(SaveGame) bool bBuilding2Active = false;
+    UPROPERTY(SaveGame) bool bTankDefeated = false;
+    UPROPERTY(SaveGame) int32 TankHitsRemaining = 3;
+    UPROPERTY(SaveGame) int32 Building2MinesRemaining = 4;
+    UPROPERTY(SaveGame) TArray<int32> ArmedTankMineSites;
+    UPROPERTY(SaveGame) int32 BunkerBeat=0;
+    UPROPERTY(SaveGame) int32 SocketIndex=0;
+    UPROPERTY(SaveGame) float TankPatrolX = 12900.f;
+    UPROPERTY(SaveGame) int32 TankDirection = 1;
+    UPROPERTY(SaveGame) int32 TankAttackPhase = 0;
+    UPROPERTY(SaveGame) float TankPhaseRemaining = 1.5f;
+    UPROPERTY(SaveGame) bool bRoofActive = false;
+    UPROPERTY(SaveGame) bool bHindDefeated = false;
+    UPROPERTY(SaveGame) int32 HindHitsRemaining = 3;
+    UPROPERTY(SaveGame) int32 RoofGrenadesRemaining = 6;
+    UPROPERTY(SaveGame) int32 HindPhase = 0;
+    UPROPERTY(SaveGame) float HindPhaseTime = 2.5f;
+    UPROPERTY(SaveGame) float HindTravelTime = 0.f;
+    // Retain original guard positions AFTER the player drags them away from
+    // patrol lanes. IDs map to placed 1995 actors, never array enumeration.
+    UPROPERTY(SaveGame)
+    TArray<FMGPersistedGuardBody> GuardBodies;
 };

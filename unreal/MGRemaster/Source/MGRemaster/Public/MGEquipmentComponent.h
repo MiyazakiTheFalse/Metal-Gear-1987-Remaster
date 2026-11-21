@@ -41,6 +41,9 @@ public:
     bool IsWeaponWindowOpen() const { return bWeaponWindowOpen; }
     bool IsItemWindowOpen() const { return bItemWindowOpen; }
     bool IsConfiscated() const { return bConfiscated; }
+    // Actor BeginPlay order is unspecified. The mission must not restore
+    // saved ammo before the equipment component has built its slot arrays.
+    bool HasInitializedInventory() const { return bInventorySlotsInitialized; }
     FString GetEquipmentFeedback() const { return FeedbackSeconds > 0.f ? Feedback : FString(); }
 
     void SetConfiscated(bool bSeized);
@@ -51,12 +54,29 @@ public:
     void SelectionPrevious();
     void SelectionNext();
     bool IsStunEquipped() const;
+    bool IsHandgunEquipped() const;
+    bool IsFirearmEquipped() const { return IsStunEquipped() || IsHandgunEquipped(); }
+    bool ConsumeHandgunRound();
+    int32 GetHandgunRounds() const;
+    void RestoreHandgunRounds(int32 Rounds);
+    void RestoreStunRounds(int32 Rounds);
     bool ConsumeStunRound();
     bool ConsumeRation();
+    bool IsItemEquipped(FName ItemId) const;
+    bool IsTransmitterEquipped() const;
+    bool HasPlantedTransmitter() const;
+    bool DiscardPlantedTransmitter();
     int32 GetStunRounds() const;
+    int32 GetItemQuantity(FName ItemId) const;
+
+    // Off by default and not registered at all in shipping builds.
+    // This is a *test harness*, never 1987 campaign equipment.
+    UPROPERTY(EditDefaultsOnly, Category="MG|Development")
+    bool bEnableNonCanonicalTestWeapons = false;
 
     // Designed for eventual room/item pickup and mission SaveGame integration.
     bool AwardItem(FName ItemId, int32 Count);
+    bool RevokeTemporaryItem(FName ItemId); // Only the borrowed dispatch carton.
     bool AwardWeapon(FName WeaponId, int32 Ammo);
     void SetFeedback(const FString& Message);
 
@@ -73,6 +93,7 @@ private:
     bool bWeaponWindowOpen = false;
     bool bItemWindowOpen = false;
     bool bConfiscated = true;
+    bool bInventorySlotsInitialized = false;
     FString Feedback;
     float FeedbackSeconds = 0.f;
 

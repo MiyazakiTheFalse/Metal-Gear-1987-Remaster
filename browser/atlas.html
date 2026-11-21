@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Outer Heaven 1995 · Architectural Atlas</title>
+<link rel="stylesheet" href="atlas/map.css">
+</head>
+<body>
+<header class="mast">
+ <div><div class="kicker">OPERATION INTRUDE N313 / DEVELOPMENT ATLAS</div>
+ <h1>OUTER HEAVEN <span>· 1995</span></h1>
+ <p>Canonical progression · proposed physical reconstruction. Coordinates, widths and placements are hypotheses until the 1987 MSX2 floor maps and real engine collision are verified.</p></div>
+ <nav><a href="index.html">Return to browser game</a><a href="https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/blob/feature/character-art-pipeline-1995/docs/OUTER_HEAVEN_MASTER_ARCHITECTURE_1995.md" target="_blank">Design bible (repository)</a></nav>
+</header>
+<main>
+ <aside class="side panel">
+ <label for="floor">FLOOR / SECTION</label><select id="floor"></select>
+ <label for="mission">MISSION OVERLAY</label><select id="mission"><option value="">All missions</option></select>
+ <label for="filter">SEARCH BEAT / BOSS / ITEM / AREA</label><input id="filter" type="search" placeholder="e.g. Card 3, Hind D, Gray Fox">
+ <label class="check"><input id="ghost" type="checkbox"> Show ghosted adjacent layers</label>
+ <label class="check"><input id="connections" type="checkbox" checked> Show planned corridors</label>
+ <div id="stats" class="stats">Loading atlas…</div>
+ <h2>Area directory</h2><div class="small">Choose an area to inspect every assigned story beat, pickup, lock and connection.</div>
+ <div id="directory" class="directory" role="navigation" aria-label="Atlas area directory"></div>
+ </aside>
+ <section class="map-column">
+  <div class="map-header panel">
+   <div><h2 id="mapTitle">Site overview</h2><div id="mapCaption" class="small"></div></div>
+   <div class="legend"><span><b class="dot green"></b> Area</span><span><b class="dot amber"></b> Boss arena</span><span><b class="dot blue"></b> Item/gear</span><span><b class="dot pale"></b> Connection</span></div>
+  </div>
+  <div class="map-viewport panel"><svg id="map" viewBox="0 0 990 580" role="img" aria-label="Annotated multi-floor Outer Heaven campus map">
+   <defs><pattern id="grid" width="25" height="25" patternUnits="userSpaceOnUse"><path d="M25 0H0V25" fill="none" stroke="#568277" stroke-width=".3" opacity=".35"/></pattern></defs>
+  </svg><div class="compass">N ↑ <span id="scale">100 m · schematic</span></div></div>
+  <div class="stack panel"><h2>Facility section / altitude</h2><div id="stack" class="stackGrid"></div></div>
+  <div class="details panel" id="detail" aria-live="polite"><h2>Select a map area</h2><p>Hover or click an area marker. Story beats and every pickup are grouped in its panel. Select a different floor to inspect vertical routing and locked connections.</p></div>
+ </section>
+</main>
+<footer>Architecture is a design proposal. Source authority: 1987 MSX2 Metal Gear, not the NES adaptation. No Unreal compilation, final materials, terrain survey or exact original tile coordinates are claimed by this drawing. <span id="sourceLinks"></span></footer>
+<script src="atlas/map.js"></script>
+</body></html>

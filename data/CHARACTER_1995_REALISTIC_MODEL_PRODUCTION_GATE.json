@@ -1,0 +1,501 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-11-20",
+  "why": "A path, procedural figure or art bible is NOT a realistic character model. Every face/body/rig must physically exist and render in Unreal before it counts.",
+  "sourceAuthority": "Original 1987 MSX2 cast and visible identity + art direction compatible with MGS4/MGSV quality; later media not a source of 1995 plot events.",
+  "creationTechnology": {
+    "recommended": "In-Unreal MetaHuman Creator for individual human characters, assembled Cine/High fidelity heads + body mesh; original bespoke clothing/grooms; actor-specific face capture and physical animation.",
+    "proof": "https://dev.epicgames.com/documentation/metahuman/metahuman-creator-in-unreal-engine",
+    "license": "https://www.metahuman.com/license?lang=en-US",
+    "availability": "Requires Unreal Editor 5.7 MetaHuman plugin and user-authored/imported assets; cannot be created merely by C++ references."
+  },
+  "sourceRefs": [
+    "https://metalgear.konami.net/manual/mc1/mg1_msx/pc/en/page10.html",
+    "https://dev.epicgames.com/documentation/metahuman/metahuman-documentation"
+  ],
+  "legal": "Do not rip Konami meshes/VO, imitate copyrighted screen captures as editable assets or claim character names/likeness licence for public release.",
+  "qualityGates": [
+    "Approved 1995 facial reference sheet with source confidence",
+    "Distinct anatomically credible facial sculpt for each named character",
+    "Actually imported skeletal body with rig+LODs and original costume",
+    "PBR materials on head/body/clothing/hair, corrective morphs for shoulders/face",
+    "Authored AnimBP locomotion+crouch+prone+wall cover+combat+body dragging",
+    "Full facial blink, jaw/visemes, eyes/lip sync tested against recorded VO",
+    "Weapon right-hand socket, foot placement, physical cloth/hair, head tracking",
+    "UE5.7 in-editor screenshot/sequence at 1080p+ with no proxy visible",
+    "Legal provenance record for all source assets; render/performance capture tested"
+  ],
+  "items": [
+    {
+      "id": "SOLID_SNAKE",
+      "description": "Young rookie Solid Snake in 1995; recognisable mid-length dark swept hair, believable face and field garments derived from the MSX2-era visual design. No MGS1/2/4 outfit transplant.",
+      "firstPlayablePhase": "P01",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/Snake/SK_Snake_1995_Infiltration",
+        "animBlueprint": "/Game/Characters/Snake/ABP_Snake_1995",
+        "characterBlueprint": "/Game/Characters/Snake/BP_Snake_1995",
+        "faceMesh": "/Game/Characters/Snake/Face/SK_Snake_Face"
+      },
+      "costumeVariants": [
+        "1995 infiltration",
+        "disarmed captive",
+        "rearmed after personal effects"
+      ],
+      "appearanceCheck": "Young rookie Solid Snake in 1995; recognisable mid-length dark swept hair, believable face and field garments derived from the MSX2-era visual design. No MGS1/2/4 outfit transplant.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "REAL_BIG_BOSS",
+      "description": "Source-ranked 1995 Big Boss portrayal; preserve identity-sensitive reveal timing. Do not expose alternate identities through opening assets or filenames in player-facing UI.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/BigBoss/SK_BigBoss_1995",
+        "animBlueprint": "/Game/Characters/BigBoss/ABP_BigBoss_1995",
+        "characterBlueprint": "/Game/Characters/BigBoss/BP_BigBoss_1995",
+        "faceMesh": "/Game/Characters/BigBoss/Face/SK_BigBoss_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Source-ranked 1995 Big Boss portrayal; preserve identity-sensitive reveal timing. Do not expose alternate identities through opening assets or filenames in player-facing UI.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "VENOM_SNAKE",
+      "description": "Potential later-continuity identity, NOT a freely displayed or directly asserted in the original 1987 plot. Any modern reinterpretation requires canon review and spoiler gate.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/BigBoss/SK_BigBoss_1995",
+        "animBlueprint": "/Game/Characters/BigBoss/ABP_BigBoss_1995",
+        "characterBlueprint": "/Game/Characters/BigBoss/BP_BigBoss_1995",
+        "faceMesh": "/Game/Characters/BigBoss/Face/SK_BigBoss_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Potential later-continuity identity, NOT a freely displayed or directly asserted in the original 1987 plot. Any modern reinterpretation requires canon review and spoiler gate.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "GRAY_FOX",
+      "description": "Human prisoner and experienced FOXHOUND agent in 1995; fatigue, wraps, non-cyborg physiology. Distinct face and believable injured physicality.",
+      "firstPlayablePhase": "P03",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/GrayFox/SK_GrayFox_1995",
+        "animBlueprint": "/Game/Characters/GrayFox/ABP_GrayFox_1995",
+        "characterBlueprint": "/Game/Characters/GrayFox/BP_GrayFox_1995",
+        "faceMesh": "/Game/Characters/GrayFox/Face/SK_GrayFox_Face"
+      },
+      "costumeVariants": [
+        "captured / bandaged",
+        "rescued fatigued"
+      ],
+      "appearanceCheck": "Human prisoner and experienced FOXHOUND agent in 1995; fatigue, wraps, non-cyborg physiology. Distinct face and believable injured physicality.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "KYLE_SCHNEIDER",
+      "description": "Resistance contact and structural engineer; 1987 manual references; 1995 civilian fieldwear. Own face, age and posture, not generic tactical soldier.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/KyleSchneider/SK_KyleSchneider_1995",
+        "animBlueprint": "/Game/Characters/KyleSchneider/ABP_KyleSchneider_1995",
+        "characterBlueprint": "/Game/Characters/KyleSchneider/BP_KyleSchneider_1995",
+        "faceMesh": "/Game/Characters/KyleSchneider/Face/SK_KyleSchneider_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Resistance contact and structural engineer; 1987 manual references; 1995 civilian fieldwear. Own face, age and posture, not generic tactical soldier.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "DIANE",
+      "description": "Resistance adviser and former punk singer; distinctive shorter hair and own expressiveness. 1987 manual and story references to confirm details.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/Diane/SK_Diane_1995",
+        "animBlueprint": "/Game/Characters/Diane/ABP_Diane_1995",
+        "characterBlueprint": "/Game/Characters/Diane/BP_Diane_1995",
+        "faceMesh": "/Game/Characters/Diane/Face/SK_Diane_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Resistance adviser and former punk singer; distinctive shorter hair and own expressiveness. 1987 manual and story references to confirm details.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "STEVE",
+      "description": "Confirm original 1987-era identity and acting specifics against canon reference before sculpting.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/Steve/SK_Steve_1995",
+        "animBlueprint": "/Game/Characters/Steve/ABP_Steve_1995",
+        "characterBlueprint": "/Game/Characters/Steve/BP_Steve_1995",
+        "faceMesh": "/Game/Characters/Steve/Face/SK_Steve_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Source-ranked cast-specific face, silhouette and garment approval required.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "JENNIFER",
+      "description": "Insider with individual personality and family stake; original 1987 cap/longer hair cues in her face and garments, distinct from Diane.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/Jennifer/SK_Jennifer_1995",
+        "animBlueprint": "/Game/Characters/Jennifer/ABP_Jennifer_1995",
+        "characterBlueprint": "/Game/Characters/Jennifer/BP_Jennifer_1995",
+        "faceMesh": "/Game/Characters/Jennifer/Face/SK_Jennifer_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Insider with individual personality and family stake; original 1987 cap/longer hair cues in her face and garments, distinct from Diane.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "JENNIFERS_BROTHER",
+      "description": "Distinct civilian prisoner, unique face; brother/sister resemblance optional creative interpretation, no facial identity duplication.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/JennifersBrother/SK_JennifersBrother_1995",
+        "animBlueprint": "/Game/Characters/JennifersBrother/ABP_JennifersBrother_1995",
+        "characterBlueprint": "/Game/Characters/JennifersBrother/BP_JennifersBrother_1995",
+        "faceMesh": "/Game/Characters/JennifersBrother/Face/SK_JennifersBrother_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Distinct civilian prisoner, unique face; brother/sister resemblance optional creative interpretation, no facial identity duplication.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "DRAGO_MADNAR",
+      "description": "Older scientist with recognisable thinning/bald scalp, glasses, anxious bearing; no later-era redesign forced into 1995.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/DragoMadnar/SK_DragoMadnar_1995",
+        "animBlueprint": "/Game/Characters/DragoMadnar/ABP_DragoMadnar_1995",
+        "characterBlueprint": "/Game/Characters/DragoMadnar/BP_DragoMadnar_1995",
+        "faceMesh": "/Game/Characters/DragoMadnar/Face/SK_DragoMadnar_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Older scientist with recognisable thinning/bald scalp, glasses, anxious bearing; no later-era redesign forced into 1995.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "ELLEN_MADNAR",
+      "description": "Individual civilian hostage with distinct appearance, not generic interchangeable POW mesh.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/EllenMadnar/SK_EllenMadnar_1995",
+        "animBlueprint": "/Game/Characters/EllenMadnar/ABP_EllenMadnar_1995",
+        "characterBlueprint": "/Game/Characters/EllenMadnar/BP_EllenMadnar_1995",
+        "faceMesh": "/Game/Characters/EllenMadnar/Face/SK_EllenMadnar_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Individual civilian hostage with distinct appearance, not generic interchangeable POW mesh.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "SHOOT_GUNNER",
+      "description": "Heavy weapon prison boss. Large sturdy silhouette, credible shotgun grip/socket, original physical performance, facial rig.",
+      "firstPlayablePhase": "P04",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/Bosses/Shotmaker/SK_Shotmaker_1995",
+        "animBlueprint": "/Game/Characters/Bosses/Shotmaker/ABP_Shotmaker_1995",
+        "characterBlueprint": "/Game/Characters/Bosses/Shotmaker/BP_Bosses_Shotmaker_1995",
+        "faceMesh": "/Game/Characters/Bosses/Shotmaker/Face/SK_Bosses_Shotmaker_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Heavy weapon prison boss. Large sturdy silhouette, credible shotgun grip/socket, original physical performance, facial rig.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "MACHINEGUN_KID",
+      "description": "Distinct heavy-weapon enemy with own face/clothing, physically supported weapon, reload feed and clear telegraph.",
+      "firstPlayablePhase": "P05",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/Bosses/MachinegunKid/SK_MachinegunKid_1995",
+        "animBlueprint": "/Game/Characters/Bosses/MachinegunKid/ABP_MachinegunKid_1995",
+        "characterBlueprint": "/Game/Characters/Bosses/MachinegunKid/BP_Bosses_MachinegunKid_1995",
+        "faceMesh": "/Game/Characters/Bosses/MachinegunKid/Face/SK_Bosses_MachinegunKid_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Distinct heavy-weapon enemy with own face/clothing, physically supported weapon, reload feed and clear telegraph.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "FIRE_TROOPER",
+      "description": "Heat-proof protective fighting equipment; distinguish from normal guard and support weapon.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/FireTrooper/SK_FireTrooper_1995",
+        "animBlueprint": "/Game/Characters/FireTrooper/ABP_FireTrooper_1995",
+        "characterBlueprint": "/Game/Characters/FireTrooper/BP_FireTrooper_1995",
+        "faceMesh": "/Game/Characters/FireTrooper/Face/SK_FireTrooper_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Heat-proof protective fighting equipment; distinguish from normal guard and support weapon.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "BLOODY_BRAD",
+      "description": "Robot enemies; mechanical materials/rig and unique mechanical silhouettes, not MetaHuman faces.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/BloodyBrad/SK_BloodyBrad_1995",
+        "animBlueprint": "/Game/Characters/BloodyBrad/ABP_BloodyBrad_1995",
+        "characterBlueprint": "/Game/Characters/BloodyBrad/BP_BloodyBrad_1995",
+        "faceMesh": "/Game/Characters/BloodyBrad/Face/SK_BloodyBrad_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Robot enemies; mechanical materials/rig and unique mechanical silhouettes, not MetaHuman faces.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "DIRTY_DUCK",
+      "description": "Hostage-taking boss with distinct silhouette and boomerang motion rig; protect civilian spatial relationships.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/DirtyDuck/SK_DirtyDuck_1995",
+        "animBlueprint": "/Game/Characters/DirtyDuck/ABP_DirtyDuck_1995",
+        "characterBlueprint": "/Game/Characters/DirtyDuck/BP_DirtyDuck_1995",
+        "faceMesh": "/Game/Characters/DirtyDuck/Face/SK_DirtyDuck_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Hostage-taking boss with distinct silhouette and boomerang motion rig; protect civilian spatial relationships.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "FIRST_MERCENARIES",
+      "description": "Four DISTINCT mercenary variants with readable roles, tactical loadouts and faces; cannot reuse four default guard duplicates.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/FirstMercenaries/SK_FirstMercenaries_1995",
+        "animBlueprint": "/Game/Characters/FirstMercenaries/ABP_FirstMercenaries_1995",
+        "characterBlueprint": "/Game/Characters/FirstMercenaries/BP_FirstMercenaries_1995",
+        "faceMesh": "/Game/Characters/FirstMercenaries/Face/SK_FirstMercenaries_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Four DISTINCT mercenary variants with readable roles, tactical loadouts and faces; cannot reuse four default guard duplicates.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "POW_INFORMANT",
+      "description": "Face and uniform variant from prisoner cast; believable captivity, voiced uncertainty, not a storage crate.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/PowInformant/SK_PowInformant_1995",
+        "animBlueprint": "/Game/Characters/PowInformant/ABP_PowInformant_1995",
+        "characterBlueprint": "/Game/Characters/PowInformant/BP_PowInformant_1995",
+        "faceMesh": "/Game/Characters/PowInformant/Face/SK_PowInformant_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Face and uniform variant from prisoner cast; believable captivity, voiced uncertainty, not a storage crate.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "OUTER_HEAVEN_GUARD",
+      "description": "1987 Outer Heaven military duty guard with locally plausible boots, webbing, weapons and swappable face variation; no identical clones.",
+      "firstPlayablePhase": "P01",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/Guard/SK_Guard_1995",
+        "animBlueprint": "/Game/Characters/Guard/ABP_Guard_1995",
+        "characterBlueprint": "/Game/Characters/Guard/BP_Guard_1995",
+        "faceMesh": "/Game/Characters/Guard/Face/SK_Guard_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "1987 Outer Heaven military duty guard with locally plausible boots, webbing, weapons and swappable face variation; no identical clones.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "MADNAR_DECOY",
+      "description": "Distinctive actor with an intentionally misleading resemblance that passes fair player observation, no magical reveals.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/MadnarDecoy/SK_MadnarDecoy_1995",
+        "animBlueprint": "/Game/Characters/MadnarDecoy/ABP_MadnarDecoy_1995",
+        "characterBlueprint": "/Game/Characters/MadnarDecoy/BP_MadnarDecoy_1995",
+        "faceMesh": "/Game/Characters/MadnarDecoy/Face/SK_MadnarDecoy_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Distinctive actor with an intentionally misleading resemblance that passes fair player observation, no magical reveals.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    },
+    {
+      "id": "TX55",
+      "description": "Full machine scale, industrial materials, 16 bomb placement sockets on correct legs; do not make the 1987 static boss a generic walker.",
+      "firstPlayablePhase": "see_story_ledger",
+      "assetPaths": {
+        "bodyMesh": "/Game/Characters/Tx55/SK_Tx55_1995",
+        "animBlueprint": "/Game/Characters/Tx55/ABP_Tx55_1995",
+        "characterBlueprint": "/Game/Characters/Tx55/BP_Tx55_1995",
+        "faceMesh": "/Game/Characters/Tx55/Face/SK_Tx55_Face"
+      },
+      "costumeVariants": [
+        "1995 source-era duty and encounter variants"
+      ],
+      "appearanceCheck": "Full machine scale, industrial materials, 16 bomb placement sockets on correct legs; do not make the 1987 static boss a generic walker.",
+      "status": "NOT_IMPORTED_OR_EDITOR_VERIFIED",
+      "meshVerified": false,
+      "facialRigVerified": false,
+      "animationBlueprintVerified": false,
+      "materialsVerified": false,
+      "renderedInEngine": false,
+      "productionReady": false
+    }
+  ],
+  "summary": {
+    "humanAndMechanicalRoles": 21,
+    "sourceReadyRealisticCharacterRigs": 0,
+    "editorVerified": 0,
+    "productionReady": 0
+  }
+}

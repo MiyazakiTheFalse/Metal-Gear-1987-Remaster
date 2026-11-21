@@ -1,0 +1,687 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-20",
+  "scope": "Whole 1987 MSX2 game rebuilt as a 1995 3D stealth adventure, source-authored Unreal project",
+  "sourcePriority": [
+    "official Konami MSX2 manual",
+    "direct 1987 MSX2 playthrough with timestamps",
+    "MSX2 script, maps and multiple independent walkthroughs",
+    "later-series narrative continuity as context only"
+  ],
+  "sourceURLs": {
+    "manual": "https://metalgear.konami.net/manual/mc1/mg1_msx/pc/en/page10.html",
+    "walkthrough": "https://www.youtube.com/watch?v=ehlAMTh42Ko",
+    "bossGuide": "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/35361",
+    "text": "https://tcrf.net/Metal_Gear_(MSX2)"
+  },
+  "authenticWeapons": [
+    "handgun",
+    "mine",
+    "plastic_explosive",
+    "remote_missile",
+    "grenade_launcher",
+    "smg",
+    "rocket_launcher"
+  ],
+  "nonCanonTools": [
+    "stun"
+  ],
+  "nonCanonToolRule": "No stun pistol in normal or shipping inventory. Opt-in developer-only, default false; keep source as a test harness.",
+  "totalBossSetPieces": 11,
+  "currentlyImplementedBossSetPieces": 2,
+  "vocab": {
+    "design_only": "not code-implemented",
+    "partial_source_greybox": "level/mission code exists; not UE verified",
+    "source_prototype": "Unreal logic source exists; not compiled/played",
+    "unreal_verified": "actual UE compilation, PIE video and automated runtime tests"
+  },
+  "qualityDefinition": "No level or boss is complete merely because its data/mesh/C++ exists; gameplay, visuals, audio, accessibility, controller and performance must be demonstrated in Unreal.",
+  "bosses": [
+    {
+      "id": "four_mercenaries",
+      "index": 1,
+      "name": "Four Mercenaries",
+      "location": "B1 early infiltration",
+      "playthroughTime": "11:50",
+      "sourceFunction": "earlier combat squad challenge, not a new 3D named boss",
+      "threeDInterpretation": "Squad encounter with coordinated sightlines, weapon reload windows and multiple room approaches",
+      "approvedCounterplay": "Stealth/weapon positioning; no mandatory new weapon",
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "buildRules": [
+        "only attacks proven by source or clearly labelled remake interpretation",
+        "each attack needs readable aim/windup/active/recovery",
+        "mechanical hitbox and physical muzzle must match authored animation",
+        "dialogue and boss knowledge cannot reveal later-game identity or spoilers",
+        "reload/action changes must be physically appropriate and interruption-safe"
+      ]
+    },
+    {
+      "id": "shoot_gunner",
+      "index": 2,
+      "name": "Shoot Gunner (revised: Shotmaker)",
+      "location": "Building 1 basement",
+      "playthroughTime": "19:24",
+      "sourceFunction": "three wide shotgun blasts; recover confiscated equipment",
+      "threeDInterpretation": "Telegraphed pellet fan, physical pump/reload, cover and breakable sightlines",
+      "approvedCounterplay": "Handgun/SMG/remote missiles/explosives per source-tested availability; preserve player retreat where valid",
+      "implementationStatus": "source_prototype",
+      "unrealVerified": false,
+      "buildRules": [
+        "only attacks proven by source or clearly labelled remake interpretation",
+        "each attack needs readable aim/windup/active/recovery",
+        "mechanical hitbox and physical muzzle must match authored animation",
+        "dialogue and boss knowledge cannot reveal later-game identity or spoilers",
+        "reload/action changes must be physically appropriate and interruption-safe"
+      ]
+    },
+    {
+      "id": "machinegun_kid",
+      "index": 3,
+      "name": "Machinegun Kid",
+      "location": "Building 1",
+      "playthroughTime": "35:22",
+      "sourceFunction": "continuous machine-gun fire; guards route to parachute",
+      "threeDInterpretation": "Sustained suppression, muzzle/cover material reaction, reload/overheat relief, flanking via physically readable ducts",
+      "approvedCounterplay": "Handgun/SMG/remote missile; cover should be helpful not invulnerable exploit",
+      "implementationStatus": "source_prototype",
+      "unrealVerified": false,
+      "buildRules": [
+        "only attacks proven by source or clearly labelled remake interpretation",
+        "each attack needs readable aim/windup/active/recovery",
+        "mechanical hitbox and physical muzzle must match authored animation",
+        "dialogue and boss knowledge cannot reveal later-game identity or spoilers",
+        "reload/action changes must be physically appropriate and interruption-safe"
+      ]
+    },
+    {
+      "id": "hind_d",
+      "index": 4,
+      "name": "Hind D",
+      "location": "Building 1 roof",
+      "playthroughTime": "41:34",
+      "sourceFunction": "helicopter gunfire; grenade launcher is the established answer",
+      "threeDInterpretation": "Visible strafing/run-up, rotor wash, vertical rooftop cover; weapon lead instead of static hitbox",
+      "approvedCounterplay": "Grenade-launcher impacts to physically vulnerable zone, plus player-chosen timing/cover",
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "buildRules": [
+        "only attacks proven by source or clearly labelled remake interpretation",
+        "each attack needs readable aim/windup/active/recovery",
+        "mechanical hitbox and physical muzzle must match authored animation",
+        "dialogue and boss knowledge cannot reveal later-game identity or spoilers",
+        "reload/action changes must be physically appropriate and interruption-safe"
+      ]
+    },
+    {
+      "id": "tank",
+      "index": 5,
+      "name": "Tank",
+      "location": "Building 2 approach",
+      "playthroughTime": "45:24",
+      "sourceFunction": "armoured rolling threat punished by mines",
+      "threeDInterpretation": "Route pre-observation, track and mine interaction, real collision, legible firing arcs and engine/track tells",
+      "approvedCounterplay": "Lay mines then withdraw; no implausible handgun damage to armour",
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "buildRules": [
+        "only attacks proven by source or clearly labelled remake interpretation",
+        "each attack needs readable aim/windup/active/recovery",
+        "mechanical hitbox and physical muzzle must match authored animation",
+        "dialogue and boss knowledge cannot reveal later-game identity or spoilers",
+        "reload/action changes must be physically appropriate and interruption-safe"
+      ]
+    },
+    {
+      "id": "bulldozer",
+      "index": 6,
+      "name": "Bulldozer",
+      "location": "Building 2",
+      "playthroughTime": "47:38",
+      "sourceFunction": "unstoppable advancing industrial machine, explosive counter",
+      "threeDInterpretation": "Hydraulic anticipation, retreat lanes, obstruction/debris physics and grenade hit feedback",
+      "approvedCounterplay": "Grenade damage and spacing, no magical stationary turret",
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "buildRules": [
+        "only attacks proven by source or clearly labelled remake interpretation",
+        "each attack needs readable aim/windup/active/recovery",
+        "mechanical hitbox and physical muzzle must match authored animation",
+        "dialogue and boss knowledge cannot reveal later-game identity or spoilers",
+        "reload/action changes must be physically appropriate and interruption-safe"
+      ]
+    },
+    {
+      "id": "fire_trooper",
+      "index": 7,
+      "name": "Fire Trooper",
+      "location": "Building 2 basement",
+      "playthroughTime": "57:17",
+      "sourceFunction": "three-phase sweeping flamethrower pressure",
+      "threeDInterpretation": "Fuel/hose sweep, surface fire persistence, low/overhead terrain, proper smoke/light telegraph",
+      "approvedCounterplay": "Fire-resistant equipment where available, movement and appropriate weapons",
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "buildRules": [
+        "only attacks proven by source or clearly labelled remake interpretation",
+        "each attack needs readable aim/windup/active/recovery",
+        "mechanical hitbox and physical muzzle must match authored animation",
+        "dialogue and boss knowledge cannot reveal later-game identity or spoilers",
+        "reload/action changes must be physically appropriate and interruption-safe"
+      ]
+    },
+    {
+      "id": "tx11_pair",
+      "index": 8,
+      "name": "TX-11 Cybernoid Arnold pair (revised: Bloody Brad)",
+      "location": "Building 2",
+      "playthroughTime": "1:07:10",
+      "sourceFunction": "twin armoured attackers; rocket weapon dependency",
+      "threeDInterpretation": "Distinct tandem pressure, stagger/isolation and vulnerable windows, no modern cyborg-ninja identity",
+      "approvedCounterplay": "Earned rocket launcher, deliberate aim/reload, fair cover",
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "buildRules": [
+        "only attacks proven by source or clearly labelled remake interpretation",
+        "each attack needs readable aim/windup/active/recovery",
+        "mechanical hitbox and physical muzzle must match authored animation",
+        "dialogue and boss knowledge cannot reveal later-game identity or spoilers",
+        "reload/action changes must be physically appropriate and interruption-safe"
+      ]
+    },
+    {
+      "id": "coward_duck",
+      "index": 9,
+      "name": "Coward Duck (revised: Dirty Duck)",
+      "location": "Building 3",
+      "playthroughTime": "1:29:52",
+      "sourceFunction": "boomerangs and hostage peril, trap/pit",
+      "threeDInterpretation": "Hostage-safe angles, readable boomerang arcs, trap warning, possibility to reposition instead of punishing uncertainty",
+      "approvedCounterplay": "Accurate handgun or other source-verified weapons without injuring prisoners",
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "buildRules": [
+        "only attacks proven by source or clearly labelled remake interpretation",
+        "each attack needs readable aim/windup/active/recovery",
+        "mechanical hitbox and physical muzzle must match authored animation",
+        "dialogue and boss knowledge cannot reveal later-game identity or spoilers",
+        "reload/action changes must be physically appropriate and interruption-safe"
+      ]
+    },
+    {
+      "id": "tx55",
+      "index": 10,
+      "name": "TX-55 Metal Gear",
+      "location": "Building 3 basement",
+      "playthroughTime": "1:35:53",
+      "sourceFunction": "stationary weapons platform destroyed using explosives; camera-laser defense",
+      "threeDInterpretation": "Scale-correct industrial superweapon, physical placement zones, leg-order investigative puzzle, two cameras as separate hazards",
+      "approvedCounterplay": "Timed plastic explosive placement; preserve puzzle logic, minimize repetitive waiting by UI/hint pacing",
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "buildRules": [
+        "only attacks proven by source or clearly labelled remake interpretation",
+        "each attack needs readable aim/windup/active/recovery",
+        "mechanical hitbox and physical muzzle must match authored animation",
+        "dialogue and boss knowledge cannot reveal later-game identity or spoilers",
+        "reload/action changes must be physically appropriate and interruption-safe"
+      ]
+    },
+    {
+      "id": "big_boss",
+      "index": 11,
+      "name": "Big Boss",
+      "location": "final escape route",
+      "playthroughTime": "1:37:39",
+      "sourceFunction": "1987 betrayal reveal and final confrontation",
+      "threeDInterpretation": "Personal contest built from prior stealth, cover, equipment and the commander's earlier contradictory radio guidance",
+      "approvedCounterplay": "Historically compatible physical counterplay, no early revelation or borrowed later-game cutscene",
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "buildRules": [
+        "only attacks proven by source or clearly labelled remake interpretation",
+        "each attack needs readable aim/windup/active/recovery",
+        "mechanical hitbox and physical muzzle must match authored animation",
+        "dialogue and boss knowledge cannot reveal later-game identity or spoilers",
+        "reload/action changes must be physically appropriate and interruption-safe"
+      ]
+    }
+  ],
+  "phases": [
+    {
+      "order": "01",
+      "id": "operation_intrude_entry",
+      "title": "Operation Intrude N313 — insertion and first-floor reconnaissance",
+      "sourceBeats": [
+        "insertion",
+        "first patrol/equipment",
+        "Card 1",
+        "binoculars",
+        "gas mask",
+        "handgun",
+        "mines",
+        "POW rescues",
+        "plastic explosives",
+        "Card 2"
+      ],
+      "firstWeaponAccess": [
+        "handgun",
+        "mines",
+        "plastic_explosive"
+      ],
+      "earnedCards": [
+        "card1",
+        "card2"
+      ],
+      "bossIds": [
+        "prelude_incoming_briefing",
+        "prelude.pow_intelligence"
+      ],
+      "implementationStatus": "partial_source_greybox",
+      "unrealVerified": false,
+      "real3DNeeds": [
+        "connected navigable hallways with unique landmarks and camera clearance",
+        "believable guard/contractor/POW positions derived from facility duties",
+        "optional stealth route that cannot bypass the original required item gate",
+        "per-beat voice, animation, materials and diegetic clues",
+        "interrupt/save-reload and return-path QA"
+      ],
+      "note": "Temporal grouping is a remake production workstream, NOT a claim that the 1987 MSX2 uses formal chapters or these exact rooms."
+    },
+    {
+      "order": "02",
+      "id": "building1_systems_and_detention_intel",
+      "title": "Building 1 — control systems, contact network and detention intelligence",
+      "sourceBeats": [
+        "remote missiles and electrical hazard",
+        "cardboard box",
+        "suppressor",
+        "four mercenaries",
+        "grenade launcher",
+        "POW rescues",
+        "submachine gun",
+        "Fox's capture discovered"
+      ],
+      "firstWeaponAccess": [
+        "remote_missile",
+        "grenade_launcher",
+        "smg"
+      ],
+      "earnedCards": [],
+      "bossIds": [
+        "four_mercenaries"
+      ],
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "real3DNeeds": [
+        "connected navigable hallways with unique landmarks and camera clearance",
+        "believable guard/contractor/POW positions derived from facility duties",
+        "optional stealth route that cannot bypass the original required item gate",
+        "per-beat voice, animation, materials and diegetic clues",
+        "interrupt/save-reload and return-path QA"
+      ],
+      "note": "Temporal grouping is a remake production workstream, NOT a claim that the 1987 MSX2 uses formal chapters or these exact rooms."
+    },
+    {
+      "order": "03",
+      "id": "gray_fox_custody_and_escape",
+      "title": "Building 1 basement — Gray Fox and Snake's imprisonment",
+      "sourceBeats": [
+        "custody/capture situation",
+        "confiscation",
+        "first cell breach",
+        "Gray Fox discovery",
+        "second breach",
+        "prison corridor",
+        "reclaim equipment"
+      ],
+      "firstWeaponAccess": [],
+      "earnedCards": [],
+      "bossIds": [],
+      "implementationStatus": "partial_source_greybox",
+      "unrealVerified": false,
+      "real3DNeeds": [
+        "connected navigable hallways with unique landmarks and camera clearance",
+        "believable guard/contractor/POW positions derived from facility duties",
+        "optional stealth route that cannot bypass the original required item gate",
+        "per-beat voice, animation, materials and diegetic clues",
+        "interrupt/save-reload and return-path QA"
+      ],
+      "note": "Temporal grouping is a remake production workstream, NOT a claim that the 1987 MSX2 uses formal chapters or these exact rooms."
+    },
+    {
+      "order": "04",
+      "id": "shoot_gunner_and_card3",
+      "title": "Shoot Gunner — first substantial boss and Card 3",
+      "sourceBeats": [
+        "three-blast duel",
+        "physical gear bag",
+        "transmitter discovery/removal",
+        "card2-secured item room",
+        "Card 3"
+      ],
+      "firstWeaponAccess": [],
+      "earnedCards": [
+        "card3"
+      ],
+      "bossIds": [
+        "shoot_gunner"
+      ],
+      "implementationStatus": "source_prototype_uncompiled",
+      "unrealVerified": false,
+      "real3DNeeds": [
+        "connected navigable hallways with unique landmarks and camera clearance",
+        "believable guard/contractor/POW positions derived from facility duties",
+        "optional stealth route that cannot bypass the original required item gate",
+        "per-beat voice, animation, materials and diegetic clues",
+        "interrupt/save-reload and return-path QA"
+      ],
+      "note": "Temporal grouping is a remake production workstream, NOT a claim that the 1987 MSX2 uses formal chapters or these exact rooms."
+    },
+    {
+      "order": "05",
+      "id": "building1_dogs_machinegun_kid",
+      "title": "Building 1 follow-through — dogs, weak wall, Machinegun Kid",
+      "sourceBeats": [
+        "service/kennel threat",
+        "surveillance risk",
+        "prone optional duct",
+        "plastic-explosive weak wall",
+        "more POW rescues",
+        "IR equipment",
+        "Machinegun Kid",
+        "parachute"
+      ],
+      "firstWeaponAccess": [],
+      "earnedCards": [],
+      "bossIds": [
+        "machinegun_kid"
+      ],
+      "implementationStatus": "partial_source_greybox",
+      "unrealVerified": false,
+      "real3DNeeds": [
+        "connected navigable hallways with unique landmarks and camera clearance",
+        "believable guard/contractor/POW positions derived from facility duties",
+        "optional stealth route that cannot bypass the original required item gate",
+        "per-beat voice, animation, materials and diegetic clues",
+        "interrupt/save-reload and return-path QA"
+      ],
+      "note": "Temporal grouping is a remake production workstream, NOT a claim that the 1987 MSX2 uses formal chapters or these exact rooms."
+    },
+    {
+      "order": "06",
+      "id": "roof_and_vehicle_transfer",
+      "title": "Building 1 roof and Building 2 approach",
+      "sourceBeats": [
+        "elevation/parachute traversal",
+        "Hind D",
+        "Card 4",
+        "mine detector",
+        "tank"
+      ],
+      "firstWeaponAccess": [],
+      "earnedCards": [
+        "card4"
+      ],
+      "bossIds": [
+        "hind_d",
+        "tank"
+      ],
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "real3DNeeds": [
+        "connected navigable hallways with unique landmarks and camera clearance",
+        "believable guard/contractor/POW positions derived from facility duties",
+        "optional stealth route that cannot bypass the original required item gate",
+        "per-beat voice, animation, materials and diegetic clues",
+        "interrupt/save-reload and return-path QA"
+      ],
+      "note": "Temporal grouping is a remake production workstream, NOT a claim that the 1987 MSX2 uses formal chapters or these exact rooms."
+    },
+    {
+      "order": "07",
+      "id": "building2_maintenance_security",
+      "title": "Building 2 — machinery, fires and restricted access",
+      "sourceBeats": [
+        "bulldozer",
+        "antenna and radio connection",
+        "Card 5",
+        "POW network",
+        "Card 6",
+        "Fire Trooper"
+      ],
+      "firstWeaponAccess": [],
+      "earnedCards": [
+        "card5",
+        "card6"
+      ],
+      "bossIds": [
+        "bulldozer",
+        "fire_trooper"
+      ],
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "real3DNeeds": [
+        "connected navigable hallways with unique landmarks and camera clearance",
+        "believable guard/contractor/POW positions derived from facility duties",
+        "optional stealth route that cannot bypass the original required item gate",
+        "per-beat voice, animation, materials and diegetic clues",
+        "interrupt/save-reload and return-path QA"
+      ],
+      "note": "Temporal grouping is a remake production workstream, NOT a claim that the 1987 MSX2 uses formal chapters or these exact rooms."
+    },
+    {
+      "order": "08",
+      "id": "building2_tx11",
+      "title": "Building 2 — Jennifer's contact and TX-11",
+      "sourceBeats": [
+        "Jennifer/contact lead and rocket launcher access",
+        "TX-11 pair",
+        "Card 7",
+        "computer intelligence"
+      ],
+      "firstWeaponAccess": [
+        "rocket_launcher"
+      ],
+      "earnedCards": [
+        "card7"
+      ],
+      "bossIds": [
+        "tx11_pair"
+      ],
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "real3DNeeds": [
+        "connected navigable hallways with unique landmarks and camera clearance",
+        "believable guard/contractor/POW positions derived from facility duties",
+        "optional stealth route that cannot bypass the original required item gate",
+        "per-beat voice, animation, materials and diegetic clues",
+        "interrupt/save-reload and return-path QA"
+      ],
+      "note": "Temporal grouping is a remake production workstream, NOT a claim that the 1987 MSX2 uses formal chapters or these exact rooms."
+    },
+    {
+      "order": "09",
+      "id": "building3_hostage_labyrinth",
+      "title": "Building 3 — hostage deception and Card 8",
+      "sourceBeats": [
+        "false scientist lead",
+        "rescues and contradictory intelligence",
+        "Coward Duck and trap",
+        "Card 8"
+      ],
+      "firstWeaponAccess": [],
+      "earnedCards": [
+        "card8"
+      ],
+      "bossIds": [
+        "coward_duck"
+      ],
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "real3DNeeds": [
+        "connected navigable hallways with unique landmarks and camera clearance",
+        "believable guard/contractor/POW positions derived from facility duties",
+        "optional stealth route that cannot bypass the original required item gate",
+        "per-beat voice, animation, materials and diegetic clues",
+        "interrupt/save-reload and return-path QA"
+      ],
+      "note": "Temporal grouping is a remake production workstream, NOT a claim that the 1987 MSX2 uses formal chapters or these exact rooms."
+    },
+    {
+      "order": "10",
+      "id": "metal_gear_and_escape",
+      "title": "TX-55 Metal Gear — the truth and escape",
+      "sourceBeats": [
+        "infiltrate basement",
+        "investigate correct explosive placement pattern",
+        "TX-55 security laser cameras",
+        "plastic explosive sequence",
+        "self-destruct",
+        "Big Boss reveal and fight",
+        "exfiltration"
+      ],
+      "firstWeaponAccess": [],
+      "earnedCards": [],
+      "bossIds": [
+        "tx55",
+        "big_boss"
+      ],
+      "implementationStatus": "design_only",
+      "unrealVerified": false,
+      "real3DNeeds": [
+        "connected navigable hallways with unique landmarks and camera clearance",
+        "believable guard/contractor/POW positions derived from facility duties",
+        "optional stealth route that cannot bypass the original required item gate",
+        "per-beat voice, animation, materials and diegetic clues",
+        "interrupt/save-reload and return-path QA"
+      ],
+      "note": "Temporal grouping is a remake production workstream, NOT a claim that the 1987 MSX2 uses formal chapters or these exact rooms."
+    }
+  ],
+  "versionExclusions": [
+    "NES Twin Shot replacing Hind D",
+    "NES Super Computer replacing TX-55",
+    "unearned MGS1 or MGSV weapons or technological affordances"
+  ],
+  "gaps": {
+    "gameplay": [
+      "canonical 7-weapon runtime integration, actual pickups, alternate approaches, enemy hearing and alert",
+      "full set of bosses and destructible machines",
+      "POW ranks/hostage intelligence and item/keycard persistence",
+      "evading/breaking CCTV, laser cameras as a different late-game hazard"
+    ],
+    "production": [
+      "UE character models, rigs, animation montages and full-body IK",
+      "environment construction kit and photogrammetry-style PBR workflow",
+      "boss VO with recorded original performances and orchestral/soundscape mix",
+      "Unreal build/test, packaging and browser parity"
+    ],
+    "canonReview": [
+      "original boss exploits versus fair 3D alternatives",
+      "which encounters can legitimately be bypassed",
+      "original building topology and authentic floor transitions",
+      "source text provenance for every new speaker line and item acquisition"
+    ]
+  },
+  "nextPlayableMilestones": [
+    {
+      "id": "N01",
+      "issue": "https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/4",
+      "goal": "Restore authentic Building 1 infiltration, original equipment acquisitions, POW chain and four-mercenary encounter",
+      "dependsOn": [],
+      "evidence": "actual connected mission and all enabled weapons earned, save/load, first full PIE review",
+      "status": "partial_source_only"
+    },
+    {
+      "id": "N02",
+      "issue": "https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/5",
+      "goal": "Prison custody, Gray Fox and Shoot Gunner become in-engine tested with valid camera, hands, rig, movement, multiple source-backed counterplays",
+      "dependsOn": [
+        "N01"
+      ],
+      "evidence": "real editor input/audio/animation and end-to-end defeat/evasion test captures",
+      "status": "source_mechanics_only"
+    },
+    {
+      "id": "N03",
+      "issue": "https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/6",
+      "goal": "Building 1 post-Card3 dog, genuine explosive wall, Machinegun Kid, roof parachute and Hind D",
+      "dependsOn": [
+        "N02"
+      ],
+      "evidence": "full sector traverse, enemy and camera counterplay, rooftop fight in native UE",
+      "status": "partial_source_then_design_only"
+    },
+    {
+      "id": "N04",
+      "issue": "https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/7",
+      "goal": "Building 2 vehicles, flame threat, TX-11, POWs/cards and earned rocket launcher",
+      "dependsOn": [
+        "N03"
+      ],
+      "evidence": "all original bosses and linked items in playable UE level",
+      "status": "design_only"
+    },
+    {
+      "id": "N05",
+      "issue": "https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/8",
+      "goal": "Building 3 hostage challenge, Card 8, authentic TX-55, Big Boss and escape ending",
+      "dependsOn": [
+        "N04"
+      ],
+      "evidence": "complete 1987 source-faithful first playthrough",
+      "status": "design_only"
+    },
+    {
+      "id": "N06",
+      "issue": "https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/issues/9",
+      "goal": "Cross-cutting MGS-standard 1995 character/environment art, animation IK, VO, MGS UI, staging, player research and release gates",
+      "dependsOn": [],
+      "schedule": "continuous, do not defer until campaign is finished",
+      "evidence": "each milestone needs actual rig/asset/rules performance testing, final full-game package",
+      "status": "partial_source_contracts"
+    }
+  ],
+  "cardboardBoxContract": {
+    "authority": "Original 1987 MSX2, Building One 3F (Card Two room), subsequent 1F and B2 use demonstrated by independent walkthrough.",
+    "source": [
+      "https://thesnakesoup.org/metal-gear-msx-walkthrough/",
+      "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/12398"
+    ],
+    "permanentItemId": "BOX",
+    "temporaryNonCanonPreludeId": "FREIGHT_CARTON",
+    "ownership": "Earn once behind original Card 2 gate, reusable wherever retained after subsequent stage/elevator transitions and recovery from authentic confiscation. Not consumed by hiding or moving on a conveyor.",
+    "currentSourceStatus": "Early freight disguise/belt and overheard clerk line in Unreal/Browser source; permanent box acquisition and full-campaign persistence remain NOT IMPLEMENTED.",
+    "meaningfulFutureUses": [
+      "1987 source-required stealth past first-floor guards/cameras before capture",
+      "Authentic post-capture inventory recovery restores original box from confiscated gear",
+      "1987 source-required B1 basement-two guard and CCTV avoidance",
+      "Selective credible 1995 warehouse shipping-belt transit as low-pressure movement reward",
+      "Other situational stealth without forcing puzzle or changing story order"
+    ],
+    "highPressureLowPressureBeat": {
+      "sequence": [
+        "consequential guard/alert/POW objective",
+        "briefly safe, mundane working freight and transported box with player-controlled camera",
+        "optional overheard staff detail while moving forwards",
+        "arrival at next legible operational area and return to tension"
+      ],
+      "forcedLockSeconds": 0,
+      "boxConsumed": false,
+      "mandatoryFreightPuzzle": false,
+      "sourcePrototype": [
+        "browser/game.js freightTick",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp TickDispatch"
+      ],
+      "unfinished": [
+        "correct later floor geometry",
+        "canonical box actual pickup",
+        "persistent across building transitions",
+        "authored rig and movement/material audio",
+        "real engine tests"
+      ]
+    },
+    "enemyLimitations": "Rarity and context matter. Original later specialist rocket guards can recognise disguise; normal nearby guard suspicion follows real LOS, facing, inspection time and freight legitimacy, not an omniscient universal reveal."
+  }
+}

@@ -1,0 +1,187 @@
+{
+  "schema_version": 1,
+  "owner": "character_art_pipeline",
+  "default_status": "candidate_only",
+  "criteria_max": 5,
+  "criteria_weight": {
+    "canon_silhouette": 25,
+    "rig_and_attachments": 20,
+    "animation_contact_quality": 20,
+    "style_integration": 15,
+    "runtime_performance": 10,
+    "licence_provenance": 10
+  },
+  "hard_vetoes": [
+    "Rights not verified for exact asset/release",
+    "No exact asset/package source and author",
+    "No compatible rig/required socket where animation is required",
+    "Identity or wardrobe contradicts 1995 continuity",
+    "Hand/weapon/muzzle contact irreparably inaccurate",
+    "No playable UE import, rendering and contact evidence",
+    "Source material ripped or redistribution not permitted"
+  ],
+  "candidates": [
+    {
+      "id": "quaternius_base",
+      "label": "Quaternius Universal Base Characters",
+      "uri": "https://quaternius.com/packs/universalbasecharacters.html",
+      "roles": [
+        "guard_base",
+        "rig_reference"
+      ],
+      "rights": "pack_page_reports_CC0_not_download_verified",
+      "format": "inspect_release",
+      "note": "Humanoid baseline only, never final identifiable Solid Snake or Gray Fox",
+      "status": "candidate_only",
+      "local_archive_sha256": null,
+      "exact_release_version": null,
+      "downloaded": false,
+      "UE5_7_import_tested": false,
+      "performance_capture": false,
+      "approved": false
+    },
+    {
+      "id": "quaternius_motions",
+      "label": "Quaternius Universal Animation Library",
+      "uri": "https://quaternius.com/packs/universalanimationlibrary.html",
+      "roles": [
+        "locomotion_source",
+        "crouch_prone_candidates"
+      ],
+      "rights": "pack_page_reports_CC0_not_download_verified",
+      "format": "verify_GLTF_GLB_FBX_version",
+      "note": "Retarget; evaluate root motion and cycle phase, not appearance in source viewer",
+      "status": "candidate_only",
+      "local_archive_sha256": null,
+      "exact_release_version": null,
+      "downloaded": false,
+      "UE5_7_import_tested": false,
+      "performance_capture": false,
+      "approved": false
+    },
+    {
+      "id": "kaykit",
+      "label": "KayKit Character Animations",
+      "uri": "https://kaylousberg.itch.io/kaykit-character-animations",
+      "roles": [
+        "supplemental_motion_source"
+      ],
+      "rights": "pack_page_reports_CC0_not_download_verified",
+      "format": "inspect_release",
+      "note": "Low-poly character style is not our production aesthetic; only motion may transfer",
+      "status": "candidate_only",
+      "local_archive_sha256": null,
+      "exact_release_version": null,
+      "downloaded": false,
+      "UE5_7_import_tested": false,
+      "performance_capture": false,
+      "approved": false
+    },
+    {
+      "id": "epic_game_animation_sample",
+      "label": "Epic Game Animation Sample",
+      "uri": "https://dev.epicgames.com/documentation/en-us/unreal-engine/game-animation-sample-project-in-unreal-engine",
+      "roles": [
+        "motion_matching_reference",
+        "retarget_reference"
+      ],
+      "rights": "engine_related_conditions_review_required",
+      "format": "UE_sample_project",
+      "note": "Excellent motion-matching and transition reference but audit project licensing and performance costs",
+      "status": "candidate_only",
+      "local_archive_sha256": null,
+      "exact_release_version": null,
+      "downloaded": false,
+      "UE5_7_import_tested": false,
+      "performance_capture": false,
+      "approved": false
+    },
+    {
+      "id": "mixamo",
+      "label": "Adobe Mixamo",
+      "uri": "https://helpx.adobe.com/creative-cloud/faq/mixamo-faq.html",
+      "roles": [
+        "motion_source"
+      ],
+      "rights": "game_royalty_free_conditions_raw_library_redistribution_restricted",
+      "format": "FBX_check",
+      "note": "Only supplemental candidate; do not ship raw animation library as user-downloadable assets",
+      "status": "candidate_only",
+      "local_archive_sha256": null,
+      "exact_release_version": null,
+      "downloaded": false,
+      "UE5_7_import_tested": false,
+      "performance_capture": false,
+      "approved": false
+    },
+    {
+      "id": "poly_haven",
+      "label": "Poly Haven",
+      "uri": "https://polyhaven.com/license",
+      "roles": [
+        "PBR_materials",
+        "HDRI_reference"
+      ],
+      "rights": "CC0_per_website_verify_assets",
+      "format": "texture_set",
+      "note": "Industrial materials with period-correct look; tune roughness/exposure across whole scene",
+      "status": "candidate_only",
+      "local_archive_sha256": null,
+      "exact_release_version": null,
+      "downloaded": false,
+      "UE5_7_import_tested": false,
+      "performance_capture": false,
+      "approved": false
+    },
+    {
+      "id": "ambientcg",
+      "label": "ambientCG",
+      "uri": "https://docs.ambientcg.com/license/",
+      "roles": [
+        "PBR_materials"
+      ],
+      "rights": "CC0_per_website_verify_assets",
+      "format": "texture_set",
+      "note": "Prison concrete and base metal wear; licensed data separate from authored damage decals",
+      "status": "candidate_only",
+      "local_archive_sha256": null,
+      "exact_release_version": null,
+      "downloaded": false,
+      "UE5_7_import_tested": false,
+      "performance_capture": false,
+      "approved": false
+    }
+  ],
+  "deliverables": [
+    {
+      "id": "snake_1995",
+      "basis": "custom recognisable face and outfit plus individually retargeted motions",
+      "license_review": "required",
+      "status": "no_approved_asset"
+    },
+    {
+      "id": "grayfox_1995",
+      "basis": "human prisoner costume and fatigue animation, never cybernetic",
+      "license_review": "required",
+      "status": "no_approved_asset"
+    },
+    {
+      "id": "guard_1995",
+      "basis": "modular character rig with shared compatible skeleton, variant silhouettes and guard behavior",
+      "license_review": "required",
+      "status": "no_approved_asset"
+    },
+    {
+      "id": "shotmaker",
+      "basis": "separate gunner model, physically aligned two-handed shotgun and shotgun montage suite",
+      "license_review": "required",
+      "status": "no_approved_asset"
+    },
+    {
+      "id": "tx55",
+      "basis": "custom authentic original-silhouette mech rig with modular engineered fail state",
+      "license_review": "required",
+      "status": "no_approved_asset"
+    }
+  ]
+}

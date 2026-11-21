@@ -5,11 +5,11 @@
 
 ## Global acceptance requirement
 
-The entire vertical slice must pass [Doctrine 004](DOCTRINE_004_INTEGRATED_EXPERIENCE.md), with integrated beat contracts in [data/beat_contracts.json](../data/beat_contracts.json). An animation, a dialogue clip or a guard action cannot be individually signed off if its audio/visual/input/timing/mission-state relationship is untested. The beat registry is currently a seed only; production assets and packaged-video evidence remain missing.
+The entire vertical slice must pass [Doctrine 004](DOCTRINE_004_INTEGRATED_EXPERIENCE.md), with integrated beat contracts in [data/beat_contracts.json](../data/beat_contracts.json). An animation, a dialogue clip or a guard action cannot be individually signed off if its audio/visual/input/timing/mission-state relationship is untested. The beat registry currently covers 18 source-designed beats and nine provisional areas, but production assets and packaged-video evidence remain missing.
 
 ## What currently works only as source
 
-- Unreal: collision capsule movement, free-look over-shoulder spring-arm camera, crouch, experimental prone + wall cover, limited melee, basic stealth and guard patrol, rescue state progression, HUD source and placeholder props.
+- Unreal source: collision capsule movement, free-look over-shoulder spring-arm camera, crouch, experimental prone + wall cover, limited melee, guard/custody state, POW-led prelude, multi-hit prison walls, connected Shoot Gunner prototype, equipment/card/transmitter logic, HUD source and placeholder props. None of this has a confirmed UE5.7 build or quality playtest.
 - Browser proof-of-play: original procedural human figures (simple geometric limbs), procedural materials, basic crouch, free camera and guards. No skeletal animation, prone pose, contextual wall cover, facial acting, real voice performances or finished 3D art. Browser WebGL smoke testing is restricted in the current environment.
 - There are no .uasset skeletal rigs, final texture atlases, facial rigs, polished sound files or production-ready lighting/post effects committed.
 - Do not call this a polished AAA-quality experience until the evidence below is recorded and a real player can complete the packaged mission.

@@ -1,0 +1,55 @@
+# Original source palette, placeholder material only; author PBR roughness/normal/UV for UE.
+newmtl steel_blued
+Ka 0.008 0.012 0.014
+Kd 0.12 0.16 0.19
+Ks 0.25 0.29 0.33
+Ns 96
+illum 2
+newmtl steel_brushed
+Ka 0.013 0.014 0.016
+Kd 0.30 0.33 0.36
+Ks 0.40 0.41 0.42
+Ns 110
+illum 2
+newmtl steel_dark
+Ka 0.009 0.01 0.012
+Kd 0.058 0.067 0.074
+Ks 0.21 0.22 0.24
+Ns 88
+illum 2
+newmtl void_black
+Ka 0 0 0
+Kd 0.018 0.018 0.022
+Ks 0.01 0.01 0.014
+Ns 20
+illum 2
+newmtl wood_walnut
+Ka 0.02 0.011 0.006
+Kd 0.21 0.12 0.070
+Ks 0.065 0.04 0.025
+Ns 38
+illum 2
+newmtl wood_highlight
+Ka 0.018 0.013 0.008
+Kd 0.26 0.17 0.10
+Ks 0.07 0.055 0.037
+Ns 36
+illum 2
+newmtl rubber_black
+Ka 0.005 0.005 0.005
+Kd 0.04 0.045 0.045
+Ks 0.015 0.02 0.02
+Ns 24
+illum 2
+newmtl rubber_texture
+Ka 0.006 0.006 0.006
+Kd 0.065 0.07 0.075
+Ks 0.02 0.02 0.025
+Ns 28
+illum 2
+newmtl accent_amber
+Ka 0.07 0.026 0.009
+Kd 0.55 0.19 0.035
+Ks 0.12 0.09 0.04
+Ns 47
+illum 2

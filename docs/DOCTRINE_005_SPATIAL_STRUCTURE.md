@@ -52,3 +52,11 @@ The current straight-line prison actors are a **functional test**, not an approv
 - The Level Design Book: https://book.leveldesignbook.com/process/preproduction/pacing
 - GDC Level Design Workshop: https://www.gamedeveloper.com/design/gdc-2017-level-design-workshop
 - Environmental and stealth level design references should be logged with dates, original editions, licensing constraints and observed implementation details; do not treat cited advice as calibrated timing data.
+
+## 19 November geometry and custody fairness correction
+
+The first source blockout placed a detention officer close to the security booth's collision edge, obstructing clean sightline and arrest staging, and several crates/guard-cover blocks were below eye-line collision traces. These are not cosmetic errors: they decide whether the level has credible cover, predictable arrests and player choices. The amended prelude places both custody officers in unobstructed world space; moves the parked truck south to create a **360 cm** unobstructed corridor between its chassis and booth; places the custody marker in that corridor; and raises sight-breaking cover above the standing trace line. A player should be able to approach from more than one side and obtain a genuine security challenge.
+
+Custody guard code now distinguishes compliant behaviour from a brief remembered threatening approach. It requires an actually observed challenge lasting approximately **0.75 seconds** (provisional animation/voice cue budget) before mission confiscation can commit; aiming/sprinting temporarily suppresses a challenge instead of immediately making a conspicuously armed suspect safe. The distance and time are tuning values, **not** verified original 1987 dimensions. No mandatory firefight or unknowable instant failure is introduced. Perception debugging is opt-in so PIE art reviews do not show guard tracing gizmos all the time.
+
+**Outstanding:** the full arrest/custody in-engine cinematic and guard animation, spatial playtest at 720p, and exact target J2ME topology still require Unreal editor validation. Do not mark this environment art complete.

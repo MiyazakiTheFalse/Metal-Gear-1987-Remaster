@@ -4,6 +4,7 @@ pub mod resource;
 pub mod mission_events;
 pub mod gray_fox;
 pub mod pacing;
+pub mod tx55;
 
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]

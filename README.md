@@ -1,8 +1,24 @@
 # Metal Gear (1987) Remaster
 
-PC-first, Switch-targeted modern 3D remake of the supplied Connect2Media **J2ME Metal Gear v3.3.0** edition. The direction is free-camera MGS4/MGSV-style movement, stealth and aiming, while faithfully reconstructing the original game's locations and mission progression.
+Modern, third-person reinterpretation of **Metal Gear (1987, original MSX2)** as a 1995 Outer Heaven infiltration game. The supplied Connect2Media J2ME edition is a separate comparison, **not the authority** for 1987 floor layouts, bosses, weapon progression or character continuity. Its free camera/stealth/aim are original source implementations with MGS-style pacing, not extracted commercial game assets.
 
-> **Current status: source-only vertical slice.** The UE5 project has **not** been compiled or packaged in the available environment. There is no playable Windows .exe or Switch build yet. A UE-capable build host is needed to produce PC playtest packages; testers will not need the editor.
+> **Current status (21 November 2026): 27/114 source-prototype beats, 0 engine-verified Unreal beats, 0 production-ready.** The browser is a runnable source/asset playtest through the proposed tank section and now has an MGS-inspired hold/scroll/release weapon/item strip; Unreal 5.7 has parallel source UI and mission code but has **not been compiled, imported or Play-In-Editor verified here**. This is NOT a finished Metal Gear game, a downloadable Unreal .exe, or a canon-exact Outer Heaven model.
+
+**Latest browser playtest ZIP:** [download this development branch as ZIP](https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/archive/refs/heads/feature/character-art-pipeline-1995.zip), extract and run `browser/Play-Windows.cmd` (or `python3 browser/tools/serve_playtest.py`). The ZIP includes the entire repository, including the browser project and its source models. A **browser-only** ZIP can also be generated from a checkout with `python scripts/package_browser_playtest.py`, which runs the local Node regressions and produces `dist/Outer_Heaven_Browser_Playtest_Latest.zip`. Neither path implies an Unreal native binary.
+
+**Architectural blueprint:** open `http://127.0.0.1:19870/atlas.html` while the browser server is running. [Whole-site design bible](docs/OUTER_HEAVEN_MASTER_ARCHITECTURE_1995.md), [52-area / 114-beat / 11-boss atlas data](browser/atlas/outer_heaven_1995.json), and [original MGS-style equipment-window contract](docs/MGS_HUD_EQUIPMENT_CONTRACT.md). The illustrated exterior/floor metre coordinates are explicitly **remake design hypotheses**; every original 1987 room tile and item position remains to be verified.
+
+## Unreal tester checkout — current development branch
+
+For the latest **uncompiled** Unreal 5.7 C++ source and committed skinned GLB assets, check out `feature/character-art-pipeline-1995`, tracked in [draft PR #3](https://github.com/MiyazakiTheFalse/Metal-Gear-1987-Remaster/pull/3). Do **not** assume `main` includes this pass.
+
+**Tester instructions:** [Unreal Tester Handoff](docs/UNREAL_TESTER_HANDOFF_2026_11_20.md). Run `scripts/unreal_tester_preflight.ps1` on a Windows UE5.7 build host, import the character GLBs through `unreal/MGRemaster/Content/Python/import_field_character_glbs.py`, then run `scripts/build_windows.ps1` for a locally generated Windows Development package. None of these steps is a verified Unreal build in this authoring environment. The 22 current cast source GLBs are original, stylised procedural prototypes, not photorealistic finished art.
+
+## Title screen and metagame (browser source, 20 Nov 2026)
+
+The main browser title now uses independently authored MGS-inspired tactical artwork, responsive menu layout and reduced-motion handling. New Game, Continue (real checkpoint-gated), Mission Briefing, VR Shoot Gunner rehearsal and Options have working keyboard/controller routes. Selecting New Game with an existing checkpoint requires an explicit Cancel-default confirmation. The briefing uses original 1987-informed illustrated Snake and Big Boss portraits. The radio portraits are unique source SVGs for eight 1995 identities, currently illustrated rather than realistic facial scans.
+
+Development status and remaining native Unreal front-end/audio/UX tasks: [Metagame Title and Front-end Contract](docs/METAGAME_TITLE_AND_FRONTEND_1995.md). This is **not** a verified in-browser visual/UX playtest, completed Unreal intro movie, final VO, or production character render.
 
 ## Implemented in source
 
@@ -22,6 +38,15 @@ These features are unverified source implementation, not finished gameplay or pr
 - `tools/` — licensed source archive inspection + local extraction, tests.
 - `scripts/build_windows.ps1` — packaging entrypoint on a Windows UE5.7 build host.
 - `docs/` — source audit, gameplay scope, graphics policy and build notes.
+- **1995 Solid Snake protagonist bible:** [binding identity/rig/aim/animation design](docs/SOLID_SNAKE_1995_PROTAGONIST_BIBLE.md), with [machine-checkable contract](data/solid_snake_character_contract.json). This is an authored specification, not imported/verified final character art.
+
+## Additional full-game lore and character bibles
+
+- [1995 continuity and cinematic treatment](docs/OUTER_HEAVEN_1995_CONTINUITY_TREATMENT.md) preserves the 1987 player perspective while reconciling later Big Boss and Venom canon.
+- [TX-55 boss bible](docs/TX55_METAL_GEAR_BOSS_BIBLE.md) preserves the 16-leg-charge sabotage puzzle and plans its cinematic/engineering climax.
+- [Significant-character individual bibles](docs/CHARACTER_CAST_BIBLES/README.md) with [auditable registry](data/character_bible_registry.json) cover original cast, encounters, allies, guards and both Big Boss identities. These are working source documents **not** imported models, rendered cinema or completed full-game systems.
+
+The [in-engine cinematic direction bible](docs/CINEMATIC_DIRECTION_AND_CUTSCENE_BIBLE.md) and [shot/skip contracts](data/cinematic_scene_contracts.json) cover capture, Gray Fox, Shoot Gunner, Madnar, TX-55 and the final confrontation. These are source-level cinematic designs, not finished Unreal sequences.
 
 ## Global production doctrine — binding
 
@@ -35,9 +60,23 @@ Every player-facing beat must be designed as **one synchronized audiovisual, int
 python -m unittest discover -s tools -p 'test_*.py'
 python tools/validate_beat_contracts.py
 python tools/validate_area_contracts.py
+python tools/validate_solid_snake_contract.py
+python tools/validate_full_game_bibles.py
+python tools/validate_cinematic_scenes.py
+python tools/validate_asset_selection.py
+# New source-only Shotmaker artifact and encounter checks:
+python -m unittest discover -s tools -p 'test_*.py'
 python tools/inspect_and_extract.py /path/to/Metal-Gear_J2ME_EN_v330.zip --output content
-cd rust && cargo test && cargo build --release
+cd rust && cargo test && cargo build --release  # Includes engine-neutral TX-55 sabotage tests
 ```
+
+## Shotmaker source pass (19 November 2026)
+
+The [Shotmaker encounter contract](data/shotmaker_attack_contract.json) now distinguishes original three-shot shotgun spread from adjustable modern 3D cadence/spread parameters. The Unreal actor and connected prison-to-boss wing encode physical recovery-room breach, reclaimed handgun, inventory transmitter with radio beacon effect, Card 2 → Card 3 progression, and a fair line-of-sight attack system. [Original editable riot-gun geometry and WAV cues](assets/source/shotmaker/README.md) include an [Editor import script](unreal/MGRemaster/Content/Python/import_shotmaker_source_assets.py); this is **source only**—no UE5.7 compile, imported UAssets, finished skeletal models, animation or complete cinematic. See [source/evidence checkpoint](docs/IMPLEMENTATION_STATUS_2026_11_19.md).
+
+## Vertical-slice audio and art completion audit (19 November 2026)
+
+[Source asset inventory](data/vertical_slice_asset_inventory.json), [readable audit](docs/VERTICAL_SLICE_ASSET_COMPLETENESS_AUDIT.md), and [original transceiver WAV cues](assets/source/transceiver/audio/README.md) separate existing source files from *actual* Unreal imports. The new in-game call sound hooks **require importing** those SoundWaves using [Editor script](unreal/MGRemaster/Content/Python/import_transceiver_audio.py). No final voice, music stems, skinned character assets, or real Sequencer cutscenes are yet present. Validate source inventory with `python tools/validate_slice_asset_inventory.py`.
 
 ## Windows packaging
 

@@ -34,17 +34,24 @@ void AMGRemasterGameMode::StartPlay()
     Super::StartPlay();
     if (!GetWorld()) return;
 
-    // The rescue is the current runnable mission slice; other greybox
-    // environments are added only after original J2ME map verification.
+    // The mission controller restores a valid checkpoint after pawn creation.
     if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
     {
         if (!PC->GetPawn())
         {
             AMGPlayerCharacter* Pawn = GetWorld()->SpawnActor<AMGPlayerCharacter>(
-                FVector(-950.f, 0.f, -11.f), FRotator::ZeroRotator);
+                FVector(-4620.f, -50.f, -11.f), FRotator::ZeroRotator);
             if (Pawn) PC->Possess(Pawn);
         }
     }
-    GetWorld()->SpawnActor<AMGGrayFoxMission>(AMGGrayFoxMission::StaticClass(),
-                                            FVector::ZeroVector, FRotator::ZeroRotator);
+    // Editor-authored levels may already contain this mission controller.
+    // A duplicate would spawn overlapping collision walls, duplicate guards
+    // and race on the same SaveGame slot. Spawn only in the Entry fallback.
+    if (!UGameplayStatics::GetActorOfClass(
+            this, AMGGrayFoxMission::StaticClass()))
+    {
+        GetWorld()->SpawnActor<AMGGrayFoxMission>(
+            AMGGrayFoxMission::StaticClass(), FVector::ZeroVector,
+            FRotator::ZeroRotator);
+    }
 }

@@ -10,16 +10,46 @@ void UMGEquipmentComponent::BeginPlay()
     Super::BeginPlay();
     Weapons = {
         {FName(TEXT("NONE")), TEXT("NO WEAPON"), 0, true, false},
-        {FName(TEXT("STUN")), TEXT("STUN PISTOL [TEST]"), 8, true, false}
+        // Existing prison-slice carryover (not yet earned in the expanded
+        // first-floor mission). This must later become an actual pickup.
+        {FName(TEXT("HANDGUN")), TEXT("HANDGUN"), 0, false, false},
+        {FName(TEXT("MINE")), TEXT("MINE [NOT INTEGRATED]"), 0, false, false},
+        {FName(TEXT("PLASTIC_EXPLOSIVE")), TEXT("PLASTIC EXPLOSIVE [NOT INTEGRATED]"), 0, false, false},
+        {FName(TEXT("REMOTE_MISSILE")), TEXT("REMOTE MISSILE [NOT INTEGRATED]"), 0, false, false},
+        {FName(TEXT("GRENADE_LAUNCHER")), TEXT("GRENADE LAUNCHER [NOT INTEGRATED]"), 0, false, false},
+        {FName(TEXT("SMG")), TEXT("SUBMACHINE GUN [NOT INTEGRATED]"), 0, false, false},
+        {FName(TEXT("ROCKET_LAUNCHER")), TEXT("ROCKET LAUNCHER [NOT INTEGRATED]"), 0, false, false}
     };
+#if !UE_BUILD_SHIPPING
+    // Separate developer sandbox only. The 1987 MSX2 never awards a stun
+    // pistol; a normal playthrough, packaged build and default PIE session
+    // must never display or equip one.
+    if (bEnableNonCanonicalTestWeapons)
+        Weapons.Add({FName(TEXT("STUN")), TEXT("STUN PISTOL [DEV ONLY]"),
+                     8, true, false});
+#endif
     Items = {
         {FName(TEXT("NONE")), TEXT("NO ITEM"), 0, true, false},
-        {FName(TEXT("RATION")), TEXT("RATION [TEST]"), 1, true, true},
-        {FName(TEXT("CARD1")), TEXT("KEYCARD 1 [TEST]"), 0, false, false}
+        {FName(TEXT("RATION")), TEXT("RATION"), 0, false, true},
+        {FName(TEXT("CARD1")), TEXT("KEYCARD 1"), 0, false, false},
+        {FName(TEXT("BINOCULARS")), TEXT("BINOCULARS"), 0, false, false},
+        // Carryover from the earlier infiltration, not a claimed playable acquisition.
+        {FName(TEXT("CARD2")), TEXT("KEYCARD 2 [CARRYOVER]"), 0, true, false},
+        {FName(TEXT("CARD3")), TEXT("KEYCARD 3 [SLICE]"), 0, false, false},
+        // This is placed in Snake's actual inventory when his gear is returned.
+        {FName(TEXT("TRANSMITTER")), TEXT("UNKNOWN TRANSMITTER"), 0, false, false},
+        {FName(TEXT("PARACHUTE")), TEXT("PARACHUTE"), 0, false, false},
+        // Remake-only *borrowed* freight disguise. Lost at custody.
+        {FName(TEXT("FREIGHT_CARTON")), TEXT("FREIGHT CARTON [TEMPORARY]"), 0, false, false},
+        // Authentic 1987 box is a distinct, still-unearned item behind a
+        // Card 2 door on Building 1 floor 3. Do not place it in this yard.
+        {FName(TEXT("BOX")), TEXT("CARDBOARD BOX [F3 / CARD 2]"), 0, false, false},
+        {FName(TEXT("CIGARETTES")), TEXT("CIGARETTES"), 1, true, false}
     };
     // A captured Snake cannot use pre-capture weapons or items. Test entries are
     // deliberately marked provisional rather than claims about J2ME inventory.
     SetConfiscated(true);
+    bInventorySlotsInitialized = true;
 }
 
 void UMGEquipmentComponent::TickComponent(
@@ -108,6 +138,38 @@ bool UMGEquipmentComponent::IsStunEquipped() const
         && Weapons[EquippedWeapon].Id == FName(TEXT("STUN"))
         && IsAvailable(Weapons[EquippedWeapon]);
 }
+bool UMGEquipmentComponent::IsHandgunEquipped() const
+{
+    return !bConfiscated && Weapons.IsValidIndex(EquippedWeapon)
+        && Weapons[EquippedWeapon].Id == FName(TEXT("HANDGUN"))
+        && IsAvailable(Weapons[EquippedWeapon]);
+}
+int32 UMGEquipmentComponent::GetHandgunRounds() const
+{
+    for (const auto& Entry : Weapons)
+        if (Entry.Id == FName(TEXT("HANDGUN"))) return Entry.Quantity;
+    return 0;
+}
+bool UMGEquipmentComponent::ConsumeHandgunRound()
+{
+    if (!IsHandgunEquipped()) return false;
+    FMGEquipmentEntry& Slot = Weapons[EquippedWeapon];
+    if (Slot.Quantity <= 0) return false;
+    --Slot.Quantity;
+    return true;
+}
+void UMGEquipmentComponent::RestoreHandgunRounds(int32 Rounds)
+{
+    for (FMGEquipmentEntry& E : Weapons)
+        if (E.Id == FName(TEXT("HANDGUN")))
+            E.Quantity = FMath::Clamp(Rounds, 0, 999);
+}
+void UMGEquipmentComponent::RestoreStunRounds(int32 Rounds)
+{
+    for (FMGEquipmentEntry& E : Weapons)
+        if (E.Id == FName(TEXT("STUN")))
+            E.Quantity = FMath::Clamp(Rounds, 0, 999);
+}
 int32 UMGEquipmentComponent::GetStunRounds() const
 {
     for (const auto& Entry : Weapons)
@@ -126,6 +188,47 @@ bool UMGEquipmentComponent::ConsumeStunRound()
     --Slot.Quantity;
     return true;
 }
+bool UMGEquipmentComponent::HasPlantedTransmitter() const
+{
+    for (const FMGEquipmentEntry& E : Items)
+        if (E.Id == TEXT("TRANSMITTER"))
+            return E.bOwned;
+    return false;
+}
+bool UMGEquipmentComponent::IsItemEquipped(FName ItemId) const
+{
+    return !bConfiscated && Items.IsValidIndex(EquippedItem)
+        && Items[EquippedItem].bOwned && Items[EquippedItem].Id == ItemId;
+}
+bool UMGEquipmentComponent::IsTransmitterEquipped() const
+{
+    return !bConfiscated && Items.IsValidIndex(EquippedItem)
+        && Items[EquippedItem].Id == TEXT("TRANSMITTER") && Items[EquippedItem].bOwned;
+}
+bool UMGEquipmentComponent::DiscardPlantedTransmitter()
+{
+    if (bConfiscated) return false;
+    for (FMGEquipmentEntry& Entry : Items)
+        if (Entry.Id == TEXT("TRANSMITTER") && Entry.bOwned)
+        {
+            Entry.bOwned = false;
+            Entry.Quantity = 0;
+            if (Items.IsValidIndex(EquippedItem) && Items[EquippedItem].Id == TEXT("TRANSMITTER"))
+                EquippedItem = 0;
+            if (Items.IsValidIndex(ItemSelection) && Items[ItemSelection].Id == TEXT("TRANSMITTER"))
+                ItemSelection = 0;
+            return true;
+        }
+    return false;
+}
+
+int32 UMGEquipmentComponent::GetItemQuantity(FName ItemId) const
+{
+    for (const FMGEquipmentEntry& E : Items)
+        if (E.Id == ItemId && E.bOwned) return E.Quantity;
+    return 0;
+}
+
 bool UMGEquipmentComponent::ConsumeRation()
 {
     if (bConfiscated || !Items.IsValidIndex(EquippedItem)
@@ -149,9 +252,28 @@ bool UMGEquipmentComponent::AwardItem(FName Id, int32 Count)
         }
     return false;
 }
+bool UMGEquipmentComponent::RevokeTemporaryItem(FName Id)
+{
+    // Not a general inventory wipe: only the borrowed, pre-capture freight
+    // carton is expendable. Authentic Card 2 and BOX stay story-owned.
+    if (Id != FName(TEXT("FREIGHT_CARTON"))) return false;
+    for (FMGEquipmentEntry& E : Items)
+        if (E.Id == Id && E.bOwned)
+        {
+            E.bOwned = false;
+            E.Quantity = 0;
+            if (Items.IsValidIndex(EquippedItem) && Items[EquippedItem].Id == Id)
+                EquippedItem = 0;
+            if (Items.IsValidIndex(ItemSelection) && Items[ItemSelection].Id == Id)
+                ItemSelection = 0;
+            return true;
+        }
+    return false;
+}
 bool UMGEquipmentComponent::AwardWeapon(FName Id, int32 Ammo)
 {
-    if (Ammo < 0) return false;
+    // New slots are not playable until their real placement/fire mechanics exist.
+    if (Ammo < 0 || Id != FName(TEXT("HANDGUN"))) return false;
     for (FMGEquipmentEntry& E : Weapons)
         if (E.Id == Id && Id != FName(TEXT("NONE")))
         {

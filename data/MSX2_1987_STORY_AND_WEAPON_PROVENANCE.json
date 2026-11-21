@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "updated": "2026-11-20",
+  "project": "Metal Gear 1987 Remaster / Operation Intrude N313 / 1995 Outer Heaven",
+  "source_policy": {
+    "priority": [
+      "1987 MSX2 original game, documented script, official Konami manual",
+      "Source-backed walkthrough and captured complete MSX2 playthrough",
+      "Later revised MSX2 translations where clearly identified as revised text",
+      "Connect2Media/J2ME edition only after direct verification",
+      "Later-series canon as consistency check, never an excuse to overwrite 1987 dialogue"
+    ],
+    "translation_rule": "Preserve the original order, functions, character knowledge, surprises and causal consequences. Any new 3D scene, crawl space, civilian activity, guard behaviour or voice line must be explicitly labeled REMAKE_INTERPRETATION; not claimed verbatim original.",
+    "source_classes": {
+      "MSX_VERIFIED": "Source-backed 1987 game/manual script or independently corroborated walkthrough",
+      "REVISED": "Revised official localization, not the 1987 on-screen wording",
+      "INTERPRETATION": "New 3D physical/dramatic construction preserving the event's purpose",
+      "UNVERIFIED": "Not supported yet by an inspected authoritative source"
+    }
+  },
+  "sources": [
+    {
+      "id": "konami_weapon_manual",
+      "type": "official_manual",
+      "url": "https://metalgear.konami.net/manual/mc1/mg1_msx/pc/en/page10.html"
+    },
+    {
+      "id": "snake_soup_walkthrough",
+      "type": "msx_walkthrough",
+      "url": "https://thesnakesoup.org/metal-gear-msx-walkthrough/"
+    },
+    {
+      "id": "uchuukeijigavan_walkthrough",
+      "type": "msx_walkthrough",
+      "url": "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/65155"
+    },
+    {
+      "id": "msx_text_dump",
+      "type": "msx_script_transcription",
+      "url": "https://metalgear.dr-sunny.info/?lang=en&page=script"
+    },
+    {
+      "id": "complete_1987_msx_playthrough",
+      "type": "captured_playthrough",
+      "url": "https://www.youtube.com/watch?v=ehlAMTh42Ko"
+    },
+    {
+      "id": "original_revised_names",
+      "type": "version_comparison",
+      "url": "https://tcrf.net/Metal_Gear_(MSX2)"
+    }
+  ],
+  "chronology": [
+    {
+      "id": "b1f1_infiltration",
+      "scope": "before_capture",
+      "canonical": true,
+      "source_class": "MSX_VERIFIED",
+      "sequence": [
+        "Crates, supply trucks, patrols, Ration / Card 1 / Binoculars",
+        "First-floor handgun and landmines; gas-mask risk and prisoner intelligence",
+        "Plastic explosives and Card 2 obtained by traversal, not magically provided",
+        "Remote-controlled missiles in Building 1, tied to high-voltage control-panel problem",
+        "Cardboard box, suppressor and grenade launcher; exploration rewards",
+        "Submachine gun in Building 1 shortly before reaching the prisoners who know Gray Fox",
+        "Prisoner reports the missing FOXHOUND operative has been captured"
+      ],
+      "current": "Current playable lead-in compresses this into a source-only yard and starts with inherited Card 2 and test weapons; not a faithful full Building 1 translation yet."
+    },
+    {
+      "id": "prison_and_gray_fox",
+      "scope": "custody",
+      "canonical": true,
+      "source_class": "MSX_VERIFIED",
+      "sequence": [
+        "Deliberate capture and confiscation",
+        "Escape a weakened cell wall using unarmed physical action",
+        "Human Gray Fox rescued in an adjacent hidden cell; learns purpose of Metal Gear",
+        "Break out of prison, evade security and locate confiscated weapons and equipment"
+      ],
+      "current": "Playable C++ prototype only, with missing physical arrest/transport performance and Fox animations/VO."
+    },
+    {
+      "id": "shotmaker",
+      "scope": "basement",
+      "canonical": true,
+      "source_class": "MSX_VERIFIED",
+      "sequence": [
+        "Shoot Gunner / revised Shotmaker prison encounter with a wide triple volley",
+        "Recovery of confiscated inventory and inspection/discard of planted transmitter",
+        "Card 2-secured storeroom and Card 3 progression"
+      ],
+      "current": "Source encounter and pickups exist but several historically plausible alternatives and nonmandatory defeat require edition-verified tests. Do not label a changed gate canon."
+    },
+    {
+      "id": "after_card3",
+      "scope": "building_one_b1",
+      "canonical": true,
+      "source_class": "MSX_VERIFIED",
+      "sequence": [
+        "Access east of Card 3 through dog-guarded interior",
+        "Find suspicious wall, use plastic explosive to open continuation",
+        "Later Building 1 encounters include Machinegun Kid and acquisition of a parachute",
+        "Roof route, blast hazards and parachute descent are later progression, not instant Card 3 loot"
+      ],
+      "current": "Connected dog/service wing is new source greybox with optional prone crawl; actual plastic explosive wall-breach and further sector not yet playable."
+    }
+  ],
+  "weapon_rules": {
+    "canonical_types": [
+      "HANDGUN",
+      "MINE",
+      "PLASTIC_EXPLOSIVE",
+      "REMOTE_MISSILE",
+      "GRENADE_LAUNCHER",
+      "SMG",
+      "ROCKET_LAUNCHER"
+    ],
+    "noncanonical_debug_only": [
+      "STUN"
+    ],
+    "noncanonical_debug_policy": "Stun pistol is a sandbox/testing affordance, NOT acquired in 1987 campaign. For a wired-electrode conducted-energy device, do not emit spent brass cartridge casings each press; a replaceable dart cartridge is not a firearm shell. Do not apply handgun slide/recoil/slide-lock animation to it.",
+    "original_mine_limit": 3,
+    "original_plastic_explosive_limit": 1,
+    "original_remote_missile": "Directional remote guidance pauses Snake's normal locomotion while guiding, not an MGS1/Nikita-era weapon skin.",
+    "smg_reference": "Original dialogue names an Ingram MAC-11; exact 3D mesh and animation remain art-provenance work.",
+    "quality_gate": "No weapon can be marked implemented merely because an OBJ or inventory ID exists; it needs authorized mesh, sockets, animations, gameplay, sound, reload/save and actually tested editor build."
+  },
+  "adaptations": [
+    {
+      "id": "service_crawl",
+      "source_class": "INTERPRETATION",
+      "intent": "Provide an optional player-understandable low route under intact service infrastructure during the post-Card-3 dog challenge",
+      "never_override": "Dog encounter and later explosive wall remain narrative beats; player need not crawl and should not be forced into a new story flag."
+    },
+    {
+      "id": "sentry_dog_3d_behavior",
+      "source_class": "INTERPRETATION",
+      "intent": "Translate 2D dog threats into grounded patrol/LOS/bark/attack recovery with tangible escape routes",
+      "never_override": "Dogs are not telepathic human guards; they alert from the dog's own world position only."
+    },
+    {
+      "id": "articulated_shotgun",
+      "source_class": "INTERPRETATION",
+      "intent": "Separate an original riot-gun body and pump for readable shoulder-to-weapon physical timing",
+      "never_override": "Specific firearm make, 1987 exact shell mechanics, and Shotmaker's inner motives are unverified."
+    }
+  ],
+  "red_lines": [
+    "Do not introduce a 2005 Codec or give 1995 Snake later-series technology.",
+    "Do not depict imprisoned Fox as a cyborg ninja.",
+    "Do not introduce invented speaking NPCs as if they originated in the 1987 script.",
+    "Do not add a second Metal Gear or reorder Machinegun Kid/Gray Fox/Shotmaker for spectacle.",
+    "Do not equate text-based source gate with a finished animation, imported rig, voice session or playable mission.",
+    "Do not permit early Card 3 bypass or unearned explosives/missiles/SMG through testing inventory defaults."
+  ],
+  "honest_status": "Source and code edits are uncompiled and unplaytested in UE5.7. Direct J2ME source-edition geometry, exact names and layouts still need verification."
+}

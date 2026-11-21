@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "updated": "2026-11-20",
+  "scope": "public historical architecture and production practice, not canonical Outer Heaven floorplans",
+  "policy": "Use credible facility functions and original era-specific materials without reproducing private plans, copyrighted photos, or asserting MGSV depicts these 1995 locations.",
+  "references": [
+    {
+      "id": "arch-kindsbach",
+      "title": "Kindsbach underground command bunker",
+      "era": "Cold War",
+      "url": "https://kindsbach.de/en/tourism/sights/bunker/",
+      "study": [
+        "repurposed command infrastructure",
+        "utility/cable runs",
+        "service corridor wear"
+      ],
+      "game_tags": [
+        "OuterServiceCableTray",
+        "SecurityThresholdHeader"
+      ],
+      "never_infer": "Outer Heaven's origin, owner, dimensions or construction date"
+    },
+    {
+      "id": "arch-ahrweiler",
+      "title": "Ahrweiler West German government bunker museum",
+      "era": "Cold War",
+      "url": "https://www.regbu.de/en/the-government-bunker/",
+      "study": [
+        "long galleries with practical services",
+        "high-contrast restricted thresholds",
+        "repeatable wall maintenance"
+      ],
+      "game_tags": [
+        "SecurityThresholdNorthPier",
+        "SecurityThresholdSouthPier",
+        "KennelSupplyCableRun"
+      ],
+      "never_infer": "Outer Heaven was built by the same contractor or is this bunker"
+    },
+    {
+      "id": "arch-greenbrier",
+      "title": "Greenbrier congressional relocation bunker",
+      "era": "completed 1961, Cold War",
+      "url": "https://clui.org/ludb/site/greenbrier-government-relocation-facility",
+      "study": [
+        "dormitories, cafeteria, clinic, water, generator and records as a complete system",
+        "plausible supply flows"
+      ],
+      "game_tags": [
+        "FreightReceivingRack",
+        "KennelHoseLocker",
+        "ServiceMaintenanceLedger"
+      ],
+      "never_infer": "exact room counts/layouts or location transfer to fictional Outer Heaven"
+    },
+    {
+      "id": "arch-facility-types",
+      "title": "Historic US military facility construction typologies",
+      "era": "WWII to Cold War",
+      "url": "https://man.fas.org/dod-101/fac/ww2_pc1.htm",
+      "study": [
+        "distinguish barracks, kitchens, stores, depots and workshops",
+        "operational reasons for movement"
+      ],
+      "game_tags": [
+        "FreightRoofCanopy",
+        "CustodyTransferDutyCard"
+      ],
+      "never_infer": "copy a real secure installation's current plan"
+    },
+    {
+      "id": "production-mgs2",
+      "title": "The Document of Metal Gear Solid 2 - GameSpot preview",
+      "era": "research and development 1999-2002",
+      "url": "https://www.gamespot.com/articles/the-document-of-metal-gear-solid-2-preview/1100-2880502/",
+      "study": [
+        "actual research trip",
+        "military adviser Motosada Mori",
+        "documented placement of guards in levels"
+      ],
+      "game_tags": [
+        "all"
+      ],
+      "never_infer": "Kojima visited the particular bunkers above"
+    },
+    {
+      "id": "mgsv-continuity",
+      "title": "MGSV thematic and identity continuity discussion",
+      "era": "1984 and retrospective ending",
+      "url": "https://www.gamejournal.it/i-am-big-boss-and-you-are-too-player-identity-and-agency-in-metal-gear-solid-v-the-phantom-pain/",
+      "study": [
+        "1984-to-1995 narrative identities only"
+      ],
+      "game_tags": [
+        "narrative_only"
+      ],
+      "never_infer": "MGSV shows 1995 Outer Heaven's real or playable fortress interior"
+    }
+  ]
+}

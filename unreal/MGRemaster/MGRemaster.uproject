@@ -4,7 +4,16 @@
   "Category": "Games",
   "Description": "PC-first 3D stealth remaster prototype with Rust perception core",
   "Modules": [
-    {"Name": "MGRemaster", "Type": "Runtime", "LoadingPhase": "Default"}
+    {
+      "Name": "MGRemaster",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
   ],
-  "Plugins": []
+  "Plugins": [
+    {
+      "Name": "PythonScriptPlugin",
+      "Enabled": true
+    }
+  ]
 }

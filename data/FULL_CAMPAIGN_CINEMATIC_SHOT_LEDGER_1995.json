@@ -1,0 +1,3614 @@
+{
+  "schemaVersion": 1,
+  "asOf": "2026-11-20",
+  "designAuthority": "1987 MSX2 plot/event order; MGS1-like realtime shot grammar and MGS2/3 restrained direction are technique only; all new dialogue original",
+  "priorities": [
+    "character revelation over spectacle",
+    "short purposeful closeups with glance and tension",
+    "real-time game actors and scene in the real playable space",
+    "optional codec exposition where it lets the player keep agency",
+    "no compulsory cinematic for routine pickups, only framing",
+    "automatic skip and reload without losing transaction",
+    "exact source 1987 canonical evidence before revealing future plot",
+    "credible 1995 art, licensed originals and actual animation, VO, sound"
+  ],
+  "statusRule": "source_prototype means runtime hooks + camera/shot data in code; no UE render or finished body performance is implied",
+  "sceneCount": 51,
+  "estimatedFullSceneScreenMinutes": 2.9,
+  "scenes": [
+    {
+      "id": "CS.P01.BRIEF",
+      "mission": "P01",
+      "beat": "P01.brief",
+      "area": "B1.1F.ENTRANCE",
+      "title": "Optional mission briefing / Big Boss establishes Snake's mission",
+      "kind": "radio",
+      "characters": [
+        "snake",
+        "bigBoss"
+      ],
+      "trigger": "player_selected",
+      "direction": "controlled two-head codec, maps not revealed",
+      "estimatedSeconds": 0,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "fully player-controlled / selected",
+      "firstPassShots": [
+        {
+          "role": "call",
+          "lensMm": 80,
+          "relativeSec": 1,
+          "motion": "animated dual-head portraits, player can continue moving"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "identity-accurate facial rig",
+        "lip sync VO timing"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.001",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype"
+    },
+    {
+      "id": "CS.P01.INSERT",
+      "mission": "P01",
+      "beat": "P01.entry",
+      "area": "B1.1F.ENTRANCE",
+      "title": "First view into Outer Heaven and first patrol threat",
+      "kind": "micro",
+      "characters": [
+        "snake",
+        "guard"
+      ],
+      "trigger": "first_clean_insertion",
+      "direction": "wide exterior > close unmarked boots > over-shoulder to playable cover",
+      "estimatedSeconds": 4.2,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "source_prototype",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "unrealSource": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ],
+      "browserSource": [
+        "browser/cinematic_director.js",
+        "browser/game.js"
+      ],
+      "productionBlockers": [
+        "realistic cast mesh and rig",
+        "actor acting and Sequencer retarget",
+        "recorded dialogue/VO and emotion",
+        "shot lighting and lens QA",
+        "Unreal PIE and browser gameplay capture"
+      ],
+      "primarySceneId": "CIN.001",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype",
+      "triggerClarification": "Source opening camera is CIN.001, not a separate filmed patrol observation at CIN.002."
+    },
+    {
+      "id": "CS.P01.TRUCKS",
+      "mission": "P01",
+      "beat": "P01.trucks",
+      "area": "B1.1F.TRUCKS",
+      "title": "Three cargo trucks imply daily life and cover routes",
+      "kind": "interactive",
+      "characters": [
+        "snake",
+        "logistics_guard"
+      ],
+      "trigger": "first_enter_truck_yard",
+      "direction": "truck cab closeup > freight duty > return to shoulder",
+      "estimatedSeconds": 2.7,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "fully player-controlled / selected",
+      "firstPassShots": [
+        {
+          "role": "notice",
+          "lensMm": 45,
+          "relativeSec": 0.6,
+          "motion": "optional player-directed glance"
+        },
+        {
+          "role": "agency",
+          "lensMm": 35,
+          "relativeSec": 0.4,
+          "motion": "camera returns when player moves"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P01.CARD1",
+      "mission": "P01",
+      "beat": "P01.card1",
+      "area": "B1.1F.TRUCKS",
+      "title": "Guard steps away from center truck leaving original keycard opening",
+      "kind": "interactive",
+      "characters": [
+        "snake",
+        "truck_guard"
+      ],
+      "trigger": "observe_guard_departure",
+      "direction": "guard eye line > card glimpse > player's choice; do not auto-collect",
+      "estimatedSeconds": 2.5,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "fully player-controlled / selected",
+      "firstPassShots": [
+        {
+          "role": "notice",
+          "lensMm": 45,
+          "relativeSec": 0.6,
+          "motion": "optional player-directed glance"
+        },
+        {
+          "role": "agency",
+          "lensMm": 35,
+          "relativeSec": 0.4,
+          "motion": "camera returns when player moves"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.003",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P01.ELEVATOR",
+      "mission": "P01",
+      "beat": "P01.elevator",
+      "area": "B1.1F.ELEVATOR",
+      "title": "First real elevator connects ground floor to third floor",
+      "kind": "micro",
+      "characters": [
+        "snake",
+        "patrol_guard"
+      ],
+      "trigger": "enter_elevator_after_earning_route",
+      "direction": "shaft scale > closing steel doors > upper-level reveal",
+      "estimatedSeconds": 3.5,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P01.FREIGHT",
+      "mission": "P01",
+      "beat": "P01.freight",
+      "area": "B1.1F.TRUCKS",
+      "title": "Optional cargo transit breather with staff banter",
+      "kind": "ambient",
+      "characters": [
+        "snake",
+        "receiver"
+      ],
+      "trigger": "voluntary_freight_ride",
+      "direction": "maintain camera agency; no letterbox; dialogue once",
+      "estimatedSeconds": 0,
+      "sourceRank": "remake_adaptation",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "fully player-controlled / selected",
+      "firstPassShots": [
+        {
+          "role": "follow",
+          "lensMm": 35,
+          "relativeSec": 1,
+          "motion": "do not take camera/input"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P02.CCTV",
+      "mission": "P02",
+      "beat": "P02.cctv",
+      "area": "B1.3F.CAMERA",
+      "title": "Security optics demonstrate why cover and direction matter",
+      "kind": "interactive",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "first_optical_camera_view",
+      "direction": "optic pan > occlusion > restored sightline",
+      "estimatedSeconds": 2,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "fully player-controlled / selected",
+      "firstPassShots": [
+        {
+          "role": "notice",
+          "lensMm": 45,
+          "relativeSec": 0.6,
+          "motion": "optional player-directed glance"
+        },
+        {
+          "role": "agency",
+          "lensMm": 35,
+          "relativeSec": 0.4,
+          "motion": "camera returns when player moves"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.004",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P02.PILLAR",
+      "mission": "P02",
+      "beat": "P02.pillar",
+      "area": "B1.3F.HAZARD",
+      "title": "First presentation of moving death pillar / physical kill path",
+      "kind": "micro",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "cross_first_pillar_line",
+      "direction": "wide transit and height > crushing mass with realistic acceleration > safe control",
+      "estimatedSeconds": 2.8,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P02.CARD2",
+      "mission": "P02",
+      "beat": "P02.card2",
+      "area": "B1.3F.CARD2",
+      "title": "Card 2 pickup reframes previously locked routes",
+      "kind": "micro",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "earn_card2",
+      "direction": "mechanical clasp close > card reader reflections > player retains item and moves",
+      "estimatedSeconds": 1.4,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P02.BOX",
+      "mission": "P02",
+      "beat": "P02.box",
+      "area": "B1.3F.BOX",
+      "title": "First permanent original box pickup and subtle comic payoff",
+      "kind": "interactive",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "earn_1987_box",
+      "direction": "gear held against nearby ordinary cargo, then return to player with reusable item",
+      "estimatedSeconds": 2.7,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "fully player-controlled / selected",
+      "firstPassShots": [
+        {
+          "role": "notice",
+          "lensMm": 45,
+          "relativeSec": 0.6,
+          "motion": "optional player-directed glance"
+        },
+        {
+          "role": "agency",
+          "lensMm": 35,
+          "relativeSec": 0.4,
+          "motion": "camera returns when player moves"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.006",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P02.MERCENARIES",
+      "mission": "P02",
+      "beat": "P02.merc",
+      "area": "B1.3F.MERCENARIES",
+      "title": "Four mercenaries reveal coordinated tactical threats",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "four_mercenaries"
+      ],
+      "trigger": "cross_mercenary_boss_gate",
+      "direction": "boots and distinct silhouettes > cross-angle squad > arena affordances > control before opening volley",
+      "estimatedSeconds": 7.5,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.007",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P02.LASER",
+      "mission": "P02",
+      "beat": "P02.laser",
+      "area": "B1.2F.LASER",
+      "title": "Inexplicable second-floor laser hazard discovered through near miss",
+      "kind": "micro",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "approach_unseen_laser",
+      "direction": "floating dust / practical light > hazard > player-led solution",
+      "estimatedSeconds": 2.1,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P02.RETURN",
+      "mission": "P02",
+      "beat": "P02.return1",
+      "area": "B1.1F.REVISIT",
+      "title": "Return to first floor now richer with Box and Card 2",
+      "kind": "interactive",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "reenter_first_floor_after_card2",
+      "direction": "same corridor new camera beat; security response conditioned on stored alarms",
+      "estimatedSeconds": 3.3,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "fully player-controlled / selected",
+      "firstPassShots": [
+        {
+          "role": "notice",
+          "lensMm": 45,
+          "relativeSec": 0.6,
+          "motion": "optional player-directed glance"
+        },
+        {
+          "role": "agency",
+          "lensMm": 35,
+          "relativeSec": 0.4,
+          "motion": "camera returns when player moves"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P03.CUSTODY",
+      "mission": "P03",
+      "beat": "P03.capture",
+      "area": "B1.B1.CELL",
+      "title": "Snake's arrest, confiscation and disorienting transfer to cell",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "custody_guards"
+      ],
+      "trigger": "committed_arrest_first_floor",
+      "direction": "close view weapon lowered > gloved restraint and isolated sound > black transfer > cell viewpoint",
+      "estimatedSeconds": 5.5,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "source_prototype",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "unrealSource": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ],
+      "browserSource": [
+        "browser/cinematic_director.js",
+        "browser/game.js"
+      ],
+      "productionBlockers": [
+        "realistic cast mesh and rig",
+        "actor acting and Sequencer retarget",
+        "recorded dialogue/VO and emotion",
+        "shot lighting and lens QA",
+        "Unreal PIE and browser gameplay capture"
+      ],
+      "primarySceneId": "CIN.008",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype"
+    },
+    {
+      "id": "CS.P03.CELL",
+      "mission": "P03",
+      "beat": "P03.wall1",
+      "area": "B1.B1.CELL",
+      "title": "Quiet recovery in cell; hollow wall clue, not a forced solution",
+      "kind": "micro",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "first_cell_awaken",
+      "direction": "lone overhead fixture > injured operative breath > hand on concrete > control",
+      "estimatedSeconds": 3.6,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "source_prototype",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "unrealSource": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ],
+      "browserSource": [
+        "browser/cinematic_director.js",
+        "browser/game.js"
+      ],
+      "productionBlockers": [
+        "realistic cast mesh and rig",
+        "actor acting and Sequencer retarget",
+        "recorded dialogue/VO and emotion",
+        "shot lighting and lens QA",
+        "Unreal PIE and browser gameplay capture"
+      ],
+      "primarySceneId": "CIN.008",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype",
+      "triggerClarification": "The source cell-awakening shot follows actual custody transfer, not first wall break. It is a sub-shot of CIN.008; CIN.009 remains unimplemented."
+    },
+    {
+      "id": "CS.P03.FOX",
+      "mission": "P03",
+      "beat": "P03.fox",
+      "area": "B1.B1.FOX",
+      "title": "Gray Fox found alive; Metal Gear intelligence lands with weight",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "gray_fox"
+      ],
+      "trigger": "rescue_transaction",
+      "direction": "worn cell frame > cautious two-shot > bandaged tired face > Snake reverse angle > hear stakes",
+      "estimatedSeconds": 8.1,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "source_prototype",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "unrealSource": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ],
+      "browserSource": [
+        "browser/cinematic_director.js",
+        "browser/game.js"
+      ],
+      "productionBlockers": [
+        "realistic cast mesh and rig",
+        "actor acting and Sequencer retarget",
+        "recorded dialogue/VO and emotion",
+        "shot lighting and lens QA",
+        "Unreal PIE and browser gameplay capture"
+      ],
+      "primarySceneId": "CIN.010",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype"
+    },
+    {
+      "id": "CS.P03.ESCAPE",
+      "mission": "P03",
+      "beat": "P03.wall2",
+      "area": "B1.B1.FOX",
+      "title": "Second breach exposes guard corridor and playable risk",
+      "kind": "micro",
+      "characters": [
+        "snake",
+        "prison_guards"
+      ],
+      "trigger": "second_wall_open",
+      "direction": "dust and falling debris > hard light in corridor > distant boots > control",
+      "estimatedSeconds": 2.2,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.011",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P03.CODEC",
+      "mission": "P03",
+      "beat": "P03.codec",
+      "area": "B1.B1.PRISON",
+      "title": "Optional post-rescue request to clarify the next objective",
+      "kind": "radio",
+      "characters": [
+        "snake",
+        "bigBoss",
+        "schneider"
+      ],
+      "trigger": "player_selected",
+      "direction": "face plates + earned clues; no future spoiler",
+      "estimatedSeconds": 0,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "fully player-controlled / selected",
+      "firstPassShots": [
+        {
+          "role": "call",
+          "lensMm": 80,
+          "relativeSec": 1,
+          "motion": "animated dual-head portraits, player can continue moving"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "identity-accurate facial rig",
+        "lip sync VO timing"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P04.SHOTMAKER",
+      "mission": "P04",
+      "beat": "P04.introduce",
+      "area": "B1.B1.SHOT",
+      "title": "Shoot Gunner introduction and readable shotgun threat",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "shoot_gunner"
+      ],
+      "trigger": "first_qualified_sight_not_through_wall",
+      "direction": "low boot and shotgun > muzzle close-up > three-shell logic and cover > control before windup",
+      "estimatedSeconds": 5.6,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "source_prototype",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "unrealSource": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ],
+      "browserSource": [
+        "browser/cinematic_director.js",
+        "browser/game.js"
+      ],
+      "productionBlockers": [
+        "realistic cast mesh and rig",
+        "actor acting and Sequencer retarget",
+        "recorded dialogue/VO and emotion",
+        "shot lighting and lens QA",
+        "Unreal PIE and browser gameplay capture"
+      ],
+      "primarySceneId": "CIN.012",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype"
+    },
+    {
+      "id": "CS.P04.GEAR",
+      "mission": "P04",
+      "beat": "P04.bag",
+      "area": "B1.B1.GEAR",
+      "title": "Emotional relief of regaining confiscated gear, discover intrusion",
+      "kind": "micro",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "actual_gear_bag_recovered",
+      "direction": "bag latch > wrong seal > moving hand to transmitter > return to control",
+      "estimatedSeconds": 3.2,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.014",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P04.TRACKER",
+      "mission": "P04",
+      "beat": "P04.tracker",
+      "area": "B1.B1.GEAR",
+      "title": "Snake identifies transmitter without radio overexplaining it",
+      "kind": "interactive",
+      "characters": [
+        "snake",
+        "bigBoss"
+      ],
+      "trigger": "player_notices_or_removes_tracker",
+      "direction": "uneasy close-up and audible electronic pulse; optional Big Boss codec",
+      "estimatedSeconds": 2,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "fully player-controlled / selected",
+      "firstPassShots": [
+        {
+          "role": "notice",
+          "lensMm": 45,
+          "relativeSec": 0.6,
+          "motion": "optional player-directed glance"
+        },
+        {
+          "role": "agency",
+          "lensMm": 35,
+          "relativeSec": 0.4,
+          "motion": "camera returns when player moves"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.015",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P04.DOWN",
+      "mission": "P04",
+      "beat": "P04.boss",
+      "area": "B1.B1.SHOT",
+      "title": "Shoot Gunner defeat changes the local sound and guard response",
+      "kind": "micro",
+      "characters": [
+        "snake",
+        "shoot_gunner"
+      ],
+      "trigger": "committed_boss_defeat",
+      "direction": "spent brass > shotgun clatter > broad room silent > return to searching",
+      "estimatedSeconds": 2.9,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "source_prototype",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "unrealSource": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ],
+      "browserSource": [
+        "browser/cinematic_director.js",
+        "browser/game.js"
+      ],
+      "productionBlockers": [
+        "realistic cast mesh and rig",
+        "actor acting and Sequencer retarget",
+        "recorded dialogue/VO and emotion",
+        "shot lighting and lens QA",
+        "Unreal PIE and browser gameplay capture"
+      ],
+      "primarySceneId": "CIN.016",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype"
+    },
+    {
+      "id": "CS.P04.CARD3",
+      "mission": "P04",
+      "beat": "P04.card3",
+      "area": "B1.B1.CARD3",
+      "title": "Card 3 unlock and route into kennel sector",
+      "kind": "micro",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "earned_card3_and_door",
+      "direction": "reader > unlocking bolts > distant animal bark > control",
+      "estimatedSeconds": 2.2,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "source_prototype",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "unrealSource": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGStoryCameraDirector.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp"
+      ],
+      "browserSource": [
+        "browser/cinematic_director.js",
+        "browser/game.js"
+      ],
+      "productionBlockers": [
+        "realistic cast mesh and rig",
+        "actor acting and Sequencer retarget",
+        "recorded dialogue/VO and emotion",
+        "shot lighting and lens QA",
+        "Unreal PIE and browser gameplay capture"
+      ],
+      "primarySceneId": "CIN.017",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "source_camera_prototype"
+    },
+    {
+      "id": "CS.P05.DOGS",
+      "mission": "P05",
+      "beat": "P05.dog",
+      "area": "B1.B1.DOGS",
+      "title": "Kennel entry uses sound/scent before first dog contact",
+      "kind": "interactive",
+      "characters": [
+        "snake",
+        "sentry_dogs"
+      ],
+      "trigger": "enter_kennel_threshold",
+      "direction": "leash chain > dog ears > exit vent path glimpse",
+      "estimatedSeconds": 2.3,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "fully player-controlled / selected",
+      "firstPassShots": [
+        {
+          "role": "notice",
+          "lensMm": 45,
+          "relativeSec": 0.6,
+          "motion": "optional player-directed glance"
+        },
+        {
+          "role": "agency",
+          "lensMm": 35,
+          "relativeSec": 0.4,
+          "motion": "camera returns when player moves"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.018",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P05.DUCT",
+      "mission": "P05",
+      "beat": "P05.spiral",
+      "area": "B1.B1.SPIRAL",
+      "title": "Low service duct opens up Outer Heaven's vertical organization",
+      "kind": "micro",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "first_successful_crawl_connection",
+      "direction": "airflow > boot-level grate > real camera down to crawl profile",
+      "estimatedSeconds": 2.3,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P05.KID",
+      "mission": "P05",
+      "beat": "P05.kid",
+      "area": "B1.B2.KID",
+      "title": "Machinegun Kid gun raised and exposed suppressive lane",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "machinegun_kid"
+      ],
+      "trigger": "first_qualified_boss_sight",
+      "direction": "machine feed belt > weapon lever > lane fire with covered escape and reload window",
+      "estimatedSeconds": 6,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.020",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P05.PARACHUTE",
+      "mission": "P05",
+      "beat": "P05.parachute",
+      "area": "B1.2F.PARACHUTE",
+      "title": "Parachute changes roof route and earns anticipation",
+      "kind": "micro",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "parachute_earned",
+      "direction": "fabric straps against hard industrial silhouette > roof lift marker",
+      "estimatedSeconds": 2,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.021",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P06.ROOF",
+      "mission": "P06",
+      "beat": "P06.roof",
+      "area": "B1.ROOF.CORRIDOR",
+      "title": "Roof establishes actual layered fortress and helicopter audio",
+      "kind": "micro",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "step_on_roof",
+      "direction": "camera crest parapet > full Hind D silhouette over real roof > player returns near cover",
+      "estimatedSeconds": 4.1,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P06.HIND",
+      "mission": "P06",
+      "beat": "P06.hind",
+      "area": "B1.ROOF.HIND",
+      "title": "Hind D assault telegraph from rotor approach, terrain and cover",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "hind_d"
+      ],
+      "trigger": "first_roof_aggression",
+      "direction": "wide rotor > lower cockpit > cover routes > readable attack state > player control",
+      "estimatedSeconds": 7.5,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.022",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P06.DROP",
+      "mission": "P06",
+      "beat": "P06.drop",
+      "area": "B1.ROOF.DROP",
+      "title": "Parachute jump has destination continuity and human scale",
+      "kind": "full",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "earned_parachute_jump",
+      "direction": "over-edge vertigo > chute deploy and wind > true lower landing",
+      "estimatedSeconds": 6.4,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.023",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P06.TANK",
+      "mission": "P06",
+      "beat": "P06.tank",
+      "area": "EXT.TANK",
+      "title": "Heavy armour arrival and visible mine-based counterplay",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "tank_crew"
+      ],
+      "trigger": "first_tank_approach",
+      "direction": "tread suspension > turret tracking > mine-sized gap and hard cover > control",
+      "estimatedSeconds": 6,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.024",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P07.INDUSTRY",
+      "mission": "P07",
+      "beat": "P07.entry",
+      "area": "B2.1F.ENTRY",
+      "title": "Building 2 shifts from prison security to production/machinery",
+      "kind": "micro",
+      "characters": [
+        "snake",
+        "industrial_guards"
+      ],
+      "trigger": "cross_building_2_airlock",
+      "direction": "industrial rhythm > hot metal > guard duty handoff > control",
+      "estimatedSeconds": 3.9,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P07.DOZER",
+      "mission": "P07",
+      "beat": "P07.bulldozer",
+      "area": "B2.1F.BULLDOZER",
+      "title": "Bulldozer's mechanical danger, escape direction and readable weakness",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "bulldozer"
+      ],
+      "trigger": "dozer_enters_main_lane",
+      "direction": "hydraulics > blade height > retreat line > control before charge",
+      "estimatedSeconds": 5.8,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.025",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P07.FIRE",
+      "mission": "P07",
+      "beat": "P07.fire",
+      "area": "B2.B1.FIRE",
+      "title": "Fire Trooper's distinct flamethrower heat and recoverability",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "fire_trooper"
+      ],
+      "trigger": "enter_fuel_bay",
+      "direction": "ignition sound > silhouette in exhaust > sweeping attack > cover/escape choices",
+      "estimatedSeconds": 5.6,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.026",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P07.CARD6",
+      "mission": "P07",
+      "beat": "P07.card6",
+      "area": "B2.2F.CARDS",
+      "title": "New level permissions and first return route",
+      "kind": "interactive",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "earn_card6",
+      "direction": "card reader > locked branch now legible > control",
+      "estimatedSeconds": 1.8,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "fully player-controlled / selected",
+      "firstPassShots": [
+        {
+          "role": "notice",
+          "lensMm": 45,
+          "relativeSec": 0.6,
+          "motion": "optional player-directed glance"
+        },
+        {
+          "role": "agency",
+          "lensMm": 35,
+          "relativeSec": 0.4,
+          "motion": "camera returns when player moves"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P08.JENNIFER",
+      "mission": "P08",
+      "beat": "P08.jennifer",
+      "area": "B2.2F.JENNIFER",
+      "title": "Earn Jennifer's genuine contact and intelligence with grounded radio acting",
+      "kind": "radio",
+      "characters": [
+        "snake",
+        "jennifer"
+      ],
+      "trigger": "call_only_after_frequency_learned",
+      "direction": "two-head codec; no contrived in-person encounter",
+      "estimatedSeconds": 0,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "fully player-controlled / selected",
+      "firstPassShots": [
+        {
+          "role": "call",
+          "lensMm": 80,
+          "relativeSec": 1,
+          "motion": "animated dual-head portraits, player can continue moving"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "identity-accurate facial rig",
+        "lip sync VO timing"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.027",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P08.MADNAR",
+      "mission": "P08",
+      "beat": "P08.madnar",
+      "area": "B2.2F.MADNAR",
+      "title": "Pettrovich's guilt, captivity and Ellen rescue request",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "dr_pettrovich"
+      ],
+      "trigger": "enter_verified_real_doctor_room",
+      "direction": "door framing > face and weary hands > constrained dialogue > mission change",
+      "estimatedSeconds": 8.5,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.029",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P08.TX11",
+      "mission": "P08",
+      "beat": "P08.tx11",
+      "area": "B2.2F.TX11",
+      "title": "Two distinct robots enter combat without instant hidden damage",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "tx11_pair"
+      ],
+      "trigger": "first_qualified_robot_contact",
+      "direction": "servo joints > paired lines > rocket vulnerability hint > playable cover",
+      "estimatedSeconds": 7.2,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.030",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P09.RETURN1",
+      "mission": "P09",
+      "beat": "P09.backB1",
+      "area": "B1.B1.ELLEN",
+      "title": "A familiar prison corridor now returns as purposeful player choice",
+      "kind": "interactive",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "return_to_b1_with_card6",
+      "direction": "match first camera with new security, changed locked route",
+      "estimatedSeconds": 2.1,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "fully player-controlled / selected",
+      "firstPassShots": [
+        {
+          "role": "notice",
+          "lensMm": 45,
+          "relativeSec": 0.6,
+          "motion": "optional player-directed glance"
+        },
+        {
+          "role": "agency",
+          "lensMm": 35,
+          "relativeSec": 0.4,
+          "motion": "camera returns when player moves"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P09.ELLEN",
+      "mission": "P09",
+      "beat": "P09.ellen",
+      "area": "B1.B1.ELLEN",
+      "title": "Ellen rescue establishes a human consequence before next return",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "ellen"
+      ],
+      "trigger": "ellen_rescue_confirmed",
+      "direction": "vent-lit captivity > injured relief > hope and urgency > player controls escort decision",
+      "estimatedSeconds": 7.5,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.031",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P09.TUNNEL",
+      "mission": "P09",
+      "beat": "P09.tunnel",
+      "area": "UNDERGROUND.TUNNEL",
+      "title": "Tunnel geography and fatal pitfall cause readable physical dread",
+      "kind": "micro",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "first_tunnel_entry",
+      "direction": "headlamp depth > drop > real reachable side ledge",
+      "estimatedSeconds": 3,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P09.MADNAR_RETURN",
+      "mission": "P09",
+      "beat": "P09.madnarReturn",
+      "area": "B2.B1.REVISIT",
+      "title": "Revisit Pettrovich with proof Ellen survived; earned TX-55 guidance",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "dr_pettrovich"
+      ],
+      "trigger": "return_with_ellen_knowledge",
+      "direction": "match earlier framing, warmer light + more urgent delivery; locked facts earned only now",
+      "estimatedSeconds": 7.4,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.032",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P09.DUCK",
+      "mission": "P09",
+      "beat": "P09.duck",
+      "area": "B2.1F.DUCK",
+      "title": "Coward Duck hostage geometry and hostage-safe shot decisions",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "coward_duck",
+        "hostages"
+      ],
+      "trigger": "cross_duck_hostage_gate",
+      "direction": "boomerang arcs > three live hostages > safe lanes > control",
+      "estimatedSeconds": 6.3,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.033",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P09.RETURN3",
+      "mission": "P09",
+      "beat": "P09.backToB3",
+      "area": "B3.1F.ENTRY",
+      "title": "Third visit through new environmental and security condition",
+      "kind": "interactive",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "cross_desert_after_card8",
+      "direction": "same terrain changed by earned kit/guard state; no false film-only gate",
+      "estimatedSeconds": 2,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "fully player-controlled / selected",
+      "firstPassShots": [
+        {
+          "role": "notice",
+          "lensMm": 45,
+          "relativeSec": 0.6,
+          "motion": "optional player-directed glance"
+        },
+        {
+          "role": "agency",
+          "lensMm": 35,
+          "relativeSec": 0.4,
+          "motion": "camera returns when player moves"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": null,
+      "contractClass": "optional_camera_accent_not_mandatory_scene",
+      "primaryStatus": "no_primary"
+    },
+    {
+      "id": "CS.P10.TRUTH",
+      "mission": "P10",
+      "beat": "P10.powTruth",
+      "area": "B3.B100.LASERS",
+      "title": "Final prisoner provides information that makes betrayal meaningful",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "final_prisoner"
+      ],
+      "trigger": "prisoner_truth_committed",
+      "direction": "captive's whisper > Snake silence > radio receives order > no premature spoiler",
+      "estimatedSeconds": 8.4,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.034",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P10.BETRAYAL",
+      "mission": "P10",
+      "beat": "P10.betrayal",
+      "area": "B3.B100.LASERS",
+      "title": "Big Boss betrayal: earned knowledge, radio pause, personal shock",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "bigBoss"
+      ],
+      "trigger": "confirmed_secret_after_true_pow",
+      "direction": "live radio with face performance > heavy uncut Snake reaction > next choice",
+      "estimatedSeconds": 9.6,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.035",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P10.TX55",
+      "mission": "P10",
+      "beat": "P10.tx55",
+      "area": "B3.B100.TX55",
+      "title": "Monstrous static weapon revealed only after original locked route",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "tx55"
+      ],
+      "trigger": "first_visual_confirmed_in_chamber",
+      "direction": "architecture-wide silhouette > leg target closeups > safe original 16-charge mechanic",
+      "estimatedSeconds": 7.3,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.036",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P10.DETONATION",
+      "mission": "P10",
+      "beat": "P10.countdown",
+      "area": "B3.B100.TX55",
+      "title": "Sixteen planted charges resolve into real self-destruct timer",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "tx55"
+      ],
+      "trigger": "all_required_charges_committed",
+      "direction": "leg shock > machine flare > ceiling alarm > persistent countdown, skip-safe",
+      "estimatedSeconds": 6.8,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.037",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P10.BIGBOSS",
+      "mission": "P10",
+      "beat": "P10.finale",
+      "area": "B3.B100.BIGBOSS",
+      "title": "Final Big Boss combat and personal confrontation",
+      "kind": "full",
+      "characters": [
+        "snake",
+        "bigBoss"
+      ],
+      "trigger": "first_in_person_boss_appearance",
+      "direction": "silhouette > identity recognition > weapon reveal > control before live duel",
+      "estimatedSeconds": 10,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.038",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P10.ESCAPE",
+      "mission": "P10",
+      "beat": "P10.ladder",
+      "area": "B3.B100.EXIT",
+      "title": "Earned left ladder escape with no game-time cheat",
+      "kind": "micro",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "correct_ladder_reached_before_countdown",
+      "direction": "industrial hatch release > daylight > sprint into actual exterior",
+      "estimatedSeconds": 3.3,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "can skip; never hold unexplained control longer than ~3s",
+      "firstPassShots": [
+        {
+          "role": "setup",
+          "lensMm": 35,
+          "relativeSec": 0.41,
+          "motion": "short authored world reframe"
+        },
+        {
+          "role": "payoff",
+          "lensMm": 65,
+          "relativeSec": 0.32,
+          "motion": "specific tactile evidence or actor reaction"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.27,
+          "motion": "handoff camera to player without snap"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.039",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    },
+    {
+      "id": "CS.P10.ENDING",
+      "mission": "P10",
+      "beat": "P10.credits",
+      "area": "B3.B100.EXIT",
+      "title": "1970s/1990s Metal Gear's earned exfiltration and credits",
+      "kind": "full",
+      "characters": [
+        "snake"
+      ],
+      "trigger": "actual_1987_ending_flag",
+      "direction": "exterior sky > spent soldier > mission aftermath and credits, no future retcon",
+      "estimatedSeconds": 32,
+      "sourceRank": "1987_event_modern_direction",
+      "gameplayAuthority": "mission flags, collision, enemy hit, item pickups and save persist in gameplay; cinematic may never grant progress",
+      "agency": "skip after first input and never leave a partially committed mission flag",
+      "firstPassShots": [
+        {
+          "role": "establish",
+          "lensMm": 28,
+          "relativeSec": 0.21,
+          "motion": "slow architectural dolly"
+        },
+        {
+          "role": "performance",
+          "lensMm": 65,
+          "relativeSec": 0.38,
+          "motion": "eyes/hand detail, shot-reverse-shot"
+        },
+        {
+          "role": "stakes",
+          "lensMm": 42,
+          "relativeSec": 0.25,
+          "motion": "moving threat/lived world"
+        },
+        {
+          "role": "handoff",
+          "lensMm": 35,
+          "relativeSec": 0.16,
+          "motion": "return to gameplay shoulder before control"
+        }
+      ],
+      "spaceRequirements": [
+        "true camera collision",
+        "physical entrance/exit and matching corridor elevations",
+        "no visual spoiler to unearned room"
+      ],
+      "animationNeeds": [
+        "approved recognizable character rigs",
+        "body language/timing and eyeline",
+        "hand prop contacts and realistic locomotion"
+      ],
+      "soundNeeds": [
+        "original score or local ambience, no ripped themes",
+        "character-specific foley",
+        "recorded voice if actual dialogue, synchronized subtitles"
+      ],
+      "implementation": "design_only",
+      "unrealPIEVerified": false,
+      "browserRuntimeVerified": false,
+      "artistApproved": false,
+      "performanceApproved": false,
+      "qualityGate": [
+        "camera/blocking actual world positions approved",
+        "correct character models rigged and lit",
+        "real voices and subtitle timings",
+        "frame-to-frame cut continuity and source canon reviewed",
+        "skip/reload/controller tested, no state exploit"
+      ],
+      "primarySceneId": "CIN.040",
+      "contractClass": "production_scene_camera_or_acting_detail",
+      "primaryStatus": "design_only"
+    }
+  ],
+  "currentPassScope": [
+    "CS.P01.INSERT",
+    "CS.P03.CUSTODY",
+    "CS.P03.CELL",
+    "CS.P03.FOX",
+    "CS.P04.SHOTMAKER"
+  ],
+  "todo": [
+    "World-accurate director camera rails for every scene",
+    "all playable areas and character models",
+    "actual full-body acting and 3D-face visemes",
+    "voice casting + original Foley/music stems",
+    "real Play-in-Editor compile and capture evidence"
+  ],
+  "firstPlayableSceneCount": 7,
+  "firstPlayableSceneStatus": "Rough camera source exists for seven supplemental shot concepts, but only six canonical cinematic contracts have first-pass camera triggers in both builds; none compile or have finished art/VO verified.",
+  "canonicalStatusAuthority": false,
+  "masterRegistry": "data/FULL_CAMPAIGN_CINEMATIC_BEAT_REGISTRY_1995.json",
+  "sceneStatusIsDerivedFrom": "data/FULL_CAMPAIGN_CINEMATIC_BEAT_REGISTRY_1995.json",
+  "primaryMatchedSceneCount": 36,
+  "optionalCameraAccentsNotInPrimary": 15
+}

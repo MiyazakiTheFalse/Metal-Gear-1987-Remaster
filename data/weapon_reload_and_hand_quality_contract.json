@@ -1,0 +1,302 @@
+{
+  "schema_version": 1,
+  "updated": "2026-11-20",
+  "authority": "DOCTRINE_000",
+  "historical_anchor": "1987_MSX2",
+  "status": "source-implemented-only-guard-and-shotgun-uncompiled",
+  "readme": "Original enemy attack behaviour and weapon categories are canon; physical reload/magazine details below are 1995-feasible 3D adaptation, NOT verified MSX2 stats or original animation footage.",
+  "sources": [
+    "https://thesnakesoup.org/metal-gear-msx-walkthrough/",
+    "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/35361",
+    "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/7524",
+    "https://www.youtube.com/watch?v=ehlAMTh42Ko",
+    "https://strategywiki.org/wiki/Metal_Gear_(NES)/Changes_from_the_original"
+  ],
+  "actors": [
+    {
+      "id": "outer_heaven_security_guard",
+      "campaign_presence": "Building 1 / prison security",
+      "weapon_class": "visible security sidearm (exact historic gun model unverified)",
+      "source_canon": "Guards may shoot at Snake",
+      "interpretation": "8-shot magazine, three spare magazines, .31s visible aim, .72s shot spacing, 1.65s magazine replacement, 7 hit points of provisional damage",
+      "mechanism": "magazine_swap_with_slide_cycle",
+      "state_machine": [
+        "patrol",
+        "investigate",
+        "confirm_by_actual_LOS",
+        "aim",
+        "shot",
+        "recoil",
+        "magazine_empty",
+        "reload",
+        "return_to_search"
+      ],
+      "source_code": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGuardActor.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGCharacterAnimInstance.cpp"
+      ],
+      "implementation": "source_mechanics_only",
+      "critical_rules": [
+        "fresh sight to shoot; no shots from sound-only suspicion",
+        "actual physical weapon-to-target line trace blocks hit",
+        "reload while searching if magazine exhausted",
+        "magazine committed at reload start and loaded only at completion",
+        "reload hit interrupt yields no restored ammo",
+        "no visible weapon grip without genuine rig and support socket",
+        "custody challenge beats take priority over gunfire against compliant Snake"
+      ],
+      "still_missing": [
+        "source-verified service arm selection",
+        "visible hands/loaded magazine and true magazine release",
+        "AnimBP aim/firing/holstering/reloading montages and two-hand IK",
+        "gunshot WAV and impact decals",
+        "editor build and playtest"
+      ]
+    },
+    {
+      "id": "shoot_gunner_1987",
+      "campaign_presence": "after Gray Fox rescue, first human boss",
+      "weapon_class": "large riot gun / shotgun; exact make unverified",
+      "source_canon": "3-shot spread volley",
+      "interpretation": "3 shells in default presentation tube, each spent shot pumps after .17s, .58s shell insert, aim hold .78s, .52s between shots and 1.85s post-volley recovery",
+      "mechanism": "pump_action_cycle_then_individual_shell_insertion",
+      "state_machine": [
+        "search",
+        "observed_warning",
+        "3_blasts",
+        "pump_and_eject_spent_hull",
+        "recovery",
+        "individual_reload",
+        "search"
+      ],
+      "implementation": "source_mechanics_only",
+      "source_code": [
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGShootGunnerActor.cpp",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGCharacterAnimInstance.cpp"
+      ],
+      "critical_rules": [
+        "never reload ammo magically inside shot callback",
+        "shot muzzle follows imported gun when present, otherwise transparent fallback",
+        "pump after real blast, ejection from pumped hull not from firing trigger",
+        "three-shot volley still required",
+        "shot blocked by physical cover",
+        "reload does not award defeat, card or other mission flag",
+        "hit/death cancels pending pump and prevents orphaned muzzle flash"
+      ],
+      "still_missing": [
+        "human rig and physically correct shoulder stock",
+        "left-hand pump IK, ejector and chamber sockets",
+        "authored reload and recoil montages",
+        "approved sonic layering and hull mesh import",
+        "damage-reaction reload interruption tuning",
+        "Unreal in-game verification"
+      ]
+    },
+    {
+      "id": "solid_snake_handgun",
+      "campaign_presence": "Building 1 before capture / returned equipment",
+      "weapon_class": "conventional ballistic semiautomatic handgun",
+      "source_canon": "ordinary handgun fire with limited ammunition",
+      "interpretation": "~65ms casing delay after committed shot; cosmetic 7s physics; weapon socket and slide timing require final artist review",
+      "mechanism": "slide_cycles_spent_brass_ejection",
+      "implementation": "source_fire_and_optional_case_physics_no_reload",
+      "critical_rules": [
+        "no casing if no committed ammo shot",
+        "no physical casing actor unless an imported mesh exists",
+        "no casing may block gameplay visibility traces",
+        "Snake needs eventual real reload, chamber state and reserve magazines"
+      ],
+      "still_missing": [
+        "actual player reload input, magazines, fire-animation sync, sidearm final rig"
+      ]
+    },
+    {
+      "id": "debug_stun_dart_pistol",
+      "campaign_presence": "NOT_IN_1987_CANON",
+      "weapon_class": "optional wired dart launcher / test prop",
+      "source_canon": "non-canonical testing only",
+      "mechanism": "dart_cartridge_replacement_no_handgun_brass",
+      "implementation": "source_firing_test_only",
+      "critical_rules": [
+        "never emit ballistic casing",
+        "never claim a historical 1995 Taser make from ambiguous original canon"
+      ],
+      "still_missing": [
+        "actual device model and source identity; excluded from authentic campaign"
+      ]
+    },
+    {
+      "id": "machinegun_kid",
+      "campaign_presence": "after the Card 3 dog and explosive route",
+      "weapon_class": "automatic machine gun (specific magazine or belt mechanism unverified)",
+      "source_canon": "rapid automatic fire by boss",
+      "mechanism": "automatic_burst_heat_magazine_or_belt_change_to_verify",
+      "implementation": "design_only",
+      "critical_rules": [
+        "do not reuse sidearm reload montage or gunner pump",
+        "verify weapon feed and barrel before animating a belt",
+        "show real occupied cover, not static bullet spawns"
+      ],
+      "still_missing": [
+        "boss implementation, rig, source-correct model, reload cycle and ammunition"
+      ]
+    },
+    {
+      "id": "hind_d_1987",
+      "campaign_presence": "later Building 1 route",
+      "weapon_class": "helicopter armament",
+      "source_canon": "Hind D original MSX2; Twin Shot is NES substitute",
+      "mechanism": "aircraft_weapon_cooldown_not_handheld_magazine",
+      "implementation": "design_only",
+      "critical_rules": [
+        "not Twin Shot in canonical MSX2 campaign",
+        "avoid pretending a helicopter changes a pistol magazine"
+      ],
+      "still_missing": [
+        "vehicle model/flight, authoritative projectiles and source-verified armament"
+      ]
+    },
+    {
+      "id": "tank_1987",
+      "campaign_presence": "later segment",
+      "weapon_class": "armoured vehicle cannon / other armament to verify",
+      "mechanism": "breech_cannon_reload_vehicle_aim",
+      "implementation": "design_only",
+      "critical_rules": [
+        "no generic human grip animation",
+        "respect cover and vehicle tracks"
+      ],
+      "still_missing": [
+        "vehicle model, full mechanics, muzzle fire and verified armour loadouts"
+      ]
+    },
+    {
+      "id": "bulldozer_1987",
+      "campaign_presence": "later segment",
+      "weapon_class": "industrial collision hazard, not a handgun",
+      "mechanism": "no_ballistic_reload; hydraulic_and_movement_recovery",
+      "implementation": "design_only",
+      "critical_rules": [
+        "no invented magazine",
+        "player can read physical mass/motion"
+      ],
+      "still_missing": [
+        "vehicle boss mechanics, vehicle physics and collisions"
+      ]
+    },
+    {
+      "id": "fire_trooper_1987",
+      "campaign_presence": "later segment",
+      "weapon_class": "flamethrower",
+      "mechanism": "fuel_ignition_pressure_and_cooldown",
+      "implementation": "design_only",
+      "critical_rules": [
+        "no spent cartridge casings",
+        "fire effects and fuel state must match"
+      ],
+      "still_missing": [
+        "fuel and flame hazard authority, proper fire audio and VFX"
+      ]
+    },
+    {
+      "id": "arnold_tx11",
+      "campaign_presence": "later Building 1",
+      "weapon_class": "cyberoid projectile systems to verify",
+      "mechanism": "specific_fire_and_cooldown_to_verify",
+      "implementation": "design_only",
+      "critical_rules": [
+        "not a later game's cyborg ninja",
+        "no imagined service-magazine unless proven"
+      ],
+      "still_missing": [
+        "source weapon evidence, boss model and attack system"
+      ]
+    },
+    {
+      "id": "coward_duck_1987",
+      "campaign_presence": "later hostage encounter",
+      "weapon_class": "boomerang + hostage manipulation",
+      "mechanism": "thrown_boomerang_return_catch_or_retrieve",
+      "implementation": "design_only",
+      "critical_rules": [
+        "never create cartridge ejection",
+        "hostages must not become convenient shields without narrative agency safeguards"
+      ],
+      "still_missing": [
+        "boomerang trajectory/retrieval and faithful hostage rescue"
+      ]
+    },
+    {
+      "id": "tx55_metal_gear",
+      "campaign_presence": "later final weapon facility",
+      "weapon_class": "mobile nuclear-capable weapons platform",
+      "mechanism": "weapon_deployment_and_cooldown_specific_to_source",
+      "implementation": "design_only",
+      "critical_rules": [
+        "not a later model REX/RAY",
+        "do not invent a field-reload magazine"
+      ],
+      "still_missing": [
+        "source-accurate attack model and final stage"
+      ]
+    },
+    {
+      "id": "big_boss_final",
+      "campaign_presence": "1987 late-game reveal",
+      "weapon_class": "conventional firearm make unspecified pending source confirmation",
+      "mechanism": "source_verified_specific_action_to_be_determined",
+      "implementation": "design_only",
+      "critical_rules": [
+        "do not reveal commander's betrayal early by generic NPC VO",
+        "don't assert exact gun model or ammunition count"
+      ],
+      "still_missing": [
+        "source-accurate weapon, fight choreography, acting and narrative timing"
+      ]
+    }
+  ],
+  "hand_rules": {
+    "minimum_bones": [
+      "hand_r",
+      "hand_l"
+    ],
+    "rig_socket": [
+      "weapon_r"
+    ],
+    "weapon_sockets": [
+      "muzzle",
+      "ejection_port",
+      "support_hand",
+      "magwell_or_shell_insert"
+    ],
+    "always_no_false_ik": true,
+    "per_action": [
+      "idle_safe_index_finger",
+      "raise_and_acquire",
+      "aim_breath_stabilization",
+      "recoil_dampening",
+      "action_cycles",
+      "magazine_or_shell_replenish",
+      "post_reload_ready",
+      "injury_cancel",
+      "confiscation_or_disarm",
+      "turn_while_aiming",
+      "crouch_cover_prone_clip_clearance"
+    ],
+    "physics": [
+      "rigid_body_casings_only_if_art_imported",
+      "case_collision_ignores_pawn_and_visibility",
+      "magazines_and_shells_cosmetic_not_authoritative_ammo",
+      "bullet_from_actual_muzzle_with_cover_trace",
+      "body_hit_and_grip_presentation_never_own_damage"
+    ]
+  },
+  "verification": {
+    "structural_status": "connector-side static checks only",
+    "python_unittest_status": "not_executed",
+    "ue_5_7_compile_status": "not_executed",
+    "loaded_animations_and_mesh_status": "none_verified",
+    "sound_and_lip_sync_status": "none_verified",
+    "lore_readiness": "MSX2 categories/beat order corroborated by manuals/walkthroughs; exact weapon feeds unverified"
+  }
+}

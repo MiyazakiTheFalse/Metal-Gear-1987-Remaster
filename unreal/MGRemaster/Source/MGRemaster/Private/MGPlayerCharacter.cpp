@@ -1,7 +1,14 @@
 #include "MGPlayerCharacter.h"
+#include "InputCoreTypes.h"
 #include "MGGrayFoxMission.h"
+#include "Sound/SoundBase.h"
+#include "Components/AudioComponent.h"
+#include "Components/PointLightComponent.h"
 #include "MGGuardActor.h"
+#include "MGSurveillanceCameraActor.h"
+#include "MGShootGunnerActor.h"
 #include "MGEquipmentComponent.h"
+#include "MGSpentCasingActor.h"
 
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
@@ -10,6 +17,10 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimSequence.h"
+#include "MGPrototypeAnimationFallback.h"
 #include "CollisionShape.h"
 #include "Engine/Engine.h"
 #include "EngineUtils.h"
@@ -27,7 +38,32 @@ AMGPlayerCharacter::AMGPlayerCharacter()
 {
     PrimaryActorTick.bCanEverTick = true;
     GetCapsuleComponent()->InitCapsuleSize(35.f, 89.f);
+    // The source-only cylindrical stand-in has no visibility collision; the
+    // real gameplay capsule must remain hittable by muzzle-origin line traces.
+    GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
     Equipment = CreateDefaultSubobject<UMGEquipmentComponent>(TEXT("Equipment"));
+    WeaponBodyVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponBodyVisual"));
+    WeaponBodyVisual->SetupAttachment(GetMesh(), TEXT("weapon_r"));
+    WeaponBodyVisual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    WeaponBodyVisual->SetVisibility(false);
+    WeaponGripVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("WeaponGripVisual"));
+    WeaponGripVisual->SetupAttachment(WeaponBodyVisual);
+    WeaponGripVisual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    WeaponGripVisual->SetVisibility(false);
+    PlayerMuzzleFlashLight = CreateDefaultSubobject<UPointLightComponent>(
+        TEXT("SnakeHandgunMuzzleFlash"));
+    PlayerMuzzleFlashLight->SetupAttachment(WeaponBodyVisual);
+    PlayerMuzzleFlashLight->SetRelativeLocation(FVector(20.f, 0.f, 1.f));
+    PlayerMuzzleFlashLight->SetIntensity(5800.f);
+    PlayerMuzzleFlashLight->SetAttenuationRadius(180.f);
+    PlayerMuzzleFlashLight->SetCastShadows(false);
+    PlayerMuzzleFlashLight->SetLightColor(FLinearColor(1.f, .72f, .40f));
+    PlayerMuzzleFlashLight->SetVisibility(false);
+    HairVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SnakeHair1995"));
+    HairVisual->SetupAttachment(GetMesh(), TEXT("head"));
+    HairVisual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    HairVisual->SetCastShadow(true);
+    HairVisual->SetVisibility(false);
     // Reference height: 178 cm (official MG2 profile; provisional for 1995).
     GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
     GetCharacterMovement()->CrouchedHalfHeight = 55.f;
@@ -46,6 +82,17 @@ AMGPlayerCharacter::AMGPlayerCharacter()
     PrototypeBody->SetRelativeScale3D(FVector(0.7f, 0.7f, 1.78f));
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
     if (Cylinder.Succeeded()) PrototypeBody->SetStaticMesh(Cylinder.Object);
+    // A minimal 1995-compatible test prop makes aim alignment inspectable as
+    // soon as a rig has a hand socket. It is NOT a finished pistol model.
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> Cube(TEXT("/Engine/BasicShapes/Cube.Cube"));
+    if (Cube.Succeeded())
+    {
+        WeaponBodyVisual->SetStaticMesh(Cube.Object);
+        WeaponGripVisual->SetStaticMesh(Cube.Object);
+        WeaponBodyVisual->SetRelativeScale3D(FVector(0.19f, 0.036f, 0.038f));
+        WeaponGripVisual->SetRelativeLocation(FVector(-3.f, 0.f, -7.f));
+        WeaponGripVisual->SetRelativeScale3D(FVector(0.47f, 1.f, 2.6f));
+    }
 
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
@@ -86,12 +133,142 @@ void AMGPlayerCharacter::BeginPlay()
         // Retain pause-compatible input for future UI; the transceiver itself never pauses play.
         PC->PrimaryActorTick.bTickEvenWhenPaused = true;
     }
+    // Asset names are shared with the editor importer. Missing assets retain the
+    // original greybox stand-in and never change movement or mission flags.
+    // Optional authored weapon overrides the primitive test prop.
+    EnsureRadioSfxLoaded();
+    StunGunArt = LoadObject<UStaticMesh>(nullptr,
+        TEXT("/Game/Weapons/Testing/SM_StunPistol_Test.SM_StunPistol_Test"));
+    if (!StunGunArt)
+        StunGunArt = LoadObject<UStaticMesh>(nullptr,
+            TEXT("/Game/Characters/Shared/Weapons/SM_StunPistol_1995.SM_StunPistol_1995"));
+    HandgunArt = LoadObject<UStaticMesh>(nullptr,
+        TEXT("/Game/Weapons/Snake/SM_Handgun_1995.SM_Handgun_1995"));
+    if (!HandgunArt)
+        HandgunArt = LoadObject<UStaticMesh>(nullptr,
+            TEXT("/Game/Characters/Shared/Weapons/SM_Handgun_1995.SM_Handgun_1995"));
+    ProxyWeaponArt = WeaponBodyVisual->GetStaticMesh();
+    InfiltrationCharacterArt = GetMesh()->GetSkeletalMeshAsset();
+    if (!InfiltrationCharacterArt)
+        InfiltrationCharacterArt = LoadObject<USkeletalMesh>(nullptr,
+            TEXT("/Game/Characters/Snake/SK_Snake_1995_Infiltration.SK_Snake_1995_Infiltration"));
+    DisarmedCharacterArt = LoadObject<USkeletalMesh>(nullptr,
+        TEXT("/Game/Characters/Snake/SK_Snake_1995_Disarmed.SK_Snake_1995_Disarmed"));
+    if (InfiltrationCharacterArt)
+        GetMesh()->SetSkeletalMeshAsset(InfiltrationCharacterArt);
+    if (GetMesh()->GetSkeletalMeshAsset())
+    {
+        GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+        GetMesh()->SetCollisionResponseToAllChannels(ECR_Ignore);
+        GetMesh()->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+        // Imported humanoid skeletons are posed at ground level; actor origin is
+        // the centre of a 178 cm capsule. Orientation is fixed during FBX prep.
+        GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -89.f));
+        if (!GetMesh()->GetAnimClass())
+            if (UClass* Class = LoadClass<UAnimInstance>(nullptr,
+                    TEXT("/Game/Characters/Snake/ABP_Snake_1995.ABP_Snake_1995_C")))
+                GetMesh()->SetAnimInstanceClass(Class);
+        // While the production AnimationBlueprint is still missing, use the
+        // checked-in, actually animated breathing Idle source. Never leave a
+        // successful skeletal import frozen in its reference T-pose.
+        if (!GetMesh()->GetAnimClass())
+            if (UAnimSequence* LivingIdle = LoadObject<UAnimSequence>(nullptr,
+                    TEXT("/Game/Characters/Snake/Animations/AS_Snake_Idle.AS_Snake_Idle")))
+                GetMesh()->PlayAnimation(LivingIdle, true);
+    }
     ApplyMenuTimeState();
     UpdateMovementState();
+    UpdateWeaponPresentation();
+    UpdateHairPresentation();
+}
+
+bool AMGPlayerCharacter::HasReadyWeapon() const
+{
+    return Equipment && Equipment->IsFirearmEquipped();
+}
+
+void AMGPlayerCharacter::UpdateWeaponPresentation()
+{
+    // The shared source GLBs contain an actual hand_R joint but do not yet
+    // contain a separately authored weapon_r socket. Prefer the artist socket
+    // when it exists, otherwise attach to the REAL imported hand bone.
+    const FName HandSocket = GetMesh()->DoesSocketExist(TEXT("weapon_r"))
+        ? FName(TEXT("weapon_r"))
+        : GetMesh()->GetBoneIndex(TEXT("hand_R")) != INDEX_NONE
+            ? FName(TEXT("hand_R")) : NAME_None;
+    // If the editor has not imported a valid hand bone, still show the
+    // original source handgun on the capsule. A shooter with a missing mesh
+    // must not fire invisible bullets from the player's chest. This placement
+    // is a visible greybox contingency, never accepted as final grip/IK.
+    const bool bCanHoldProp = HasReadyWeapon();
+    if (HandSocket != NAME_None && HasAuthoredCharacterArt())
+    {
+        if (WeaponBodyVisual->GetAttachParent() != GetMesh() ||
+            WeaponBodyVisual->GetAttachSocketName() != HandSocket)
+            WeaponBodyVisual->AttachToComponent(GetMesh(),
+                FAttachmentTransformRules::SnapToTargetNotIncludingScale, HandSocket);
+    }
+    else
+    {
+        if (WeaponBodyVisual->GetAttachParent() != GetCapsuleComponent())
+            WeaponBodyVisual->AttachToComponent(GetCapsuleComponent(),
+                FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+        WeaponBodyVisual->SetRelativeLocation(FVector(23.f, 24.f, 10.f));
+    }
+    // Do not show a stun pistol as a period handgun. Only the currently
+    // equipped weapon's matching mesh may replace the honest proxy.
+    UStaticMesh* Authored = (Equipment && Equipment->IsHandgunEquipped())
+        ? HandgunArt : StunGunArt;
+    UStaticMesh* Desired = Authored ? Authored : ProxyWeaponArt;
+    if (Desired && WeaponBodyVisual->GetStaticMesh() != Desired)
+        WeaponBodyVisual->SetStaticMesh(Desired);
+    bHasAuthoredWeaponMesh = Authored != nullptr;
+    WeaponBodyVisual->SetRelativeScale3D(Authored ? FVector::OneVector
+        : FVector(0.19f, 0.036f, 0.038f));
+    // Flash offset is in the weapon COMPONENT's local units. On a source
+    // cube scaled to 19cm long, a raw 20cm relative offset shrinks to 3.8cm
+    // and flashes at the grip. Put the light at the physical muzzle tip.
+    if (PlayerMuzzleFlashLight)
+        PlayerMuzzleFlashLight->SetRelativeLocation(
+            Authored ? FVector(20.f, 0.f, 1.f) : FVector(52.f, 0.f, 0.f));
+    // Weapon rendering is cosmetic and cannot bypass inventory confiscation.
+    WeaponBodyVisual->SetVisibility(bCanHoldProp, true);
+    WeaponGripVisual->SetVisibility(bCanHoldProp && !bHasAuthoredWeaponMesh, true);
+}
+
+void AMGPlayerCharacter::UpdateHairPresentation()
+{
+    if (!HairVisual || !GetMesh()) return;
+    // The static authored hair-card shell must use a real imported skeleton's
+    // head bone/socket, never the proxy capsule or the camera's location.
+    const bool bHasHead = HasAuthoredCharacterArt() &&
+        GetMesh()->DoesSocketExist(HairAttachmentBone);
+    if (!bHasHead)
+    {
+        HairVisual->SetVisibility(false, true);
+        return;
+    }
+    // Do not silently replace an artist-assigned mesh. If a better licensed
+    // hairstyle is supplied in a Blueprint child it takes priority.
+    if (!HairVisual->GetStaticMesh())
+        HairVisual->SetStaticMesh(LoadObject<UStaticMesh>(nullptr,
+            TEXT("/Game/Characters/Snake/Hair/SM_SnakeHair_1995.SM_SnakeHair_1995")));
+    HairVisual->AttachToComponent(GetMesh(),
+        FAttachmentTransformRules::KeepRelativeTransform, HairAttachmentBone);
+    HairVisual->SetRelativeLocation(HairOffsetCm);
+    HairVisual->SetRelativeRotation(HairRotation);
+    HairVisual->SetVisibility(HairVisual->GetStaticMesh() != nullptr, true);
+}
+
+bool AMGPlayerCharacter::HasAuthoredCharacterArt() const
+{
+    return GetMesh() && GetMesh()->GetSkeletalMeshAsset() != nullptr;
 }
 
 void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+    StopIncomingRing();
+    StopRadioDialogue();
     // Ensure a checkpoint restart cannot inherit a slowed or paused world.
     if (GetWorld())
     {
@@ -101,26 +278,126 @@ void AMGPlayerCharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
     Super::EndPlay(EndPlayReason);
 }
 
+void AMGPlayerCharacter::UpdatePrototypeFallbackAnimation()
+{
+    if (!GetMesh() || !GetMesh()->GetSkeletalMeshAsset()) return;
+    const float Speed = GetVelocity().Size2D(); // actual travel, not input intent
+    FName Clip = TEXT("Idle");
+    if (Health <= 0.f) Clip = TEXT("Down");
+    else if (HitReactionSeconds > 0.f) Clip = TEXT("Hit");
+    else if (MeleeVisualTimer > 0.f || WallKnockVisualTimer > 0.f)
+        Clip = TEXT("Melee");
+    else if (PhysicalInteractionRemaining > 0.f || DraggedBody.IsValid())
+        Clip = TEXT("Reaching");
+    else if (bCodecOpen) Clip = TEXT("RadioListen");
+    else if (bAiming) Clip = bIsProne ? TEXT("ProneAim") :
+        bIsCrouched ? TEXT("CrouchAim") : TEXT("Aim");
+    else if (bInCover) Clip = TEXT("Cover");
+    else if (bIsProne) Clip = TEXT("Prone");
+    else if (bIsCrouched) Clip = TEXT("Crouch");
+    else if (Speed > 235.f && bSprinting) Clip = TEXT("Run");
+    else if (Speed > 20.f) Clip = TEXT("Walk");
+    else if (GetWorld())
+    {
+        const int32 IdleBeat = FMath::FloorToInt(GetWorld()->GetTimeSeconds() / 9.f) % 7;
+        Clip = IdleBeat == 1 ? TEXT("IdleLook") :
+            IdleBeat == 5 ? TEXT("IdleWary") : TEXT("Idle");
+    }
+    const float Rate = Clip == TEXT("Walk") || Clip == TEXT("Run")
+        ? FMath::Clamp(Speed / (Clip == TEXT("Run") ? 430.f : 250.f), .65f, 1.55f)
+        : 1.f;
+    MGPrototypeAnimationFallback::Apply(GetMesh(),
+        TEXT("/Game/Characters/Snake"), TEXT("Snake"), Clip,
+        PrototypeAnimationRequest, Rate);
+}
+
 void AMGPlayerCharacter::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    if (bBinocularView && (!Equipment || !Equipment->IsItemEquipped(TEXT("BINOCULARS"))))
+    {
+        bBinocularView = false;
+        if (FollowCamera) FollowCamera->SetFieldOfView(85.f);
+    }
+    if (PendingHandgunCasingSeconds >= 0.f)
+    {
+        PendingHandgunCasingSeconds -= FMath::Max(0.f, DeltaSeconds);
+        if (PendingHandgunCasingSeconds < 0.f && GetWorld())
+        {
+            // Only conventional fired brass uses the actual ejector path.
+            // No brass spawned for the unverified 1995 stun-dart test prop.
+            const FVector Source = WeaponBodyVisual->IsVisible() &&
+                WeaponBodyVisual->DoesSocketExist(TEXT("ejection_port"))
+                ? WeaponBodyVisual->GetSocketLocation(TEXT("ejection_port"))
+                : GetActorLocation() + FVector(8.f, 18.f, 68.f);
+            AMGSpentCasingActor::Eject(GetWorld(), EMGCasingType::HandgunBrass,
+                Source, WeaponBodyVisual->GetComponentRotation());
+            OnHandgunCasingEjected();
+        }
+    }
+    if (IncomingConnectionDelay >= 0.f)
+    {
+        IncomingConnectionDelay -= FMath::Max(0.f, DeltaSeconds);
+        if (IncomingConnectionDelay < 0.f && bCodecOpen)
+        {
+            StopIncomingRing();
+            EnsureRadioSfxLoaded();
+            PlayRadioCue(ConnectRadioSfx, .48f);
+            CodecStatus = TEXT("CONNECTED — BIG BOSS / 120.85");
+        }
+    }
+    if (bCodecOpen)
+    {
+        RadioTranscriptSeconds += FMath::Max(0.f, DeltaSeconds);
+        CodecSpeechSeconds = FMath::Max(0.f, CodecSpeechSeconds - DeltaSeconds);
+        UpdateRadioDialogue(DeltaSeconds);
+    }
     CombatNoiseTimer = FMath::Max(0.f, CombatNoiseTimer - DeltaSeconds);
+    WeaponRecoilTimer = FMath::Max(0.f, WeaponRecoilTimer - DeltaSeconds);
+    HitReactionSeconds = FMath::Max(0.f, HitReactionSeconds - DeltaSeconds);
+    if (PlayerMuzzleFlashLight)
+        PlayerMuzzleFlashLight->SetVisibility(HasReadyWeapon() &&
+            WeaponRecoilTimer > .115f);
     MeleeVisualTimer = FMath::Max(0.f, MeleeVisualTimer - DeltaSeconds);
     WallKnockVisualTimer = FMath::Max(0.f, WallKnockVisualTimer - DeltaSeconds);
+    PhysicalInteractionRemaining = FMath::Max(0.f,
+        PhysicalInteractionRemaining - FMath::Max(0.f, DeltaSeconds));
     CoverReattachCooldown = FMath::Max(0.f, CoverReattachCooldown - DeltaSeconds);
     // Start prone only once CharacterMovement has established a valid crouch
     // base position. Never fake a prone pose with a standing collision capsule.
     if (bPendingProne && bIsCrouched && !bIsProne)
         EnterProneAfterCrouch();
+    UpdateDraggedBody(DeltaSeconds);
 
-    if (GetMesh())
-        PrototypeBody->SetVisibility(GetMesh()->GetSkeletalMeshAsset() == nullptr, true);
+    // Prison state chooses the unarmed outfit without respawning Snake or
+    // resetting aim/locomotion/camera. Swaps happen once per state change.
+    if (DisarmedCharacterArt)
+    {
+        bool bCaptured = false;
+        if (const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+                UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+            bCaptured = Mission->HasEquipmentConfiscated();
+        if (bDisarmedArtApplied != bCaptured)
+        {
+            GetMesh()->SetSkeletalMeshAsset(bCaptured ? DisarmedCharacterArt : InfiltrationCharacterArt);
+            bDisarmedArtApplied = bCaptured;
+            PrototypeAnimationRequest = NAME_None; // outfit swap rebinds the clip
+            // Mesh swaps can change socket mappings; refresh attachment and
+            // keep the same hair identity across both 1995 outfits.
+            UpdateHairPresentation();
+        }
+    }
+    PrototypeBody->SetVisibility(GetMesh()->GetSkeletalMeshAsset() == nullptr, true);
+    UpdateWeaponPresentation();
+    UpdatePrototypeFallbackAnimation();
 
     // A temporary prone/cover camera uses real collision and interpolated
     // pivot/shoulder geometry. Artists can replace the cylinder with a rig.
     const float TargetLength = bIsProne ? (bAiming ? 170.f : 275.f) :
         (bAiming ? 190.f : (bInCover ? 320.f : 420.f));
-    const float TargetFOV = bAiming ? 65.f : 85.f;
+    // The prior camera loop inadvertently overwrote the binocular UseItem
+    // zoom each frame. The scope now participates in the SAME camera state.
+    const float TargetFOV = bBinocularView ? 34.f : (bAiming ? 65.f : 85.f);
     const float ShoulderWidth = bIsProne ? 24.f : (bInCover ? 46.f : (bAiming ? 58.f : 65.f));
     const float CornerCameraReach = (bInCover && bAiming) ? 18.f * CoverPeekAlpha : 0.f;
     const FVector PivotLocal(0.f, 0.f, bIsProne ? 18.f : (bIsCrouched ? 40.f : 65.f));
@@ -189,6 +466,7 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
     Super::SetupPlayerInputComponent(Input);
     Input->BindAxis("MoveForward", this, &AMGPlayerCharacter::MoveForward);
     Input->BindAxis("MoveRight", this, &AMGPlayerCharacter::MoveRight);
+    Input->BindAxis("EquipmentScroll", this, &AMGPlayerCharacter::EquipmentScroll);
     Input->BindAxis("Turn", this, &AMGPlayerCharacter::Turn);
     Input->BindAxis("LookUp", this, &AMGPlayerCharacter::LookUp);
     Input->BindAxis("TurnRate", this, &AMGPlayerCharacter::TurnRate);
@@ -202,7 +480,9 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
     Input->BindAction("Fire", IE_Pressed, this, &AMGPlayerCharacter::FireStun);
     Input->BindAction("GraphicsPreset", IE_Pressed, this, &AMGPlayerCharacter::CycleGraphicsQuality);
     Input->BindAction("Interact", IE_Pressed, this, &AMGPlayerCharacter::Interact);
+    Input->BindKey(EKeys::F10, IE_Pressed, this, &AMGPlayerCharacter::RequestNewOperation);
     Input->BindAction("RestartRescue", IE_Pressed, this, &AMGPlayerCharacter::RestartRescue);
+    Input->BindAction("SkipCinematic", IE_Pressed, this, &AMGPlayerCharacter::SkipStoryCinematic);
     Input->BindAction("MissionLog", IE_Pressed, this, &AMGPlayerCharacter::ToggleMissionLog);
     Input->BindAction("WeaponWindow", IE_Pressed, this, &AMGPlayerCharacter::WeaponWindowStart);
     Input->BindAction("WeaponWindow", IE_Released, this, &AMGPlayerCharacter::WeaponWindowStop);
@@ -220,6 +500,9 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
 }
 void AMGPlayerCharacter::MoveForward(float Value)
 {
+    // During a held inventory window, left stick scrolls the strip; it must
+    // not accidentally walk Snake out of cover or into a live mine field.
+    if (Equipment && (Equipment->IsItemWindowOpen() || Equipment->IsWeaponWindowOpen())) return;
     if (Controller && !FMath::IsNearlyZero(Value))
     {
         const FRotator Yaw(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -244,6 +527,7 @@ void AMGPlayerCharacter::MoveForward(float Value)
 }
 void AMGPlayerCharacter::MoveRight(float Value)
 {
+    if (Equipment && (Equipment->IsItemWindowOpen() || Equipment->IsWeaponWindowOpen())) return;
     if (Controller && !FMath::IsNearlyZero(Value))
     {
         const FRotator Yaw(0.f, Controller->GetControlRotation().Yaw, 0.f);
@@ -278,6 +562,11 @@ void AMGPlayerCharacter::LookUpRate(float Value)
 
 void AMGPlayerCharacter::AimStart()
 {
+    if (DraggedBody.IsValid())
+    {
+        NotifyFeedback(TEXT("RELEASE BODY BEFORE AIMING"), TEXT("denied"));
+        return;
+    }
     bAiming = true;
     bSprinting = false;
     UpdateMovementState();
@@ -285,6 +574,7 @@ void AMGPlayerCharacter::AimStart()
 void AMGPlayerCharacter::AimStop() { bAiming = false; UpdateMovementState(); }
 void AMGPlayerCharacter::SprintStart()
 {
+    if (DraggedBody.IsValid()) return;
     if (!bAiming && !bIsCrouched && !bIsProne)
     {
         if (bInCover) LeaveCover();
@@ -295,6 +585,14 @@ void AMGPlayerCharacter::SprintStart()
 void AMGPlayerCharacter::SprintStop() { bSprinting = false; UpdateMovementState(); }
 void AMGPlayerCharacter::CrouchToggle()
 {
+    // Xbox B serves as "skip" during an actual presentation. Input bindings
+    // also invoke CrouchToggle on that same physical button: do not leave
+    // Snake unexpectedly crouched when a filmed event is dismissed.
+    if (const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+            UGameplayStatics::GetActorOfClass(
+                this, AMGGrayFoxMission::StaticClass())))
+        if (Mission->IsStoryCinematicPlaying()) return;
+    if (DraggedBody.IsValid()) return; // Remain crouched while pulling.
     bSprinting = false;
     if (bIsProne)
     {
@@ -311,6 +609,16 @@ void AMGPlayerCharacter::ShoulderSwap()
     if (bCodecOpen)
     {
         TransceiverChannel = (TransceiverChannel + 1) % 2;
+        bStagedOpeningCall = false; // Explicit tuning reveals the full contact.
+        StopRadioDialogue(); // No wrong-speaker tails while changing stations.
+        RadioTranscriptSeconds = 0.f;
+        StopIncomingRing();
+        EnsureRadioSfxLoaded();
+        IncomingConnectionDelay = -1.f;
+        PlayRadioCue(TuneRadioSfx, .42f);
+        CodecStatus = TransceiverChannel == 0
+            ? TEXT("CONNECTED — KYLE SCHNEIDER / 120.79")
+            : TEXT("CONNECTED — BIG BOSS / 120.85");
         NotifyFeedback(TransceiverChannel == 0 ?
             TEXT("RADIO TUNED — SCHNEIDER / 120.79") :
             TEXT("RADIO TUNED — BIG BOSS / 120.85"), TEXT("select"));
@@ -324,17 +632,18 @@ void AMGPlayerCharacter::UpdateMovementState()
     UCharacterMovementComponent* Movement = GetCharacterMovement();
     Movement->bOrientRotationToMovement = !bAiming && !bInCover;
     Movement->bUseControllerDesiredRotation = bAiming && !bInCover;
-    Movement->MaxWalkSpeed = bIsProne ? 95.f :
+    Movement->MaxWalkSpeed = DraggedBody.IsValid() ? 118.f : bIsProne ? 95.f :
         (bInCover ? 120.f : (bIsCrouched ? 170.f :
             (bAiming ? 210.f : (bSprinting ? 600.f : 350.f))));
     // Crouched/prone cover must not bypass the current slow movement cap.
-    Movement->MaxWalkSpeedCrouched = bIsProne ? 95.f : (bInCover ? 120.f : 170.f);
+    Movement->MaxWalkSpeedCrouched = DraggedBody.IsValid() ? 118.f : bIsProne ? 95.f : (bInCover ? 120.f : 170.f);
 }
 float AMGPlayerCharacter::GetNoiseFactor() const
 {
     const float Speed = GetVelocity().Size2D();
     if (CombatNoiseTimer > 0.f) return 0.95f;
     if (Speed < 15.f) return 0.f;
+    if (DraggedBody.IsValid()) return 0.38f; // Scrape/fabric: louder than ordinary crouch.
     if (bIsProne) return 0.035f;
     if (bInCover) return 0.10f;
     if (bIsCrouched) return 0.08f;
@@ -348,8 +657,100 @@ float AMGPlayerCharacter::GetVisibilityFactor() const
     return bIsCrouched ? 0.36f : 1.f;
 }
 
+void AMGPlayerCharacter::BeginPhysicalInteraction(
+    const FVector& WorldTarget, FName InteractionKind, float DurationSeconds)
+{
+    // A contact cue points to a REAL actor or traced physical surface.
+    // This event NEVER owns mission/camera/health state; the authoritative
+    // gameplay transaction has already succeeded.
+    PhysicalInteractionWorldTarget = WorldTarget;
+    PhysicalInteractionKind = InteractionKind;
+    PhysicalInteractionRemaining = FMath::Clamp(DurationSeconds, .10f, 1.20f);
+    OnPhysicalInteractionStarted(InteractionKind, WorldTarget);
+}
+
+void AMGPlayerCharacter::StopDraggingBody()
+{
+    AMGGuardActor* Body = DraggedBody.Get();
+    if (IsValid(Body)) Body->SetBodyBeingDragged(false);
+    DraggedBody.Reset();
+    UpdateMovementState();
+    OnBodyDragChanged(false, Body);
+    if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+        Mission->NotifyBodyRelocated(this);
+    NotifyFeedback(TEXT("BODY RELEASED"), TEXT("select"));
+}
+
+bool AMGPlayerCharacter::TryToggleBodyDrag()
+{
+    if (DraggedBody.IsValid()) { StopDraggingBody(); return true; }
+    if (!GetWorld() || bIsProne || bInCover || bAiming || bSprinting)
+        return false;
+    AMGGuardActor* Nearest = nullptr;
+    float Distance = 145.f;
+    for (TActorIterator<AMGGuardActor> It(GetWorld()); It; ++It)
+    {
+        AMGGuardActor* Candidate = *It;
+        if (!IsValid(Candidate) || !Candidate->IsIncapacitated() ||
+            Candidate->IsBodyBeingDragged()) continue;
+        const float D = FVector::Dist2D(
+            GetActorLocation(), Candidate->GetActorLocation());
+        if (D >= Distance || FMath::Abs(
+            GetActorLocation().Z - Candidate->GetActorLocation().Z) > 85.f)
+            continue;
+        // A body behind a locked door is not reachable; surface checks
+        // respect the same world visibility as melee and cover.
+        FHitResult Hit;
+        FCollisionQueryParams Query(SCENE_QUERY_STAT(MGBeginBodyDrag), false, this);
+        if (GetWorld()->LineTraceSingleByChannel(
+            Hit, GetActorLocation() + FVector(0,0,32),
+            Candidate->GetActorLocation() + FVector(0,0,32), ECC_Visibility, Query)
+            && Hit.GetActor() != Candidate) continue;
+        Nearest = Candidate; Distance = D;
+    }
+    if (!Nearest) return false;
+    DraggedBody = Nearest;
+    Nearest->SetBodyBeingDragged(true);
+    bSprinting = bAiming = false;
+    if (!bIsCrouched) Crouch();
+    UpdateMovementState();
+    BeginPhysicalInteraction(Nearest->GetActorLocation() + FVector(0,0,35),
+        TEXT("BodyDragGrab"), .55f);
+    OnBodyDragChanged(true, Nearest);
+    NotifyFeedback(Nearest->IsUnconscious() ?
+        TEXT("DRAGGING UNCONSCIOUS GUARD — E TO DROP") :
+        TEXT("MOVING GUARD BODY — E TO DROP"), TEXT("select"));
+    return true;
+}
+
+void AMGPlayerCharacter::UpdateDraggedBody(float Dt)
+{
+    AMGGuardActor* Body = DraggedBody.Get();
+    if (!Body) { DraggedBody.Reset(); return; }
+    if (Dt <= 0.f) return;
+    if (bIsProne || bInCover || bSprinting || bAiming ||
+        FVector::Dist2D(GetActorLocation(), Body->GetActorLocation()) > 195.f ||
+        FMath::Abs(GetActorLocation().Z - Body->GetActorLocation().Z) > 70.f)
+    {
+        StopDraggingBody();
+        return;
+    }
+    FVector Target = GetActorLocation() - GetActorForwardVector().GetSafeNormal2D()*102.f;
+    Target.Z = Body->GetActorLocation().Z;
+    const FVector Next = FMath::VInterpConstantTo(
+        Body->GetActorLocation(), Target, Dt, 220.f);
+    if (FVector::DistSquared2D(Next, Body->GetActorLocation()) > 1.f &&
+        !Body->TryMoveBodyTo(Next, this))
+    {
+        StopDraggingBody();
+        NotifyFeedback(TEXT("BODY CANNOT PASS THROUGH OBSTACLE"), TEXT("denied"));
+    }
+}
+
 void AMGPlayerCharacter::Interact()
 {
+    if (DraggedBody.IsValid()) { StopDraggingBody(); return; }
     if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
     {
@@ -363,13 +764,37 @@ void AMGPlayerCharacter::Interact()
             else if (Changed & 8u) NotifyFeedback(TEXT("GRAY FOX RESCUED — INTEL LOG UPDATED"), TEXT("rescue"));
             else if (Changed & 16u) NotifyFeedback(TEXT("ESCAPE ROUTE OPEN"), TEXT("breach"));
         }
-        else if (bInCover)
+        else
         {
-            LeaveCover();
-            NotifyFeedback(TEXT("LEFT COVER"), TEXT("select"));
+            // E is also a grounded world interaction: the player must stand
+            // at a service isolator and actually reach it. A remote camera
+            // focus/reticle alone cannot disable security across the room.
+            bool bHandledControl = false;
+            for (TActorIterator<AMGSurveillanceCameraActor> CCTV(GetWorld()); CCTV; ++CCTV)
+            {
+                if (CCTV->TryDisableAtControlPanel(this))
+                {
+                    BeginPhysicalInteraction(CCTV->GetControlPanelWorldLocation(),
+                        TEXT("CameraIsolator"), .65f);
+                    NotifyFeedback(TEXT("CCTV ISOLATED — LOCAL POWER OFF"),
+                        TEXT("select"));
+                    bHandledControl = true;
+                    break;
+                }
+            }
+            if (!bHandledControl)
+            {
+                if (TryToggleBodyDrag()) return;
+                if (bInCover)
+                {
+                    LeaveCover();
+                    NotifyFeedback(TEXT("LEFT COVER"), TEXT("select"));
+                }
+                else if (!TryEnterCover())
+                    NotifyFeedback(TEXT("NO ACTION AVAILABLE — MOVE CLOSER AND FACE TARGET"),
+                        TEXT("denied"));
+            }
         }
-        else if (!TryEnterCover())
-            NotifyFeedback(TEXT("NO ACTION AVAILABLE — MOVE CLOSER AND FACE TARGET"), TEXT("denied"));
     }
 }
 
@@ -378,18 +803,39 @@ void AMGPlayerCharacter::ToggleMissionLog()
     if (!bCodecOpen) bShowMissionLog = !bShowMissionLog;
 }
 
+void AMGPlayerCharacter::SkipStoryCinematic()
+{
+    if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+        Mission->SkipStoryCinematic();
+}
+
+void AMGPlayerCharacter::RequestNewOperation()
+{
+    const double Now = FPlatformTime::Seconds();
+    if (Now > NewOperationConfirmUntil)
+    {
+        NewOperationConfirmUntil = Now + 3.0;
+        NotifyFeedback(TEXT("Press F10 again to replace the checkpoint and begin Mission 1."), TEXT("menu"));
+        return;
+    }
+    const FString Level = UGameplayStatics::GetCurrentLevelName(this, true);
+    UGameplayStatics::OpenLevel(this, FName(*Level), true, TEXT("NewOperation"));
+}
+
 void AMGPlayerCharacter::RestartRescue()
 {
     if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
     {
-        Mission->RestartMission();
+        Mission->RetryFromCheckpoint();
     }
 }
 
 
 FString AMGPlayerCharacter::GetPostureText() const
 {
+    if (DraggedBody.IsValid()) return TEXT("DRAGGING BODY");
     if (bIsProne) return TEXT("PRONE");
     if (bInCover) return TEXT("WALL COVER");
     if (bIsCrouched) return TEXT("CROUCHED");
@@ -483,6 +929,11 @@ bool AMGPlayerCharacter::ExitProneSafely()
 }
 void AMGPlayerCharacter::ToggleProne()
 {
+    if (DraggedBody.IsValid())
+    {
+        NotifyFeedback(TEXT("RELEASE BODY TO CRAWL"), TEXT("denied"));
+        return;
+    }
     if (bIsProne) { ExitProneSafely(); return; }
     if (bPendingProne) return;
     bSprinting = false;
@@ -519,7 +970,7 @@ bool AMGPlayerCharacter::FindContactWall(const FVector& Direction, float Reach, 
 
 bool AMGPlayerCharacter::TryAutoEnterCover(const FVector& WorldDirection)
 {
-    if (bInCover || bIsProne || bAiming || bSprinting || bCodecOpen ||
+    if (DraggedBody.IsValid() || bInCover || bIsProne || bAiming || bSprinting || bCodecOpen ||
         CoverReattachCooldown > 0.f || !GetCharacterMovement()->IsMovingOnGround())
         return false;
     FHitResult Hit;
@@ -593,6 +1044,7 @@ void AMGPlayerCharacter::KnockOnWall()
     NextWallKnockTime = Now + 0.70f;
     WallKnockVisualTimer = 0.30f;
     CoverPeekAlpha = 0.f;
+    BeginPhysicalInteraction(Hit.ImpactPoint, TEXT("WallKnock"), .30f);
     const UPrimitiveComponent* Wall = Hit.GetComponent();
     const bool bMetal = Wall && Wall->ComponentHasTag(TEXT("MG_Surface_Metal"));
     const bool bWood = Wall && Wall->ComponentHasTag(TEXT("MG_Surface_Wood"));
@@ -629,19 +1081,31 @@ void AMGPlayerCharacter::FireStun()
         NotifyFeedback(TEXT("HOLD AIM BEFORE FIRING"), TEXT("denied"));
         return;
     }
-    if (!Equipment || !Equipment->IsStunEquipped())
+    const bool bStun = Equipment && Equipment->IsStunEquipped();
+    const bool bHandgun = Equipment && Equipment->IsHandgunEquipped();
+    if (!bStun && !bHandgun)
     {
         NotifyFeedback(Equipment && Equipment->IsConfiscated() ?
             TEXT("WEAPONS CONFISCATED") : TEXT("NO WEAPON EQUIPPED"), TEXT("denied"));
         return;
     }
-    if (!Equipment->ConsumeStunRound())
+    if (!(bStun ? Equipment->ConsumeStunRound() : Equipment->ConsumeHandgunRound()))
     {
         NotifyFeedback(TEXT("OUT OF AMMUNITION"), TEXT("denied"));
         return;
     }
-    NotifyFeedback(TEXT("STUN ROUND FIRED"), TEXT("stun"));
+    NotifyFeedback(bStun ? TEXT("STUN ROUND FIRED") : TEXT("HANDGUN FIRED"),
+                   bStun ? TEXT("stun") : TEXT("shoot"));
+    WeaponRecoilTimer = 0.18f;
+    // Muzzle flash is a light and future Niagara/mesh event, not a
+    // mandatory rendered projectile: authoritative line trace remains below.
+    if (PlayerMuzzleFlashLight && bHandgun)
+        PlayerMuzzleFlashLight->SetVisibility(true);
     CombatNoiseTimer = 0.55f;
+    if (bHandgun)
+        PendingHandgunCasingSeconds = .065f; // Slide extraction follows ignition.
+    // The non-canonical wired-dart test firearm NEVER creates brass.
+
     // Camera ray determines crosshair target; a second ray enforces obstruction
     // between the character and target. Prototype nonlethal incapacitation only.
     const FVector CameraStart = FollowCamera->GetComponentLocation();
@@ -650,11 +1114,42 @@ void AMGPlayerCharacter::FireStun()
     FHitResult CameraHit;
     const bool bCameraHit = GetWorld()->LineTraceSingleByChannel(CameraHit, CameraStart, CameraEnd, ECC_Visibility, Params);
     const FVector Target = bCameraHit ? CameraHit.ImpactPoint : CameraEnd;
-    const FVector Muzzle = GetActorLocation() + FVector(0.f, 0.f, 45.f);
+    // Camera picks intended aim point. The actual weapon muzzle (if a valid
+    // authored socket exists) owns physical obstruction; shooting through a
+    // wall because a camera can see past it is never allowed.
+    const bool bHasMuzzleSocket = HasAuthoredCharacterArt()
+        && WeaponBodyVisual->IsVisible() && WeaponBodyVisual->DoesSocketExist(TEXT("muzzle"));
+    // Imported weapons use their authored muzzle socket. Otherwise the
+    // actual visible proxy's flash position is the bullet origin, not a
+    // phantom actor-chest gun that can shoot through nearby cover.
+    const FVector Muzzle = bHasMuzzleSocket ?
+        WeaponBodyVisual->GetSocketLocation(TEXT("muzzle")) :
+        (WeaponBodyVisual->IsVisible() && PlayerMuzzleFlashLight
+            ? PlayerMuzzleFlashLight->GetComponentLocation()
+            : GetActorLocation() + FVector(0.f, 0.f, 45.f));
     FHitResult MuzzleHit;
     if (GetWorld()->LineTraceSingleByChannel(MuzzleHit, Muzzle, Target, ECC_Visibility, Params) && MuzzleHit.GetActor())
     {
-        UGameplayStatics::ApplyDamage(MuzzleHit.GetActor(), 100.f, Controller, this, UDamageType::StaticClass());
+        // Standard handgun keeps 26-damage prototype tuning against guards,
+        // but the first MSX2 boss withstands ten accepted handgun hits.
+        // Shotmaker-specific HP is in his encounter contract, not a hidden
+        // global nerf to Snake's handgun against ordinary sentries.
+        float Damage = bStun ? 100.f : 26.f;
+        if (bHandgun)
+            if (const AMGShootGunnerActor* Gunner =
+                Cast<AMGShootGunnerActor>(MuzzleHit.GetActor()))
+                Damage = Gunner->GetHandgunDamagePerHit();
+        if (bStun && Cast<AMGSurveillanceCameraActor>(MuzzleHit.GetActor()))
+        {
+            // Conducted-energy dart cartridges are not magic EMP rounds.
+            // The noncanonical test stun tool can hit a camera housing but
+            // must not short, shatter or remotely deactivate its electronics.
+            NotifyFeedback(TEXT("STUN DART HAS NO EFFECT ON CCTV"),
+                TEXT("denied"));
+        }
+        else
+            UGameplayStatics::ApplyDamage(MuzzleHit.GetActor(), Damage, Controller,
+                this, UDamageType::StaticClass());
     }
 }
 
@@ -671,12 +1166,25 @@ void AMGPlayerCharacter::NotifyFeedback(const FString& Message, FName CueName)
     if (USoundBase* Sound = LoadObject<USoundBase>(nullptr, *ObjectRef))
         UGameplayStatics::PlaySound2D(this, Sound, 0.65f);
 }
+void AMGPlayerCharacter::EquipmentScroll(float Value)
+{
+    if (!Equipment || (!Equipment->IsItemWindowOpen() && !Equipment->IsWeaponWindowOpen()) ||
+        !GetWorld() || FMath::Abs(Value) < .62f) return;
+    const float Now = GetWorld()->GetRealTimeSeconds();
+    if (Now < NextEquipmentScrollAt) return;
+    // A modest 180ms held-stick repeat feels like stepped MGS scrolling,
+    // without input spam or any change to authoritative inventory.
+    if (Value > 0.f) SelectionPrevious();
+    else SelectionNext();
+    NextEquipmentScrollAt = Now + .18f;
+}
 void AMGPlayerCharacter::WeaponWindowStart()
 {
     if (bCodecOpen) return;
     if (Equipment)
     {
         Equipment->OpenWeaponWindow();
+        NextEquipmentScrollAt = 0.f;
         ApplyMenuTimeState();
         NotifyFeedback(TEXT("WEAPON SELECTION — TIME SLOWED"), TEXT("menu"));
     }
@@ -699,16 +1207,46 @@ void AMGPlayerCharacter::ItemWindowStart()
     if (Equipment)
     {
         Equipment->OpenItemWindow();
+        NextEquipmentScrollAt = 0.f;
         ApplyMenuTimeState();
         NotifyFeedback(TEXT("ITEM SELECTION — TIME SLOWED"), TEXT("menu"));
     }
+}
+bool AMGPlayerCharacter::IsWearingCarton() const
+{
+    return Equipment && (Equipment->IsItemEquipped(TEXT("BOX")) ||
+        Equipment->IsItemEquipped(TEXT("FREIGHT_CARTON"))) && bIsCrouched
+        && !bAiming && !bIsProne && !IsMeleeVisualActive() && !bInCover;
+}
+bool AMGPlayerCharacter::IsStillInCarton() const
+{
+    return IsWearingCarton() && GetVelocity().SizeSquared2D() < 4.f;
 }
 void AMGPlayerCharacter::ItemWindowStop()
 {
     if (Equipment)
     {
+        if (!Equipment->IsItemWindowOpen()) return;
         const int32 Selected = Equipment->GetItemSelection();
         Equipment->CloseItemWindow();
+        if (Equipment->GetEquippedItemIndex() == Selected)
+        {
+            if ((Equipment->IsItemEquipped(TEXT("BOX")) ||
+                 Equipment->IsItemEquipped(TEXT("FREIGHT_CARTON"))) && !bIsProne)
+            {
+                if (bInCover) LeaveCover();
+                Crouch();
+            }
+            // Selecting cigarettes only equips them. A visible plume
+            // requires deliberate UseItem, as in the browser control scheme.
+            if (bBinocularView &&
+                !Equipment->IsItemEquipped(TEXT("BINOCULARS")))
+            {
+                bBinocularView = false;
+                if (FollowCamera) FollowCamera->SetFieldOfView(
+                    bAiming ? 65.f : 85.f);
+            }
+        }
         ApplyMenuTimeState();
         NotifyFeedback(Equipment->GetEquippedItemIndex() == Selected ?
             TEXT("ITEM CONFIRMED") : TEXT("ITEM UNAVAILABLE"),
@@ -729,17 +1267,55 @@ void AMGPlayerCharacter::UseItem()
 {
     if (!Equipment || Equipment->IsConfiscated())
     { NotifyFeedback(TEXT("ITEMS CONFISCATED"), TEXT("denied")); return; }
+    // Source-faithful: extra inventory item itself is an enemy tracking bug.
+    // Remove it through the inventory instead of clicking a distant objective.
+    if (Equipment->IsTransmitterEquipped())
+    {
+        if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+            UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+            if (Mission->DiscardTransmitter(this))
+            {
+                NotifyFeedback(TEXT("ENEMY TRANSMITTER DISCARDED"), TEXT("select"));
+                return;
+            }
+        NotifyFeedback(TEXT("TRANSMITTER CANNOT BE DISCARDED"), TEXT("denied"));
+        return;
+    }
+    if (Equipment->IsItemEquipped(TEXT("BINOCULARS")))
+    {
+        bBinocularView = !bBinocularView;
+        if (FollowCamera) FollowCamera->SetFieldOfView(bBinocularView ? 34.f : 85.f);
+        NotifyFeedback(bBinocularView ? TEXT("BINOCULARS — SCOUTING")
+                                     : TEXT("BINOCULARS LOWERED"), TEXT("select"));
+        return;
+    }
+    if (Equipment->IsItemEquipped(TEXT("CIGARETTES")))
+    {
+        if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+                UGameplayStatics::GetActorOfClass(
+                    this, AMGGrayFoxMission::StaticClass())))
+        {
+            Mission->ExhaleSmoke(this);
+            NotifyFeedback(TEXT("CIGARETTE SMOKE EXHALED"), TEXT("select"));
+        }
+        else NotifyFeedback(TEXT("NO AIRFLOW CONTEXT"), TEXT("denied"));
+        return;
+    }
     if (Health >= 100.f)
     { NotifyFeedback(TEXT("HEALTH FULL"), TEXT("denied")); return; }
     if (Equipment->ConsumeRation())
     {
         Health = FMath::Min(100.f, Health + 45.f);
         NotifyFeedback(TEXT("RATION USED — HEALTH RESTORED"), TEXT("select"));
+        if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+            UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+            Mission->NotifyItemConsumed(this);
     }
     else NotifyFeedback(TEXT("EQUIP A RATION FIRST"), TEXT("denied"));
 }
 void AMGPlayerCharacter::MeleeAttack()
 {
+    if (DraggedBody.IsValid()) { StopDraggingBody(); return; }
     if (!GetWorld() || !Controller) return;
     if (bInCover) { KnockOnWall(); return; }
     if (bIsProne)
@@ -779,13 +1355,27 @@ void AMGPlayerCharacter::MeleeAttack()
     }
     if (Target)
     {
+        BeginPhysicalInteraction(
+            Target->GetActorLocation() + FVector(0.f, 0.f, 55.f),
+            TEXT("MeleeImpact"), .22f);
         const float ComboDamage[3] = {35.f, 35.f, 40.f};
         UGameplayStatics::ApplyDamage(Target, ComboDamage[MeleeComboStep - 1],
             Controller, this, UDamageType::StaticClass());
         NotifyFeedback(Target->IsIncapacitated() ?
             TEXT("GUARD INCAPACITATED") : TEXT("MELEE IMPACT"), TEXT("impact"));
     }
-    else NotifyFeedback(TEXT("UNARMED STRIKE — NO TARGET"), TEXT("whoosh"));
+    else
+    {
+        // The original recovery-room puzzle is a **punchable door**, not a
+        // magically disappearing 'E' prop or a forced cinematic prompt.
+        AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+            UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
+        if (Mission && Mission->TryPunchWeakWall(this))
+            NotifyFeedback(TEXT("CONCRETE FRACTURE — IMPACT"), TEXT("impact"));
+        else if (Mission && Mission->TryPunchRecoveryDoor(this))
+            NotifyFeedback(TEXT("DOOR IMPACT — HINGES STRAINING"), TEXT("impact"));
+        else NotifyFeedback(TEXT("UNARMED STRIKE — NO TARGET"), TEXT("whoosh"));
+    }
 }
 float AMGPlayerCharacter::TakeDamage(float Amount, const FDamageEvent& Event,
                                      AController* Instigator, AActor* Causer)
@@ -793,13 +1383,27 @@ float AMGPlayerCharacter::TakeDamage(float Amount, const FDamageEvent& Event,
     const float Accepted = Super::TakeDamage(Amount, Event, Instigator, Causer);
     if (Amount <= 0.f || Health <= 0.f) return Accepted;
     Health = FMath::Max(0.f, Health - Amount);
+    // The impact is committed BEFORE notifying art/HUD. The hit event
+    // never deals a second hit and must not drive AI or mission flags.
+    HitReactionSeconds = .48f;
+    LastDamageDirection = Causer
+        ? (Causer->GetActorLocation() - GetActorLocation()).GetSafeNormal2D()
+        : -GetActorForwardVector().GetSafeNormal2D();
+    OnSnakeDamaged(Amount, LastDamageDirection);
     NotifyFeedback(Health <= 0.f ? TEXT("SNAKE DOWN — RELOADING CHECKPOINT")
                                   : TEXT("INJURED — TAKE COVER"), TEXT("hurt"));
     if (Health <= 0.f && GetWorld())
     {
-        // A full failure flow will add death animation/AI reset; checkpoint
-        // reload retains the versioned mission save.
-        UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
+        // Both manual retry (F9) and actual death use EXACTLY the same
+        // lossless save/load pathway. Never delete the user's progress or
+        // request a raw PIE-prefixed map name from the current World.
+        if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+                UGameplayStatics::GetActorOfClass(
+                    this, AMGGrayFoxMission::StaticClass())))
+            Mission->RetryFromCheckpoint();
+        else
+            UGameplayStatics::OpenLevel(this, FName(
+                *UGameplayStatics::GetCurrentLevelName(this, true)));
     }
     return Accepted;
 }
@@ -833,13 +1437,203 @@ void AMGPlayerCharacter::ApplyMenuTimeState()
     UGameplayStatics::SetGlobalTimeDilation(this, Desired);
 }
 
+void AMGPlayerCharacter::EnsureRadioSfxLoaded()
+{
+    // Mission BeginPlay and Player BeginPlay order is not guaranteed. Loading
+    // on the first incoming call as well avoids a silent initial chirp.
+    if (!IncomingRadioSfx)
+        IncomingRadioSfx = LoadObject<USoundBase>(nullptr,
+            TEXT("/Game/Audio/Transceiver/Transceiver_Incoming.Transceiver_Incoming"));
+    if (!ConnectRadioSfx)
+        ConnectRadioSfx = LoadObject<USoundBase>(nullptr,
+            TEXT("/Game/Audio/Transceiver/Transceiver_Connect.Transceiver_Connect"));
+    if (!TuneRadioSfx)
+        TuneRadioSfx = LoadObject<USoundBase>(nullptr,
+            TEXT("/Game/Audio/Transceiver/Transceiver_Tune.Transceiver_Tune"));
+    if (!CloseRadioSfx)
+        CloseRadioSfx = LoadObject<USoundBase>(nullptr,
+            TEXT("/Game/Audio/Transceiver/Transceiver_Close.Transceiver_Close"));
+    if (!SignalRadioSfx)
+        SignalRadioSfx = LoadObject<USoundBase>(nullptr,
+            TEXT("/Game/Audio/Transceiver/Transceiver_Signal.Transceiver_Signal"));
+}
+
+void AMGPlayerCharacter::StopIncomingRing()
+{
+    if (IsValid(ActiveIncomingRing))
+        ActiveIncomingRing->Stop(); // No lingering ring when the call is skipped.
+    ActiveIncomingRing = nullptr;
+}
+
+int32 AMGPlayerCharacter::GetVisibleRadioLineCount(int32 AvailableLines) const
+{
+    if (AvailableLines <= 0) return 0;
+    if (!bStagedOpeningCall || !bCodecOpen) return AvailableLines;
+    // Reveal intervals follow the duration of imported voice performances
+    // (or equivalent accessible reading time when no voice exists).
+    return FMath::Clamp(RevealedRadioLines, 1, AvailableLines);
+}
+
+void AMGPlayerCharacter::StopRadioDialogue()
+{
+    if (IsValid(ActiveRadioDialogue))
+        ActiveRadioDialogue->Stop();
+    ActiveRadioDialogue = nullptr;
+    CurrentVoiceScene.Empty();
+    NextVoiceLine = 0;
+    RevealedRadioLines = 0;
+    VoiceLineAdvanceDelay = 0.f;
+    CodecSpeechSeconds = 0.f;
+    ActiveCodecSpeakerId = NAME_None;
+}
+
+float AMGPlayerCharacter::GetCodecTalkAlpha() const
+{
+    if (!bCodecOpen || CodecSpeechSeconds <= 0.f || !GetWorld())
+        return 0.f;
+    // Estimated visual cadence where final viseme/mocap VO is unavailable.
+    // No invented audio playback. AnimBP can replace this with authored data.
+    const float Phase = GetWorld()->GetTimeSeconds() * 19.f;
+    return FMath::Clamp(0.45f + 0.35f * FMath::Sin(Phase)
+        + 0.15f * FMath::Sin(Phase * .57f), 0.f, 1.f);
+}
+
+float AMGPlayerCharacter::PlayRadioDialogueLine(
+    const FString& SceneKey, int32 Index, const FString& FullLine)
+{
+    FString Speaker, Spoken;
+    if (!FullLine.Split(TEXT(":"), &Speaker, &Spoken)) return 1.65f;
+    Speaker.TrimStartAndEndInline();
+    Spoken.TrimStartAndEndInline();
+    // Performances should follow the identity bible; never impersonate the
+    // particular voice of an existing actor. Missing assets remain captions.
+    const FString SpeakerId = Speaker.ToLower().Replace(TEXT(" "), TEXT("_"));
+    ActiveCodecSpeakerId = FName(*SpeakerId);
+    const FString AssetName = FString::Printf(TEXT("VO_%s_%02d"),
+        *SceneKey, Index + 1);
+    const FString AssetPath = FString::Printf(TEXT("/Game/Audio/VO/%s/%s.%s"),
+        *SpeakerId, *AssetName, *AssetName);
+    if (USoundBase* Cue = LoadObject<USoundBase>(nullptr, *AssetPath))
+    {
+        ActiveRadioDialogue = UGameplayStatics::SpawnSound2D(this, Cue, .72f);
+        if (IsValid(ActiveRadioDialogue))
+        {
+            const float Duration = Cue->GetDuration();
+            if (FMath::IsFinite(Duration) && Duration > 0.f)
+            {
+                const float PerformanceSeconds = FMath::Clamp(Duration + .22f, 1.65f, 18.f);
+                CodecSpeechSeconds = PerformanceSeconds;
+                OnCodecPortraitSpeakerStarted(ActiveCodecSpeakerId, PerformanceSeconds, true);
+                return PerformanceSeconds;
+            }
+        }
+    }
+    // Subtitle duration approximation is NOT generated/recorded speech.
+    const float ReadingSeconds = FMath::Clamp(Spoken.Len() / 16.f + .50f, 1.65f, 5.5f);
+    CodecSpeechSeconds = ReadingSeconds;
+    OnCodecPortraitSpeakerStarted(ActiveCodecSpeakerId, ReadingSeconds, false);
+    return ReadingSeconds;
+}
+
+void AMGPlayerCharacter::UpdateRadioDialogue(float DeltaSeconds)
+{
+    const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
+    if (!Mission || IncomingConnectionDelay >= 0.f) return;
+    const FString SceneKey = Mission->GetTransceiverVoiceSceneKey(TransceiverChannel);
+    if (SceneKey != CurrentVoiceScene)
+    {
+        StopRadioDialogue();
+        CurrentVoiceScene = SceneKey;
+    }
+    TArray<FString> Lines;
+    Mission->GetTransceiverDialogue(TransceiverChannel).ParseIntoArrayLines(Lines, true);
+    if (!bStagedOpeningCall)
+        RevealedRadioLines = Lines.Num(); // Player may review all intel instantly.
+    if (NextVoiceLine >= Lines.Num()) return;
+    VoiceLineAdvanceDelay -= FMath::Max(0.f, DeltaSeconds);
+    if (VoiceLineAdvanceDelay > 0.f) return;
+    if (IsValid(ActiveRadioDialogue))
+    {
+        ActiveRadioDialogue->Stop();
+        ActiveRadioDialogue = nullptr;
+    }
+    // Some on-screen lines are manual wrapping of ONE performed sentence.
+    // Combine successive same-speaker fragments until terminal punctuation,
+    // so recorded phrasing remains natural and the listener never hears
+    // "I never saw" followed by an artificial new take of "the prison plans".
+    const int32 StartingLine = NextVoiceLine;
+    FString Combined = Lines[StartingLine];
+    FString Speaker, Spoken;
+    Combined.Split(TEXT(":"), &Speaker, &Spoken);
+    Speaker.TrimStartAndEndInline();
+    int32 Consumed = 1;
+    while (StartingLine + Consumed < Lines.Num() && Consumed < 3)
+    {
+        FString Trimmed = Spoken;
+        Trimmed.TrimEndInline();
+        if (Trimmed.EndsWith(TEXT(".")) || Trimmed.EndsWith(TEXT("!"))
+            || Trimmed.EndsWith(TEXT("?"))) break;
+        FString NextSpeaker, NextSpoken;
+        if (!Lines[StartingLine + Consumed].Split(
+                TEXT(":"), &NextSpeaker, &NextSpoken)) break;
+        NextSpeaker.TrimStartAndEndInline();
+        if (NextSpeaker != Speaker) break;
+        NextSpoken.TrimStartAndEndInline();
+        Spoken += TEXT(" ") + NextSpoken;
+        Combined = Speaker + TEXT(": ") + Spoken;
+        ++Consumed;
+    }
+    VoiceLineAdvanceDelay = PlayRadioDialogueLine(
+        SceneKey, StartingLine, Combined);
+    NextVoiceLine += Consumed;
+    if (bStagedOpeningCall)
+        RevealedRadioLines = FMath::Max(RevealedRadioLines, NextVoiceLine);
+}
+
+void AMGPlayerCharacter::PlayRadioCue(USoundBase* Cue, float Level) const
+{
+    if (Cue && GetWorld())
+        UGameplayStatics::PlaySound2D(this, Cue, FMath::Clamp(Level, 0.f, .8f));
+}
+
+void AMGPlayerCharacter::OpenIncomingMissionBriefing()
+{
+    // An incoming 1995 transceiver call is NOT a mandatory stationary movie.
+    // Always allow immediate close, movement and survival. Its identity and
+    // dialogue are read from the mission's authoritative stage.
+    EnsureRadioSfxLoaded();
+    StopIncomingRing();
+    StopRadioDialogue();
+    CloseEquipmentWindows();
+    bCodecOpen = true;
+    TransceiverChannel = 1; // Real Big Boss, FOXHOUND 120.85
+    CodecStatus = TEXT("INCOMING — BIG BOSS / 120.85");
+    RadioTranscriptSeconds = 0.f;
+    bStagedOpeningCall = true;
+    // The sound motif plays as gameplay begins; there is no unskippable
+    // call animation and no missing intelligence on immediate close.
+    IncomingConnectionDelay = .94f;
+    if (IncomingRadioSfx && GetWorld())
+        ActiveIncomingRing = UGameplayStatics::SpawnSound2D(
+            this, IncomingRadioSfx, .55f);
+    ApplyMenuTimeState();
+}
+
 void AMGPlayerCharacter::ToggleCodec()
 {
     if (!GetWorld()) return;
+    EnsureRadioSfxLoaded();
     if (bCodecOpen)
     {
         bCodecOpen = false;
+        bStagedOpeningCall = false;
+        RadioTranscriptSeconds = 0.f;
+        StopIncomingRing();
+        StopRadioDialogue();
+        IncomingConnectionDelay = -1.f;
         CodecStatus.Empty();
+        PlayRadioCue(CloseRadioSfx, .50f);
         ApplyMenuTimeState();
         NotifyFeedback(TEXT("TRANSCEIVER CLOSED"), TEXT("select"));
         return;
@@ -848,11 +1642,18 @@ void AMGPlayerCharacter::ToggleCodec()
     // 1995 transceiver: separate from seized inventory and weapons, and never
     // treated as an implanted 2005-era Codec. Manual, optional, replayable,
     // non-pausing: players remain free to move and solve the wall immediately.
+    StopIncomingRing();
+    StopRadioDialogue();
     CloseEquipmentWindows();
     ApplyMenuTimeState();
     bCodecOpen = true;
+    bStagedOpeningCall = false;
+    RadioTranscriptSeconds = 0.f;
     TransceiverChannel = 0; // Kyle Schneider; Q changes to Big Boss.
+    IncomingConnectionDelay = -1.f;
     CodecStatus = TEXT("TRANSCEIVER ACTIVE — CHANGE CHANNEL Q / RS; CLOSE C / START");
+    PlayRadioCue(SignalRadioSfx, .20f);
+    PlayRadioCue(ConnectRadioSfx, .45f);
     NotifyFeedback(TEXT("TRANSCEIVER OPEN — SCHNEIDER / 120.79"), TEXT("select"));
 }
 

@@ -1,13 +1,26 @@
 #include "MGGuardActor.h"
 
 #include "MGPlayerCharacter.h"
+#include "MGGrayFoxMission.h"
+#include "MGSpentCasingActor.h"
+#include "Components/PointLightComponent.h"
+#include "Sound/SoundBase.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimSequence.h"
+#include "MGPrototypeAnimationFallback.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 #include "mg_legacy_core.h"
+#include "EngineUtils.h"
+
+// The perception model may classify an audible footfall as suspicious; only
+// a fresh sight confirmation authorises aimed close-range damage.
 
 AMGGuardActor::AMGGuardActor()
 {
@@ -26,17 +39,387 @@ AMGGuardActor::AMGGuardActor()
     ProxyBody->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
     static ConstructorHelpers::FObjectFinder<UStaticMesh> Cylinder(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
     if (Cylinder.Succeeded()) ProxyBody->SetStaticMesh(Cylinder.Object);
+
+    CharacterMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("GuardSkeletalBody"));
+    CharacterMesh->SetupAttachment(RootComponent);
+    CharacterMesh->SetRelativeLocation(FVector(0.f, 0.f, -89.f));
+    CharacterMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    SecuritySidearm = CreateDefaultSubobject<UStaticMeshComponent>(
+        TEXT("Guard1995SecuritySidearm"));
+    SecuritySidearm->SetupAttachment(RootComponent);
+    SecuritySidearm->SetRelativeLocation(FVector(27.f, 13.f, 49.f));
+    SecuritySidearm->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    SecuritySidearm->SetCastShadow(true);
+    SecuritySidearm->SetVisibility(false);
+    // Procedural weapon prototype stays visible when the optional imported
+    // weapon does not exist. Guards must never fire from an invisible pistol.
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> PistolProxy(
+        TEXT("/Engine/BasicShapes/Cube.Cube"));
+    if (PistolProxy.Succeeded())
+        SecuritySidearm->SetStaticMesh(PistolProxy.Object);
+    SecuritySidearm->SetRelativeScale3D(FVector(.20f, .036f, .042f));
+    SidearmMuzzleLight = CreateDefaultSubobject<UPointLightComponent>(
+        TEXT("GuardSidearmMuzzleFlash"));
+    SidearmMuzzleLight->SetupAttachment(SecuritySidearm);
+    SidearmMuzzleLight->SetRelativeLocation(FVector(52.f, 0.f, 0.f));
+    SidearmMuzzleLight->SetIntensity(6100.f);
+    SidearmMuzzleLight->SetAttenuationRadius(190.f);
+    SidearmMuzzleLight->SetCastShadows(false);
+    SidearmMuzzleLight->SetLightColor(FLinearColor(1.f, .68f, .33f));
+    SidearmMuzzleLight->SetVisibility(false);
 }
 
 void AMGGuardActor::BeginPlay()
 {
     Super::BeginPlay();
     PatrolOrigin = GetActorLocation();
+    StationFacing = GetActorRotation();
+    SidearmRounds = FMath::Clamp(SidearmMagazineCapacity, 4, 16);
+    SidearmShotSound = LoadObject<USoundBase>(nullptr,
+        TEXT("/Game/Audio/Weapons/GuardSidearm_Shot.GuardSidearm_Shot"));
+    // A missing licensed art asset cannot become a fake successful import.
+    // When present, the new original handgun source can serve security roles
+    // until approved, distinct guard-specific service arms are supplied.
+    if (UStaticMesh* Sidearm = LoadObject<UStaticMesh>(nullptr,
+            TEXT("/Game/Weapons/Snake/SM_Handgun_1995.SM_Handgun_1995")))
+    {
+        SecuritySidearm->SetStaticMesh(Sidearm);
+        SecuritySidearm->SetRelativeScale3D(FVector::OneVector);
+        SidearmMuzzleLight->SetRelativeLocation(FVector(21.f, 0.f, 3.f));
+    }
+    if (!CharacterMesh->GetSkeletalMeshAsset())
+        if (USkeletalMesh* Asset = LoadObject<USkeletalMesh>(nullptr,
+                TEXT("/Game/Characters/Guard/SK_Guard_1995.SK_Guard_1995")))
+            CharacterMesh->SetSkeletalMeshAsset(Asset);
+    if (HasAuthoredCharacterArt())
+    {
+        if (!CharacterMesh->GetAnimClass())
+            if (UClass* Class = LoadClass<UAnimInstance>(nullptr,
+                    TEXT("/Game/Characters/Guard/ABP_Guard_1995.ABP_Guard_1995_C")))
+                CharacterMesh->SetAnimInstanceClass(Class);
+        // While the production AnimationBlueprint is still missing, use the
+        // checked-in, actually animated breathing Idle source. Never leave a
+        // successful skeletal import frozen in its reference T-pose.
+        if (!CharacterMesh->GetAnimClass())
+            if (UAnimSequence* LivingIdle = LoadObject<UAnimSequence>(nullptr,
+                    TEXT("/Game/Characters/Guard/Animations/AS_Guard_Idle.AS_Guard_Idle")))
+                CharacterMesh->PlayAnimation(LivingIdle, true);
+        ProxyBody->SetVisibility(false, true);
+        ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        CharacterMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+        CharacterMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+        CharacterMesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+        const FName HandSocket = CharacterMesh->DoesSocketExist(TEXT("weapon_r"))
+            ? FName(TEXT("weapon_r"))
+            : CharacterMesh->GetBoneIndex(TEXT("hand_R")) != INDEX_NONE
+                ? FName(TEXT("hand_R")) : NAME_None;
+        if (HandSocket != NAME_None)
+        {
+            SecuritySidearm->AttachToComponent(CharacterMesh,
+                FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+                HandSocket);
+            SecuritySidearm->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+            SecuritySidearm->SetVisibility(SecuritySidearm->GetStaticMesh() != nullptr);
+        }
+        else
+        {
+            // A malformed imported Skeleton must not create invisible gun
+            // fire. Keep the source proxy attached at the actor chest until
+            // the rig's hand_R bone or weapon_r socket is repaired in Editor.
+            SecuritySidearm->SetVisibility(SecuritySidearm->GetStaticMesh() != nullptr);
+            UE_LOG(LogTemp, Warning, TEXT("MG guard %s: skinned art lacks hand_R/weapon_r; using actor-mounted weapon proxy"), *GetName());
+        }
+    }
+    else
+    {
+        // The fallback unrigged guard keeps a physically readable sidearm
+        // on its actor instead of a silent invisible firing attachment.
+        SecuritySidearm->SetVisibility(SecuritySidearm->GetStaticMesh() != nullptr);
+    }
+}
+
+void AMGGuardActor::SetPrototypeAnimationSource(const FString& Folder,
+                                                const FString& Prefix)
+{
+    PrototypeAnimationFolder = Folder;
+    PrototypeAnimationPrefix = Prefix;
+    PrototypeAnimationRequest = NAME_None;
+}
+void AMGGuardActor::PlayPrototypeActing(FName Requested, float Rate)
+{
+    MGPrototypeAnimationFallback::Apply(CharacterMesh,
+        PrototypeAnimationFolder, PrototypeAnimationPrefix, Requested,
+        PrototypeAnimationRequest, Rate);
+}
+void AMGGuardActor::UpdatePrototypeFallbackAnimation()
+{
+    FName Clip = TEXT("Idle");
+    const float Speed = ActualGroundSpeedCmPerSec; // previous committed step
+    if (bIncapacitated) Clip = TEXT("Down");
+    else if (StaggerSeconds > 0.f) Clip = TEXT("Hit");
+    else if (bSidearmReloading) Clip = TEXT("Reaching");
+    else if (AttackWindupSeconds > 0.f) Clip = TEXT("Melee");
+    else if (bSidearmAiming || SidearmShotCooldown > .55f)
+        Clip = TEXT("Aim");
+    else if (bPendingRadioReport) Clip = TEXT("RadioListen");
+    else if (Speed > 135.f) Clip = TEXT("Run");
+    else if (Speed > 18.f) Clip = TEXT("Walk");
+    else if (AwarenessState >= 3) Clip = TEXT("IdleAlert");
+    else if (SecurityPhase == EMGGuardAwarenessPhase::Searching ||
+             SecurityPhase == EMGGuardAwarenessPhase::Investigating)
+        Clip = TEXT("IdleLook");
+    else if (AwarenessState >= 1) Clip = TEXT("IdleWary");
+    else if (GetWorld())
+    {
+        const int32 IdleBeat = FMath::FloorToInt((GetWorld()->GetTimeSeconds() +
+            (GetUniqueID() % 13) * .55f) / 9.5f) % 8;
+        Clip = IdleBeat == 2 ? TEXT("IdleLook") :
+            IdleBeat == 6 ? TEXT("IdleWary") : TEXT("Idle");
+    }
+    const float Rate = Clip == TEXT("Walk") || Clip == TEXT("Run")
+        ? FMath::Clamp(Speed / (Clip == TEXT("Run") ? 320.f : 95.f), .65f, 1.55f)
+        : 1.f;
+    PlayPrototypeActing(Clip, Rate);
+}
+void AMGGuardActor::ApplyIncapacitatedVisual()
+{
+    // Source Down already rotates the joints to the ground. Without it,
+    // retain the honest fallen proxy rather than leaving an upright T-pose.
+    const bool SourceDown = HasAuthoredCharacterArt() &&
+        CharacterMesh->GetAnimClass() == nullptr &&
+        MGPrototypeAnimationFallback::FindClip(PrototypeAnimationFolder,
+            PrototypeAnimationPrefix, TEXT("Down")) != nullptr;
+    if (SourceDown) PlayPrototypeActing(TEXT("Down"));
+    USceneComponent* Body = HasAuthoredCharacterArt()
+        ? static_cast<USceneComponent*>(CharacterMesh)
+        : static_cast<USceneComponent*>(ProxyBody);
+    Body->SetRelativeRotation(FRotator(0.f, 0.f, SourceDown ? 0.f : 80.f));
+}
+
+void AMGGuardActor::ConfigurePatrol(const FVector& Axis,
+                                    float HalfLengthCm, float SpeedCmPerSec)
+{
+    PatrolAxis = Axis.GetSafeNormal2D();
+    if (PatrolAxis.IsNearlyZero()) PatrolAxis = FVector::ForwardVector;
+    PatrolHalfLength = FMath::Clamp(HalfLengthCm, 60.f, 320.f);
+    PatrolSpeed = FMath::Clamp(SpeedCmPerSec, 45.f, 130.f);
+}
+
+bool AMGGuardActor::HasAuthoredCharacterArt() const
+{
+    return CharacterMesh && CharacterMesh->GetSkeletalMeshAsset() != nullptr;
+}
+
+bool AMGGuardActor::TryUseBespokeSkeletalArt(
+    const TCHAR* MeshPath, const TCHAR* AnimClassPath)
+{
+    if (!CharacterMesh || !MeshPath || !*MeshPath) return false;
+    USkeletalMesh* Bespoke = LoadObject<USkeletalMesh>(nullptr, MeshPath);
+    if (!Bespoke) return false; // Never relabel a default guard as a boss.
+    // Super::BeginPlay already loaded a GUARD skeleton driver. Reusing it
+    // for a boss-specific mesh can freeze the boss in a T-pose or log an
+    // incompatible-skeleton AnimBlueprint failure.
+    CharacterMesh->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+    CharacterMesh->SetSkeletalMeshAsset(Bespoke);
+    PrototypeAnimationRequest = NAME_None;
+    if (AnimClassPath && *AnimClassPath)
+    {
+        if (UClass* Animation = LoadClass<UAnimInstance>(nullptr, AnimClassPath))
+            CharacterMesh->SetAnimInstanceClass(Animation);
+    }
+    // Without a dedicated boss AnimBP, the derived actor's Tick may now
+    // select its own source AnimationSequences instead of the guard idle.
+    ProxyBody->SetVisibility(false, true);
+    ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    CharacterMesh->SetVisibility(true, true);
+    CharacterMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+    CharacterMesh->SetCollisionResponseToAllChannels(ECR_Ignore);
+    CharacterMesh->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
+    return true;
+}
+
+bool AMGGuardActor::CanAcceptDetention(const AMGPlayerCharacter* Suspect) const
+{
+    if (Role != EMGGuardRole::Custody || bIncapacitated || !bCustodyChallenge ||
+        !IsValid(Suspect) || Suspect->IsAiming() || Suspect->IsSprinting()
+        || Suspect->IsProne() || ChallengeAge < .75f
+        || CustodyThreatMemorySeconds > 0.f || AwarenessState >= 3)
+        return false;
+    if (FVector::Dist2D(GetActorLocation(), Suspect->GetActorLocation()) > 620.f)
+        return false;
+    // Unarmed/procedurally compliant suspect. The custody officer has an
+    // observable legal reason to detain, not foreknowledge of Snake's plan.
+    FHitResult Hit;
+    FCollisionQueryParams Trace(SCENE_QUERY_STAT(MGCustodyLOS), false, this);
+    const bool bHit = GetWorld() && GetWorld()->LineTraceSingleByChannel(
+        Hit, GetActorLocation() + FVector(0,0,65.f),
+        Suspect->GetActorLocation() + FVector(0,0,65.f), ECC_Visibility, Trace);
+    return !bHit || Hit.GetActor() == Suspect;
+}
+
+void AMGGuardActor::EmitGuardCallout(FName EventId, const FString& Caption)
+{
+    ActiveGuardCallout = Caption;
+    CalloutRemaining = 2.6f;
+    // Hook to replace provisional subtitles with authored 1995 tactical
+    // performance, subtitled VO and sound occlusion. Caption remains optional
+    // for the player but is never a hidden mission-state trigger.
+    OnGuardCallout(EventId);
+    const FString AssetName = FString::Printf(
+        TEXT("VO_guard_%s_01"), *EventId.ToString().ToLower());
+    const FString AssetPath = FString::Printf(
+        TEXT("/Game/Audio/VO/guard/%s.%s"), *AssetName, *AssetName);
+    if (USoundBase* Cue = LoadObject<USoundBase>(nullptr, *AssetPath))
+        UGameplayStatics::PlaySoundAtLocation(this, Cue, GetActorLocation(), .74f);
+}
+
+void AMGGuardActor::SetSecurityPhase(EMGGuardAwarenessPhase NewPhase)
+{
+    if (SecurityPhase == NewPhase) return;
+    const EMGGuardAwarenessPhase Old = SecurityPhase;
+    SecurityPhase = NewPhase;
+    TimeInSecurityState = 0.f;
+    OnAwarenessPhaseChanged(Old, NewPhase, EvidenceKind);
+    if (NewPhase == EMGGuardAwarenessPhase::Suspicious &&
+        (EvidenceKind == EMGGuardEvidenceKind::HeardMovement ||
+         EvidenceKind == EMGGuardEvidenceKind::StructuralImpact))
+        EmitGuardCallout(TEXT("Question"), TEXT("GUARD: WHAT WAS THAT?"));
+    else if (NewPhase == EMGGuardAwarenessPhase::Investigating)
+        EmitGuardCallout(TEXT("Investigate"), TEXT("GUARD: CHECK THAT NOISE."));
+    else if (NewPhase == EMGGuardAwarenessPhase::Engaged)
+        EmitGuardCallout(TEXT("Contact"), TEXT("GUARD: INTRUDER!"));
+    else if (NewPhase == EMGGuardAwarenessPhase::Searching &&
+             Old == EMGGuardAwarenessPhase::Engaged)
+        EmitGuardCallout(TEXT("LostSight"), TEXT("GUARD: LOST VISUAL. SEARCH THE AREA."));
+    else if (NewPhase == EMGGuardAwarenessPhase::Returning)
+        EmitGuardCallout(TEXT("Return"), TEXT("GUARD: BACK TO POST."));
+}
+
+void AMGGuardActor::ObserveEvidence(EMGGuardEvidenceKind Kind, const FVector& Location)
+{
+    EvidenceKind = Kind;
+    EvidenceAge = 0.f;
+    LastKnownPlayerPosition = Location; // search destination; may be a BODY, not a Snake sighting
+}
+
+void AMGGuardActor::ObserveApproximateFootstep(const FVector& AudibleSource, bool bOccluded)
+{
+    // A continuous movement/noise factor is not a continuous GPS fix.
+    // Sample a rough bearing and distance no more often than the refresh window.
+    if (FootstepLocalizationRefreshSeconds > 0.f) return;
+    // Direct visual proof and urgent concrete discoveries retain priority:
+    // an innocuous footstep cannot erase a confirmed sighting or body report.
+    if ((EvidenceKind == EMGGuardEvidenceKind::ObservedIntruder &&
+         ContactEvidenceAge < 4.5f) ||
+        (EvidenceKind == EMGGuardEvidenceKind::SquadSighting && EvidenceAge < 4.f) ||
+        ((EvidenceKind == EMGGuardEvidenceKind::DiscoveredBody ||
+          EvidenceKind == EMGGuardEvidenceKind::SquadBodyReport) && EvidenceAge < 6.f) ||
+        (EvidenceKind == EMGGuardEvidenceKind::StructuralImpact && EvidenceAge < 3.f))
+        return;
+
+    const FVector Relative = AudibleSource - GetActorLocation();
+    const float Range = Relative.Size2D();
+    if (Range < SMALL_NUMBER) return;
+    const float BearingStep = FMath::DegreesToRadians(bOccluded ? 35.f : 20.f);
+    const float RangeStep = bOccluded ? 260.f : 170.f; // cm, provisional
+    const float Bearing = FMath::RoundToFloat(
+        FMath::Atan2(Relative.Y, Relative.X) / BearingStep) * BearingStep;
+    const float EstimatedRange = FMath::Max(
+        65.f, FMath::RoundToFloat(Range / RangeStep) * RangeStep);
+    const FVector ApproximateLocation = GetActorLocation() + FVector(
+        FMath::Cos(Bearing) * EstimatedRange,
+        FMath::Sin(Bearing) * EstimatedRange, 0.f);
+    ObserveEvidence(EMGGuardEvidenceKind::HeardMovement, ApproximateLocation);
+    // A sustained audible disturbance earns a deliberate walk toward the
+    // approximate sector; one minor footfall merely turns a suspicious head.
+    if (Suspicion >= .32f)
+        SearchForLastKnownSeconds = FMath::Max(SearchForLastKnownSeconds, 2.6f);
+    FootstepLocalizationRefreshSeconds = bOccluded ? 2.2f : 1.2f;
+}
+
+void AMGGuardActor::SetGuardPosture(EMGGuardPosture Desired)
+{
+    if (PresentedPosture == Desired) return;
+    const EMGGuardPosture Old = PresentedPosture;
+    PresentedPosture = Desired;
+    OnPostureChanged(Old, Desired);
+}
+
+void AMGGuardActor::ReceiveEnvironmentalReport(const FVector& EvidenceAt, const AActor* Sender)
+{
+    if (bIncapacitated || !IsValid(Sender) || AwarenessState == 3 ||
+        FVector::Dist2D(GetActorLocation(), Sender->GetActorLocation()) > 950.f)
+        return;
+    // This is the location of a discovered *body* or disturbed environment,
+    // NOT a report of Snake's current or last directly seen coordinates.
+    ObserveEvidence(EMGGuardEvidenceKind::SquadBodyReport, EvidenceAt);
+    Suspicion = FMath::Max(Suspicion, .72f);
+    AwarenessState = FMath::Max(AwarenessState, 2u);
+    SearchForLastKnownSeconds = FMath::Max(SearchForLastKnownSeconds, 5.5f);
+    SetGuardPosture(EMGGuardPosture::Search);
+}
+
+void AMGGuardActor::CheckVisibleIncapacitatedColleagues()
+{
+    if (bIncapacitated || !GetWorld()) return;
+    // Small slice population; evaluate infrequently, and do not see a body
+    // through walls, around the back of the head or from unlimited range.
+    for (TActorIterator<AMGGuardActor> Other(GetWorld()); Other; ++Other)
+    {
+        AMGGuardActor* Colleague = *Other;
+        if (Colleague == this || !Colleague->IsIncapacitated() ||
+            SeenIncapacitatedColleagues.Contains(Colleague))
+            continue;
+        const FVector ToBody = Colleague->GetActorLocation() - GetActorLocation();
+        const float Range = ToBody.Size2D();
+        const bool bNearby = Range < 180.f;
+        if (Range > 720.f || (!bNearby && FVector::DotProduct(
+                GetActorForwardVector().GetSafeNormal2D(),
+                ToBody.GetSafeNormal2D()) < 0.42f))
+            continue;
+        FHitResult Hit;
+        FCollisionQueryParams Params(SCENE_QUERY_STAT(MGBodyEvidenceLOS), false, this);
+        const bool bOccluded = GetWorld()->LineTraceSingleByChannel(
+            Hit, GetActorLocation() + FVector(0,0,65.f),
+            Colleague->GetActorLocation() + FVector(0,0,45.f),
+            ECC_Visibility, Params);
+        if (bOccluded && Hit.GetActor() != Colleague) continue;
+        SeenIncapacitatedColleagues.Add(Colleague);
+        ObserveEvidence(EMGGuardEvidenceKind::DiscoveredBody, Colleague->GetActorLocation());
+        Suspicion = FMath::Max(Suspicion, .78f);
+        AwarenessState = FMath::Max(AwarenessState, 2u);
+        SearchForLastKnownSeconds = FMath::Max(SearchForLastKnownSeconds, 7.f);
+        BodyReportLocation = Colleague->GetActorLocation();
+        BodyReportDelay = 1.2f;
+        OnBodyDiscovered(BodyReportLocation);
+        EmitGuardCallout(TEXT("BodyDiscovered"), TEXT("GUARD: MAN DOWN!"));
+        SetGuardPosture(EMGGuardPosture::Investigate);
+        break; // One discovery / report action per brief scan.
+    }
+}
+
+void AMGGuardActor::ReceiveLocalSquadReport(const FVector& SeenAt, const AActor* Sender)
+{
+    if (bIncapacitated || AwarenessState >= 3 || !IsValid(Sender)
+        || FVector::Dist2D(GetActorLocation(), Sender->GetActorLocation()) > 950.f)
+        return;
+    // Radio shares last *observed* location only; it does not mark the player
+    // in a world-state oracle, force precise lock, or grant through-wall hits.
+    ObserveEvidence(EMGGuardEvidenceKind::SquadSighting, SeenAt);
+    SearchForLastKnownSeconds = 4.0f;
+    Suspicion = FMath::Max(Suspicion, .66f);
+    AwarenessState = FMath::Max(AwarenessState, 2u);
 }
 
 void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, const FVector& WallNormal, float HearingRadius, AActor* SoundInstigator)
 {
     if (bIncapacitated || !GetWorld() || AwarenessState >= 3) return;
+    // A discovered body is serious evidence. A random subsequent knock must
+    // not delete the guard's ongoing security investigation of a casualty.
+    if ((EvidenceKind == EMGGuardEvidenceKind::DiscoveredBody ||
+         EvidenceKind == EMGGuardEvidenceKind::SquadBodyReport) &&
+        EvidenceAge < 5.f)
+        return;
     const float Distance = FVector::Dist2D(GetActorLocation(), SoundLocation);
     if (Distance > HearingRadius) return;
     const FVector GuardSide = (GetActorLocation() - SoundLocation).GetSafeNormal2D();
@@ -59,8 +442,14 @@ void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, const FVector& W
         0 : FMath::Min(ConsecutiveKnocks + 1, 3);
     DistractionLocation = SoundLocation + GuardSide * 90.f;
     DistractionLocation.Z = GetActorLocation().Z;
-    ReturnToPatrol = PatrolOrigin +
-        FVector(FMath::Clamp(GetActorLocation().X - PatrolOrigin.X, -180.f, 180.f), 0.f, 0.f);
+    ObserveEvidence(EMGGuardEvidenceKind::StructuralImpact, DistractionLocation);
+    // Return to the actual duty route, including Y-axis patrols. The older
+    // X-only projection stranded northern/southern corridor patrols away
+    // from their assigned sweep after checking a noise.
+    const float RouteOffset = FVector::DotProduct(
+        GetActorLocation() - PatrolOrigin, PatrolAxis);
+    ReturnToPatrol = PatrolOrigin + PatrolAxis *
+        FMath::Clamp(RouteOffset, -PatrolHalfLength, PatrolHalfLength);
     DistractionPhase = EDistractionPhase::React;
     DistractionTimer = FMath::Max(0.31f, 0.52f - ConsecutiveKnocks * 0.07f);
     InvestigationStuckTimer = 0.f;
@@ -70,18 +459,46 @@ void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, const FVector& W
 
 void AMGGuardActor::MoveToward(const FVector& Destination, float Speed, float DeltaSeconds)
 {
-    const FVector Diff = (Destination - GetActorLocation()).GetSafeNormal2D();
-    if (Diff.IsNearlyZero()) return;
-    const FVector Step = Diff * FMath::Min(Speed * DeltaSeconds, FVector::Dist2D(Destination, GetActorLocation()));
-    SetActorLocation(GetActorLocation() + Step, true);
-    SetActorRotation(FMath::RInterpTo(GetActorRotation(), Diff.Rotation(), DeltaSeconds, 6.f));
+    if (DeltaSeconds <= SMALL_NUMBER) return;
+    const FVector Before = GetActorLocation();
+    const FVector Delta = Destination - Before;
+    const float Distance = Delta.Size2D();
+    if (Distance < 1.f)
+    {
+        SmoothedGroundVelocity = FMath::VInterpTo(
+            SmoothedGroundVelocity, FVector::ZeroVector, DeltaSeconds, 9.f);
+        ActualGroundSpeedCmPerSec = 0.f;
+        return;
+    }
+    const FVector Direction = Delta.GetSafeNormal2D();
+    // Actual acceleration/braking rather than snapping directly to full speed
+    // or flipping 180 degrees while the body remains standing still.
+    const float DesiredSpeed = FMath::Min(
+        FMath::Max(0.f, Speed), Distance * 4.5f);
+    SmoothedGroundVelocity = FMath::VInterpTo(
+        SmoothedGroundVelocity, Direction * DesiredSpeed, DeltaSeconds, 6.f);
+    SetActorLocation(Before + SmoothedGroundVelocity * DeltaSeconds, true);
+    const FVector Travel = GetActorLocation() - Before;
+    ActualGroundSpeedCmPerSec = Travel.Size2D() / DeltaSeconds;
+    if (Travel.Size2D() < 0.2f)
+        SmoothedGroundVelocity = FMath::VInterpTo(
+            SmoothedGroundVelocity, FVector::ZeroVector, DeltaSeconds, 10.f);
+    if (Travel.Size2D() > 0.2f)
+        SetActorRotation(FMath::RInterpTo(
+            GetActorRotation(), Travel.GetSafeNormal2D().Rotation(),
+            DeltaSeconds, 5.5f));
 }
 
 bool AMGGuardActor::AdvanceNoiseInvestigation(float DeltaSeconds)
 {
     if (DistractionPhase == EDistractionPhase::None) return false;
-    // Real visual detection and combat stimuli supersede a mere sound cue.
-    if (AwarenessState >= 2)
+    // Direct visual confirmation supersedes noise. A guard who is merely
+    // searching a body or responding to a radio report must NOT forget the
+    // local sound stimulus just because numeric awareness reached 2.
+    if ((bConfirmedVisualThisFrame && AwarenessState >= 3) ||
+        ((EvidenceKind == EMGGuardEvidenceKind::DiscoveredBody ||
+          EvidenceKind == EMGGuardEvidenceKind::SquadBodyReport) &&
+         EvidenceAge < 5.f))
     {
         DistractionPhase = EDistractionPhase::None;
         ConsecutiveKnocks = 0;
@@ -141,41 +558,268 @@ bool AMGGuardActor::AdvanceNoiseInvestigation(float DeltaSeconds)
     return true;
 }
 
+bool AMGGuardActor::AdvanceBoxInvestigation(float Dt)
+{
+    if (BoxPhase == EMGGuardBoxPhase::None ||
+        BoxPhase == EMGGuardBoxPhase::Confirmed) return false;
+    if (bConfirmedVisualThisFrame && AwarenessState >= 3)
+    {
+        BoxPhase = EMGGuardBoxPhase::None;
+        return false;
+    }
+    BoxInterestRemainingSeconds -= FMath::Max(0.f, Dt);
+    if (BoxInterestRemainingSeconds <= 0.f)
+    {
+        BoxPhase = EMGGuardBoxPhase::None;
+        bCartonInterestAnnounced = false;
+        bCartonInspectionAnnounced = false;
+        CartonInspectionSeconds = 0.f;
+        return false;
+    }
+    // Never chase Snake's current transform: the last *seen* carton coordinate
+    // is the only permissible location. Geometry/capsule sweeps remain active.
+    const FVector ToEvidence = BoxEvidenceWorldPosition - GetActorLocation();
+    const FVector Heading = ToEvidence.GetSafeNormal2D();
+    if (BoxPhase == EMGGuardBoxPhase::Notice)
+    {
+        if (!Heading.IsNearlyZero())
+            SetActorRotation(FMath::RInterpTo(GetActorRotation(),
+                Heading.Rotation(), Dt, 3.0f));
+        BoxReactSeconds -= Dt;
+        if (BoxReactSeconds <= 0.f)
+            BoxPhase = EMGGuardBoxPhase::Approach;
+    }
+    else if (BoxPhase == EMGGuardBoxPhase::Approach)
+    {
+        const float Before = ToEvidence.Size2D();
+        if (Before > 120.f)
+            MoveToward(BoxEvidenceWorldPosition, 105.f, Dt);
+        else BoxPhase = EMGGuardBoxPhase::Inspect;
+        const float After = FVector::Dist2D(GetActorLocation(), BoxEvidenceWorldPosition);
+        BoxApproachStuckSeconds = After > Before - .5f ?
+            BoxApproachStuckSeconds + Dt : 0.f;
+        if (BoxApproachStuckSeconds > 1.5f)
+        {
+            BoxPhase = EMGGuardBoxPhase::Search;
+            BoxSearchSeconds = 3.f;
+        }
+    }
+    else if (BoxPhase == EMGGuardBoxPhase::Inspect)
+    {
+        if (!Heading.IsNearlyZero())
+            SetActorRotation(FMath::RInterpTo(GetActorRotation(),
+                Heading.Rotation(), Dt, 4.5f));
+        // If the visible box has moved/vanished, investigate the known
+        // location, never assign an unseen actor target.
+        if (CartonInspectionSeconds <= 0.f)
+        {
+            BoxPhase = EMGGuardBoxPhase::Search;
+            BoxSearchSeconds = 3.f;
+        }
+    }
+    else if (BoxPhase == EMGGuardBoxPhase::Search)
+    {
+        BoxSearchSeconds -= Dt;
+        if (ToEvidence.Size2D() > 120.f)
+            MoveToward(BoxEvidenceWorldPosition, 88.f, Dt);
+        else
+            SetActorRotation(FRotator(0.f, GetActorRotation().Yaw +
+                32.f * FMath::Sin(GetWorld()->GetTimeSeconds() * 2.f) * Dt, 0.f));
+        if (BoxSearchSeconds <= 0.f)
+            BoxInterestRemainingSeconds = 0.f;
+    }
+    return true;
+}
+
 float AMGGuardActor::TakeDamage(float DamageAmount, const FDamageEvent& DamageEvent,
                                 AController* EventInstigator, AActor* DamageCauser)
 {
     const float Accepted = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
     if (DamageAmount > 0.f && !bIncapacitated)
     {
+        AttackWindupSeconds = 0.f; // A genuine interruption cancels a strike.
+        SidearmWindupSeconds = 0.f;
+        bSidearmAiming = false;
+        if (bSidearmReloading)
+        {
+            bSidearmReloading = false;
+            SidearmReloadSeconds = 0.f;
+            OnSidearmReloadInterrupted();
+            // No free ammunition for an interrupted magazine exchange.
+        }
+        // Getting hit during the half-second radio procedure cancels the
+        // transmission rather than broadcasting from an interrupted posture.
+        if (bPendingRadioReport)
+        {
+            bPendingRadioReport = false;
+            PendingRadioDelay = 0.f;
+            SquadBroadcastCooldown = FMath::Min(SquadBroadcastCooldown, 1.5f);
+        }
         Health = FMath::Max(0.f, Health - DamageAmount);
         StaggerSeconds = 0.22f;
         // A victim can react and report contact; damage never silently vanishes.
         Suspicion = 1.f;
         AwarenessState = 3;
-        if (DamageCauser) LastKnownPlayerPosition = DamageCauser->GetActorLocation();
+        if (DamageCauser)
+            ObserveEvidence(EMGGuardEvidenceKind::Wounded, DamageCauser->GetActorLocation());
         if (Health <= 0.f)
         {
             bIncapacitated = true;
+            // Current weapon damage is >=50 per handgun bullet while native
+            // CQC combo strikes are 35/35/40. This distinguishes animation
+            // state until typed DamageTypes replace the prototype heuristic.
+            bBodyDead = DamageAmount >= 50.f;
+            PendingSidearmCaseSeconds = -1.f;
+            if (SidearmMuzzleLight) SidearmMuzzleLight->SetVisibility(false);
+            SetGuardPosture(EMGGuardPosture::Incapacitated);
+            SetSecurityPhase(EMGGuardAwarenessPhase::Incapacitated);
             Suspicion = 0.f;
             AwarenessState = 0;
             ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            CharacterMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             CollisionCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-            ProxyBody->SetRelativeRotation(FRotator(0.f, 0.f, 80.f));
+            ApplyIncapacitatedVisual();
             SetActorTickEnabled(false);
         }
     }
     return Accepted;
 }
 
+void AMGGuardActor::RestoreIncapacitatedBody(
+    const FVector& Position, bool bUnconscious)
+{
+    if (!GetWorld() || Position.ContainsNaN()) return;
+    // The actor retains its original stable ID and is never sent through a
+    // kill montage a second time on load. There is no resurrection wave.
+    bIncapacitated = true;
+    bBodyDead = !bUnconscious;
+    bBodyBeingDragged = false;
+    Health = 0.f;
+    AwarenessState = 0;
+    Suspicion = 0.f;
+    bPendingRadioReport = false;
+    SidearmWindupSeconds = 0.f;
+    PendingSidearmCaseSeconds = -1.f;
+    SetActorLocation(Position, false, nullptr, ETeleportType::TeleportPhysics);
+    ProxyBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    CharacterMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    CollisionCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    ApplyIncapacitatedVisual();
+    SetGuardPosture(EMGGuardPosture::Incapacitated);
+    SetSecurityPhase(EMGGuardAwarenessPhase::Incapacitated);
+    SetActorTickEnabled(false);
+}
+
+void AMGGuardActor::SetBodyBeingDragged(bool bDragged)
+{
+    if (!bIncapacitated || bBodyBeingDragged == bDragged) return;
+    bBodyBeingDragged = bDragged;
+    OnBodyDragChanged(bDragged);
+}
+
+bool AMGGuardActor::TryMoveBodyTo(
+    const FVector& ProposedPosition, const AActor* DraggingActor)
+{
+    if (!bIncapacitated || !bBodyBeingDragged || !IsValid(DraggingActor) ||
+        !GetWorld() || FVector::Dist2D(DraggingActor->GetActorLocation(),
+                                      GetActorLocation()) > 205.f)
+        return false;
+    if (FVector::Dist2D(ProposedPosition, GetActorLocation()) > 72.f)
+        return false; // Reject teleport-sized step and unrealistic snaps.
+    // The dead/KO actor has no Pawn collision so Snake can stand and grab it,
+    // but the body itself still CANNOT be pulled through concrete, doors,
+    // furnaces or the physical boundary of an elevated walkway.
+    FCollisionQueryParams Q(SCENE_QUERY_STAT(MGBodyDragObstacle), false, this);
+    Q.AddIgnoredActor(DraggingActor);
+    FHitResult Obstacle;
+    const FVector Raised = FVector(0.f, 0.f, 35.f);
+    const bool bObstructed = GetWorld()->SweepSingleByChannel(
+        Obstacle, GetActorLocation() + Raised,
+        ProposedPosition + Raised, FQuat::Identity, ECC_Visibility,
+        FCollisionShape::MakeSphere(34.f), Q);
+    if (bObstructed && Obstacle.bBlockingHit) return false;
+    return SetActorLocation(ProposedPosition, false);
+}
+
 void AMGGuardActor::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
-    if (bIncapacitated || !GetWorld()) return;
+    if (!GetWorld()) return;
+    UpdatePrototypeFallbackAnimation();
+    if (bIncapacitated) return;
+    SidearmMuzzleFlashRemaining = FMath::Max(0.f,
+        SidearmMuzzleFlashRemaining - FMath::Max(0.f, DeltaSeconds));
+    if (SidearmMuzzleLight)
+        SidearmMuzzleLight->SetVisibility(SidearmMuzzleFlashRemaining > 0.f);
+    if (PendingSidearmCaseSeconds >= 0.f)
+    {
+        PendingSidearmCaseSeconds -= FMath::Max(0.f, DeltaSeconds);
+        if (PendingSidearmCaseSeconds < 0.f)
+        {
+            const FVector CaseLocation = SecuritySidearm->IsVisible() &&
+                SecuritySidearm->DoesSocketExist(TEXT("ejection_port"))
+                ? SecuritySidearm->GetSocketLocation(TEXT("ejection_port"))
+                : GetActorLocation() + FVector(10.f, 18.f, 65.f);
+            AMGSpentCasingActor::Eject(GetWorld(), EMGCasingType::HandgunBrass,
+                CaseLocation, SecuritySidearm->GetComponentRotation());
+            OnSidearmCasingEjected();
+        }
+    }
+    TimeInSecurityState += FMath::Max(0.f, DeltaSeconds);
+    CalloutRemaining = FMath::Max(0.f, CalloutRemaining - FMath::Max(0.f, DeltaSeconds));
+    EvidenceAge = FMath::Min(120.f, EvidenceAge + FMath::Max(0.f, DeltaSeconds));
+    FootstepLocalizationRefreshSeconds = FMath::Max(
+        0.f, FootstepLocalizationRefreshSeconds - FMath::Max(0.f, DeltaSeconds));
+    bConfirmedVisualThisFrame = false;
     StaggerSeconds = FMath::Max(0.f, StaggerSeconds - DeltaSeconds);
+    // No movement in this frame unless the state actually produces a step.
+    // An AnimBP can use actual capsule travel speed, not a phantom target
+    // velocity that animates running feet against an obstructing wall.
+    ActualGroundSpeedCmPerSec = FMath::FInterpTo(
+        ActualGroundSpeedCmPerSec, 0.f, DeltaSeconds, 8.f);
     AttackCooldown = FMath::Max(0.f, AttackCooldown - DeltaSeconds);
-    ProxyBody->SetRelativeRotation(FMath::RInterpTo(ProxyBody->GetRelativeRotation(),
-        StaggerSeconds > 0.f ? FRotator(0.f, 0.f, 12.f) : FRotator::ZeroRotator,
-        DeltaSeconds, 9.f));
+    SidearmShotCooldown = FMath::Max(0.f, SidearmShotCooldown - DeltaSeconds);
+    if (bSidearmReloading && StaggerSeconds <= 0.f)
+    {
+        SidearmReloadSeconds -= FMath::Max(0.f, DeltaSeconds);
+        if (SidearmReloadSeconds <= 0.f)
+        {
+            SidearmRounds = FMath::Clamp(SidearmMagazineCapacity, 4, 16);
+            bSidearmReloading = false;
+            OnSidearmReloadFinished();
+        }
+    }
+    SquadBroadcastCooldown = FMath::Max(0.f, SquadBroadcastCooldown - DeltaSeconds);
+    CustodyThreatMemorySeconds = FMath::Max(0.f,
+        CustodyThreatMemorySeconds - DeltaSeconds);
+    SearchForLastKnownSeconds = FMath::Max(0.f,
+        SearchForLastKnownSeconds - DeltaSeconds);
+    // A body report is a separate type of intelligence from confirmed enemy
+    // contact. Nearby colleagues investigate the evidence, not Snake's GPS.
+    if (BodyReportDelay >= 0.f)
+    {
+        BodyReportDelay -= DeltaSeconds;
+        if (BodyReportDelay < 0.f)
+        {
+            for (TActorIterator<AMGGuardActor> Ally(GetWorld()); Ally; ++Ally)
+                if (*Ally != this)
+                    Ally->ReceiveEnvironmentalReport(BodyReportLocation, this);
+            if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+                    UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+                Mission->NotifyGuardBodyReported(BodyReportLocation);
+        }
+    }
+    BodyScanCountdown -= DeltaSeconds;
+    if (BodyScanCountdown <= 0.f)
+    {
+        BodyScanCountdown = 0.70f;
+        CheckVisibleIncapacitatedColleagues();
+    }
+    // Do not counter-rotate an authored skeletal rig: its AnimBP owns hit reactions.
+    if (!HasAuthoredCharacterArt())
+        ProxyBody->SetRelativeRotation(FMath::RInterpTo(ProxyBody->GetRelativeRotation(),
+            StaggerSeconds > 0.f ? FRotator(0.f, 0.f, 12.f) : FRotator::ZeroRotator,
+            DeltaSeconds, 9.f));
     const AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (!Player) return;
 
@@ -187,67 +831,460 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     const FVector Eye = GetActorLocation() + FVector(0.f, 0.f, 55.f);
     const FVector Target = Player->GetActorLocation() + FVector(0.f, 0.f, 55.f);
     const bool bTraceHit = GetWorld()->LineTraceSingleByChannel(Hit, Eye, Target, ECC_Visibility, Params);
-    const bool bHasLineOfSight = !bTraceHit || Hit.GetActor() == Player;
+    const bool bRealSightline = !bTraceHit || Hit.GetActor() == Player;
+    // A stationary carton reads as ordinary freight at a distance, but it
+    // is not an all-purpose invisibility cloak. Close inspection requires a
+    // real unblocked view from the guard's FRONT; no magical 360-degree ID.
+    // Staged parcels on the working conveyor are expected, so the same
+    // close look does not create a contrived alert at that position.
+    const AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+        UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass()));
+    const EMGFacilitySecurityState BaseState = Mission
+        ? Mission->GetFacilitySecurityState() : EMGFacilitySecurityState::Normal;
+    const bool bFacilityLockdown = BaseState == EMGFacilitySecurityState::Alert ||
+        BaseState == EMGFacilitySecurityState::Evasion;
+    const bool bFacilityCaution = bFacilityLockdown ||
+        BaseState == EMGFacilitySecurityState::Caution;
+    const FVector GuardForward = GetActorForwardVector().GetSafeNormal2D();
+    const bool bInFront = FVector::DotProduct(
+        GuardForward, ToPlayer.GetSafeNormal2D()) > 0.50f;
+    // Detect an unusual OBJECT, not Snake. No wall, rear-facing or infinite
+    // range detection; the real world is the authority for plausible cargo.
+    const bool bBoxPhysicallyVisible = Player->IsWearingCarton()
+        && bRealSightline && bInFront && Distance < 930.f;
+    const bool bExpectedCargo = Mission &&
+        Mission->IsExpectedFreightLocation(Player->GetActorLocation());
+    const bool bMovingOnRealBelt = Mission &&
+        Mission->IsWorkingFreightConveyor(Player->GetActorLocation());
+    const bool bBoxMovedByPlayer = bBoxPhysicallyVisible &&
+        !Player->IsStillInCarton();
+    const float SuspiciousRange = (Role == EMGGuardRole::LogisticsPost ? 690.f :
+        Role == EMGGuardRole::Custody ? 650.f : 570.f)
+        + (bFacilityCaution ? 160.f : 0.f);
+    const bool bBoxEvidenceVisible = bBoxPhysicallyVisible &&
+        ((bBoxMovedByPlayer && !bMovingOnRealBelt && Distance < 880.f) ||
+         (!bExpectedCargo && Distance < SuspiciousRange) ||
+         (bFacilityLockdown && Distance < 720.f));
+    if (bBoxEvidenceVisible && AwarenessState < 3)
+    {
+        BoxEvidenceWorldPosition = Player->GetActorLocation();
+        BoxInterestRemainingSeconds = 5.5f;
+        if (!bCartonInterestAnnounced)
+        {
+            BoxPhase = EMGGuardBoxPhase::Notice;
+            BoxReactSeconds = bBoxMovedByPlayer ? .15f : .42f;
+            bCartonInterestAnnounced = true;
+            EmitGuardCallout(TEXT("ContainerNotice"),
+                bBoxMovedByPlayer
+                    ? TEXT("GUARD: THAT CARTON JUST MOVED!")
+                    : TEXT("GUARD: THAT BOX DOES NOT BELONG HERE."));
+            OnCartonNotice();
+        }
+        Suspicion = FMath::Max(Suspicion, bBoxMovedByPlayer ? .46f : .25f);
+    }
+    const bool bCloseUnusualCarton = bBoxEvidenceVisible &&
+        Distance < (bBoxMovedByPlayer ? 245.f : 160.f);
+    CartonInspectionRequiredSeconds = bBoxMovedByPlayer ? .60f :
+        (bFacilityLockdown ? .85f :
+         (Role == EMGGuardRole::LogisticsPost ? 1.70f : 1.30f));
+    if (bCloseUnusualCarton && AwarenessState < 3)
+    {
+        if (BoxPhase != EMGGuardBoxPhase::Inspect &&
+            BoxPhase != EMGGuardBoxPhase::Confirmed &&
+            BoxReactSeconds <= 0.f)
+        {
+            BoxPhase = EMGGuardBoxPhase::Inspect;
+            if (!bCartonInspectionAnnounced)
+            {
+                bCartonInspectionAnnounced = true;
+                EmitGuardCallout(TEXT("ContainerInspection"),
+                    TEXT("GUARD: WAIT. I'M CHECKING THIS ONE."));
+                OnCartonInspectStarted();
+            }
+        }
+        // Only continuous LOS in the actual Inspect phase accumulates proof.
+        if (BoxPhase == EMGGuardBoxPhase::Inspect)
+            CartonInspectionSeconds = FMath::Min(
+                CartonInspectionSeconds + FMath::Max(0.f, DeltaSeconds), 1.75f);
+    }
+    else
+        CartonInspectionSeconds = 0.f;
+    const bool bCartonIdentityConfirmed =
+        (bCloseUnusualCarton && CartonInspectionSeconds >= CartonInspectionRequiredSeconds) ||
+        (BoxPhase == EMGGuardBoxPhase::Confirmed &&
+         bBoxPhysicallyVisible && Distance < 350.f);
+    if (bCartonIdentityConfirmed && !bCartonIdentitySpoken)
+    {
+        BoxPhase = EMGGuardBoxPhase::Confirmed;
+        bCartonIdentitySpoken = true;
+        EmitGuardCallout(TEXT("ContainerOpened"),
+            TEXT("GUARD: SOMEONE'S INSIDE!"));
+        OnCartonInspectionConfirmed();
+    }
+    if (!bBoxEvidenceVisible && BoxPhase != EMGGuardBoxPhase::Confirmed)
+        bCartonInspectionAnnounced = false;
+    const bool bHasLineOfSight = bRealSightline &&
+        (!Player->IsWearingCarton() || bCartonIdentityConfirmed);
+    // A moving cardboard box is suspicious, but is not proof of identity
+    // until a real guard actually inspects it.
+
+    // The officers at the detention truck CHALLENGE instead of automatically
+    // attacking a compliant nearby suspect. Challenge requires first-hand
+    // sight and is revoked if the suspect retreats behind geometry.
+    if (Role == EMGGuardRole::Custody && !bIncapacitated)
+    {
+        const bool bNear = Distance < 690.f;
+        const bool bThreatening = Player->IsAiming() || Player->IsSprinting();
+        if (bNear && bHasLineOfSight && bThreatening)
+            CustodyThreatMemorySeconds = 3.5f;
+        const bool bCanChallenge = bNear && bHasLineOfSight
+            && !bThreatening && !Player->IsProne()
+            && CustodyThreatMemorySeconds <= 0.f && AwarenessState < 3
+            && !bFacilityLockdown;
+        const bool bFirstChallengeFrame = bCanChallenge && !bCustodyChallenge;
+        bCustodyChallenge = bCanChallenge;
+        if (bCustodyChallenge)
+        {
+            SetSecurityPhase(EMGGuardAwarenessPhase::Confirming);
+            SetGuardPosture(EMGGuardPosture::Challenge);
+            AttackWindupSeconds = 0.f;
+            ChallengeAge += DeltaSeconds;
+            if (bFirstChallengeFrame)
+            {
+                OnCustodyChallenge();
+                EmitGuardCallout(TEXT("CustodyChallenge"),
+                    TEXT("SECURITY: HALT. KEEP YOUR HANDS VISIBLE."));
+            }
+            const FVector Direction = ToPlayer.GetSafeNormal2D();
+            if (!Direction.IsNearlyZero())
+                SetActorRotation(FMath::RInterpTo(GetActorRotation(),
+                    Direction.Rotation(), DeltaSeconds, 3.5f));
+            AwarenessState = 1;
+            Suspicion = FMath::Max(Suspicion, .35f);
+            // No damage, chase or magical confiscation on this frame. The
+            // player commits compliance via physical custody handoff.
+            return;
+        }
+        ChallengeAge = 0.f;
+    }
     const FVector Forward = GetActorForwardVector();
 
     MgGuardFrame Frame = {};
     Frame.guard_pos = {GetActorLocation().X / 100.f, GetActorLocation().Y / 100.f};
     Frame.guard_forward = {Forward.X, Forward.Y};
     Frame.player_pos = {Player->GetActorLocation().X / 100.f, Player->GetActorLocation().Y / 100.f};
-    Frame.vision_range_m = 12.f;
-    Frame.vision_half_angle_deg = 55.f;
-    Frame.hearing_range_m = 11.f;
+    // Elevated security means more deliberate attention, not omniscient AI.
+    // Rust and editor fallback read the SAME actual tuned sensor envelope.
+    Frame.vision_range_m = bFacilityLockdown ? 13.2f :
+        (bFacilityCaution ? 12.6f : 12.f);
+    Frame.vision_half_angle_deg = bFacilityLockdown ? 60.f : 55.f;
+    Frame.hearing_range_m = bFacilityLockdown ? 12.2f : 11.f;
     Frame.visibility = Player->GetVisibilityFactor();
-    Frame.noise = Player->GetNoiseFactor();
+    // A footstep can still transmit through walls, but physical barriers
+    // reduce its useful evidence radius instead of creating an x-ray acoustic
+    // tracker. Direct visual proof remains a separate channel.
+    Frame.noise = Player->GetNoiseFactor() *
+        (bHasLineOfSight ? 1.f : .42f);
     Frame.suspicion = Suspicion;
     Frame.delta_seconds = DeltaSeconds;
     Frame.line_of_sight = bHasLineOfSight ? 1u : 0u;
 
     MgGuardResult Result = {};
+    bool bConfirmedVisualNow = false;
 #if MG_WITH_RUST
     if (mg_core_abi_version() == 1 && mg_step_guard(&Frame, &Result))
     {
         Suspicion = Result.suspicion;
         AwarenessState = Result.state;
-        if (Result.sees_player || Result.hears_player)
-            LastKnownPlayerPosition = Player->GetActorLocation();
+        bConfirmedVisualNow = Result.sees_player != 0 && bHasLineOfSight;
+        if (bConfirmedVisualNow)
+        {
+            ObserveEvidence(EMGGuardEvidenceKind::ObservedIntruder,
+                Player->GetActorLocation());
+            ContactEvidenceAge = 0.f;
+        }
+        else if (Result.hears_player)
+        {
+            ObserveApproximateFootstep(Player->GetActorLocation(), !bHasLineOfSight);
+        }
     }
 #else
     // Reduced fallback for editor prototyping only; use the Rust native ABI
     // for the full independently tested perception implementation.
-    const bool bFacing = FVector::DotProduct(Forward.GetSafeNormal2D(), ToPlayer.GetSafeNormal2D()) > 0.57f;
-    const bool bVisible = bHasLineOfSight && bFacing && Distance < 1200.f;
-    const bool bAudible = Distance < 1100.f && Frame.noise > 0.1f;
+    const float FacingThreshold =
+        FMath::Cos(FMath::DegreesToRadians(Frame.vision_half_angle_deg));
+    const bool bFacing = FVector::DotProduct(
+        Forward.GetSafeNormal2D(), ToPlayer.GetSafeNormal2D()) > FacingThreshold;
+    const bool bVisible = bHasLineOfSight && bFacing &&
+        Distance < Frame.vision_range_m * 100.f;
+    const bool bAudible = Distance < Frame.hearing_range_m * 100.f &&
+        Frame.noise > 0.1f;
     Suspicion = FMath::Clamp(Suspicion + DeltaSeconds *
         ((bVisible ? Frame.visibility * 0.95f : 0.f) +
          (bAudible ? Frame.noise * 0.40f : 0.f) -
          ((!bVisible && !bAudible) ? 0.12f : 0.f)), 0.f, 1.f);
     AwarenessState = Suspicion >= 0.99f ? 3 : Suspicion >= 0.68f ? 2 : Suspicion >= 0.22f ? 1 : 0;
-    if (bVisible || bAudible) LastKnownPlayerPosition = Player->GetActorLocation();
+    bConfirmedVisualNow = bVisible;
+    if (bConfirmedVisualNow)
+    {
+        ObserveEvidence(EMGGuardEvidenceKind::ObservedIntruder,
+            Player->GetActorLocation());
+        ContactEvidenceAge = 0.f;
+    }
+    else if (bAudible)
+    {
+        ObserveApproximateFootstep(Player->GetActorLocation(), !bHasLineOfSight);
+    }
 #endif
 
-    // Enemy attack only after an actual alert and physical approach.
-    // Player health and HUD are authoritative; no invisible instant failure.
-    if (AwarenessState == 3 && Distance < 145.f && AttackCooldown <= 0.f)
+    // Only actual first-hand sight refreshes contact age. Repeated muffled
+    // footsteps may renew a local search, not extend visual combat privilege.
+    ContactEvidenceAge = FMath::Min(ContactEvidenceAge + DeltaSeconds, 100.f);
+    bConfirmedVisualThisFrame = bConfirmedVisualNow;
+    VisualConfirmationSeconds = bConfirmedVisualNow
+        ? FMath::Min(VisualConfirmationSeconds + DeltaSeconds, 1.5f) : 0.f;
+    // The solver's fast decay must not erase explicit squad/body
+    // investigation. It is *evidence* that fades, not hidden combat privilege.
+    if (SearchForLastKnownSeconds > 0.f && AwarenessState < 2)
     {
-        UGameplayStatics::ApplyDamage(const_cast<AMGPlayerCharacter*>(Player),
-            12.f, nullptr, this, UDamageType::StaticClass());
-        AttackCooldown = 1.2f;
+        AwarenessState = 2;
+        Suspicion = FMath::Max(Suspicion, .68f);
+    }
+    if (AwarenessState == 3 && !bConfirmedVisualNow && ContactEvidenceAge > 4.5f)
+    {
+        AwarenessState = 2;
+        Suspicion = FMath::Min(Suspicion, .67f);
+        SearchForLastKnownSeconds = FMath::Max(SearchForLastKnownSeconds, 3.f);
+    }
+    // Half-second radio call, only on actually evidenced fresh contact. Nearby
+    // colleagues receive last known position, not Snake's live world transform.
+    if (AwarenessState == 3 && bConfirmedVisualNow
+        && SquadBroadcastCooldown <= 0.f && !bPendingRadioReport)
+    {
+        bPendingRadioReport = true;
+        PendingRadioDelay = .6f;
+        // Snapshot only what was actually SEEN when the report began. Later
+        // sound or body evidence cannot silently replace this radio payload.
+        PendingConfirmedRadioSighting = Player->GetActorLocation();
+        SquadBroadcastCooldown = 9.f;
+    }
+    if (bPendingRadioReport)
+    {
+        PendingRadioDelay -= DeltaSeconds;
+        if (PendingRadioDelay <= 0.f)
+        {
+            bPendingRadioReport = false;
+            OnContactReported(PendingConfirmedRadioSighting);
+            EmitGuardCallout(TEXT("RadioContact"),
+                TEXT("GUARD RADIO: HOSTILE CONTACT. REQUEST SUPPORT."));
+            if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
+                    UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
+                Mission->NotifyGuardContactReported(PendingConfirmedRadioSighting);
+            for (TActorIterator<AMGGuardActor> Ally(GetWorld()); Ally; ++Ally)
+                if (*Ally != this)
+                    Ally->ReceiveLocalSquadReport(PendingConfirmedRadioSighting, this);
+        }
+    }
+    // Close combat cannot fire the same tick a guard becomes alerted.
+    // A real face-on visual lock starts a readable wind-up; Snake may break
+    // sight, retreat or stagger the guard to cancel the impending strike.
+    const float FacingDot = FVector::DotProduct(
+        GetActorForwardVector().GetSafeNormal2D(), ToPlayer.GetSafeNormal2D());
+    const bool bValidStrike = AwarenessState == 3 && bConfirmedVisualNow
+        && VisualConfirmationSeconds >= .16f && Distance < 150.f
+        && FacingDot >= .68f && StaggerSeconds <= 0.f;
+    if (bValidStrike && AttackCooldown <= 0.f)
+    {
+        if (AttackWindupSeconds <= 0.f)
+        {
+            AttackWindupSeconds = .38f;
+            OnMeleeWarning();
+        }
+        else
+        {
+            AttackWindupSeconds -= FMath::Max(0.f, DeltaSeconds);
+            if (AttackWindupSeconds <= 0.f)
+            {
+                UGameplayStatics::ApplyDamage(const_cast<AMGPlayerCharacter*>(Player),
+                    12.f, nullptr, this, UDamageType::StaticClass());
+                OnMeleeImpact();
+                AttackCooldown = 1.25f;
+            }
+        }
+    }
+    else AttackWindupSeconds = 0.f;
+
+    // A security guard, unlike a scripted bullet emitter, carries real finite
+    // ammunition. Only actual fresh sight grants a sidearm shot; noise, squad
+    // messages and a last-known position may initiate a SEARCH, never a hit.
+    // Compact handgun and reload intervals are modern 3D tuning hypotheses.
+    const bool bLegitimateRangedTarget = AwarenessState == 3
+        && bConfirmedVisualNow && VisualConfirmationSeconds >= .35f
+        && Distance > 180.f && Distance < 800.f && FacingDot >= .90f
+        && StaggerSeconds <= 0.f && !bPendingRadioReport
+        && (Role != EMGGuardRole::Custody ||
+            Player->IsAiming() || Player->IsSprinting());
+    // Once empty, use a quiet or searching interval to change magazines
+    // rather than carrying an empty pistol until the exact instant an enemy
+    // appears. No reload during custody compliance, stagger or radio traffic.
+    if (!bSidearmReloading && !bCustodyChallenge
+        && StaggerSeconds <= 0.f && !bPendingRadioReport
+        && SidearmRounds <= 0 && SpareSidearmMagazines > 0)
+    {
+        --SpareSidearmMagazines; // Reserve magazine committed, no free resupply.
+        bSidearmReloading = true;
+        SidearmReloadSeconds = FMath::Clamp(
+            SidearmReloadDuration, .8f, 3.f);
+        SidearmWindupSeconds = 0.f;
+        bSidearmAiming = false;
+        OnSidearmReloadStarted();
+    }
+    if (bLegitimateRangedTarget && !bSidearmReloading
+        && SidearmRounds > 0 && SidearmShotCooldown <= 0.f
+        && AttackWindupSeconds <= 0.f)
+    {
+        if (!bSidearmAiming)
+        {
+            bSidearmAiming = true;
+            SidearmWindupSeconds = .31f;
+            OnSidearmAimStarted();
+        }
+        else
+        {
+            SidearmWindupSeconds -= FMath::Max(0.f, DeltaSeconds);
+            if (SidearmWindupSeconds <= 0.f)
+            {
+                --SidearmRounds;
+                SidearmShotCooldown = .72f;
+                bSidearmAiming = false;
+                // A camera may see around a barrel obstruction. Only a
+                // muzzle-origin physical trace may authorise real damage.
+                const FVector Muzzle = (SecuritySidearm->IsVisible() &&
+                    SecuritySidearm->DoesSocketExist(TEXT("muzzle")))
+                    ? SecuritySidearm->GetSocketLocation(TEXT("muzzle"))
+                    : (SecuritySidearm->IsVisible() && SidearmMuzzleLight
+                        ? SidearmMuzzleLight->GetComponentLocation()
+                        : GetActorLocation() + FVector(0.f, 0.f, 62.f));
+                const FVector ActualTarget =
+                    Player->GetActorLocation() + FVector(0.f, 0.f, 48.f);
+                FHitResult ShotHit;
+                FCollisionQueryParams ShotQuery(
+                    SCENE_QUERY_STAT(MGGuardActualSidearmShot), false, this);
+                const bool bHitPlayer = GetWorld()->LineTraceSingleByChannel(
+                    ShotHit, Muzzle, ActualTarget, ECC_Visibility, ShotQuery)
+                    && ShotHit.GetActor() == Player;
+                if (bHitPlayer)
+                    UGameplayStatics::ApplyDamage(
+                        const_cast<AMGPlayerCharacter*>(Player),
+                        7.f, nullptr, this, UDamageType::StaticClass());
+                SidearmMuzzleFlashRemaining = .075f;
+                if (SidearmShotSound)
+                    UGameplayStatics::PlaySoundAtLocation(this, SidearmShotSound,
+                        Muzzle, .62f);
+                PendingSidearmCaseSeconds = .065f;
+                OnSidearmFired(SidearmRounds, bHitPlayer);
+            }
+        }
+    }
+    else if (!bSidearmReloading)
+    {
+        bSidearmAiming = false;
+        SidearmWindupSeconds = 0.f;
     }
 
     if (StaggerSeconds > 0.f) return;
+    // Local awareness stays distinct from duty and acting. Combat needs
+    // actual visual proof; a body/noise/radio report creates investigation,
+    // not an omniscient 'enemy spotted' state.
+    if (bConfirmedVisualNow && AwarenessState >= 3)
+        SetSecurityPhase(EMGGuardAwarenessPhase::Engaged);
+    else if (bConfirmedVisualNow && AwarenessState >= 1)
+        SetSecurityPhase(EMGGuardAwarenessPhase::Confirming);
+    else if ((BoxPhase != EMGGuardBoxPhase::None &&
+              BoxPhase != EMGGuardBoxPhase::Confirmed) ||
+             DistractionPhase == EDistractionPhase::React ||
+             DistractionPhase == EDistractionPhase::Approach)
+        SetSecurityPhase(EMGGuardAwarenessPhase::Investigating);
+    else if (DistractionPhase == EDistractionPhase::Search ||
+             SearchForLastKnownSeconds > 0.f || AwarenessState >= 2)
+        SetSecurityPhase(EMGGuardAwarenessPhase::Searching);
+    else if (DistractionPhase == EDistractionPhase::Return ||
+             (EvidenceAge < 9.f && AwarenessState == 0))
+        SetSecurityPhase(EMGGuardAwarenessPhase::Returning);
+    else if (AwarenessState == 1 || bFacilityLockdown)
+        SetSecurityPhase(EMGGuardAwarenessPhase::Suspicious);
+    else
+        SetSecurityPhase(EMGGuardAwarenessPhase::Routine);
+
+    // States are presented as acting intentions. Missing AnimBPs still have
+    // truthful collision and AI behavior; art cannot change these states.
+    if (AttackWindupSeconds > 0.f)
+        SetGuardPosture(EMGGuardPosture::Strike);
+    else if (bSidearmReloading)
+        SetGuardPosture(EMGGuardPosture::SidearmReload);
+    else if (bSidearmAiming)
+        SetGuardPosture(EMGGuardPosture::SidearmAim);
+    else if (SidearmShotCooldown > .55f)
+        SetGuardPosture(EMGGuardPosture::SidearmFire);
+    else if (bPendingRadioReport)
+        SetGuardPosture(EMGGuardPosture::Report);
+    else if (AwarenessState >= 3)
+        SetGuardPosture(EMGGuardPosture::Engage);
+    else if (BoxPhase == EMGGuardBoxPhase::Notice ||
+             BoxPhase == EMGGuardBoxPhase::Approach ||
+             BoxPhase == EMGGuardBoxPhase::Inspect ||
+             BoxPhase == EMGGuardBoxPhase::Search ||
+             DistractionPhase != EDistractionPhase::None || SearchForLastKnownSeconds > 0.f)
+        SetGuardPosture(EMGGuardPosture::Investigate);
+    else if (AwarenessState == 2)
+        SetGuardPosture(EMGGuardPosture::Search);
+    else if (AwarenessState == 1 || bFacilityLockdown)
+        SetGuardPosture(EMGGuardPosture::Notice);
+    else SetGuardPosture(EMGGuardPosture::Patrol);
+    // Reload and aim are physically committed hand/posture transactions.
+    // Standing vulnerable is a readable risk/reward window, not an
+    // instant mag swap during a full-speed, two-handed sprint.
+    if (bSidearmReloading || bSidearmAiming) return;
     // Noise investigations are interruptible by real detection/alert.
-    if (AdvanceNoiseInvestigation(DeltaSeconds))
+    if (AdvanceBoxInvestigation(DeltaSeconds))
+    {
+        // Contextual box evidence uses the same sweep/physical movement as
+        // other investigations, without duplicating the patrol AI.
+    }
+    else if (AdvanceNoiseInvestigation(DeltaSeconds))
     {
         // Noise behaviour already selected movement/turning for this frame.
     }
-    else if (AwarenessState == 3)
+    else if (AwarenessState == 3 || SearchForLastKnownSeconds > 0.f)
     {
-        const FVector Direction = (LastKnownPlayerPosition - GetActorLocation()).GetSafeNormal2D();
-        if (!Direction.IsNearlyZero())
+        const FVector Location = GetActorLocation();
+        const FVector ToLast = LastKnownPlayerPosition - Location;
+        const FVector Direction = ToLast.GetSafeNormal2D();
+        if (!Direction.IsNearlyZero() && ToLast.Size2D() > 105.f)
         {
-            SetActorLocation(GetActorLocation() + Direction * 185.f * DeltaSeconds, true);
-            SetActorRotation(Direction.Rotation());
+            // Collision-aware pursuit. No teleport, no infinite straight-line
+            // wall scraping; try a bounded, alternating flank if blocked.
+            // A recent *direct* sighting earns an urgent pursuit. Secondhand
+            // intel, an audible sector or a body earns a slower search, not a
+            // perfect-speed rush toward a coordinate guessed from sound.
+            const bool bRecentFirsthandContact = bConfirmedVisualNow ||
+                ContactEvidenceAge < 4.5f;
+            MoveToward(LastKnownPlayerPosition,
+                bRecentFirsthandContact ? 185.f : 115.f, DeltaSeconds);
+            const float Progress = FVector::Dist2D(Location, GetActorLocation());
+            PursuitBlockedSeconds = Progress < 1.f
+                ? PursuitBlockedSeconds + DeltaSeconds : 0.f;
+            if (PursuitBlockedSeconds > .7f)
+            {
+                const FVector Lateral(-Direction.Y * FlankSide,
+                                     Direction.X * FlankSide, 0.f);
+                MoveToward(GetActorLocation() + Lateral * 175.f, 110.f, DeltaSeconds);
+                if (PursuitBlockedSeconds > 1.8f)
+                {
+                    FlankSide = -FlankSide;
+                    PursuitBlockedSeconds = 0.f;
+                }
+            }
         }
     }
     else if (AwarenessState > 0)
@@ -256,25 +1293,39 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         if (!ToSearch.IsNearlyZero())
             SetActorRotation(FMath::RInterpTo(GetActorRotation(), ToSearch.Rotation(), DeltaSeconds, 3.f));
     }
+    else if (Role == EMGGuardRole::Custody || Role == EMGGuardRole::LogisticsPost)
+    {
+        // The two transport officers hold actual security posts, rather than
+        // walking away from the arrest point because a generic patrol tick
+        // was reused. Their scan is subtle and visible to the player.
+        const float Scan = (Role == EMGGuardRole::LogisticsPost ? 17.f :
+             (bFacilityCaution ? 31.f : 23.f)) *
+            FMath::Sin(GetWorld()->GetTimeSeconds() *
+                (bFacilityCaution ? 1.1f : .75f));
+        SetActorRotation(FMath::RInterpTo(GetActorRotation(),
+            FRotator(0.f, StationFacing.Yaw + Scan, 0.f), DeltaSeconds, 1.8f));
+    }
     else
     {
-        const FVector Point = PatrolOrigin + FVector(bPatrolForward ? 180.f : -180.f, 0.f, 0.f);
-        const FVector Diff = Point - GetActorLocation();
-        if (Diff.Size2D() < 20.f) bPatrolForward = !bPatrolForward;
-        else
-        {
-            const FVector Step = Diff.GetSafeNormal2D();
-            SetActorLocation(GetActorLocation() + Step * 90.f * DeltaSeconds, true);
-            SetActorRotation(Step.Rotation());
-        }
+        const FVector Point = PatrolOrigin
+            + PatrolAxis * (bPatrolForward ? PatrolHalfLength : -PatrolHalfLength);
+        if (FVector::Dist2D(Point, GetActorLocation()) < 30.f)
+            bPatrolForward = !bPatrolForward;
+        else MoveToward(Point, PatrolSpeed, DeltaSeconds);
     }
 
 #if !UE_BUILD_SHIPPING
-    const FColor DebugColor = AwarenessState == 3 ? FColor::Red :
-        (AwarenessState == 2 ? FColor::Orange : (AwarenessState == 1 ? FColor::Yellow : FColor::Green));
-    DrawDebugSphere(GetWorld(), GetActorLocation() + FVector(0.f, 0.f, 180.f),
-        22.f, 12, DebugColor, false, 0.f, 0, 2.f);
-    DrawDebugLine(GetWorld(), Eye, Eye + GetActorForwardVector() * 300.f,
-        DebugColor, false, 0.f, 0, 2.f);
+    // Visible perception orbs and forward vectors spoil lighting and
+    // narrative staging in Play-In-Editor; turn on explicitly for diagnosis.
+    if (bShowPerceptionDebug)
+    {
+        const FColor DebugColor = AwarenessState == 3 ? FColor::Red :
+            (AwarenessState == 2 ? FColor::Orange :
+             (AwarenessState == 1 ? FColor::Yellow : FColor::Green));
+        DrawDebugSphere(GetWorld(), GetActorLocation() + FVector(0.f, 0.f, 180.f),
+            22.f, 12, DebugColor, false, 0.f, 0, 2.f);
+        DrawDebugLine(GetWorld(), Eye, Eye + GetActorForwardVector() * 300.f,
+            DebugColor, false, 0.f, 0, 2.f);
+    }
 #endif
 }

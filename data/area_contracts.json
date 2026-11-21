@@ -3,7 +3,7 @@
   "doctrine": "DOCTRINE_005",
   "supreme_doctrine": "DOCTRINE_000",
   "scope": "game_wide",
-  "coverage_status": "seed_only_not_exhaustive",
+  "coverage_status": "12_areas_11_source_greyboxes_1_future_boundary_the_original_still_unverified",
   "areas": [
     {
       "provenance": "comparative_msx2_pending_target_j2me",
@@ -20,7 +20,7 @@
         "gray_fox.first_breach"
       ],
       "arrival": {
-        "entry": "Capture checkpoint inside western holding cell",
+        "entry": "After genuine, player-controlled custody in the prelude; existing prison saves still resume directly here.",
         "safe_observation": "Initial cell is shielded from pre-existing outer corridor patrols",
         "first_goal": "Find a credible way out without a mandatory radio",
         "landmark": "Uneven patched wall material adjacent to service structure is proposed"
@@ -30,7 +30,7 @@
           "prison.gray_fox_cell after first breach"
         ],
         "gates": [
-          "First breach requires capture flag; first wall blocks until successful E/X"
+          "First breach requires capture flag; three melee F contacts progressively break wall"
         ],
         "choices": [
           "Direct first-wall approach",
@@ -61,14 +61,14 @@
         "pressure": "Low until player genuinely exposes route; never spawn a wave for pacing"
       },
       "timing": {
-        "trigger": "Player action / first successful wall interaction",
+        "trigger": "Three genuine wall strikes, not an instant E transaction",
         "hint_policy": "Candidate 28/75s since beat, deferred during active exploration; never blocks a breach",
         "lock_seconds": 0
       },
       "accessibility": {
         "color_independent": true,
         "caption_plan": "Describe relevant hollow resonance when introduced",
-        "control_plan": "E/X first breach works without radio; C optional"
+        "control_plan": "F/A melee hits on the weak seam; E examines; radio is optional"
       },
       "failure": {
         "interrupts": [
@@ -112,8 +112,8 @@
           "prison.escape_corridor after second breach"
         ],
         "gates": [
-          "Rescue requires first-wall breach",
-          "Second breach requires rescue"
+          "Gray Fox rescue requires first breach",
+          "Second wall requires rescue and four deliberate F melee contacts"
         ],
         "choices": [
           "Hear or skip through temporary intel subtitle",
@@ -150,7 +150,7 @@
       "accessibility": {
         "color_independent": true,
         "caption_plan": "Subtitles distinguish speaker and speaker intent",
-        "control_plan": "E/X rescue and exit breach available when flags permit"
+        "control_plan": "E/X interact with Fox; F/A physically strikes second wall"
       },
       "failure": {
         "interrupts": [
@@ -184,13 +184,13 @@
       "arrival": {
         "entry": "After second breach",
         "safe_observation": "Opening grants a vantage over a dangerous route before stepping out",
-        "first_goal": "Read guard patrols, choose a route to physical exit marker",
-        "landmark": "Exit marker at far end of corridor, currently geometric proxy"
+        "first_goal": "Avoid guards and reach the physical east exit point, then advance to the Shotmaker wing",
+        "landmark": "Eastern passage is a transition, not the end of the slice"
       },
       "topology": {
         "adjacency": [
           "prison.gray_fox_cell",
-          "escape marker destination"
+          "shotmaker.threshold after east passage"
         ],
         "gates": [
           "Escape action requires second breach"
@@ -251,6 +251,740 @@
         "Camera and collision sweeps",
         "Guard acoustic/route tests",
         "Escape checkpoint replay"
+      ]
+    },
+    {
+      "id": "prelude.intelligence_yard",
+      "stage": "infiltration",
+      "beat_ids": [
+        "prelude.incoming_briefing",
+        "prelude.pow_intelligence",
+        "prelude.handgun_pickup"
+      ],
+      "provenance": "MSX2_comparative_pending_J2ME_geometry",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Do not claim this 3D layout matches the unverified J2ME edition or production art.",
+      "test_evidence": [],
+      "arrival": {
+        "entry": "Walk from the western infiltration start to guarded northern prisoner route",
+        "safe_observation": "Player sees at least one consequence or tactical route before committing to new exposure.",
+        "first_goal": "Walk from the western infiltration start to guarded northern prisoner route",
+        "landmark": "Visible utility/crates, POW and transport silhouette"
+      },
+      "topology": {
+        "adjacency": [
+          "physically continuous existing greybox route unless custody transport scene deliberately commits"
+        ],
+        "gates": [
+          "POW intel is acquired only through physical reach and player interaction"
+        ],
+        "choices": [
+          "Northern sneaking lane",
+          "Southern cargo lane",
+          "Central more exposed route"
+        ],
+        "camera_clearance": "Standing/crouch/cover, shoulders and guarded interactions require UE5.7 capsule/camera collision evidence."
+      },
+      "visual": {
+        "forewarning": "Geometry, sight breaks and player posture show the next decision without forced HUD solve.",
+        "reveal": "Actor and gameplay state must agree at the moment of change.",
+        "spatial_readability": "Unfamiliar players should identify route and readable cover at 720p."
+      },
+      "audio": {
+        "sources": [
+          "Original sound design pending Unreal import",
+          "Placeholders where available"
+        ],
+        "occlusion": "Occluding wall and weapon sightlines must correspond to actual static mesh collision.",
+        "non_audio_equivalent": "Environmental surfaces, subtitles and actor postures remain independently readable."
+      },
+      "risk": {
+        "safe_points": [
+          "Western infiltration spawn"
+        ],
+        "exposure_windows": [
+          "Only actual line of sight, audio evidence and player actions"
+        ],
+        "pressure": "Patrols react to actual sight and sound, not to opening radio"
+      },
+      "timing": {
+        "trigger": "Walk from the western infiltration start to guarded northern prisoner route",
+        "hint_policy": "28/75s candidate hints only while stalled and not under active danger; no timed objective unlock.",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "color_independent": true,
+        "caption_plan": "All relevant contacts, danger and clues need readable captions/animation.",
+        "control_plan": "Mouse/keyboard/gamepad must preserve movement and interaction in the same physical space."
+      },
+      "failure": {
+        "interrupts": [
+          "death_checkpoint",
+          "failing_to_notice_landmark",
+          "vision_occlusion",
+          "no_audio"
+        ],
+        "recovery": "Return to nearest safe committed mission state; never force a whole-slice replay."
+      },
+      "tests": [
+        "POW approachable from a covered route",
+        "No unavoidable injury during first radio",
+        "Camera has multiple retreat lines"
+      ]
+    },
+    {
+      "id": "prelude.custody_transport",
+      "stage": "capture",
+      "beat_ids": [
+        "prelude.custody_procedure",
+        "gray_fox.capture_and_control"
+      ],
+      "provenance": "MSX2_comparative_pending_J2ME_geometry",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Do not claim this 3D layout matches the unverified J2ME edition or production art.",
+      "test_evidence": [],
+      "arrival": {
+        "entry": "Approach the truck security area after learning the POW's clue",
+        "safe_observation": "Player sees at least one consequence or tactical route before committing to new exposure.",
+        "first_goal": "Approach the truck security area after learning the POW's clue",
+        "landmark": "Detention truck, both visible officers and an uncluttered challenge lane"
+      },
+      "topology": {
+        "adjacency": [
+          "physically continuous existing greybox route unless custody transport scene deliberately commits"
+        ],
+        "gates": [
+          "No detention before POW clue",
+          "Guard must really see/challenge compliant player"
+        ],
+        "choices": [
+          "Approach openly with lowered weapon",
+          "Retreat behind cover and retry after threatening behaviour"
+        ],
+        "camera_clearance": "Standing/crouch/cover, shoulders and guarded interactions require UE5.7 capsule/camera collision evidence."
+      },
+      "visual": {
+        "forewarning": "Geometry, sight breaks and player posture show the next decision without forced HUD solve.",
+        "reveal": "Actor and gameplay state must agree at the moment of change.",
+        "spatial_readability": "Unfamiliar players should identify route and readable cover at 720p."
+      },
+      "audio": {
+        "sources": [
+          "Original sound design pending Unreal import",
+          "Placeholders where available"
+        ],
+        "occlusion": "Occluding wall and weapon sightlines must correspond to actual static mesh collision.",
+        "non_audio_equivalent": "Environmental surfaces, subtitles and actor postures remain independently readable."
+      },
+      "risk": {
+        "safe_points": [
+          "Booth/truck corridor"
+        ],
+        "exposure_windows": [
+          "Only actual line of sight, audio evidence and player actions"
+        ],
+        "pressure": "No automatic kill or magically allied guard; compliance triggers one custody event"
+      },
+      "timing": {
+        "trigger": "Approach the truck security area after learning the POW's clue",
+        "hint_policy": "28/75s candidate hints only while stalled and not under active danger; no timed objective unlock.",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "color_independent": true,
+        "caption_plan": "All relevant contacts, danger and clues need readable captions/animation.",
+        "control_plan": "Mouse/keyboard/gamepad must preserve movement and interaction in the same physical space."
+      },
+      "failure": {
+        "interrupts": [
+          "death_checkpoint",
+          "failing_to_notice_landmark",
+          "vision_occlusion",
+          "no_audio"
+        ],
+        "recovery": "Return to nearest safe committed mission state; never force a whole-slice replay."
+      },
+      "tests": [
+        "No custody actor intersects booth",
+        "Guard challenge has observable direction",
+        "No arbitrary magic capture"
+      ]
+    },
+    {
+      "id": "shotmaker.threshold",
+      "stage": "threat",
+      "beat_ids": [
+        "shotmaker.entrance_reveal"
+      ],
+      "provenance": "MSX2_comparative_pending_J2ME_geometry",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Do not claim this 3D layout matches the unverified J2ME edition or production art.",
+      "test_evidence": [],
+      "arrival": {
+        "entry": "Exit the prison corridor east into the connected boss wing",
+        "safe_observation": "Player sees at least one consequence or tactical route before committing to new exposure.",
+        "first_goal": "Exit the prison corridor east into the connected boss wing",
+        "landmark": "Wide corridor, cover near first gunner sightline"
+      },
+      "topology": {
+        "adjacency": [
+          "physically continuous existing greybox route unless custody transport scene deliberately commits"
+        ],
+        "gates": [
+          "First encounter flag requires the prior prison exit"
+        ],
+        "choices": [
+          "Observe gunner from edge",
+          "Break line of sight",
+          "Retreat to corridor"
+        ],
+        "camera_clearance": "Standing/crouch/cover, shoulders and guarded interactions require UE5.7 capsule/camera collision evidence."
+      },
+      "visual": {
+        "forewarning": "Geometry, sight breaks and player posture show the next decision without forced HUD solve.",
+        "reveal": "Actor and gameplay state must agree at the moment of change.",
+        "spatial_readability": "Unfamiliar players should identify route and readable cover at 720p."
+      },
+      "audio": {
+        "sources": [
+          "Original sound design pending Unreal import",
+          "Placeholders where available"
+        ],
+        "occlusion": "Occluding wall and weapon sightlines must correspond to actual static mesh collision.",
+        "non_audio_equivalent": "Environmental surfaces, subtitles and actor postures remain independently readable."
+      },
+      "risk": {
+        "safe_points": [
+          "Corridor entry before boss vision"
+        ],
+        "exposure_windows": [
+          "Only actual line of sight, audio evidence and player actions"
+        ],
+        "pressure": "Gunner sees through physical line of sight and owns three-shot threat, not a scripted teleport"
+      },
+      "timing": {
+        "trigger": "Exit the prison corridor east into the connected boss wing",
+        "hint_policy": "28/75s candidate hints only while stalled and not under active danger; no timed objective unlock.",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "color_independent": true,
+        "caption_plan": "All relevant contacts, danger and clues need readable captions/animation.",
+        "control_plan": "Mouse/keyboard/gamepad must preserve movement and interaction in the same physical space."
+      },
+      "failure": {
+        "interrupts": [
+          "death_checkpoint",
+          "failing_to_notice_landmark",
+          "vision_occlusion",
+          "no_audio"
+        ],
+        "recovery": "Return to nearest safe committed mission state; never force a whole-slice replay."
+      },
+      "tests": [
+        "Normal traversal from prison to boss without teleport",
+        "Telegraph must precede first damage"
+      ]
+    },
+    {
+      "id": "shotmaker.recovery_room",
+      "stage": "recovery_puzzle",
+      "beat_ids": [
+        "shotmaker.reclaimed_equipment",
+        "shotmaker.tracker_revelation"
+      ],
+      "provenance": "MSX2_comparative_pending_J2ME_geometry",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Do not claim this 3D layout matches the unverified J2ME edition or production art.",
+      "test_evidence": [],
+      "arrival": {
+        "entry": "Enter southern side room by weakening its door, then interact with the confiscated bag",
+        "safe_observation": "Player sees at least one consequence or tactical route before committing to new exposure.",
+        "first_goal": "Enter southern side room by weakening its door, then interact with the confiscated bag",
+        "landmark": "Physical damaged recovery door and bag with transmitter"
+      },
+      "topology": {
+        "adjacency": [
+          "physically continuous existing greybox route unless custody transport scene deliberately commits"
+        ],
+        "gates": [
+          "Door takes two purposeful strikes",
+          "Bag pickup restores owned equipment, not a free spawn"
+        ],
+        "choices": [
+          "Use cover and time door hits",
+          "Inspect bag before rejoining arena",
+          "Dispose of planted transmitter in item interface"
+        ],
+        "camera_clearance": "Standing/crouch/cover, shoulders and guarded interactions require UE5.7 capsule/camera collision evidence."
+      },
+      "visual": {
+        "forewarning": "Geometry, sight breaks and player posture show the next decision without forced HUD solve.",
+        "reveal": "Actor and gameplay state must agree at the moment of change.",
+        "spatial_readability": "Unfamiliar players should identify route and readable cover at 720p."
+      },
+      "audio": {
+        "sources": [
+          "Original sound design pending Unreal import",
+          "Placeholders where available"
+        ],
+        "occlusion": "Occluding wall and weapon sightlines must correspond to actual static mesh collision.",
+        "non_audio_equivalent": "Environmental surfaces, subtitles and actor postures remain independently readable."
+      },
+      "risk": {
+        "safe_points": [
+          "Behind southern recovery-room wall"
+        ],
+        "exposure_windows": [
+          "Only actual line of sight, audio evidence and player actions"
+        ],
+        "pressure": "Boss sightline stops at real southern room wall"
+      },
+      "timing": {
+        "trigger": "Enter southern side room by weakening its door, then interact with the confiscated bag",
+        "hint_policy": "28/75s candidate hints only while stalled and not under active danger; no timed objective unlock.",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "color_independent": true,
+        "caption_plan": "All relevant contacts, danger and clues need readable captions/animation.",
+        "control_plan": "Mouse/keyboard/gamepad must preserve movement and interaction in the same physical space."
+      },
+      "failure": {
+        "interrupts": [
+          "death_checkpoint",
+          "failing_to_notice_landmark",
+          "vision_occlusion",
+          "no_audio"
+        ],
+        "recovery": "Return to nearest safe committed mission state; never force a whole-slice replay."
+      },
+      "tests": [
+        "No hits through intact door",
+        "Loot and transmitter survive checkpoint",
+        "Player can always leave room"
+      ]
+    },
+    {
+      "id": "shotmaker.arena",
+      "stage": "combat",
+      "beat_ids": [
+        "shotmaker.three_blast_duel"
+      ],
+      "provenance": "MSX2_comparative_pending_J2ME_geometry",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Do not claim this 3D layout matches the unverified J2ME edition or production art.",
+      "test_evidence": [],
+      "arrival": {
+        "entry": "Face the shotgun specialist while able to withdraw and observe his three-shot rhythm",
+        "safe_observation": "Player sees at least one consequence or tactical route before committing to new exposure.",
+        "first_goal": "Face the shotgun specialist while able to withdraw and observe his three-shot rhythm",
+        "landmark": "Heavy riot shotgun and three actual projectile-blocking cover objects"
+      },
+      "topology": {
+        "adjacency": [
+          "physically continuous existing greybox route unless custody transport scene deliberately commits"
+        ],
+        "gates": [
+          "Gunner needs own LOS and physical aim alignment"
+        ],
+        "choices": [
+          "Hold cover and return fire",
+          "Reposition between volleys",
+          "Retreat to heal/rethink"
+        ],
+        "camera_clearance": "Standing/crouch/cover, shoulders and guarded interactions require UE5.7 capsule/camera collision evidence."
+      },
+      "visual": {
+        "forewarning": "Geometry, sight breaks and player posture show the next decision without forced HUD solve.",
+        "reveal": "Actor and gameplay state must agree at the moment of change.",
+        "spatial_readability": "Unfamiliar players should identify route and readable cover at 720p."
+      },
+      "audio": {
+        "sources": [
+          "Original sound design pending Unreal import",
+          "Placeholders where available"
+        ],
+        "occlusion": "Occluding wall and weapon sightlines must correspond to actual static mesh collision.",
+        "non_audio_equivalent": "Environmental surfaces, subtitles and actor postures remain independently readable."
+      },
+      "risk": {
+        "safe_points": [
+          "Entry cover and alternate lateral cover"
+        ],
+        "exposure_windows": [
+          "Only actual line of sight, audio evidence and player actions"
+        ],
+        "pressure": "Threat is highest here; no stalling hints over a telegraphed volley"
+      },
+      "timing": {
+        "trigger": "Face the shotgun specialist while able to withdraw and observe his three-shot rhythm",
+        "hint_policy": "28/75s candidate hints only while stalled and not under active danger; no timed objective unlock.",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "color_independent": true,
+        "caption_plan": "All relevant contacts, danger and clues need readable captions/animation.",
+        "control_plan": "Mouse/keyboard/gamepad must preserve movement and interaction in the same physical space."
+      },
+      "failure": {
+        "interrupts": [
+          "death_checkpoint",
+          "failing_to_notice_landmark",
+          "vision_occlusion",
+          "no_audio"
+        ],
+        "recovery": "Return to nearest safe committed mission state; never force a whole-slice replay."
+      },
+      "tests": [
+        "Three discrete blasts plus pump",
+        "Ten valid handgun hits defeat on prototype standard",
+        "Muzzle traces cannot penetrate solid cover"
+      ]
+    },
+    {
+      "id": "shotmaker.card_store_and_exit",
+      "stage": "aftermath",
+      "beat_ids": [
+        "shotmaker.aftermath_and_access",
+        "presentation.phase_authority"
+      ],
+      "provenance": "MSX2_comparative_pending_J2ME_geometry",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Do not claim this 3D layout matches the unverified J2ME edition or production art.",
+      "test_evidence": [],
+      "arrival": {
+        "entry": "After the gunner falls, find the Card-2 storeroom, collect Card 3 and exit east",
+        "safe_observation": "Player sees at least one consequence or tactical route before committing to new exposure.",
+        "first_goal": "After the gunner falls, find the Card-2 storeroom, collect Card 3 and exit east",
+        "landmark": "North card-gated room, collectible and final eastern passage"
+      },
+      "topology": {
+        "adjacency": [
+          "physically continuous existing greybox route unless custody transport scene deliberately commits"
+        ],
+        "gates": [
+          "Card 3 requires real pickup",
+          "Slice complete only after new exit interaction"
+        ],
+        "choices": [
+          "Search after fight",
+          "Use earlier card",
+          "Choose when to finish"
+        ],
+        "camera_clearance": "Standing/crouch/cover, shoulders and guarded interactions require UE5.7 capsule/camera collision evidence."
+      },
+      "visual": {
+        "forewarning": "Geometry, sight breaks and player posture show the next decision without forced HUD solve.",
+        "reveal": "Actor and gameplay state must agree at the moment of change.",
+        "spatial_readability": "Unfamiliar players should identify route and readable cover at 720p."
+      },
+      "audio": {
+        "sources": [
+          "Original sound design pending Unreal import",
+          "Placeholders where available"
+        ],
+        "occlusion": "Occluding wall and weapon sightlines must correspond to actual static mesh collision.",
+        "non_audio_equivalent": "Environmental surfaces, subtitles and actor postures remain independently readable."
+      },
+      "risk": {
+        "safe_points": [
+          "Postboss northern storeroom"
+        ],
+        "exposure_windows": [
+          "Only actual line of sight, audio evidence and player actions"
+        ],
+        "pressure": "Quiet deliberate interval after real defeat; only real guards may continue their alerts"
+      },
+      "timing": {
+        "trigger": "After the gunner falls, find the Card-2 storeroom, collect Card 3 and exit east",
+        "hint_policy": "28/75s candidate hints only while stalled and not under active danger; no timed objective unlock.",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "color_independent": true,
+        "caption_plan": "All relevant contacts, danger and clues need readable captions/animation.",
+        "control_plan": "Mouse/keyboard/gamepad must preserve movement and interaction in the same physical space."
+      },
+      "failure": {
+        "interrupts": [
+          "death_checkpoint",
+          "failing_to_notice_landmark",
+          "vision_occlusion",
+          "no_audio"
+        ],
+        "recovery": "Return to nearest safe committed mission state; never force a whole-slice replay."
+      },
+      "tests": [
+        "No forced next enemy wave",
+        "Aftermath hints do not reveal Card2 immediately",
+        "No duplicate rewards on reload"
+      ]
+    },
+    {
+      "id": "building1.after_card3_dog_corridor",
+      "stage": "post_card3",
+      "beat_ids": [
+        "building1.after_card3_kennel"
+      ],
+      "provenance": "MSX2_dogs_verified_third_person_layout_interpretation",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Canon dogs after Card3, but room sizes, kennel props and dog movements are 3D adaptation, never misrepresented as 1987 source screenshots.",
+      "test_evidence": [],
+      "arrival": {
+        "entry": "Full-width chapter gate removed only after canonical Card3 exit transaction",
+        "safe_observation": "View dog-kennel infrastructure before close contact",
+        "first_goal": "Get past dogs to investigate the passage",
+        "landmark": "Kennel block and service-duct alternative"
+      },
+      "topology": {
+        "adjacency": [
+          "shotmaker.card_store_and_exit",
+          "building1.after_card3_crawl"
+        ],
+        "gates": [
+          "ChapterExit must span width until complete"
+        ],
+        "choices": [
+          "Main north dog sightline",
+          "Southern low crawl route",
+          "Cover behind kennel supply"
+        ],
+        "camera_clearance": "Actual standing/crouch/prone body and camera collision require UE verification."
+      },
+      "visual": {
+        "forewarning": "Dog care station and visible patrols",
+        "reveal": "Animals emerge from physically placed patrols, not player-proximity spawn",
+        "spatial_readability": "Retains distinct main/alternate lanes at 720p"
+      },
+      "audio": {
+        "sources": [
+          "Optional local dog bark with human reaction dependent on true proximity"
+        ],
+        "occlusion": "Physical wall blocks dog sight and bite",
+        "non_audio_equivalent": "Dog acting state and visible windup"
+      },
+      "risk": {
+        "safe_points": [
+          "Eastern side of main chapter gate"
+        ],
+        "exposure_windows": [
+          "Main center/north dog sightline"
+        ],
+        "pressure": "Two preplaced dog patrols, no infinite spawn"
+      },
+      "timing": {
+        "start_event": "Crossing physical threshold",
+        "feedback_target_ms": 150,
+        "forced_lock_seconds": 0,
+        "tempo_role": "postboss_new_threat",
+        "trigger": "Crossing physical threshold",
+        "hint_policy": "No forced prompts; inspect actual readable spatial evidence before optional contextual hints",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "non_audio": "Readable dog movement and lunge; captions/animations pending",
+        "posture": "Player can avoid with no required gun",
+        "color_independent": true,
+        "caption_plan": "Readable dog movement and lunge; captions/animations pending; must be evaluated in UE at 720p",
+        "control_plan": "Player can avoid with no required gun; use the existing controller input and physical collision"
+      },
+      "failure": {
+        "deaths": "Existing chapter checkpoint saved after entering corridor",
+        "recovery": "Dog checkpoint body state persistence still pending",
+        "interrupts": [
+          "exit and reenter",
+          "save and reload",
+          "alarm and evasion",
+          "low-posture camera occlusion",
+          "no imported skeletal art"
+        ]
+      },
+      "tests": [
+        "No premature entry before chapter flags",
+        "Dog hit blocked by wall and line-of-sight",
+        "First-entry checkpoint reload valid",
+        "No forced scripted animal attack"
+      ]
+    },
+    {
+      "id": "building1.after_card3_crawl",
+      "stage": "post_card3_optional",
+      "beat_ids": [
+        "building1.after_card3_crawl"
+      ],
+      "provenance": "remake_3d_interpretation_not_original_MSX_map",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "Optional headroom route only; never replaces original dog threat or the next plastic-explosive wall.",
+      "test_evidence": [],
+      "arrival": {
+        "entry": "Left/southern diversion before main kennel",
+        "safe_observation": "Roof visibly too low for crouch",
+        "first_goal": "Crawl to avoid a dog sightline",
+        "landmark": "Low concrete service duct"
+      },
+      "topology": {
+        "adjacency": [
+          "building1.after_card3_dog_corridor"
+        ],
+        "gates": [
+          "Real 81 cm roof clearance forces validated 76 cm prone capsule"
+        ],
+        "choices": [
+          "Crawl concealed route",
+          "Use main dog lane"
+        ],
+        "camera_clearance": "Spring arm and head/shoulders collision test needed"
+      },
+      "visual": {
+        "forewarning": "Low roof with side rails",
+        "reveal": "Prone body travels under geometry",
+        "spatial_readability": "Unambiguous entrance and exit"
+      },
+      "audio": {
+        "sources": [
+          "Prone textile scrape not recorded"
+        ],
+        "occlusion": "Solid roof blocks visual dog detection",
+        "non_audio_equivalent": "Visible narrow passage"
+      },
+      "risk": {
+        "safe_points": [
+          "Duct ends"
+        ],
+        "exposure_windows": [
+          "Approach to mouth"
+        ],
+        "pressure": "Enemy cannot enter lower-than-dog-capsule crawl"
+      },
+      "timing": {
+        "start_event": "Player toggles physical prone",
+        "feedback_target_ms": 120,
+        "forced_lock_seconds": 0,
+        "tempo_role": "rest_before_next_stealth_exposure",
+        "trigger": "Player toggles physical prone",
+        "hint_policy": "No forced prompts; inspect actual readable spatial evidence before optional contextual hints",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "non_audio": "Collision/stance feedback",
+        "posture": "Exit if no overhead obstruction; no automatic warp",
+        "color_independent": true,
+        "caption_plan": "Collision/stance feedback; must be evaluated in UE at 720p",
+        "control_plan": "Exit if no overhead obstruction; no automatic warp; use the existing controller input and physical collision"
+      },
+      "failure": {
+        "deaths": "Ordinary checkpoint",
+        "recovery": "Reversible duck/crawl",
+        "interrupts": [
+          "exit and reenter",
+          "save and reload",
+          "alarm and evasion",
+          "low-posture camera occlusion",
+          "no imported skeletal art"
+        ]
+      },
+      "tests": [
+        "Prone enters; crouch blocked",
+        "Rising under roof blocked",
+        "Camera does not pop through wall",
+        "Alternative main path remains open"
+      ]
+    },
+    {
+      "id": "building1.after_card3_explosive_boundary",
+      "stage": "relay_to_west_lift",
+      "beat_ids": [
+        "building1.after_card3_explosive_wall",
+        "building1.machinegun_kid_leadin"
+      ],
+      "provenance": "original_MSX_weak_blast_wall_event_3d_location_unverified",
+      "verification_status": "unverified",
+      "implementation_status": "source_greybox",
+      "constraints": "The next scene is explicitly NOT playable until timed plastic explosives, breakable geometry, and downstream area exist; do not bluff completion.",
+      "test_evidence": [],
+      "arrival": {
+        "entry": "After passing the dog patrol area",
+        "safe_observation": "Readable patched wall",
+        "first_goal": "Investigate destructive route",
+        "landmark": "Subtle damaged masonry seam"
+      },
+      "topology": {
+        "adjacency": [
+          "building1.after_card3_dog_corridor"
+        ],
+        "gates": [
+          "Card 3 entry",
+          "Service charge opens masonry",
+          "Machinegun Kid guards the parachute"
+        ],
+        "choices": [
+          "Kennel or crawl route",
+          "Optional relay desk",
+          "Two lift motors provide cover"
+        ],
+        "camera_clearance": "Check the relay entrance, motor housings and pickup from both shoulders."
+      },
+      "visual": {
+        "forewarning": "Patched masonry",
+        "reveal": "The breach opens into the relay room.",
+        "spatial_readability": "The west lift terminates the current playable route."
+      },
+      "audio": {
+        "sources": [
+          "No recorded explosion or masonry debris"
+        ],
+        "occlusion": "A solid wall blocks sight until the fuse completes.",
+        "non_audio_equivalent": "Weak patch visibly distinct"
+      },
+      "risk": {
+        "safe_points": [
+          "Behind kennel supplies"
+        ],
+        "exposure_windows": [
+          "Dog pursuit remains natural"
+        ],
+        "pressure": "No extra invented enemy"
+      },
+      "timing": {
+        "start_event": "Reach the kennel",
+        "feedback_target_ms": 150,
+        "forced_lock_seconds": 0,
+        "tempo_role": "next_campaign_problem",
+        "trigger": "Approach the service parcel or patched joint",
+        "hint_policy": "No forced prompts; inspect actual readable spatial evidence before optional contextual hints",
+        "lock_seconds": 0
+      },
+      "accessibility": {
+        "non_audio": "Charge, breach, burst and reload captions.",
+        "posture": "No softlock; can retreat",
+        "color_independent": true,
+        "caption_plan": "Verify caption timing in both engines.",
+        "control_plan": "No softlock; can retreat; use the existing controller input and physical collision"
+      },
+      "failure": {
+        "deaths": "Current checkpoint",
+        "recovery": "Backtrack possible",
+        "interrupts": [
+          "exit and reenter",
+          "save and reload",
+          "alarm and evasion",
+          "low-posture camera occlusion",
+          "no imported skeletal art"
+        ]
+      },
+      "tests": [
+        "No fake access beyond wall",
+        "Canon plastic explosive not bare fists",
+        "Next Machinegun Kid order preserved"
       ]
     }
   ]
