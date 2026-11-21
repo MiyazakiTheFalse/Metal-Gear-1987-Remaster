@@ -724,6 +724,10 @@ void AMGPlayerCharacter::RestartRescue()
 
 FString AMGPlayerCharacter::GetPostureText() const
 {
+    if (bMeleeInProgress)
+        return MeleeStrikeIndex==1 ? TEXT("MELEE / LEFT PUNCH") :
+            (MeleeStrikeIndex==2 ? TEXT("MELEE / RIGHT PUNCH") :
+                                   TEXT("MELEE / FINISHING KICK"));
     if (bIsProne) return TEXT("PRONE");
     if (ChokedGuard.IsValid()) return TEXT("GRAPPLING");
     if (DraggedGuard.IsValid()) return TEXT("DRAGGING");
