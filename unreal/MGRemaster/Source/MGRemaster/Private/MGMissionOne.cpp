@@ -4,6 +4,7 @@
 #include "Engine/GameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "MGGuardActor.h"
+#include "MGBodyHidingSpot.h"
 #include "MGSecurityCamera.h"
 #include "MGPlayerCharacter.h"
 #include "MGEquipmentComponent.h"
@@ -144,6 +145,14 @@ void AMGMissionOne::Build()
     AddPickup(TEXT("P05"), TEXT("HANDGUN"), FVector(55.f, 29.5f, 0.f), true);
     AddPickup(TEXT("P06"), TEXT("MINES"), FVector(67.f, 29.5f, 0.f), false);
     BuildUpperFloors();
+    // Optional MGS-era concealment affordances live at actual security posts.
+    // They do not move source-critical items or create a new mandatory gate.
+    if (AMGBodyHidingSpot* Store = GetWorld()->SpawnActor<AMGBodyHidingSpot>(
+        CM(65.f,39.f,95.f), FRotator(0.f,180.f,0.f)))
+        Store->SetFacilityLabel(TEXT("01 / VEHICLE SERVICE"));
+    if (AMGBodyHidingSpot* Service = GetWorld()->SpawnActor<AMGBodyHidingSpot>(
+        CM(81.f,39.f,695.f), FRotator(0.f,180.f,0.f)))
+        Service->SetFacilityLabel(TEXT("02 / MAINTENANCE"));
 }
 
 void AMGMissionOne::SpawnGuards()
