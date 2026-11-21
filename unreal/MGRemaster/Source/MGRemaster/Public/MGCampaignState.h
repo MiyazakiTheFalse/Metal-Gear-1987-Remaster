@@ -23,6 +23,7 @@ public:
     int32 GetRadioContactCount() const;
     FString GetRadioContactLabel(int32 Channel) const;
     bool HasBeat(FName Id) const;
+    int32 GetMissionThreeIntelCount() const;
     bool RecordBeat(FName Id, const FString& Intel);
     bool AdvanceMission(int32 NextMissionNumber);
     FString GetIntelLog() const;
