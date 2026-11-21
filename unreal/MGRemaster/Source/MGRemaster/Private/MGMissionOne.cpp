@@ -219,7 +219,7 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
     UMGEquipmentComponent* Equipment = Player->GetEquipment();
     for (FPickup& P : Pickups)
     {
-        if (P.bTaken || FVector::Dist2D(Player->GetActorLocation(), P.Location) > 190.f)
+        if (P.bTaken || FVector::Dist(Player->GetActorLocation(), P.Location) > 190.f)
             continue;
         if (P.Item == TEXT("GASMASK") && !Equipment->HasItem(TEXT("CARD1")))
         {
