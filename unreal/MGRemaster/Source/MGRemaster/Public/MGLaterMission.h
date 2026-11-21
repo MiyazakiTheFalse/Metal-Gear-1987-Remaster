@@ -69,6 +69,8 @@ private:
     AStaticMeshActor* PassageGateC = nullptr;
     UPROPERTY()
     AStaticMeshActor* PassageGateD = nullptr;
+    UPROPERTY()
+    AStaticMeshActor* RocketRoomDoor = nullptr;
     TArray<FWorldPickup> Pickups;
     int32 Mission = 3;
     float DialogueSeconds = 0.f;
