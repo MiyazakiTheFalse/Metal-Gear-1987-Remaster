@@ -5,8 +5,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-function boot(storage = new Map(),search = '',getGamepads=()=>[]) {
+function boot(storage = new Map(),search = '',getGamepads=()=>[],hash = '') {
   const elements = new Map();
+  let reloads=0;
   const documentListeners = new Map();
   const noop = () => {};
   const gl = new Proxy({}, { get(_, name) {
@@ -22,7 +23,7 @@ function boot(storage = new Map(),search = '',getGamepads=()=>[]) {
       addEventListener:noop, getContext:() => gl });
     return elements.get(id);
   }
-  const runtime = { console, performance, URLSearchParams, location:{search, hash:''},
+  const runtime = { console, performance, URLSearchParams, location:{search, hash, reload:()=>{reloads++}}, 
     document:{getElementById:element, addEventListener:(id,handler)=>documentListeners.set(id,handler)}, addEventListener:noop,
     navigator:{getGamepads}, requestAnimationFrame:noop, setTimeout:noop,
     localStorage:{getItem:key=>storage.get(key),setItem:(key,value)=>storage.set(key,value)},
@@ -32,6 +33,7 @@ function boot(storage = new Map(),search = '',getGamepads=()=>[]) {
   for (const file of ['dialogue.js','tutorial.js','game.js'])
     vm.runInContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),runtime,{filename:file});
   return {game:runtime.__mgGameDebug,button:id=>element(id).onclick(),element,storage,
+    get reloads(){return reloads}, get location(){return runtime.location}, 
     key:(which,targetId='start')=>documentListeners.get('keydown')?.({
       key:which,target:element(targetId),preventDefault:noop
     })};
@@ -80,6 +82,32 @@ savedOperation.button('confirmNewGame');
 assert.equal(savedOperation.game.state.started,true,
  'explicit confirmation starts the new operation');
 console.log('PASS: Save-protecting New Game confirmation and safe cancellation.');
+
+// Default retries must NEVER erase the existing local checkpoint; R is an
+// instinctive reload key for new players and previously wiped their entire run.
+const retrySafety=boot();
+retrySafety.button('start');
+const beforeRetry=retrySafety.storage.get('mg1987.grayfox.browser.v1');
+assert.ok(beforeRetry,'new infiltration makes a persistent checkpoint');
+retrySafety.key('r');
+assert.equal(retrySafety.reloads,1,'R initiates a checkpoint reload, not a wipe');
+assert.equal(retrySafety.location.hash,'#retry-checkpoint');
+assert.equal(retrySafety.storage.get('mg1987.grayfox.browser.v1'),beforeRetry,
+ 'R preserves the exact checkpoint bytes before reload');
+const afterRetry=boot(retrySafety.storage,'',()=>[],retrySafety.location.hash);
+assert.equal(afterRetry.game.state.started,true,
+ 'retry opens the game directly without another title-menu interaction');
+assert.equal(afterRetry.location.hash,'','one-shot retry hash cannot loop');
+assert.equal(afterRetry.game.state.stage,-2,
+ 'fresh world is reconstructed from actual saved mission progress');
+afterRetry.game.act('pause');
+const beforePauseRetry=afterRetry.storage.get('mg1987.grayfox.browser.v1');
+afterRetry.button('restart');
+assert.equal(afterRetry.reloads,1,'pause Retry triggers same safe checkpoint flow');
+assert.equal(afterRetry.storage.get('mg1987.grayfox.browser.v1'),beforePauseRetry,
+ 'pause Retry does not delete inventory, world flags or earned progress');
+console.log('PASS: browser R and pause Retry reload checkpoints without destructive progress loss.');
+
 
 // The original 1987 three-truck discovery loop is available before custody.
 // These are physical props with independent pickups, save state and useful items.
