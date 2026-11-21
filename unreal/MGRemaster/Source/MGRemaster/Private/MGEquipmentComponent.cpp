@@ -26,6 +26,8 @@ void UMGEquipmentComponent::BeginPlay()
         {FName(TEXT("CARD5")), TEXT("CARD 5"), 0, false, false},
         {FName(TEXT("CARD6")), TEXT("CARD 6"), 0, false, false},
         {FName(TEXT("CARD7")), TEXT("CARD 7"), 0, false, false},
+        {FName(TEXT("CARD8")), TEXT("CARD 8"), 0, false, false},
+        {FName(TEXT("COMPASS")), TEXT("COMPASS"), 0, false, false},
         {FName(TEXT("PLASTIC_EXPLOSIVE")), TEXT("PLASTIC EXPLOSIVE"), 0, false, true},
         {FName(TEXT("BINOCULARS")), TEXT("BINOCULARS"), 0, false, false},
         {FName(TEXT("GASMASK")), TEXT("GAS MASK"), 0, false, false},
