@@ -247,3 +247,15 @@ bool AMGMissionOne::TryInteract(AMGPlayerCharacter* Player)
     }
     return false;
 }
+
+FString AMGMissionOne::GetObjectiveText() const
+{
+    if (bElevatorReached) return TEXT("BUILDING ONE — UPPER FLOORS AWAIT IMPLEMENTATION");
+    bool bCardCollected = false;
+    for (const FPickup& P : Pickups)
+        if (P.Item == FName(TEXT("CARD1")) && P.bTaken)
+            bCardCollected = true;
+    if (!bCardCollected) return TEXT("INFILTRATE THE TRUCK YARD — FIND ACCESS CARD 1");
+    if (!bCardDoorOpened) return TEXT("ACCESS THE CARD 1 ROOM — INVESTIGATE ITS CONTENTS");
+    return TEXT("REACH THE BUILDING ONE ELEVATOR — AVOID DETECTION");
+}
