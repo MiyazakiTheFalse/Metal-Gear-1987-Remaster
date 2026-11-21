@@ -740,6 +740,8 @@ const card1Slot={name:'CARD 1',usable:false};
 const rationSlot=inventories.items[1];
 const binocularsSlot={name:'BINOCULARS',usable:false};
 inventories.items.push(card1Slot,binocularsSlot);
+// Equipped inventory lives independently of the menu highlight, matching Unreal.
+let equippedItemSlot=inventories.items[0];
 let firstCardEarned=false,rationEarned=false,rationRemaining=0,binocularsEarned=false;
 const bay={x:-26.8,z:-2.3};
 const lens={x:-19.2,z:-4.55};
@@ -958,6 +960,7 @@ function save(){
   localStorage.setItem(STORAGE,JSON.stringify({version:10,b2:{...b2,armed:[...b2.armed]},roof:{active:roof.active,defeated:roof.defeated,hp:roof.hp,grenades:roof.grenades,phase:roof.phase,clock:roof.clock,lap:roof.lap,flyX:roof.flyX,flyZ:roof.flyZ},service:{charge:service.charge,open:service.open,intel:service.intel,kidDown:service.kidDown,parachute:service.parachute},storesOpen,legacyFloorCard,freight:{handgun:world.handgun,box:world.box,freightAmbientHeard:world.freightAmbientHeard,cameraOff:world.cameraOff,foxFollowup:world.foxFollowup,preview:world.preview,hallOpen:world.hallOpen},propertyTag:{state:tag.state,point:tag.point},stage,cardDrop,x:player.x,z:player.z,
    rounds,equippedWeapon,sealedWeapon,recoveredGear,wallHits,health,
    firstCardEarned,rationEarned,rationRemaining,binocularsEarned,
+   equippedItemName:equippedItemSlot.name,
    storySeen:window.MGCharacterStory?.heard()||[],
    bossHP:boss.hp,bossRest:stage>=5?{x:boss.x,z:boss.z,yaw:boss.yaw}:null,
    guardBodies:guards.map((g,i)=>g.knocked&&!g.boss?{
@@ -1031,6 +1034,10 @@ function load(){
   }else if(stage===4||saved?.state==='carried')armPropertyTag();
  }
  syncEquipment();syncBoss();
+ // Older checkpoint versions do not have an equipped-item selection.
+ // Do not auto-use a ration or re-raise binoculars on reload.
+ const restoredItem=inventories.items.find(x=>x.name===data.equippedItemName);
+ equippedItemSlot=restoredItem?.usable?restoredItem:inventories.items[0];
  // Returning to a sector must not resurrect or teleport guards whose
  // bodies the player actually disposed of. Save body-world position at each
  // safe checkpoint, but never restart an active drag on reload.
@@ -1322,7 +1329,7 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
    if(draggedGuard){releaseGuardBody();return;}
    if(equipOpen){
     if(equipOpen==='items'&&inventories.items[eqIndex]===tagSlot){
-     equipOpen=null;setDownTag();eqIndex=0;drawEquipment();
+     equipOpen=null;equippedItemSlot=inventories.items[0];setDownTag();eqIndex=0;drawEquipment();
     }
     return;
    }
@@ -1497,26 +1504,55 @@ function action(name){if(!started){if(name==='start')start(false);return;}if(pau
    if(personal)dialogueQueue.push(personal);
    else say(stage<0?'schneider':stage===0?'bigBoss':'continueMission');
  }
- else if(name==='equipitem'||name==='equipweapon'){equipOpen=name==='equipitem'?'items':'weapons';eqIndex=0;discovery.openedEquip=true;drawEquipment();playCue('menu');}
- else if(name==='equipclose'){if(equipOpen){const slot=inventories[equipOpen][eqIndex];
-  const ownedOnSelection=slot.usable;let itemFeedback='';
-  if(equipOpen==='items'&&slot.usable){
-   world.boxed=slot===boxSlot&&setPlayerStance(1);
-   if(world.boxed){player.cover=false;player.coverNormal=null;}
-   if(slot===smokeSlot){world.smokeX=player.x;world.smokeZ=player.z;world.smokeUntil=gameTime+3;}
-   if(slot===rationSlot){
-    if(health>=100)itemFeedback='HEALTH FULL — RATION SAVED';
-    else{const gain=Math.min(45,100-health);health+=gain;
-     rationRemaining--;syncEquipment();save();playCue('select');
-     itemFeedback='RATION USED · +'+Math.round(gain)+' HEALTH';}
+ else if(name==='equipitem'||name==='equipweapon'){
+   equipOpen=name==='equipitem'?'items':'weapons';
+   eqIndex=equipOpen==='items'?Math.max(0,inventories.items.indexOf(equippedItemSlot)):0;
+   discovery.openedEquip=true;drawEquipment();playCue('menu');
+ }
+ else if(name==='equipclose'){
+   if(equipOpen){
+    const selectedCategory=equipOpen;
+    const slot=inventories[selectedCategory][eqIndex];
+    const owned=slot?.usable===true;
+    if(selectedCategory==='items'&&owned){
+     equippedItemSlot=slot;
+     world.boxed=slot===boxSlot&&setPlayerStance(1);
+     if(world.boxed){player.cover=false;player.coverNormal=null;}
+     if(slot!==binocularsSlot)world.scouting=false;
+    }
+    if(owned&&selectedCategory==='weapons')equippedWeapon=slot.name;
+    popup(owned?slot.name+' SELECTED':'EQUIPMENT UNAVAILABLE');
+    playCue(owned?'select':'denied');equipOpen=null;drawEquipment();
+    if(owned)save(); // Player-selected gear survives a retry.
    }
-   if(slot===binocularsSlot){world.scouting=!world.scouting;
-    itemFeedback=world.scouting?'BINOCULARS RAISED — ZOOM ONLY; GUARDS STILL SEE YOU':'BINOCULARS LOWERED';}
-   else world.scouting=false;
-  }
-  if(ownedOnSelection&&equipOpen==='weapons')equippedWeapon=slot.name;
-  popup(itemFeedback||(ownedOnSelection?slot.name+' SELECTED':'EQUIPMENT CONFISCATED'));
-  playCue(ownedOnSelection?'select':'denied');equipOpen=null;drawEquipment();}}
+ }
+ else if(name==='useitem'){
+   if(equipOpen){popup('RELEASE EQUIPMENT WINDOW FIRST');playCue('denied');return;}
+   const slot=equippedItemSlot;
+   if(!slot?.usable||!kitAvailable()){
+    popup('NO USABLE ITEM EQUIPPED');playCue('denied');return;
+   }
+   if(slot===rationSlot){
+    if(health>=100){popup('HEALTH FULL — RATION SAVED');playCue('denied');return;}
+    if(rationRemaining<=0){popup('NO RATIONS REMAIN');playCue('denied');return;}
+    const gain=Math.min(45,100-health);health+=gain;
+    rationRemaining--;syncEquipment();save();playCue('select');
+    if(rationRemaining<=0)equippedItemSlot=inventories.items[0];
+    popup('RATION USED · +'+Math.round(gain)+' HEALTH');return;
+   }
+   if(slot===binocularsSlot){
+    world.scouting=!world.scouting;playCue('select');
+    popup(world.scouting?'BINOCULARS RAISED — ZOOM ONLY; GUARDS STILL SEE YOU':'BINOCULARS LOWERED');return;
+   }
+   if(slot===smokeSlot){
+    world.smokeX=player.x;world.smokeZ=player.z;world.smokeUntil=gameTime+3;
+    playCue('select');popup('CIGARETTE SMOKE — AIR CURRENTS VISIBLE');return;
+   }
+   if(slot===tagSlot&&tag.state==='carried'){
+    equippedItemSlot=inventories.items[0];setDownTag();playCue('select');return;
+   }
+   popup('ITEM HAS NO DIRECT USE HERE');playCue('denied');
+ }
  else if(name==='next'||name==='previous'){if(equipOpen){const slots=inventories[equipOpen];eqIndex=(eqIndex+(name==='next'?1:-1)+slots.length)%slots.length;drawEquipment();playCue('menu')}}
  else if(name==='tips'){discovery.showTips=!discovery.showTips;tipToggle.checked=discovery.showTips;popup(discovery.showTips?'TRAINING PROMPTS ON':'TRAINING PROMPTS OFF')}
 }
@@ -2716,7 +2752,7 @@ function updateHUD(dt){
   $('foxTactics').textContent=fox.mode.replaceAll('_',' ').toUpperCase()+(stage===3?' · '+Math.round(dist(player,fox)*10)/10+'M FROM SNAKE':'');
   foxHUD.dataset.danger=fox.hp<=35?'yes':'no';}
 $('status').textContent=`LIFE ${Math.ceil(health)} / 100   |   ${player.stance===2?'PRONE':player.stance===1?'CROUCHED':'STANDING'}${player.cover?' / COVER':''}\nEQUIPMENT: ${kitAvailable()?equippedWeapon+' / '+rounds+' ROUNDS':'CONFISCATED'}   |   ${alertState}${message?'\n'+message.text:''}`;
- $('controls').textContent=lastInputIsPad&&framePad?'A Interact   ·   B Crouch   ·   Y Prone   ·   Menu Pause':'E Interact   ·   Ctrl Crouch   ·   Z Prone   ·   Esc Pause';
+ $('controls').textContent=lastInputIsPad&&framePad?'A Interact   ·   X Strike   ·   Y Prone   ·   ↓ Use Item':'E Interact   ·   F Strike   ·   Y Use Item   ·   R Retry';
  if(!paused)displayNextDialogue(dt);
  const canvas2=$('radar'),ctx=canvas2.getContext('2d');ctx.clearRect(0,0,182,140);ctx.fillStyle='#0e2424';ctx.fillRect(0,0,182,140);if(awareness>=2){ctx.fillStyle=awareness>=3?'#c25e51':'#c7a36b';ctx.font='bold 18px monospace';ctx.textAlign='center';ctx.fillText(awareness>=3?'ALERT':'SEARCH',91,65);ctx.font='9px monospace';ctx.fillText('SIGNAL UNAVAILABLE',91,89);return;}
  const coord=(x,z)=>[7+(x+28.6)/58.1*168,8+(z+5.1)/10.2*124];
@@ -2735,7 +2771,7 @@ $('status').textContent=`LIFE ${Math.ceil(health)} / 100   |   ${player.stance==
  for(const g of guards){if(g.knocked)continue;const c=coord(g.x,g.z);ctx.fillStyle=g.state>=1?'#f7b96b':'#e58a79';ctx.beginPath();ctx.arc(c[0],c[1],2.6,0,Math.PI*2);ctx.fill()}
  ctx.restore();
 }
-function drawEquipment(){const panel=$('equip');panel.style.display=equipOpen?'block':'none';if(!equipOpen)return;const slots=inventories[equipOpen];panel.innerHTML=`<div class="kicker">${equipOpen==='items'?'LEFT / ITEMS':'RIGHT / WEAPONS'} &nbsp;|&nbsp; TIME ×0.2</div>`+slots.map((v,i)=>`<div class="slot ${i===eqIndex?'picked ':''}${v.usable?'':'locked'}">${i===eqIndex?'► ':''}${v.name}${v.usable?'':' · LOCKED'}</div>`).join('')+(slots[eqIndex]===tagSlot?'<small>Stamped at processing. E / A · Set down</small>':'')+'<small>Hold LB / RB or Tab / G. D-pad left/right or [ ] selects. Release to close.</small>'}
+function drawEquipment(){const panel=$('equip');panel.style.display=equipOpen?'block':'none';if(!equipOpen)return;const slots=inventories[equipOpen];panel.innerHTML=`<div class="kicker">${equipOpen==='items'?'LEFT / ITEMS':'RIGHT / WEAPONS'} &nbsp;|&nbsp; TIME ×0.2</div>`+slots.map((v,i)=>`<div class="slot ${i===eqIndex?'picked ':''}${v.usable?'':'locked'}">${i===eqIndex?'► ':''}${v.name}${v.usable?'':' · LOCKED'}</div>`).join('')+(slots[eqIndex]===tagSlot?'<small>Stamped at processing. E / A · Set down</small>':'')+'<small>Hold LB / RB or Tab / G. D-pad left/right or [ ] selects. Release to SELECT; Y / D-pad down uses the equipped item.</small>'}
 function setPaused(value,type){paused=!!value;$('pause').style.display='none';$('intel').style.display='none';$('complete').style.display='none';$('missionFail').style.display='none';if(value){if(type==='complete'){$('complete').style.display='flex';paused=true}else if(type==='failed'){$('missionFail').style.display='flex';paused=true}else if(type==='intel'){showIntel()}else{$('pause').style.display='flex'}if(document.pointerLockElement)document.exitPointerLock?.()}else{if(canvas.requestPointerLock)Promise.resolve(canvas.requestPointerLock()).catch(()=>{})}}
 function showIntel(){
  paused=true;$('intel').style.display='flex';$('pause').style.display='none';
@@ -2861,7 +2897,7 @@ document.addEventListener('keydown',e=>{lastInputIsPad=false;const k=e.key.toLow
 }if(window.MGCinematicDirector?.active&&(k===' '||k==='escape')){
  e.preventDefault();window.MGCinematicDirector.skip();return;
 }if(window.MGCinematicDirector?.blocking)return;
-if(k==='escape'){action('pause');return}if(paused){if(k==='j'||k==='c')setPaused(false);return}const actions={e:'interact',control:'crouch',z:'prone',v:'cover',f:'melee',n:'knock',j:'intel',c:'codec',t:'tips','[':'previous',']':'next'};if(actions[k])action(actions[k]);if(k==='tab')action('equipitem');if(k==='g')action('equipweapon');if(k==='r')retryCheckpoint();if(k==='q')cam.shoulder*=-1;});document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();key[k]=false;if(k==='tab'||k==='g')action('equipclose')});window.addEventListener('blur',()=>{for(const k of Object.keys(key))key[k]=false;if(equipOpen)action('equipclose')});
+if(k==='escape'){action('pause');return}if(paused){if(k==='j'||k==='c')setPaused(false);return}const actions={e:'interact',control:'crouch',z:'prone',v:'cover',f:'melee',n:'knock',j:'intel',c:'codec',t:'tips',y:'useitem','[':'previous',']':'next'};if(actions[k])action(actions[k]);if(k==='tab')action('equipitem');if(k==='g')action('equipweapon');if(k==='r')retryCheckpoint();if(k==='q')cam.shoulder*=-1;});document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();key[k]=false;if(k==='tab'||k==='g')action('equipclose')});window.addEventListener('blur',()=>{for(const k of Object.keys(key))key[k]=false;if(equipOpen)action('equipclose')});
 function readGamepad(){const p=pollGamepad();updatePadStatus(p);padUsing=!!p&&(Math.abs(p.axes[0]||0)>.16||Math.abs(p.axes[1]||0)>.16);if(!p){padPrev=[];return;}const now=p.buttons.map(pressed);const previous=padPrev;const down=i=>now[i]&&!previous[i];const up=i=>!now[i]&&previous[i];padPrev=now;if(!started){
  if(!$('newGameConfirm').hidden){
   if(down(14))setNewGameConfirmChoice(0);
@@ -2877,7 +2913,7 @@ function readGamepad(){const p=pollGamepad();updatePadStatus(p);padUsing=!!p&&(M
 }if(window.MGCinematicDirector?.active&&down(1)){
  window.MGCinematicDirector.skip();return;
 }if(window.MGCinematicDirector?.blocking)return;
-if(down(9)){action('pause');return}if(paused){if(down(1)||down(0)){setPaused(false)}return}if(down(0))action('interact');if(down(1)){action('crouch');}if(down(2))action('melee');if(down(3))action('prone');if(down(12))action('intel');if(down(8))action('codec');if(down(11))cam.shoulder*=-1;if(down(4))action('equipitem');if(down(5))action('equipweapon');if(up(4)||up(5))action('equipclose');if(down(14))action('previous');if(down(15))action('next');if(down(7)){player.aim=inputDown('mouse2')||pressed(p.buttons[6]);action('fire');}}
+if(down(9)){action('pause');return}if(paused){if(down(1)||down(0)){setPaused(false)}return}if(down(0))action('interact');if(down(1)){action('crouch');}if(down(2))action('melee');if(down(3))action('prone');if(down(12))action('intel');if(down(13))action('useitem');if(down(8))action('codec');if(down(11))cam.shoulder*=-1;if(down(4))action('equipitem');if(down(5))action('equipweapon');if(up(4)||up(5))action('equipclose');if(down(14))action('previous');if(down(15))action('next');if(down(7)){player.aim=inputDown('mouse2')||pressed(p.buttons[6]);action('fire');}}
 function frame(now){requestAnimationFrame(frame);const real=clamp((now-last)/1000,0,.06);last=now;readGamepad();
  damagePulse=Math.max(0,damagePulse-real*1.85);
  player.hitTimer=Math.max(0,(player.hitTimer||0)-real);
@@ -2897,7 +2933,7 @@ if(location.hash==='#retry-checkpoint'){
  if(available)start(true);
 }
 // Console contract for deterministic browser tests, never elevated to source fidelity.
-window.__mgGameDebug={previewRigActors:(time=gameTime)=>activeCastForRig(time),get state(){return {stage,service:{...service},roof:{...roof},b2:{...b2,armed:[...b2.armed]},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
+window.__mgGameDebug={previewRigActors:(time=gameTime)=>activeCastForRig(time),get state(){return {stage,equippedItemName:equippedItemSlot.name,service:{...service},roof:{...roof},b2:{...b2,armed:[...b2.armed]},freight:{...world},tagState:tag.state,tagPoint:tag.point&&{...tag.point},signal:duel.signal&&{...duel.signal},bossBeat:duel.phase,bossLocation:{x:boss.x,z:boss.z},cardDrop:{...cardDrop},hasCard3:inventories.items[2].usable,shutterOpen:!finalGate.active,accessPrompt:exitInteraction(),wallHits:[...wallHits],bossHP:boss.hp,health,recoveredGear,rounds,equippedWeapon,sectorSecured,draggingBodyIndex:draggedGuard?guards.indexOf(draggedGuard):-1,
  firstCardEarned,rationEarned,rationRemaining,binocularsEarned,
  rationWorld:originalRationProp.active?{...originalRationTarget}:null,
  binocularsWorld:originalBinocularsProp.active?{...originalBinocularsTarget}:null,
