@@ -19,8 +19,10 @@ public:
     AMGSecurityCamera();
     virtual void BeginPlay() override;
     virtual void Tick(float DeltaSeconds) override;
+    virtual float TakeDamage(float DamageAmount, const FDamageEvent& Event,
+                             AController* Instigator, AActor* DamageCauser) override;
     void Configure(FName StableId, int32 DeckNumber, float SweepDegrees = 42.f);
-    bool IsAlarmActive() const { return AlertSeconds > 0.f; }
+    bool IsAlarmActive() const { return !bDisabled && AlertSeconds > 0.f; }
     float GetDetectionProgress() const { return Suspicion; }
     int32 GetDeck() const { return Deck; }
 private:
@@ -28,6 +30,7 @@ private:
     USceneComponent* SceneRoot;
     UPROPERTY(VisibleAnywhere)
     UStaticMeshComponent* Housing;
+    bool bDisabled = false;
     int32 Deck = 3;
     float BaseYaw = 0.f;
     float SweepAmplitude = 42.f;
