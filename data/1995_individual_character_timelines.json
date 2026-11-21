@@ -394,7 +394,13 @@
         "snake.ellen_return_route",
         "snake.disobeys_abort",
         "snake.tx55_detonation",
-        "snake.left_ladder_escape"
+        "snake.left_ladder_escape",
+        "m03.route.manifest",
+        "m03.route.survey",
+        "m03.route.archive",
+        "m03.route.confirmed",
+        "m03.cache.claimed",
+        "m03.security.power_disabled"
       ],
       "implementation": "partial_start_source",
       "continuity_note": "Only source-confirmed dialogue/room presence should become player-facing; scene cast may include offscreen or documentary referents."
