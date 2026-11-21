@@ -154,6 +154,9 @@ private:
 
     UPROPERTY(EditAnywhere, Category="Controls|Time")
     float EquipmentTimeScale = 0.20f; // Engineering default, not a canonical franchise speed.
+    // UI repeat clock is real elapsed seconds; not slowed by world dilation.
+    float NextEquipmentScrollAt = 0.f;
+    void EquipmentScroll(float Value);
     bool bCodecOpen = false;
     bool bBinocularView = false; // optical view only; never reveals hidden enemies
     FName PrototypeAnimationRequest = NAME_None;
