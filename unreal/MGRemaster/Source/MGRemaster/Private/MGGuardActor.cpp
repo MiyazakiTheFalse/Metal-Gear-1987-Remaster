@@ -68,6 +68,16 @@ void AMGGuardActor::HearWallKnock(const FVector& SoundLocation, const FVector& W
     AwarenessState = FMath::Max(AwarenessState, 1u);
 }
 
+void AMGGuardActor::ReceiveCameraAlert(const FVector& SightLocation, float DurationSeconds)
+{
+    if (bIncapacitated || DurationSeconds <= 0.f) return;
+    CameraAlertSeconds = FMath::Max(CameraAlertSeconds, DurationSeconds);
+    LastKnownPlayerPosition = SightLocation;
+    Suspicion = 1.f;
+    AwarenessState = 3;
+    DistractionPhase = EDistractionPhase::None;
+}
+
 void AMGGuardActor::MoveToward(const FVector& Destination, float Speed, float DeltaSeconds)
 {
     const FVector Diff = (Destination - GetActorLocation()).GetSafeNormal2D();
@@ -172,6 +182,7 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     if (bIncapacitated || !GetWorld()) return;
     StaggerSeconds = FMath::Max(0.f, StaggerSeconds - DeltaSeconds);
+    CameraAlertSeconds = FMath::Max(0.f, CameraAlertSeconds - DeltaSeconds);
     AttackCooldown = FMath::Max(0.f, AttackCooldown - DeltaSeconds);
     ProxyBody->SetRelativeRotation(FMath::RInterpTo(ProxyBody->GetRelativeRotation(),
         StaggerSeconds > 0.f ? FRotator(0.f, 0.f, 12.f) : FRotator::ZeroRotator,
@@ -241,6 +252,13 @@ void AMGGuardActor::Tick(float DeltaSeconds)
         FVector(180.f * FMath::Sin(GetActorLocation().X * .001f),
                 180.f * FMath::Cos(GetActorLocation().Y * .001f), 0.f);
 #endif
+    // Camera-confirmed alarms are durable for their short message lifetime,
+    // regardless of ordinary perception decay after Snake leaves the frame.
+    if (CameraAlertSeconds > 0.f)
+    {
+        AwarenessState = 3;
+        Suspicion = FMath::Max(Suspicion, 0.99f);
+    }
 
     // Enemy attack only after an actual alert and physical approach.
     // Player health and HUD are authoritative; no invisible instant failure.
