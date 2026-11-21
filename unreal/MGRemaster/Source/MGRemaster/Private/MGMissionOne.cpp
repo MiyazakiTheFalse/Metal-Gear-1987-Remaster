@@ -205,7 +205,7 @@ void AMGMissionOne::BeginPlay()
     SpawnGuards();
     const UMGMissionOneSaveGame* Save = Cast<UMGMissionOneSaveGame>(
         UGameplayStatics::LoadGameFromSlot(TEXT("MissionOneV1"), 0));
-    if (Save && (Save->Version >= 1 && Save->Version <= 5))
+    if (Save && (Save->Version >= 1 && Save->Version <= 6))
     {
         for (FPickup& P : Pickups)
             if (Save->CollectedPickupIds.Contains(P.Id))
@@ -222,6 +222,33 @@ void AMGMissionOne::BeginPlay()
         SavedHandgunRounds = Save->Version >= 4 ? Save->HandgunRounds : -1;
         SavedRationsRemaining = Save->Version >= 4 ? Save->RationsRemaining : -1;
         bMissionThreeCacheClaimed = Save->Version >= 5 && Save->bMissionThreeCacheClaimed;
+        if (Save->Version >= 6)
+        {
+            bDianePOWRescued = Save->bDianePOWRescued;
+            bFoxLocationPOWRescued = Save->bFoxLocationPOWRescued;
+            bCaptureMethodPOWRescued = Save->bCaptureMethodPOWRescued;
+            bRCStoreDoorOpened = Save->bRCStoreDoorOpened;
+            bCardTwoDoorOpened = Save->bCardTwoDoorOpened;
+            bFoxLocationDoorOpened = Save->bFoxLocationDoorOpened;
+            bCaptureMethodDoorOpened = Save->bCaptureMethodDoorOpened;
+            bDianeDoorOpened = Save->bDianeDoorOpened;
+            bElectricPanelDisabled = Save->bElectricPanelDisabled;
+            SavedRCRounds = Save->WeaponRounds.FindRef(TEXT("RC_MISSILE"));
+            SavedMineCount = Save->ItemQuantities.FindRef(TEXT("MINES"));
+        }
+        if (bCardTwoDoorOpened && IsValid(CardTwoDoor)) CardTwoDoor->Destroy();
+        if (bRCStoreDoorOpened && IsValid(RCStoreDoor)) RCStoreDoor->Destroy();
+        if (bFoxLocationDoorOpened && IsValid(FoxLocationDoor)) FoxLocationDoor->Destroy();
+        if (bCaptureMethodDoorOpened && IsValid(CaptureMethodDoor))
+            CaptureMethodDoor->Destroy();
+        if (bDianeDoorOpened && IsValid(DianeDoor)) DianeDoor->Destroy();
+        if (bDianePOWRescued && IsValid(DianePrisoner)) DianePrisoner->Destroy();
+        if (bFoxLocationPOWRescued && IsValid(FoxLocationPrisoner))
+            FoxLocationPrisoner->Destroy();
+        if (bCaptureMethodPOWRescued && IsValid(CaptureMethodPrisoner))
+            CaptureMethodPrisoner->Destroy();
+        if (bElectricPanelDisabled && IsValid(ElectricPanel))
+            ElectricPanel->Destroy();
         if (bPrisonerDoorOpened && IsValid(PrisonerDoor)) PrisonerDoor->Destroy();
         if (bGasDoorOpened && IsValid(GasDoor)) GasDoor->Destroy();
         CurrentFloor = Save->Version >= 2 ? FMath::Clamp(Save->CurrentFloor, 1, 3) : 1;
@@ -235,9 +262,28 @@ void AMGMissionOne::BeginPlay()
         {
             Story->RecordBeat(TEXT("snake.early_pow"),
                 TEXT("PRISONER: A FOXHOUND agent was transferred through a concealed detention post."));
-            Story->RecordBeat(TEXT("diane.contact"),
-                TEXT("PRISONER: Resistance contact Diane can be reached on 120.33."));
+            // The first rescued 3F POW does not give Diane's frequency.
         }
+    if (GetWorld() && GetWorld()->GetGameInstance())
+    {
+        if (UMGCampaignState* Story =
+            GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>())
+        {
+            // Earlier prototypes awarded Diane at the wrong prisoner. Migrate
+            // those saves to the actual electrified-floor prisoner interaction.
+            if (Save && Save->Version < 6 && !bDianePOWRescued)
+                Story->RevokeMisplacedDianeContact();
+            if (bDianePOWRescued)
+                Story->RecordBeat(TEXT("diane.contact"),
+                    TEXT("PRISONER BEYOND ELECTRIC FLOOR: Diane — 120.33."));
+            if (bFoxLocationPOWRescued)
+                Story->RecordBeat(TEXT("fox.location_learned"),
+                    TEXT("PRISONER: Gray Fox is held in a hidden solitary cell."));
+            if (bCaptureMethodPOWRescued)
+                Story->RecordBeat(TEXT("fox.capture_method_learned"),
+                    TEXT("PRISONER: Follow the western dead end on 1F to reach the prison."));
+        }
+    }
     // Return to previously explored architecture only after Fox's rescue.
     // No new evidence props are available during Mission 1's initial passage.
     if (GetWorld() && GetWorld()->GetGameInstance())
@@ -256,13 +302,18 @@ void AMGMissionOne::RestoreSavedEquipment(AMGPlayerCharacter* Player)
         {
             if (P.Item == TEXT("HANDGUN_AMMO"))
                 Equipment->AwardAmmunition(TEXT("HANDGUN"), 12);
-            else if (P.bWeapon) Equipment->AwardWeapon(P.Item, 0);
+            else if (P.bWeapon)
+                Equipment->AwardWeapon(P.Item, P.Item == TEXT("RC_MISSILE") ? 4 : 0);
             else Equipment->AwardItem(P.Item, 1);
         }
     if (SavedHandgunRounds >= 0)
         Equipment->RestoreHandgunRounds(SavedHandgunRounds);
     if (SavedRationsRemaining >= 0)
         Equipment->RestoreItemQuantity(TEXT("RATION"), SavedRationsRemaining);
+    if (SavedRCRounds >= 0)
+        Equipment->RestoreWeaponAmmo(TEXT("RC_MISSILE"), SavedRCRounds);
+    if (SavedMineCount >= 0)
+        Equipment->RestoreItemQuantity(TEXT("MINES"), SavedMineCount);
 }
 
 bool AMGMissionOne::SaveProgress(AMGPlayerCharacter* Player)
@@ -275,15 +326,30 @@ bool AMGMissionOne::SaveProgress(AMGPlayerCharacter* Player)
     Save->bCardDoorOpened = bCardDoorOpened;
     Save->bElevatorReached = bElevatorReached;
     Save->bPOWRescued = bPOWRescued;
+    Save->bDianePOWRescued = bDianePOWRescued;
+    Save->bFoxLocationPOWRescued = bFoxLocationPOWRescued;
+    Save->bCaptureMethodPOWRescued = bCaptureMethodPOWRescued;
+    Save->bRCStoreDoorOpened = bRCStoreDoorOpened;
+    Save->bCardTwoDoorOpened = bCardTwoDoorOpened;
+    Save->bFoxLocationDoorOpened = bFoxLocationDoorOpened;
+    Save->bCaptureMethodDoorOpened = bCaptureMethodDoorOpened;
+    Save->bDianeDoorOpened = bDianeDoorOpened;
+    Save->bElectricPanelDisabled = bElectricPanelDisabled;
     Save->bPrisonerDoorOpened = bPrisonerDoorOpened;
     Save->bGasDoorOpened = bGasDoorOpened;
     Save->CurrentFloor = CurrentFloor;
-    Save->Version = 5;
+    Save->Version = 6;
     Save->bMissionThreeCacheClaimed = bMissionThreeCacheClaimed;
     if (Player && Player->GetEquipment())
     {
         Save->HandgunRounds = Player->GetEquipment()->GetHandgunRounds();
         Save->RationsRemaining = Player->GetEquipment()->GetItemQuantity(TEXT("RATION"));
+        for (const FMGEquipmentEntry& Weapon : Player->GetEquipment()->GetWeapons())
+            if (Weapon.Id != TEXT("NONE"))
+                Save->WeaponRounds.Add(Weapon.Id, Weapon.Quantity);
+        for (const FMGEquipmentEntry& Item : Player->GetEquipment()->GetItems())
+            if (Item.Id != TEXT("NONE"))
+                Save->ItemQuantities.Add(Item.Id, Item.Quantity);
     }
     if (!UGameplayStatics::SaveGameToSlot(Save, TEXT("MissionOneV1"), 0))
     {
