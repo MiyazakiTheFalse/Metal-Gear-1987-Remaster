@@ -250,7 +250,15 @@
       "dependency": [],
       "grade": "original_msx2_comparative",
       "implementation": "design_only",
-      "exact_1995_time": "not_established_by_source"
+      "exact_1995_time": "not_established_by_source",
+      "optional_interactions": [
+        "m03.route.manifest",
+        "m03.route.survey",
+        "m03.route.archive",
+        "m03.route.confirmed",
+        "m03.cache.claimed",
+        "m03.security.power_disabled"
+      ]
     },
     {
       "order": 13,
