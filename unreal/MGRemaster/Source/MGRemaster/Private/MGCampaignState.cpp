@@ -268,7 +268,8 @@ bool UMGCampaignState::AdvanceMission(int32 NextMissionNumber)
     if (NextMissionNumber == 5 &&
         (!HasBeat(TEXT("m04.bulldozer_defeated")) ||
          !HasBeat(TEXT("m04.fire_trooper_defeated")) ||
-         !HasBeat(TEXT("tx11.rocket_defeat")))) return false;
+         !HasBeat(TEXT("tx11.rocket_defeat")) ||
+         !HasBeat(TEXT("m04.card7_claimed")))) return false;
     if (NextMissionNumber == 6 &&
         (!HasBeat(TEXT("ellen.rescue")) ||
          !HasBeat(TEXT("madnar.weakness")))) return false;
