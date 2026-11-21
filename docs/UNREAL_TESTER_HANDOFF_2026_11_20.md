@@ -28,6 +28,14 @@ git rev-parse HEAD
 
 **If any preflight check fails, report the first failing command and complete output; do not proceed as if the build is verified.** The script checks Git, engine paths, 17 browser campaign checkpoints (simulated harness evidence), a new deterministic animation-intent test, four core GLB binary contracts, Python source contracts and Rust tests. It cannot run the Unreal Editor in this project-authoring session.
 
+## 21 November — playability and browser parity first
+
+This branch now uses the **same main Xbox inputs in Unreal and browser:** A = E/interact; X = F/strike; B = crouch (or skip during a REAL cinematic); Y = prone; D-pad down = deliberate Use Item, after selecting with LB; LT/RT = aim/fire. Escape and B now have actual Unreal `SkipCinematic` input bindings; camera skip may not mutate mission flags. **F9 retries the last checkpoint without deleting the save**, including after a fatal shot. The level name used for recovery strips Play In Editor prefixes.
+
+Unreal now draws locally true action prompts only when real physical reach/LOS and mission flags allow the interaction (truck loot, prisoner, custody, breakable walls, gear, Card 2/3, roof launcher, lift and mine sites). The browser has matching action opportunities, a non-consuming equipment selector, safe R/pause/death retries, and tiered anti-stall guidance beyond the prison. See the [cross-engine playability record](CROSS_ENGINE_PLAYABILITY_PASS_2026_11_21.md).
+
+**Required physical-play acceptance:** Test every A/X/B/Y/D-pad mapping with a real controller and keyboard, then attempt to get stuck by dying mid-boss, pressing Retry during a cinematic, skipping an active scene, reaching a physical item from the wrong side of a wall, consuming the last ration, reopening equipment, running out of grenades, and re-entering roof/tank areas. Compare screenshots and player comprehension between engines. These are source modifications; UE5.7 compile, PIE, native package and human playability are not validated by this note.
+
 ## Unreal native import and packaging troubleshooting added this pass
 
 **Do not trust a successful .exe build just because the source code references GLBs.** The project now explicitly cooks its dynamic `/Game/Characters`, `/Game/Weapons`, `/Game/Feedback` and `/Game/Audio/Weapons` roots. The importer rejects pre-existing mesh-only/partial imports, and PowerShell requires affirmative import/audit markers instead of trusting a zero Editor exit code. After the character import step, run:
