@@ -1,0 +1,3202 @@
+{
+  "schemaVersion": 1,
+  "revision": "2026-11-21",
+  "title": "OUTER HEAVEN / 1995 CONVERSION MASTER ATLAS",
+  "authority": "1987 MSX2 source order and 3-building floor-stack; NOT original screen grid or exact canonical architectural survey",
+  "warning": "ALL site coordinates, lengths, room shapes, gate positions and exterior materials are DESIGN PROPOSALS, pending source comparison and native collision/PIE tests.",
+  "sources": [
+    {
+      "label": "Konami 1987 MSX2 manual (illustrated)",
+      "url": "https://www.ne.jp/asahi/hzk/kommander/mg1manual.pdf",
+      "evidence": "3 building stacks, infiltration, floors, lift, cards"
+    },
+    {
+      "label": "Konami modern MGS1 manual",
+      "url": "https://metalgear.konami.net/manual/mc1/mgs1/pc/en/page06.html",
+      "evidence": "hold/scroll/release weapon/item control"
+    },
+    {
+      "label": "Project original story and weapon audit",
+      "repoPath": "data/MSX2_1987_STORY_AND_WEAPON_PROVENANCE.json"
+    },
+    {
+      "label": "Project 114 beat ledger",
+      "repoPath": "data/FULL_CAMPAIGN_BEAT_BY_BEAT_IMPLEMENTATION_LEDGER.json"
+    }
+  ],
+  "site": {
+    "size_m": [
+      990,
+      580
+    ],
+    "origin": "north-west in displayed local metres",
+    "north": "up",
+    "terrain": "semi-arid highland / rocky scrub is REMAKE art direction, not source-verified physical geography",
+    "surveyStatus": "illustrative - not a geodetic map",
+    "scaleBars_m": [
+      0,
+      50,
+      100,
+      200
+    ]
+  },
+  "scaleDoctrine": {
+    "baseUnit": "metre",
+    "wall_height_m": 6.4,
+    "watchtower_height_m": 12.5,
+    "service_road_width_m": 8,
+    "truck_turning_clearance_m": 20,
+    "helipad_nominal_side_m": 47,
+    "storey_to_storey_m": 4.5,
+    "minimum_walkway_m": 1.5,
+    "normal_two_person_corridor_m": 2.2,
+    "proposed_crawl_width_m": 0.85,
+    "humanHeight_m": 1.8,
+    "scope": "Plausible engineering target, not source-derived",
+    "pacing": "Physical site sells strategic scale; shorten compulsory travel using lifts, meaningful backtrack changes and unlocked shortcuts. Any traversal over 90 seconds without affordances is a design review signal."
+  },
+  "levels": [
+    {
+      "id": "SITE",
+      "label": "Site / exterior",
+      "elevation_m": 0,
+      "building": "external",
+      "sourceStatus": "floor stack inferred from 1987 manual and project conversion, elevations proposed"
+    },
+    {
+      "id": "B1.1F",
+      "label": "Building 1 · 1F",
+      "elevation_m": 0,
+      "building": "b1",
+      "sourceStatus": "floor stack inferred from 1987 manual and project conversion, elevations proposed"
+    },
+    {
+      "id": "B1.2F",
+      "label": "Building 1 · 2F",
+      "elevation_m": 4.5,
+      "building": "b1",
+      "sourceStatus": "floor stack inferred from 1987 manual and project conversion, elevations proposed"
+    },
+    {
+      "id": "B1.3F",
+      "label": "Building 1 · 3F",
+      "elevation_m": 9,
+      "building": "b1",
+      "sourceStatus": "floor stack inferred from 1987 manual and project conversion, elevations proposed"
+    },
+    {
+      "id": "B1.ROOF",
+      "label": "Building 1 · Roof",
+      "elevation_m": 13.5,
+      "building": "b1",
+      "sourceStatus": "floor stack inferred from 1987 manual and project conversion, elevations proposed"
+    },
+    {
+      "id": "B1.B1",
+      "label": "Building 1 · BF",
+      "elevation_m": -4.5,
+      "building": "b1",
+      "sourceStatus": "floor stack inferred from 1987 manual and project conversion, elevations proposed"
+    },
+    {
+      "id": "B1.B2",
+      "label": "Building 1 · Deep service (adapted)",
+      "elevation_m": -9,
+      "building": "b1",
+      "sourceStatus": "floor stack inferred from 1987 manual and project conversion, elevations proposed"
+    },
+    {
+      "id": "B2.1F",
+      "label": "Building 2 · 1F",
+      "elevation_m": 0,
+      "building": "b2",
+      "sourceStatus": "floor stack inferred from 1987 manual and project conversion, elevations proposed"
+    },
+    {
+      "id": "B2.2F",
+      "label": "Building 2 · 2F",
+      "elevation_m": 4.5,
+      "building": "b2",
+      "sourceStatus": "floor stack inferred from 1987 manual and project conversion, elevations proposed"
+    },
+    {
+      "id": "B2.B1",
+      "label": "Building 2 · BF",
+      "elevation_m": -4.5,
+      "building": "b2",
+      "sourceStatus": "floor stack inferred from 1987 manual and project conversion, elevations proposed"
+    },
+    {
+      "id": "B3.1F",
+      "label": "Building 3 · 1F",
+      "elevation_m": 0,
+      "building": "b3",
+      "sourceStatus": "floor stack inferred from 1987 manual and project conversion, elevations proposed"
+    },
+    {
+      "id": "B3.B100",
+      "label": "Building 3 · Deep core B100",
+      "elevation_m": -20,
+      "building": "b3",
+      "sourceStatus": "floor stack inferred from 1987 manual and project conversion, elevations proposed"
+    },
+    {
+      "id": "TUNNEL",
+      "label": "Service tunnel",
+      "elevation_m": -8,
+      "building": "external",
+      "sourceStatus": "floor stack inferred from 1987 manual and project conversion, elevations proposed"
+    }
+  ],
+  "features": [
+    {
+      "id": "b1",
+      "kind": "building",
+      "label": "BUILDING 1",
+      "rect_m": [
+        97,
+        159,
+        235,
+        221
+      ],
+      "height_m": 16.3,
+      "role": "security / detention / comms",
+      "sourceStatus": "remake_proposed_not_canon"
+    },
+    {
+      "id": "b2",
+      "kind": "building",
+      "label": "BUILDING 2",
+      "rect_m": [
+        426,
+        165,
+        214,
+        210
+      ],
+      "height_m": 12.8,
+      "role": "heavy industrial / logistics / research",
+      "sourceStatus": "remake_proposed_not_canon"
+    },
+    {
+      "id": "b3",
+      "kind": "building",
+      "label": "BUILDING 3",
+      "rect_m": [
+        725,
+        166,
+        196,
+        210
+      ],
+      "height_m": 10.2,
+      "role": "strategic command / TX-55 core",
+      "sourceStatus": "remake_proposed_not_canon"
+    },
+    {
+      "id": "yard",
+      "kind": "yard",
+      "label": "RECEIVING MOTOR POOL",
+      "rect_m": [
+        92,
+        386,
+        264,
+        116
+      ],
+      "role": "freight, checks, inventory, returning guards",
+      "sourceStatus": "remake_proposed_not_canon"
+    },
+    {
+      "id": "motor_road",
+      "kind": "road",
+      "label": "SERVICE ROAD",
+      "rect_m": [
+        97,
+        402,
+        789,
+        9
+      ],
+      "width_m": 8,
+      "role": "vehicle movement, tanks, evacuation",
+      "sourceStatus": "remake_proposed_not_canon"
+    },
+    {
+      "id": "tank_sweep",
+      "kind": "danger",
+      "label": "TANK / TRACK",
+      "rect_m": [
+        340,
+        385,
+        95,
+        48
+      ],
+      "role": "three exposed mines, cover, armoured advance",
+      "sourceStatus": "remake_proposed_not_canon"
+    },
+    {
+      "id": "heli",
+      "kind": "helipad",
+      "label": "HELIPAD",
+      "rect_m": [
+        250,
+        80,
+        47,
+        47
+      ],
+      "role": "aviation support; rooftop boss separate",
+      "sourceStatus": "remake_proposed_not_canon"
+    },
+    {
+      "id": "utilities",
+      "kind": "utility",
+      "label": "DIESEL / WATER / TRANSFORMERS",
+      "rect_m": [
+        655,
+        202,
+        58,
+        106
+      ],
+      "role": "visible power and ventilation logic",
+      "sourceStatus": "remake_proposed_not_canon"
+    },
+    {
+      "id": "wall",
+      "kind": "perimeter",
+      "label": "PERIMETER",
+      "rect_m": [
+        42,
+        62,
+        910,
+        465
+      ],
+      "height_m": 6.4,
+      "role": "hardened perimeter with surveillance and gate",
+      "sourceStatus": "remake_proposed_not_canon"
+    },
+    {
+      "id": "t_nw",
+      "kind": "tower",
+      "center_m": [
+        59,
+        78
+      ],
+      "height_m": 12.5,
+      "sourceStatus": "remake_proposed_not_canon"
+    },
+    {
+      "id": "t_ne",
+      "kind": "tower",
+      "center_m": [
+        934,
+        78
+      ],
+      "height_m": 12.5,
+      "sourceStatus": "remake_proposed_not_canon"
+    },
+    {
+      "id": "t_sw",
+      "kind": "tower",
+      "center_m": [
+        59,
+        510
+      ],
+      "height_m": 12.5,
+      "sourceStatus": "remake_proposed_not_canon"
+    },
+    {
+      "id": "t_se",
+      "kind": "tower",
+      "center_m": [
+        934,
+        510
+      ],
+      "height_m": 12.5,
+      "sourceStatus": "remake_proposed_not_canon"
+    },
+    {
+      "id": "main_gate",
+      "kind": "gate",
+      "center_m": [
+        121,
+        526
+      ],
+      "width_m": 8,
+      "role": "two-stage freight entry",
+      "sourceStatus": "remake_proposed_not_canon"
+    }
+  ],
+  "areas": [
+    {
+      "id": "B1.1F.ENTRANCE",
+      "label": "Ingress",
+      "mission": "P01",
+      "level": "B1.1F",
+      "center_m": [
+        125,
+        328
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P01.brief",
+          "ordinal": 1,
+          "name": "Optional opening radio",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P01.entry",
+          "ordinal": 2,
+          "name": "Two-guard crate-lined entry",
+          "status": "source_prototype"
+        }
+      ],
+      "adjacencySource": [
+        "B1.1F.TRUCKS"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.1F.TRUCKS",
+      "label": "Truck depot",
+      "mission": "P01",
+      "level": "B1.1F",
+      "center_m": [
+        155,
+        341
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Ration",
+        "Card 1",
+        "Binoculars"
+      ],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P01.trucks",
+          "ordinal": 3,
+          "name": "Original three supply trucks",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P01.ration",
+          "ordinal": 4,
+          "name": "Western ration pickup",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P01.card1",
+          "ordinal": 5,
+          "name": "Card 1 in centre truck",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P01.scope",
+          "ordinal": 6,
+          "name": "Binoculars in eastern truck",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P01.cover",
+          "ordinal": 10,
+          "name": "Crate concealment and patrol avoidance",
+          "status": "design_only"
+        },
+        {
+          "id": "P01.freight",
+          "ordinal": 12,
+          "name": "Optional remake-only working cargo conveyor",
+          "status": "source_prototype"
+        }
+      ],
+      "adjacencySource": [
+        "B1.1F.ENTRANCE",
+        "B1.1F.GAS"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.1F.GAS",
+      "label": "Gas machinery",
+      "mission": "P01",
+      "level": "B1.1F",
+      "center_m": [
+        190,
+        282
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Gas mask"
+      ],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P01.mask",
+          "ordinal": 7,
+          "name": "Card 1 and sleeping guard to Gas Mask",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.1F.TRUCKS",
+        "B1.1F.ARMORY"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.1F.ARMORY",
+      "label": "Armoury",
+      "mission": "P01",
+      "level": "B1.1F",
+      "center_m": [
+        235,
+        292
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Handgun",
+        "Mines",
+        "Plastic explosive"
+      ],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P01.handgun",
+          "ordinal": 8,
+          "name": "Authentic handgun acquisition",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P01.mines",
+          "ordinal": 9,
+          "name": "Guarded mine-truck pickup",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.1F.GAS",
+        "B1.1F.ELEVATOR"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.1F.ELEVATOR",
+      "label": "East lift",
+      "mission": "P01",
+      "level": "B1.1F",
+      "center_m": [
+        278,
+        262
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P01.elevator",
+          "ordinal": 11,
+          "name": "Two sentries and lift to floor three",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.1F.ARMORY"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.3F.CAMERA",
+      "label": "CCTV",
+      "mission": "P02",
+      "level": "B1.3F",
+      "center_m": [
+        129,
+        216
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P02.cctv",
+          "ordinal": 1,
+          "name": "Cover and live camera sightlines",
+          "status": "design_only"
+        },
+        {
+          "id": "P02.ammo",
+          "ordinal": 2,
+          "name": "Original handgun ammunition",
+          "status": "design_only"
+        },
+        {
+          "id": "P02.pow1",
+          "ordinal": 3,
+          "name": "Third-floor prisoner one",
+          "status": "design_only"
+        },
+        {
+          "id": "P02.gas",
+          "ordinal": 4,
+          "name": "Original toxic room and mask",
+          "status": "design_only"
+        },
+        {
+          "id": "P02.pow2",
+          "ordinal": 5,
+          "name": "Third-floor prisoner two",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.3F.HAZARD"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.3F.HAZARD",
+      "label": "Hazard vents",
+      "mission": "P02",
+      "level": "B1.3F",
+      "center_m": [
+        171,
+        216
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P02.pillar",
+          "ordinal": 6,
+          "name": "Moving death-pillar and optional plastic explosive",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.3F.CAMERA",
+        "B1.3F.CARD2"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.3F.CARD2",
+      "label": "Card 2",
+      "mission": "P02",
+      "level": "B1.3F",
+      "center_m": [
+        217,
+        210
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Card 2"
+      ],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P02.card2",
+          "ordinal": 7,
+          "name": "Card 2 gated original location",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.3F.HAZARD",
+        "B1.3F.ELECTRIC"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.3F.ELECTRIC",
+      "label": "Power control",
+      "mission": "P02",
+      "level": "B1.3F",
+      "center_m": [
+        278,
+        218
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Remote missile"
+      ],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P02.remote",
+          "ordinal": 8,
+          "name": "Earn remote-controlled missile",
+          "status": "design_only"
+        },
+        {
+          "id": "P02.electric",
+          "ordinal": 9,
+          "name": "Destroy electrical floor unit with guided missile",
+          "status": "design_only"
+        },
+        {
+          "id": "P02.pow3",
+          "ordinal": 10,
+          "name": "Diane-frequency prisoner",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.3F.CARD2",
+        "B1.3F.BOX"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.3F.BOX",
+      "label": "Cardboard box",
+      "mission": "P02",
+      "level": "B1.3F",
+      "center_m": [
+        130,
+        287
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Cardboard box (Card 2 gate)"
+      ],
+      "gates": [
+        "Card 2"
+      ],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P02.box",
+          "ordinal": 11,
+          "name": "Permanent Card 2 / floor-three cardboard box",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.3F.ELECTRIC",
+        "B1.3F.MERCENARIES"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.3F.MERCENARIES",
+      "label": "Four Mercenaries",
+      "mission": "P02",
+      "level": "B1.3F",
+      "center_m": [
+        197,
+        293
+      ],
+      "footprint_m": [
+        36,
+        28
+      ],
+      "boss": "Four Mercenaries",
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P02.merc",
+          "ordinal": 12,
+          "name": "Four mercenaries multi-threat or original bypass",
+          "status": "design_only"
+        },
+        {
+          "id": "P02.silencer",
+          "ordinal": 13,
+          "name": "Earn silencer from optional mercenary defeat",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.3F.BOX",
+        "B1.3F.GRENADE"
+      ],
+      "designNotes": [
+        "Visible arena preparation and recovery phase",
+        "Cover must suit legitimate boss counterplay",
+        "Safe retreat that cannot skip reward gate"
+      ]
+    },
+    {
+      "id": "B1.3F.GRENADE",
+      "label": "Grenade supply",
+      "mission": "P02",
+      "level": "B1.3F",
+      "center_m": [
+        277,
+        302
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Grenade launcher"
+      ],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P02.grenade",
+          "ordinal": 14,
+          "name": "Grenade launcher behind Card 1 route",
+          "status": "design_only"
+        },
+        {
+          "id": "P02.pow4",
+          "ordinal": 15,
+          "name": "Third-floor prisoner after gun room",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.3F.MERCENARIES",
+        "B1.2F.LASER"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.2F.LASER",
+      "label": "Laser controls",
+      "mission": "P02",
+      "level": "B1.2F",
+      "center_m": [
+        170,
+        218
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Suppressor"
+      ],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P02.laser",
+          "ordinal": 16,
+          "name": "Second floor invisible IR beams before IR goggles",
+          "status": "design_only"
+        },
+        {
+          "id": "P02.pow5",
+          "ordinal": 17,
+          "name": "Second-floor rescue and rank",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.3F.GRENADE",
+        "B1.1F.REVISIT"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.1F.REVISIT",
+      "label": "Revisit corridor",
+      "mission": "P02",
+      "level": "B1.1F",
+      "center_m": [
+        279,
+        340
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P02.return1",
+          "ordinal": 18,
+          "name": "Backtrack to ground floor with box and Card 2",
+          "status": "design_only"
+        },
+        {
+          "id": "P02.smg",
+          "ordinal": 19,
+          "name": "Recover SMG behind Card 2 door",
+          "status": "design_only"
+        },
+        {
+          "id": "P02.pow6",
+          "ordinal": 20,
+          "name": "First-floor final rescue before capture",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.2F.LASER"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.B1.CELL",
+      "label": "Snake's cell",
+      "mission": "P03",
+      "level": "B1.B1",
+      "center_m": [
+        124,
+        213
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P03.capture",
+          "ordinal": 1,
+          "name": "Earn the original first-floor capture and controlled detention",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P03.confiscate",
+          "ordinal": 2,
+          "name": "Take and persist honestly acquired items",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P03.wall1",
+          "ordinal": 3,
+          "name": "Locate hollow first cell wall and break it through repeat blows",
+          "status": "source_prototype"
+        }
+      ],
+      "adjacencySource": [
+        "B1.B1.FOX"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.B1.FOX",
+      "label": "Gray Fox holding",
+      "mission": "P03",
+      "level": "B1.B1",
+      "center_m": [
+        157,
+        215
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [
+        "1st weak wall"
+      ],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P03.fox",
+          "ordinal": 4,
+          "name": "Contact Gray Fox and recover his intelligence",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P03.wall2",
+          "ordinal": 5,
+          "name": "Locate and break second cell wall",
+          "status": "source_prototype"
+        }
+      ],
+      "adjacencySource": [
+        "B1.B1.CELL",
+        "B1.B1.PRISON"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.B1.PRISON",
+      "label": "Detention exit",
+      "mission": "P03",
+      "level": "B1.B1",
+      "center_m": [
+        198,
+        218
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [
+        "Gray Fox conversation",
+        "2nd weak wall"
+      ],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P03.prison",
+          "ordinal": 6,
+          "name": "Evade guarded passage without recovered equipment",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P03.codec",
+          "ordinal": 7,
+          "name": "Optional reliable Big Boss and Schneider clues",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P03.bodies",
+          "ordinal": 8,
+          "name": "Drag/stash unconscious guards with movement and discovery consequences",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.B1.FOX"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.B1.SHOT",
+      "label": "Shoot Gunner",
+      "mission": "P04",
+      "level": "B1.B1",
+      "center_m": [
+        245,
+        225
+      ],
+      "footprint_m": [
+        36,
+        28
+      ],
+      "boss": "Shoot Gunner",
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P04.introduce",
+          "ordinal": 1,
+          "name": "Shoot Gunner/Shotmaker introduction without surprise hit",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P04.volley",
+          "ordinal": 2,
+          "name": "Distinct three-shot telegraphed shotgun volleys",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P04.boss",
+          "ordinal": 7,
+          "name": "Source-valid defeat and alternate outcome",
+          "status": "source_prototype"
+        }
+      ],
+      "adjacencySource": [
+        "B1.B1.GEAR"
+      ],
+      "designNotes": [
+        "Visible arena preparation and recovery phase",
+        "Cover must suit legitimate boss counterplay",
+        "Safe retreat that cannot skip reward gate"
+      ]
+    },
+    {
+      "id": "B1.B1.GEAR",
+      "label": "Recovery locker",
+      "mission": "P04",
+      "level": "B1.B1",
+      "center_m": [
+        275,
+        261
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Confiscated equipment",
+        "Enemy transmitter"
+      ],
+      "gates": [
+        "Physical gear door"
+      ],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P04.evade",
+          "ordinal": 3,
+          "name": "Original escape toward gear room while unarmed",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P04.break",
+          "ordinal": 4,
+          "name": "Physically break recovering-room door",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P04.bag",
+          "ordinal": 5,
+          "name": "Retrieve entire confiscated inventory",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P04.tracker",
+          "ordinal": 6,
+          "name": "Find and remove planted transmitter",
+          "status": "source_prototype"
+        }
+      ],
+      "adjacencySource": [
+        "B1.B1.SHOT",
+        "B1.B1.CARD3"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.B1.CARD3",
+      "label": "Card 3",
+      "mission": "P04",
+      "level": "B1.B1",
+      "center_m": [
+        254,
+        306
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Card 3"
+      ],
+      "gates": [
+        "Card 2",
+        "Shoot Gunner encounter"
+      ],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P04.card3",
+          "ordinal": 8,
+          "name": "Take Card 3 behind owned Card 2 door",
+          "status": "source_prototype"
+        }
+      ],
+      "adjacencySource": [
+        "B1.B1.GEAR"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.B1.DOGS",
+      "label": "Kennels",
+      "mission": "P05",
+      "level": "B1.B1",
+      "center_m": [
+        180,
+        305
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P05.dog",
+          "ordinal": 1,
+          "name": "Card 3 dog passage, real kennel behaviour",
+          "status": "source_prototype"
+        }
+      ],
+      "adjacencySource": [
+        "B1.B1.SPIRAL"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.B1.SPIRAL",
+      "label": "Spiral shaft",
+      "mission": "P05",
+      "level": "B1.B1",
+      "center_m": [
+        130,
+        306
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P05.weak",
+          "ordinal": 2,
+          "name": "Explosive-only breakable weak wall",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P05.spiral",
+          "ordinal": 3,
+          "name": "Multiple 3D-connected spiral side branches and hide spots",
+          "status": "design_only"
+        },
+        {
+          "id": "P05.suit",
+          "ordinal": 4,
+          "name": "Bomb Blast Suit in spiral branch",
+          "status": "design_only"
+        },
+        {
+          "id": "P05.uniform",
+          "ordinal": 5,
+          "name": "Enemy Uniform behind secret passage",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.B1.DOGS",
+        "B1.B2.GUARDS"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.B2.GUARDS",
+      "label": "Guard station",
+      "mission": "P05",
+      "level": "B1.B2",
+      "center_m": [
+        130,
+        228
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P05.lift",
+          "ordinal": 6,
+          "name": "Connected B1-to-B2 lift and same state on return",
+          "status": "design_only"
+        },
+        {
+          "id": "P05.boxB2",
+          "ordinal": 7,
+          "name": "Reuse permanent box under genuine basement CCTV",
+          "status": "design_only"
+        },
+        {
+          "id": "P05.mines2",
+          "ordinal": 8,
+          "name": "Sleep-guarded mine restock",
+          "status": "design_only"
+        },
+        {
+          "id": "P05.powB2",
+          "ordinal": 9,
+          "name": "Basement hostage and rank",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.B1.SPIRAL",
+        "B1.B2.ELECTRIC"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.B2.ELECTRIC",
+      "label": "Power control",
+      "mission": "P05",
+      "level": "B1.B2",
+      "center_m": [
+        185,
+        255
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P05.controller",
+          "ordinal": 10,
+          "name": "Guard-operated electric floor controller",
+          "status": "design_only"
+        },
+        {
+          "id": "P05.ir",
+          "ordinal": 11,
+          "name": "Earn infrared goggles for later lasers",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.B2.GUARDS",
+        "B1.B2.KID"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.B2.KID",
+      "label": "Machinegun Kid",
+      "mission": "P05",
+      "level": "B1.B2",
+      "center_m": [
+        261,
+        270
+      ],
+      "footprint_m": [
+        36,
+        28
+      ],
+      "boss": "Machinegun Kid",
+      "pickups": [
+        "Parachute route lead"
+      ],
+      "gates": [
+        "Plastic explosive breach"
+      ],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P05.kid",
+          "ordinal": 12,
+          "name": "Machinegun Kid telegraph, suppression, reload and physical cover",
+          "status": "source_prototype"
+        },
+        {
+          "id": "P05.powKid",
+          "ordinal": 13,
+          "name": "Second-floor or basement rescue after boss",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.B2.ELECTRIC",
+        "B1.2F.PARACHUTE"
+      ],
+      "designNotes": [
+        "Visible arena preparation and recovery phase",
+        "Cover must suit legitimate boss counterplay",
+        "Safe retreat that cannot skip reward gate"
+      ]
+    },
+    {
+      "id": "B1.2F.PARACHUTE",
+      "label": "Parachute",
+      "mission": "P05",
+      "level": "B1.2F",
+      "center_m": [
+        265,
+        305
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Parachute"
+      ],
+      "gates": [
+        "Machinegun Kid overcome"
+      ],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P05.parachute",
+          "ordinal": 14,
+          "name": "Earn parachute in floor-two room",
+          "status": "source_prototype"
+        }
+      ],
+      "adjacencySource": [
+        "B1.B2.KID"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.ROOF.CORRIDOR",
+      "label": "Rooftop corridor",
+      "mission": "P06",
+      "level": "B1.ROOF",
+      "center_m": [
+        128,
+        284
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P06.roof",
+          "ordinal": 1,
+          "name": "Reach actual roof elevation and guarded parapet",
+          "status": "design_only"
+        },
+        {
+          "id": "P06.powRoof",
+          "ordinal": 2,
+          "name": "Roof prisoner and ammo route",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.ROOF.HIND"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.ROOF.HIND",
+      "label": "Hind D",
+      "mission": "P06",
+      "level": "B1.ROOF",
+      "center_m": [
+        215,
+        264
+      ],
+      "footprint_m": [
+        36,
+        28
+      ],
+      "boss": "Hind D",
+      "pickups": [],
+      "gates": [
+        "West lift",
+        "Grenade launcher"
+      ],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P06.hind",
+          "ordinal": 3,
+          "name": "Fight helicopter with correct weapon and real vertical cover",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.ROOF.CORRIDOR",
+        "B1.ROOF.DROP"
+      ],
+      "designNotes": [
+        "Visible arena preparation and recovery phase",
+        "Cover must suit legitimate boss counterplay",
+        "Safe retreat that cannot skip reward gate"
+      ]
+    },
+    {
+      "id": "B1.ROOF.DROP",
+      "label": "Roof drop",
+      "mission": "P06",
+      "level": "B1.ROOF",
+      "center_m": [
+        283,
+        327
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Card 4 progression (location unverified)"
+      ],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P06.drop",
+          "ordinal": 4,
+          "name": "Parachute onto connected lower landing zone",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.ROOF.HIND",
+        "EXT.TRUCKS"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "EXT.TRUCKS",
+      "label": "Truck depot",
+      "mission": "P06",
+      "level": "SITE",
+      "center_m": [
+        345,
+        423
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P06.dogs",
+          "ordinal": 5,
+          "name": "Exterior dogs and movement routes",
+          "status": "design_only"
+        },
+        {
+          "id": "P06.card4",
+          "ordinal": 6,
+          "name": "Earn Card 4 from correct exterior truck",
+          "status": "design_only"
+        },
+        {
+          "id": "P06.mineDetector",
+          "ordinal": 7,
+          "name": "Mine detector before landmine threat",
+          "status": "design_only"
+        },
+        {
+          "id": "P06.returnTruck",
+          "ordinal": 8,
+          "name": "Truck back to B1 without losing world flags",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.ROOF.DROP",
+        "EXT.TANK"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "EXT.TANK",
+      "label": "Tank",
+      "mission": "P06",
+      "level": "SITE",
+      "center_m": [
+        391,
+        410
+      ],
+      "footprint_m": [
+        36,
+        28
+      ],
+      "boss": "Tank",
+      "pickups": [
+        "Mine-placement track"
+      ],
+      "gates": [
+        "Hind D resolved",
+        "Mines"
+      ],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P06.tank",
+          "ordinal": 9,
+          "name": "Mine-based tank encounter, real vehicle path and cover",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "EXT.TRUCKS"
+      ],
+      "designNotes": [
+        "Visible arena preparation and recovery phase",
+        "Cover must suit legitimate boss counterplay",
+        "Safe retreat that cannot skip reward gate"
+      ]
+    },
+    {
+      "id": "B2.1F.ENTRY",
+      "label": "Building entry",
+      "mission": "P07",
+      "level": "B2.1F",
+      "center_m": [
+        449,
+        314
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P07.entry",
+          "ordinal": 1,
+          "name": "Cross vehicle checkpoint into industrial building",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B2.1F.BULLDOZER"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B2.1F.BULLDOZER",
+      "label": "Bulldozer",
+      "mission": "P07",
+      "level": "B2.1F",
+      "center_m": [
+        501,
+        279
+      ],
+      "footprint_m": [
+        36,
+        28
+      ],
+      "boss": "Bulldozer",
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P07.bulldozer",
+          "ordinal": 2,
+          "name": "Avoid and destroy advancing bulldozer using source weapon",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B2.1F.ENTRY",
+        "B2.1F.WATER"
+      ],
+      "designNotes": [
+        "Visible arena preparation and recovery phase",
+        "Cover must suit legitimate boss counterplay",
+        "Safe retreat that cannot skip reward gate"
+      ]
+    },
+    {
+      "id": "B2.1F.WATER",
+      "label": "Water works",
+      "mission": "P07",
+      "level": "B2.1F",
+      "center_m": [
+        568,
+        254
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Oxygen equipment route"
+      ],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P07.antenna",
+          "ordinal": 3,
+          "name": "Find antenna and restore distant radio",
+          "status": "design_only"
+        },
+        {
+          "id": "P07.card5",
+          "ordinal": 4,
+          "name": "Earn Card 5 from correct source room",
+          "status": "design_only"
+        },
+        {
+          "id": "P07.powB2",
+          "ordinal": 5,
+          "name": "Rescue engineer-zone hostages and update rank",
+          "status": "design_only"
+        },
+        {
+          "id": "P07.water",
+          "ordinal": 6,
+          "name": "Use walkable catwalk and channel routes",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B2.1F.BULLDOZER",
+        "B2.B1.FIRE"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B2.B1.FIRE",
+      "label": "Fire Trooper",
+      "mission": "P07",
+      "level": "B2.B1",
+      "center_m": [
+        533,
+        259
+      ],
+      "footprint_m": [
+        36,
+        28
+      ],
+      "boss": "Fire Trooper",
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P07.fire",
+          "ordinal": 7,
+          "name": "Fire Trooper flame cone and vulnerable recovery",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B2.1F.WATER",
+        "B2.2F.CARDS"
+      ],
+      "designNotes": [
+        "Visible arena preparation and recovery phase",
+        "Cover must suit legitimate boss counterplay",
+        "Safe retreat that cannot skip reward gate"
+      ]
+    },
+    {
+      "id": "B2.2F.CARDS",
+      "label": "Card office",
+      "mission": "P07",
+      "level": "B2.2F",
+      "center_m": [
+        465,
+        220
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Card 5 / Card 6 (location unverified)"
+      ],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P07.card6",
+          "ordinal": 8,
+          "name": "Earn Card 6 in source-correct order",
+          "status": "design_only"
+        },
+        {
+          "id": "P07.returnElevator",
+          "ordinal": 9,
+          "name": "Bidirectional lifts with correct prior alarm state",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B2.B1.FIRE"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B2.2F.JENNIFER",
+      "label": "Jennifer's lead",
+      "mission": "P08",
+      "level": "B2.2F",
+      "center_m": [
+        502,
+        218
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Rocket launcher contact"
+      ],
+      "gates": [
+        "Resistance intel"
+      ],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P08.jennifer",
+          "ordinal": 1,
+          "name": "Earn and contact Jennifer at 120.48",
+          "status": "design_only"
+        },
+        {
+          "id": "P08.rocket",
+          "ordinal": 2,
+          "name": "Earn rocket launcher from source-required room",
+          "status": "design_only"
+        },
+        {
+          "id": "P08.compass",
+          "ordinal": 7,
+          "name": "Recover compass from Jennifer-approved stores",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B2.2F.TX11"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B2.2F.TX11",
+      "label": "TX-11 / Bloody Brad",
+      "mission": "P08",
+      "level": "B2.2F",
+      "center_m": [
+        569,
+        228
+      ],
+      "footprint_m": [
+        36,
+        28
+      ],
+      "boss": "TX-11 / Bloody Brad",
+      "pickups": [],
+      "gates": [
+        "Rocket launcher"
+      ],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P08.tx11",
+          "ordinal": 5,
+          "name": "Defeat two Arnold/Bloody Brad robots with rockets",
+          "status": "design_only"
+        },
+        {
+          "id": "P08.card7",
+          "ordinal": 6,
+          "name": "Earn Card 7 as one-time boss reward",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B2.2F.JENNIFER",
+        "B2.2F.MADNAR"
+      ],
+      "designNotes": [
+        "Visible arena preparation and recovery phase",
+        "Cover must suit legitimate boss counterplay",
+        "Safe retreat that cannot skip reward gate"
+      ]
+    },
+    {
+      "id": "B2.2F.MADNAR",
+      "label": "Dr Madnar",
+      "mission": "P08",
+      "level": "B2.2F",
+      "center_m": [
+        592,
+        298
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Card 7 narrative lead"
+      ],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P08.madnar",
+          "ordinal": 3,
+          "name": "Meet original real Dr Pettrovich and rescue demand",
+          "status": "design_only"
+        },
+        {
+          "id": "P08.decoy",
+          "ordinal": 4,
+          "name": "Distinguish impostor from real captive",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B2.2F.TX11",
+        "B2.2F.RETURN"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B2.2F.RETURN",
+      "label": "Return route",
+      "mission": "P08",
+      "level": "B2.2F",
+      "center_m": [
+        471,
+        316
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P08.flashlight",
+          "ordinal": 8,
+          "name": "Collect flashlight for upcoming tunnel",
+          "status": "design_only"
+        },
+        {
+          "id": "P08.pow",
+          "ordinal": 9,
+          "name": "Rescue Card 5/6-gated hostages",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B2.2F.MADNAR"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B1.B1.ELLEN",
+      "label": "Ellen",
+      "mission": "P09",
+      "level": "B1.B1",
+      "center_m": [
+        272,
+        344
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P09.backB1",
+          "ordinal": 1,
+          "name": "Return to Building 1 through Card 6 gates",
+          "status": "design_only"
+        },
+        {
+          "id": "P09.ellen",
+          "ordinal": 2,
+          "name": "Discover weak wall and rescue Ellen without trap exploit",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "UNDERGROUND.TUNNEL"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "UNDERGROUND.TUNNEL",
+      "label": "Tunnel",
+      "mission": "P09",
+      "level": "TUNNEL",
+      "center_m": [
+        677,
+        408
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P09.tunnel",
+          "ordinal": 3,
+          "name": "Navigate flashlight tunnel, pits and explosive route",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B1.B1.ELLEN",
+        "B2.B1.REVISIT"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B2.B1.REVISIT",
+      "label": "Revisit corridor",
+      "mission": "P09",
+      "level": "B2.B1",
+      "center_m": [
+        590,
+        342
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P09.madnarReturn",
+          "ordinal": 4,
+          "name": "Return to Dr Madnar with Ellen alive and get TX-55 intelligence",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "UNDERGROUND.TUNNEL",
+        "B3.1F.ENTRY"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B3.1F.ENTRY",
+      "label": "Building entry",
+      "mission": "P09",
+      "level": "B3.1F",
+      "center_m": [
+        751,
+        308
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P09.desert",
+          "ordinal": 5,
+          "name": "Use compass and uniform in scorpion desert to B3",
+          "status": "design_only"
+        },
+        {
+          "id": "P09.backToB3",
+          "ordinal": 13,
+          "name": "Return again through desert using Card 8",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B2.B1.REVISIT",
+        "B3.B100.OXYGEN"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B3.B100.OXYGEN",
+      "label": "Oxygen route",
+      "mission": "P09",
+      "level": "B3.B100",
+      "center_m": [
+        764,
+        219
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [
+        "Deep drainage supply"
+      ],
+      "gates": [
+        "Oxygen equipment"
+      ],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P09.b3Visit1",
+          "ordinal": 6,
+          "name": "Enter B3 and reach B100 initially",
+          "status": "design_only"
+        },
+        {
+          "id": "P09.oxygen",
+          "ordinal": 7,
+          "name": "Obtain oxygen tanks from laser-camera side chamber",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B3.1F.ENTRY",
+        "B2.1F.DRAIN"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B2.1F.DRAIN",
+      "label": "Drain",
+      "mission": "P09",
+      "level": "B2.1F",
+      "center_m": [
+        570,
+        339
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P09.backToB2",
+          "ordinal": 8,
+          "name": "Physically backtrack to B2 while retaining Oxygen Tanks",
+          "status": "design_only"
+        },
+        {
+          "id": "P09.drain",
+          "ordinal": 9,
+          "name": "Traverse deep water, electric hazard and camera awareness",
+          "status": "design_only"
+        },
+        {
+          "id": "P09.restock",
+          "ordinal": 12,
+          "name": "Optional rations/plastic explosives before final trip",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B3.B100.OXYGEN",
+        "B2.1F.DUCK"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B2.1F.DUCK",
+      "label": "Coward Duck / Dirty Duck",
+      "mission": "P09",
+      "level": "B2.1F",
+      "center_m": [
+        620,
+        321
+      ],
+      "footprint_m": [
+        36,
+        28
+      ],
+      "boss": "Coward Duck / Dirty Duck",
+      "pickups": [
+        "Card 8 (location unverified)"
+      ],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P09.duck",
+          "ordinal": 10,
+          "name": "Fight Coward Duck without harming three POW shields",
+          "status": "design_only"
+        },
+        {
+          "id": "P09.card8",
+          "ordinal": 11,
+          "name": "Earn Card 8 and Jennifer brother's exit ladder clue",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B2.1F.DRAIN"
+      ],
+      "designNotes": [
+        "Visible arena preparation and recovery phase",
+        "Cover must suit legitimate boss counterplay",
+        "Safe retreat that cannot skip reward gate"
+      ]
+    },
+    {
+      "id": "B3.B100.LASERS",
+      "label": "Laser cameras",
+      "mission": "P10",
+      "level": "B3.B100",
+      "center_m": [
+        808,
+        213
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P10.powTruth",
+          "ordinal": 1,
+          "name": "Rescue original identity-revealing final POW",
+          "status": "design_only"
+        },
+        {
+          "id": "P10.betrayal",
+          "ordinal": 2,
+          "name": "Big Boss's betrayal only after player earns information",
+          "status": "design_only"
+        },
+        {
+          "id": "P10.laser",
+          "ordinal": 3,
+          "name": "Avoid lethal optical cameras distinct from security CCTV",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B3.B100.HAZARD"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B3.B100.HAZARD",
+      "label": "Hazard vents",
+      "mission": "P10",
+      "level": "B3.B100",
+      "center_m": [
+        866,
+        216
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P10.gas",
+          "ordinal": 4,
+          "name": "Pits gas and mines behind authentically gated walls",
+          "status": "design_only"
+        },
+        {
+          "id": "P10.electric",
+          "ordinal": 5,
+          "name": "Cross late electrified floor with real hazards",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B3.B100.LASERS",
+        "B3.B100.TX55"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    },
+    {
+      "id": "B3.B100.TX55",
+      "label": "TX-55 Metal Gear",
+      "mission": "P10",
+      "level": "B3.B100",
+      "center_m": [
+        816,
+        294
+      ],
+      "footprint_m": [
+        36,
+        28
+      ],
+      "boss": "TX-55 Metal Gear",
+      "pickups": [
+        "Explosive planting positions"
+      ],
+      "gates": [
+        "Card access",
+        "Plastic explosive"
+      ],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P10.pattern",
+          "ordinal": 6,
+          "name": "Transmit authentic Madnar 15+1 leg sequence",
+          "status": "design_only"
+        },
+        {
+          "id": "P10.tx55",
+          "ordinal": 7,
+          "name": "Place sixteen uniquely committed plastic charges in correct order",
+          "status": "design_only"
+        },
+        {
+          "id": "P10.countdown",
+          "ordinal": 8,
+          "name": "TX-55 detonates and sets persistent self-destruct timer",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B3.B100.HAZARD",
+        "B3.B100.BIGBOSS"
+      ],
+      "designNotes": [
+        "Visible arena preparation and recovery phase",
+        "Cover must suit legitimate boss counterplay",
+        "Safe retreat that cannot skip reward gate"
+      ]
+    },
+    {
+      "id": "B3.B100.BIGBOSS",
+      "label": "Big Boss",
+      "mission": "P10",
+      "level": "B3.B100",
+      "center_m": [
+        868,
+        322
+      ],
+      "footprint_m": [
+        36,
+        28
+      ],
+      "boss": "Big Boss",
+      "pickups": [],
+      "gates": [
+        "TX-55 destroyed"
+      ],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P10.finale",
+          "ordinal": 9,
+          "name": "Big Boss confrontation with real cover and rocket mechanics",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B3.B100.TX55",
+        "B3.B100.EXIT"
+      ],
+      "designNotes": [
+        "Visible arena preparation and recovery phase",
+        "Cover must suit legitimate boss counterplay",
+        "Safe retreat that cannot skip reward gate"
+      ]
+    },
+    {
+      "id": "B3.B100.EXIT",
+      "label": "Final exit",
+      "mission": "P10",
+      "level": "B3.B100",
+      "center_m": [
+        890,
+        349
+      ],
+      "footprint_m": [
+        28,
+        20
+      ],
+      "boss": null,
+      "pickups": [],
+      "gates": [],
+      "sourceStatus": "1987-derived area name; physical footprint is a remake hypothesis",
+      "beats": [
+        {
+          "id": "P10.cigarettes",
+          "ordinal": 10,
+          "name": "Source-version-verified escape timer extension",
+          "status": "design_only"
+        },
+        {
+          "id": "P10.ladder",
+          "ordinal": 11,
+          "name": "Use correct left escape ladder based on earlier POW clue",
+          "status": "design_only"
+        },
+        {
+          "id": "P10.credits",
+          "ordinal": 12,
+          "name": "Earn closing cutscene, rank, save and credits",
+          "status": "design_only"
+        }
+      ],
+      "adjacencySource": [
+        "B3.B100.BIGBOSS"
+      ],
+      "designNotes": [
+        "Directional landmark from believable utilities",
+        "Patrol cover / crawlspace if functionally justified",
+        "No critical gate bypass; persistent body state"
+      ]
+    }
+  ],
+  "links": [
+    {
+      "from": "B1.1F.ENTRANCE",
+      "to": "B1.1F.TRUCKS",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.1F.GAS",
+      "to": "B1.1F.TRUCKS",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.1F.ARMORY",
+      "to": "B1.1F.GAS",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.1F.ARMORY",
+      "to": "B1.1F.ELEVATOR",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.3F.CAMERA",
+      "to": "B1.3F.HAZARD",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.3F.CARD2",
+      "to": "B1.3F.HAZARD",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.3F.CARD2",
+      "to": "B1.3F.ELECTRIC",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.3F.BOX",
+      "to": "B1.3F.ELECTRIC",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.3F.BOX",
+      "to": "B1.3F.MERCENARIES",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.3F.GRENADE",
+      "to": "B1.3F.MERCENARIES",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.2F.LASER",
+      "to": "B1.3F.GRENADE",
+      "status": "ledger_proposed_adjacency",
+      "connector": "lift/stair",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.1F.REVISIT",
+      "to": "B1.2F.LASER",
+      "status": "ledger_proposed_adjacency",
+      "connector": "lift/stair",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.B1.CELL",
+      "to": "B1.B1.FOX",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.B1.FOX",
+      "to": "B1.B1.PRISON",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.B1.GEAR",
+      "to": "B1.B1.SHOT",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.B1.CARD3",
+      "to": "B1.B1.GEAR",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.B1.DOGS",
+      "to": "B1.B1.SPIRAL",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.B1.SPIRAL",
+      "to": "B1.B2.GUARDS",
+      "status": "ledger_proposed_adjacency",
+      "connector": "lift/stair",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.B2.ELECTRIC",
+      "to": "B1.B2.GUARDS",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.B2.ELECTRIC",
+      "to": "B1.B2.KID",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.2F.PARACHUTE",
+      "to": "B1.B2.KID",
+      "status": "remake_provisional_connection",
+      "connector": "west lift",
+      "gate": "Kid passage"
+    },
+    {
+      "from": "B1.ROOF.CORRIDOR",
+      "to": "B1.ROOF.HIND",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.ROOF.DROP",
+      "to": "B1.ROOF.HIND",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.ROOF.DROP",
+      "to": "EXT.TRUCKS",
+      "status": "remake_provisional_connection",
+      "connector": "drop zone",
+      "gate": "Hind D defeated"
+    },
+    {
+      "from": "EXT.TANK",
+      "to": "EXT.TRUCKS",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B2.1F.BULLDOZER",
+      "to": "B2.1F.ENTRY",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B2.1F.BULLDOZER",
+      "to": "B2.1F.WATER",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B2.1F.WATER",
+      "to": "B2.B1.FIRE",
+      "status": "ledger_proposed_adjacency",
+      "connector": "lift/stair",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B2.2F.CARDS",
+      "to": "B2.B1.FIRE",
+      "status": "ledger_proposed_adjacency",
+      "connector": "lift/stair",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B2.2F.JENNIFER",
+      "to": "B2.2F.TX11",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B2.2F.MADNAR",
+      "to": "B2.2F.TX11",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B2.2F.MADNAR",
+      "to": "B2.2F.RETURN",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B1.B1.ELLEN",
+      "to": "UNDERGROUND.TUNNEL",
+      "status": "ledger_proposed_adjacency",
+      "connector": "lift/stair",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B2.B1.REVISIT",
+      "to": "UNDERGROUND.TUNNEL",
+      "status": "remake_provisional_connection",
+      "connector": "service tunnel",
+      "gate": "late return"
+    },
+    {
+      "from": "B2.B1.REVISIT",
+      "to": "B3.1F.ENTRY",
+      "status": "ledger_proposed_adjacency",
+      "connector": "lift/stair",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B3.1F.ENTRY",
+      "to": "B3.B100.OXYGEN",
+      "status": "remake_provisional_connection",
+      "connector": "secured elevator",
+      "gate": "Card 8 and oxygen"
+    },
+    {
+      "from": "B2.1F.DRAIN",
+      "to": "B3.B100.OXYGEN",
+      "status": "ledger_proposed_adjacency",
+      "connector": "lift/stair",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B2.1F.DRAIN",
+      "to": "B2.1F.DUCK",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B3.B100.HAZARD",
+      "to": "B3.B100.LASERS",
+      "status": "ledger_proposed_adjacency",
+      "connector": "corridor/door",
+      "gate": "source card/puzzle validation pending"
+    },
+    {
+      "from": "B3.B100.HAZARD",
+      "to": "B3.B100.TX55",
+      "status": "remake_provisional_connection",
+      "connector": "blast door",
+      "gate": "security lasers"
+    },
+    {
+      "from": "B3.B100.BIGBOSS",
+      "to": "B3.B100.TX55",
+      "status": "remake_provisional_connection",
+      "connector": "escape stairs",
+      "gate": "Metal Gear destroyed"
+    },
+    {
+      "from": "B3.B100.BIGBOSS",
+      "to": "B3.B100.EXIT",
+      "status": "remake_provisional_connection",
+      "connector": "emergency egress",
+      "gate": "Big Boss defeated"
+    },
+    {
+      "from": "B1.1F.ELEVATOR",
+      "to": "B1.3F.CAMERA",
+      "status": "remake_provisional_connection",
+      "connector": "lift",
+      "gate": "vertical service spine"
+    },
+    {
+      "from": "B1.1F.ELEVATOR",
+      "to": "B1.2F.LASER",
+      "status": "remake_provisional_connection",
+      "connector": "lift",
+      "gate": "vertical service spine"
+    },
+    {
+      "from": "B1.1F.ELEVATOR",
+      "to": "B1.B1.CELL",
+      "status": "remake_provisional_connection",
+      "connector": "secure lift",
+      "gate": "custody flag"
+    },
+    {
+      "from": "B1.1F.REVISIT",
+      "to": "B1.1F.TRUCKS",
+      "status": "remake_provisional_connection",
+      "connector": "freight return",
+      "gate": "after gear"
+    },
+    {
+      "from": "B1.B1.CARD3",
+      "to": "B1.B1.DOGS",
+      "status": "remake_provisional_connection",
+      "connector": "security shutter",
+      "gate": "Card 3"
+    },
+    {
+      "from": "B1.2F.PARACHUTE",
+      "to": "B1.ROOF.CORRIDOR",
+      "status": "remake_provisional_connection",
+      "connector": "roof lift",
+      "gate": "parachute secured"
+    },
+    {
+      "from": "B2.1F.ENTRY",
+      "to": "EXT.TANK",
+      "status": "remake_provisional_connection",
+      "connector": "vehicle gate",
+      "gate": "tank defeated"
+    },
+    {
+      "from": "B2.1F.ENTRY",
+      "to": "B2.2F.CARDS",
+      "status": "remake_provisional_connection",
+      "connector": "service lift",
+      "gate": "Card 4"
+    },
+    {
+      "from": "B1.B1.ELLEN",
+      "to": "B2.2F.RETURN",
+      "status": "remake_provisional_connection",
+      "connector": "return connector",
+      "gate": "late POW intelligence"
+    },
+    {
+      "from": "B2.1F.DRAIN",
+      "to": "B2.1F.WATER",
+      "status": "remake_provisional_connection",
+      "connector": "water access",
+      "gate": "oxygen equipment"
+    },
+    {
+      "from": "B3.1F.ENTRY",
+      "to": "UNDERGROUND.TUNNEL",
+      "status": "remake_provisional_connection",
+      "connector": "hardened corridor",
+      "gate": "late Card gate"
+    }
+  ],
+  "missions": [
+    {
+      "id": "P01",
+      "title": "Building 1 first-floor insertion and equipment",
+      "areaIds": [
+        "B1.1F.ENTRANCE",
+        "B1.1F.TRUCKS",
+        "B1.1F.GAS",
+        "B1.1F.ARMORY",
+        "B1.1F.ELEVATOR"
+      ],
+      "beats": [
+        "P01.brief",
+        "P01.entry",
+        "P01.trucks",
+        "P01.ration",
+        "P01.card1",
+        "P01.scope",
+        "P01.mask",
+        "P01.handgun",
+        "P01.mines",
+        "P01.cover",
+        "P01.elevator",
+        "P01.freight"
+      ]
+    },
+    {
+      "id": "P02",
+      "title": "Building 1 third floor, second floor and earned backtrack",
+      "areaIds": [
+        "B1.3F.CAMERA",
+        "B1.3F.HAZARD",
+        "B1.3F.CARD2",
+        "B1.3F.ELECTRIC",
+        "B1.3F.BOX",
+        "B1.3F.MERCENARIES",
+        "B1.3F.GRENADE",
+        "B1.2F.LASER",
+        "B1.1F.REVISIT"
+      ],
+      "beats": [
+        "P02.cctv",
+        "P02.ammo",
+        "P02.pow1",
+        "P02.gas",
+        "P02.pow2",
+        "P02.pillar",
+        "P02.card2",
+        "P02.remote",
+        "P02.electric",
+        "P02.pow3",
+        "P02.box",
+        "P02.merc",
+        "P02.silencer",
+        "P02.grenade",
+        "P02.pow4",
+        "P02.laser",
+        "P02.pow5",
+        "P02.return1",
+        "P02.smg",
+        "P02.pow6"
+      ]
+    },
+    {
+      "id": "P03",
+      "title": "Building 1 basement capture and Gray Fox",
+      "areaIds": [
+        "B1.B1.CELL",
+        "B1.B1.FOX",
+        "B1.B1.PRISON"
+      ],
+      "beats": [
+        "P03.capture",
+        "P03.confiscate",
+        "P03.wall1",
+        "P03.fox",
+        "P03.wall2",
+        "P03.prison",
+        "P03.codec",
+        "P03.bodies"
+      ]
+    },
+    {
+      "id": "P04",
+      "title": "Shoot Gunner and Card 3",
+      "areaIds": [
+        "B1.B1.SHOT",
+        "B1.B1.GEAR",
+        "B1.B1.CARD3"
+      ],
+      "beats": [
+        "P04.introduce",
+        "P04.volley",
+        "P04.evade",
+        "P04.break",
+        "P04.bag",
+        "P04.tracker",
+        "P04.boss",
+        "P04.card3"
+      ]
+    },
+    {
+      "id": "P05",
+      "title": "Basement dogs, spiral, Machinegun Kid and parachute",
+      "areaIds": [
+        "B1.B1.DOGS",
+        "B1.B1.SPIRAL",
+        "B1.B2.GUARDS",
+        "B1.B2.ELECTRIC",
+        "B1.B2.KID",
+        "B1.2F.PARACHUTE"
+      ],
+      "beats": [
+        "P05.dog",
+        "P05.weak",
+        "P05.spiral",
+        "P05.suit",
+        "P05.uniform",
+        "P05.lift",
+        "P05.boxB2",
+        "P05.mines2",
+        "P05.powB2",
+        "P05.controller",
+        "P05.ir",
+        "P05.kid",
+        "P05.powKid",
+        "P05.parachute"
+      ]
+    },
+    {
+      "id": "P06",
+      "title": "Rooftop Hind D, parachute, Card 4 and Tank",
+      "areaIds": [
+        "B1.ROOF.CORRIDOR",
+        "B1.ROOF.HIND",
+        "B1.ROOF.DROP",
+        "EXT.TRUCKS",
+        "EXT.TANK"
+      ],
+      "beats": [
+        "P06.roof",
+        "P06.powRoof",
+        "P06.hind",
+        "P06.drop",
+        "P06.dogs",
+        "P06.card4",
+        "P06.mineDetector",
+        "P06.returnTruck",
+        "P06.tank"
+      ]
+    },
+    {
+      "id": "P07",
+      "title": "Building 2 industrial passages and Fire Trooper",
+      "areaIds": [
+        "B2.1F.ENTRY",
+        "B2.1F.BULLDOZER",
+        "B2.1F.WATER",
+        "B2.B1.FIRE",
+        "B2.2F.CARDS"
+      ],
+      "beats": [
+        "P07.entry",
+        "P07.bulldozer",
+        "P07.antenna",
+        "P07.card5",
+        "P07.powB2",
+        "P07.water",
+        "P07.fire",
+        "P07.card6",
+        "P07.returnElevator"
+      ]
+    },
+    {
+      "id": "P08",
+      "title": "Building 2 Jennifer, TX-11, Dr. Madnar and Card 7",
+      "areaIds": [
+        "B2.2F.JENNIFER",
+        "B2.2F.TX11",
+        "B2.2F.MADNAR",
+        "B2.2F.RETURN"
+      ],
+      "beats": [
+        "P08.jennifer",
+        "P08.rocket",
+        "P08.madnar",
+        "P08.decoy",
+        "P08.tx11",
+        "P08.card7",
+        "P08.compass",
+        "P08.flashlight",
+        "P08.pow"
+      ]
+    },
+    {
+      "id": "P09",
+      "title": "Whole-world return: Ellen, tunnels, oxygen and Coward Duck",
+      "areaIds": [
+        "B1.B1.ELLEN",
+        "UNDERGROUND.TUNNEL",
+        "B2.B1.REVISIT",
+        "B3.1F.ENTRY",
+        "B3.B100.OXYGEN",
+        "B2.1F.DRAIN",
+        "B2.1F.DUCK"
+      ],
+      "beats": [
+        "P09.backB1",
+        "P09.ellen",
+        "P09.tunnel",
+        "P09.madnarReturn",
+        "P09.desert",
+        "P09.b3Visit1",
+        "P09.oxygen",
+        "P09.backToB2",
+        "P09.drain",
+        "P09.duck",
+        "P09.card8",
+        "P09.restock",
+        "P09.backToB3"
+      ]
+    },
+    {
+      "id": "P10",
+      "title": "Building 3 B100, TX-55, Big Boss and escape",
+      "areaIds": [
+        "B3.B100.LASERS",
+        "B3.B100.HAZARD",
+        "B3.B100.TX55",
+        "B3.B100.BIGBOSS",
+        "B3.B100.EXIT"
+      ],
+      "beats": [
+        "P10.powTruth",
+        "P10.betrayal",
+        "P10.laser",
+        "P10.gas",
+        "P10.electric",
+        "P10.pattern",
+        "P10.tx55",
+        "P10.countdown",
+        "P10.finale",
+        "P10.cigarettes",
+        "P10.ladder",
+        "P10.credits"
+      ]
+    }
+  ],
+  "sourceStatus": "DESIGN_ATLAS_NEEDS_1987_TILE_VERIFICATION_AND_REAL_UNREAL_AND_BROWSER_COLLISION_CHECK"
+}
