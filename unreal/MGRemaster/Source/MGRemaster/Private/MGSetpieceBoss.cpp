@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Engine/World.h"
+#include "GameFramework/DamageType.h"
 
 AMGSetpieceBoss::AMGSetpieceBoss()
 {
@@ -74,6 +75,18 @@ void AMGSetpieceBoss::Tick(float DeltaSeconds)
     AMGPlayerCharacter* Snake = Cast<AMGPlayerCharacter>(
         UGameplayStatics::GetPlayerCharacter(this,0));
     if (!Snake) return;
+    // Mobile machines follow an authored roadway. Their movement is not
+    // driven by Snake's position; prepare mines along the actual tank route.
+    if (Id == TEXT("m03.tank_defeated") ||
+        Id == TEXT("m04.bulldozer_defeated"))
+    {
+        MoveClock += DeltaSeconds;
+        const float Amplitude = Id == TEXT("m03.tank_defeated") ? 790.f : 470.f;
+        FVector Next=GetActorLocation();
+        Next.X=DefensiveFocus.X + FMath::Sin(MoveClock*.58f)*Amplitude;
+        FHitResult MovementHit;
+        SetActorLocation(Next,true,&MovementHit);
+    }
     const FVector Offset = Snake->GetActorLocation() - GetActorLocation();
     if (FMath::Abs(Offset.Z) > 340.f || Offset.Size2D() > AlertRange)
     {
