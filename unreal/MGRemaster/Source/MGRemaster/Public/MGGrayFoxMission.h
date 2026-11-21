@@ -56,6 +56,7 @@ private:
     FRotator LastObservedViewRotation = FRotator::ZeroRotator;
     bool bHasObservedPlayer = false;
     float DialogueTimeRemaining = 0.f;
+    float ReturnToOuterHeavenSeconds = -1.f;
     FVector SavedPosition = FVector::ZeroVector;
     FString Dialogue;
 
