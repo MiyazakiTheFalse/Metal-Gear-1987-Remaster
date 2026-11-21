@@ -171,6 +171,24 @@ void AMGGuardActor::ReleaseChoke(bool bAlertOnRelease)
         LastKnownPlayerPosition = GetActorLocation() - GetActorForwardVector() * 80.f;
     CameraAlertSeconds = FMath::Max(CameraAlertSeconds, 1.8f);
 }
+void AMGGuardActor::ReactToMeleeStrike(bool bFinishingKick,
+                                      const FVector& StrikeSource)
+{
+    if (bIncapacitated || bBeingChoked) return;
+    StaggerSeconds = bFinishingKick ? 0.4f : 0.2f;
+    if (bFinishingKick)
+    {
+        MeleeKnockdownSeconds = 1.25f;
+        // Small collision-tested displacement, never throw a body through
+        // a closed cell or a prop. The state drives a future fall/get-up rig.
+        const FVector Away=(GetActorLocation()-StrikeSource).GetSafeNormal2D();
+        FHitResult Hit;
+        AddActorWorldOffset(Away*65.f,true,&Hit);
+    }
+    Suspicion=1.f;
+    AwarenessState=3;
+    LastKnownPlayerPosition=StrikeSource;
+}
 void AMGGuardActor::CompleteChoke()
 {
     if (!bBeingChoked || bIncapacitated) return;
@@ -335,6 +353,17 @@ void AMGGuardActor::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
     if (bIncapacitated || !GetWorld()) return;
+    if (MeleeKnockdownSeconds > 0.f)
+    {
+        MeleeKnockdownSeconds=FMath::Max(0.f,MeleeKnockdownSeconds-DeltaSeconds);
+        // The fall and recovery are not attacks or omniscient tracking.
+        ProxyBody->SetRelativeRotation(FMath::RInterpTo(
+            ProxyBody->GetRelativeRotation(),
+            MeleeKnockdownSeconds > 0.f ? FRotator(0.f,0.f,78.f) :
+                                         FRotator::ZeroRotator,
+            DeltaSeconds,11.f));
+        return;
+    }
     if (bBeingChoked)
     {
         // A live guard still struggles visibly while Snake must maintain grip.
