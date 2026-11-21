@@ -1,4 +1,5 @@
 #include "MGPlayerCharacter.h"
+#include "InputCoreTypes.h"
 #include "MGGrayFoxMission.h"
 #include "Sound/SoundBase.h"
 #include "Components/AudioComponent.h"
@@ -479,6 +480,7 @@ void AMGPlayerCharacter::SetupPlayerInputComponent(UInputComponent* Input)
     Input->BindAction("Fire", IE_Pressed, this, &AMGPlayerCharacter::FireStun);
     Input->BindAction("GraphicsPreset", IE_Pressed, this, &AMGPlayerCharacter::CycleGraphicsQuality);
     Input->BindAction("Interact", IE_Pressed, this, &AMGPlayerCharacter::Interact);
+    Input->BindKey(EKeys::F10, IE_Pressed, this, &AMGPlayerCharacter::RequestNewOperation);
     Input->BindAction("RestartRescue", IE_Pressed, this, &AMGPlayerCharacter::RestartRescue);
     Input->BindAction("SkipCinematic", IE_Pressed, this, &AMGPlayerCharacter::SkipStoryCinematic);
     Input->BindAction("MissionLog", IE_Pressed, this, &AMGPlayerCharacter::ToggleMissionLog);
@@ -806,6 +808,19 @@ void AMGPlayerCharacter::SkipStoryCinematic()
     if (AMGGrayFoxMission* Mission = Cast<AMGGrayFoxMission>(
         UGameplayStatics::GetActorOfClass(this, AMGGrayFoxMission::StaticClass())))
         Mission->SkipStoryCinematic();
+}
+
+void AMGPlayerCharacter::RequestNewOperation()
+{
+    const double Now = FPlatformTime::Seconds();
+    if (Now > NewOperationConfirmUntil)
+    {
+        NewOperationConfirmUntil = Now + 3.0;
+        NotifyFeedback(TEXT("Press F10 again to replace the checkpoint and begin Mission 1."), TEXT("menu"));
+        return;
+    }
+    const FString Level = UGameplayStatics::GetCurrentLevelName(this, true);
+    UGameplayStatics::OpenLevel(this, FName(*Level), true, TEXT("NewOperation"));
 }
 
 void AMGPlayerCharacter::RestartRescue()

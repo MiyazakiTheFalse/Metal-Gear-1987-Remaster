@@ -211,7 +211,11 @@ for (const [centre,width] of [[-22.6,20],[22,15]]) {
  for(const z of [-5.15,5.15])wall('perimeter boundary',centre,z,width,.28);
  cameraOnlySolids.push(add('ceiling',centre,3.5,0,width,.28,10.4,color.roof));
 }
-wall('yard boundary',-32.6,0,.28,10.4);
+add('drainage channel',-37,-.26,0,9,.5,10.4,[.07,.15,.17],mat.steel);
+for(const side of [-1,1])wall('channel retaining wall',-37,side*5.15,9,.28);
+for(const x of [-39,-36,-33])add('waterline reflection',x,.005,2.8,.11,.01,3,color.metal);
+add('inspection lamp',-32.8,2.1,-3,.35,.5,.35,color.light,mat.light);
+wall('channel inlet',-41.5,0,.28,10.4);
 // Source-derived Building 1 truck pickup, provisionally compressed into the
 // existing connected entry yard. This is NOT a verified 1987 tile-accurate
 // placement. Cargo entrances on their south sides are physically accessible.
@@ -285,6 +289,71 @@ const b2Tank=add('tank armoured hull',111,1.25,0,3.2,1.5,2.2,color.green,mat.ste
 const b2Turret=add('tank rotating turret',111,2.1,0,1.9,.5,1.35,color.dark,mat.steel);
 const b2Sites=[105,111,117].map(x=>({x,z:0}));
 const b2Markers=b2Sites.map((v,i)=>add('mine station '+i,v.x,.04,0,.5,.08,.5,color.stripe,mat.light));
+// The road and bunker share one coordinate system so the return path stays walkable.
+const bunkerRoute = [
+ ["Tank road","Enter the maintenance tunnel",123,0,0],
+ ["Motor pool","Stop the bulldozer at the red cut-off lever",131,-2,1],
+ ["Antenna room","Restore the resistance frequency and collect Card 5",139,2,0],
+ ["Detention ward","Release the prisoners and collect Card 6",147,-2,0],
+ ["Fire Trooper","Open the deluge valve between flame sweeps",155,2,1],
+ ["Jennifer","Meet Jennifer at the blue locker for the launcher",163,-2,0],
+ ["TX-11 hangar","Disable the first TX-11 from the left firing port",171,-2,1],
+ ["TX-11 hangar","Disable the second TX-11 from the right firing port",174,2,1],
+ ["Computer room","Read the bunker coordinates and take Card 7",182,-2,0],
+ ["Building 3 infirmary","Check the decoy bed against the prisoner register",190,2,0],
+ ["Hostage wing","Free Jennifer's brother before confronting the captor",198,-2,0],
+ ["Coward Duck","Flank the empty side of the barricade and recover Card 8",206,2,1],
+ ["Madnar's workshop","Record Madnar's fifteen placements at the workbench",214,-2,0],
+ ["TX-55 basement","Arm the TX-55 leg sockets",224,0,2],
+ ["Self-destruct","Release the emergency stairwell",234,-2,1],
+ ["Big Boss","Break his line of fire and counter from the side gallery",242,2,1],
+ ["Extraction","Reach the surface ladder",250,0,0]
+];
+const txOrder = 'RRLRLLRLLRRLRLRR';
+b2.beat=0;
+b2.placements=0;
+const bunkerStations=bunkerRoute.map(([room,,x,z,kind])=>{
+ const tint=kind===1?color.rust:kind===2?color.dark:color.metal;
+ add(room+' floor',x,-.27,0,10,.5,10.4,tint,mat.grate);
+  for(const side of [-1,1])wall(room+' outer wall',x,side*5.1,10,.28);
+  add(room+' lintel',x,3.25,0,.45,.4,10,tint,mat.steel);
+  add(room+' bulkhead',x-2.2,1.1,-Math.sign(z||1)*3,.65,2.2,3,tint,mat.steel,true);
+ return add(room+' station',x,.55,z,.75,1.1,.7,tint,mat.steel);
+});
+for(const side of [-1,1])add('TX-55 leg socket',224,1.35,side*2,1.25,2.7,.95,color.green,mat.steel);
+for(const z of [-.38,.38])add('extraction ladder rail',250,1.25,z,.08,2.5,.08,color.metal,mat.steel);
+for(let y=.25;y<2.6;y+=.34)add('extraction rung',250,y,0,.08,.07,.8,color.light,mat.steel);
+add('TX-55 chassis',224,3.15,0,2.8,1.1,5.5,color.green,mat.steel);
+function bunkerLimit(){return b2.defeated?(bunkerRoute[b2.beat]?.[2]??250)+2:123.5}
+function bunkerObjective(){
+ const beat=bunkerRoute[b2.beat];
+ if(!beat)return 'Operation complete · Snake escaped Outer Heaven.';
+ if(beat[4]===2)return 'Madnar: RRLR LLRL LRRL RLR? · Socket '+(b2.placements+1)+'/16 · Left and right face the chassis.';
+ return beat[1]+(beat[4]===1?' · '+(gameTime%5<2?'Sweep active. Hold cover.':'Clear window. Move now.'):'');
+}
+function bunkerAction(){
+ if(!b2.active||!b2.defeated)return '';
+ const beat=bunkerRoute[b2.beat];if(!beat)return '';
+ const [,objective,x,z,kind]=beat;
+ if(kind===2){
+  for(const [side,offset] of [['LEFT',-2],['RIGHT',2]])
+   if(dist(player,{x,z:offset})<1.6)return 'ARM '+side+' SOCKET';
+  return '';
+ }
+ return dist(player,{x,z})<1.6?objective.toUpperCase():'';
+}
+function advanceBunker(){
+ const beat=bunkerRoute[b2.beat];
+ if(beat[4]===2){
+  if((player.z<0?'L':'R')!==txOrder[b2.placements]){popup('Socket rejected. Check Madnar’s sequence.');return;}
+  b2.placements++;
+  if(b2.placements<txOrder.length){playCue('select');save();return;}
+ }else if(beat[4]===1&&gameTime%5<2){
+  popup('Sweep active. Fall back into cover.');applyPlayerDamage(10,bunkerStations[b2.beat]);return;
+ }
+ b2.beat++;playCue(b2.beat===bunkerRoute.length?'win':'select');
+ popup(bunkerRoute[b2.beat]?.[0]??'Operation Intrude N313 complete',4);save();
+}
 function syncB2(){
  b2Tank.active=b2Turret.active=b2.active&&!b2.defeated;
  b2Tank.x=b2Turret.x=b2.x;
@@ -319,6 +388,10 @@ function b2Interact(cmd){
  }
 }
 function b2Tick(dt){
+ if(b2.active&&b2.defeated){
+  const station=bunkerStations[b2.beat];
+  if(station)station.color=bunkerRoute[b2.beat][4]===1&&gameTime%5<2?[.9,.22,.08]:[.28,.82,.59];
+ }
  if(!b2.active||b2.defeated)return;
  const old=b2.x;
  b2.x=clamp(old+b2.dir*1.5*dt,102,120);
@@ -446,6 +519,7 @@ function kidTick(dt){
  }else if(kid.phase==='reload'&&kid.clock<=0){kid.phase='waiting';kid.state=0;}
 }
 function serviceAction(){
+ const bunker=bunkerAction();if(bunker)return bunker;
  const rooftop=roofAction();if(rooftop)return rooftop;
  if(stage!==8)return '';
  if(service.kidDown&&!service.parachute&&dist(player,canopy)<1.6)return 'TAKE PARACHUTE';
@@ -463,6 +537,7 @@ function syncService(){
  serviceParcel.active=!service.charge;
 }
 function useService(action){
+ if(action&&action===bunkerAction()){advanceBunker();return;}
  if(['TAKE LIFT TO BUILDING 1 ROOF','RETURN TO WEST LIFT','FIRE ROOFTOP GRENADE','LAUNCHER EMPTY','HIND EVADING','DESCEND TO BUILDING 2','RETURN TO ROOF','PLANT MINE','NO MINES','TRACK OCCUPIED'].includes(action)){roofInteract(action);return;}
  if(action==='TAKE PLASTIC EXPLOSIVE'){service.charge=true;playCue('card');popup('Plastic explosive recovered. One charge.');}
  if(action==='INSPECT MASONRY')popup('A patched joint. A fist will do nothing here.');
@@ -854,7 +929,8 @@ function setDownTag(){
  syncEquipment();save();popup('Property tag set down.');
 }
 const rehearsal=new URLSearchParams(location.search).has('boss');
-const STORAGE='mg1987.grayfox.browser.v1'+(rehearsal?'.boss':'')+(escortMode?'.escort':'');let context=null,audioReady=false,audioBed=null,beatTime=0,prevAlert=0,padPrev=[],padUsing=false,tipToggle=$('tipsToggle');
+const cellRehearsal=new URLSearchParams(location.search).has('cell');
+const STORAGE='mg1987.grayfox.browser.v1'+(rehearsal?'.boss':cellRehearsal?'.cell':'')+(escortMode?'.escort':'');let context=null,audioReady=false,audioBed=null,beatTime=0,prevAlert=0,padPrev=[],padUsing=false,tipToggle=$('tipsToggle');
 const wallHits=[0,0];
 let nextImpact=0, sealedWeapon='BARE HANDS', quietSince=0, movementSample=null;
 const boss={...guards[0],x:25,z:.6,yaw:Math.PI,hp:240,boss:true,waypoints:[],last:{x:25,z:.6},knocked:false,cycle:0};
@@ -1012,6 +1088,8 @@ function load(){
  if(data.version>=10&&stage===10&&roof.defeated&&service.parachute){
   const saved=data.b2||{};
   b2.active=saved.active===true;b2.defeated=saved.defeated===true;
+  b2.beat=b2.defeated&&Number.isInteger(saved.beat)?clamp(saved.beat,0,bunkerRoute.length):0;
+  b2.placements=bunkerRoute[b2.beat]?.[4]===2&&Number.isInteger(saved.placements)?clamp(saved.placements,0,15):0;
   b2.hp=b2.defeated?0:clamp(Number.isInteger(saved.hp)?saved.hp:3,1,3);
   b2.mines=clamp(Number.isInteger(saved.mines)?saved.mines:4,0,4);
   b2.armed=Array.isArray(saved.armed)?[...new Set(saved.armed.filter(i=>Number.isInteger(i)&&i>=0&&i<3))]:[];
@@ -1072,7 +1150,7 @@ function load(){
   boss.x=rest.x;boss.z=rest.z;boss.yaw=Number.isFinite(rest.yaw)?rest.yaw:Math.PI;
  }
  const fallback=stage===10?(b2.active?[99.2,0]:roof.active?[87.5,0]:[62.5,0]):stage===9?(roof.active?[72.3,0]:[62.5,0]):stage<0?[-27,0]:stage===0?[-10.6,0]:stage<3?[-.5,0]:stage===3?[5.4,-3.7]:stage===4?[15.7,0]:[26,0];
- const withinStage=stage===10?(b2.active?data.x>=97.0&&data.x<=123.0:roof.active?data.x>=69&&data.x<=90.7:data.x>=-32.5&&data.x<=65.3):
+ const withinStage=stage===10?(b2.active?data.x>=97.0&&data.x<=bunkerLimit():roof.active?data.x>=69&&data.x<=90.7:data.x>=-32.5&&data.x<=65.3):
   stage===9?(roof.active?data.x>=69&&data.x<=90.7:data.x>=-32.5&&data.x<=65.3):
   stage<0?data.x<-12.6:stage===0?data.x>-12.6&&data.x<-4.1:
   stage<3?data.x>-12.6&&data.x<4.5:stage===3?data.x>-12.6&&data.x<(world.hallOpen?27.3:14.6):
@@ -1680,7 +1758,7 @@ function bodySamples(x,z,stance,yaw){
 function canOccupyBody(x,z,stance=player.stance,yaw=player.yaw){
  const b=bodyShape(stance);
  for(const sample of bodySamples(x,z,stance,yaw)){
-  if(sample.x-sample.r<-32.2||sample.x+sample.r>(stage===10&&b2.active?123.5:stage>=9&&roof.active?90.7:65.1)||
+  if(sample.x-sample.r<-41.1||sample.x+sample.r>(stage===10&&b2.active?bunkerLimit():stage>=9&&roof.active?90.7:65.1)||
      sample.z-sample.r<-4.77||sample.z+sample.r>4.77)return false;
   for(const o of obstacles){
    if(!o.active||o.name==='concrete floor')continue;
@@ -1713,7 +1791,7 @@ function movePlayer(vx,vz,dt){
  }
 }
 // Guards still use upright circular capsules (separate from Snake's prone shape).
-function collides(x,z,rad=.31){if(x<-32.2||x>(stage===10&&b2.active?123.5:stage>=9&&roof.active?90.7:65.1)||z<-4.77||z>4.77)return true;return obstacles.some(o=>o.active&&o.name!=='concrete floor'&&x>o.x-o.w/2-rad&&x<o.x+o.w/2+rad&&z>o.z-o.d/2-rad&&z<o.z+o.d/2+rad)}
+function collides(x,z,rad=.31){if(x<-41.1||x>(stage===10&&b2.active?bunkerLimit():stage>=9&&roof.active?90.7:65.1)||z<-4.77||z>4.77)return true;return obstacles.some(o=>o.active&&o.name!=='concrete floor'&&x>o.x-o.w/2-rad&&x<o.x+o.w/2+rad&&z>o.z-o.d/2-rad&&z<o.z+o.d/2+rad)}
 function moveEntity(o,vx,vz,dt,rad=.31){const xx=o.x+vx*dt,zz=o.z+vz*dt;if(!collides(xx,o.z,rad))o.x=xx;if(!collides(o.x,zz,rad))o.z=zz;}
 function coverWall(o){
  // Find an actual vertical surface rather than using a blind collision probe.
@@ -2583,6 +2661,13 @@ function activeCastForRig(t){
  return cast;
 }
 function drawFrame(t,dt){let w=canvas.clientWidth,h=canvas.clientHeight,scale=window.devicePixelRatio>1?Math.min(1.5,window.devicePixelRatio):1;let ww=Math.max(2,Math.floor(w*scale)),hh=Math.max(2,Math.floor(h*scale));if(canvas.width!==ww||canvas.height!==hh){canvas.width=ww;canvas.height=hh;gl.viewport(0,0,ww,hh)}const target=updateCamera(dt);const pv=m4.mul(m4.persp(Math.PI/(world.scouting?5.6:player.aim?3.6:3.1),ww/hh,.075,120),m4.look(cam.eye,target));gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(program);gl.uniformMatrix4fv(loc.pv,false,new Float32Array(pv));gl.uniform3f(loc.eye,...cam.eye);gl.uniform1f(loc.time,t);drawn=0;
+ if(player.x<-30){
+  for(let i=0;i<9;i++){
+   const x=-40+i*.85+.19*Math.sin(t*.9+i);
+   const z=1.8*Math.sin(i*2.3+t*.36);
+   drawCube([x,.014,z],[.07,.012,.7+.24*Math.sin(t+i)],[.16,.27,.29],.12,mat.steel);
+  }
+ }
  const planes=cameraPlanes(pv);
  for(const o of geometry)if(o.active){
  const radius=o.boundRadius??(o.boundRadius=.5*Math.hypot(o.w,o.h,o.d));
@@ -2672,7 +2757,7 @@ function drawFrame(t,dt){let w=canvas.clientWidth,h=canvas.clientHeight,scale=wi
  }
 }
 const chapters=[
- ['INFILTRATION','Speak to the prisoner under the yard light.'],
+ ['MISSION 1 · OPERATION INTRUDE N313','Enter Building 1. Search for a lead on Gray Fox.'],
  ['THE APPROACH','Reach the processing post. Lower your weapon to surrender.'],
  ['SOLITARY','Search your cell for a way out.'],
  ['CONTACT','Find the prisoner in the neighbouring cell.'],
@@ -2739,7 +2824,9 @@ function optionalStageHelp(tier){
  return '';
 }
 function updateHUD(dt){
- const [phase,objective]=chapters[stage+2];$('phase').textContent=phase;$('obj').textContent=stage===10?(b2.defeated?'Tank immobilised. Next checkpoint is not yet implemented.':b2.active?'Lay track mines · '+b2.mines+' remain.':'Return to Building 2 from roof.') :stage===9?(roof.defeated?'Hind D disabled · return by the west lift.':roof.active?'Use the roof shelters and the launcher rack · '+roof.grenades+' grenades.':'Return to the roof from the west lift.') :service.parachute?'Take the west lift to the roof.':service.kidDown?'Collect the parachute by the lift.':service.intel?'Follow the relay passage to the west lift.':service.open?'Investigate the relay room beyond the kennels.':objective;
+ const [phase,objective]=chapters[stage+2];$('phase').textContent=phase;$('obj').textContent=stage===10?(b2.active&&b2.defeated?bunkerObjective():b2.active?'Lay track mines · '+b2.mines+' remain.':'Return to Building 2 from roof.') :stage===9?(roof.defeated?'Hind D disabled · return by the west lift.':roof.active?'Use the roof shelters and the launcher rack · '+roof.grenades+' grenades.':'Return to the roof from the west lift.') :service.parachute?'Take the west lift to the roof.':service.kidDown?'Collect the parachute by the lift.':service.intel?'Follow the relay passage to the west lift.':service.open?'Investigate the relay room beyond the kennels.':objective;
+ if(stage===10&&b2.active&&b2.defeated)$('phase').textContent=(bunkerRoute[b2.beat]?.[0]??'Mission complete').toUpperCase();
+ if(stage===-2)$('obj').textContent=player.x<-32?'Follow the waterline to the inspection lamp at Building 1.':'Scout the trucks and patrol. Speak to the prisoner under the yard light.';
  const sample=[player.x,player.z,cam.yaw,cam.pitch];
  if(!movementSample||sample.some((v,i)=>Math.abs(v-movementSample[i])>(i<2?.05:.025))){
   movementSample=sample;quietSince=gameTime;
@@ -2888,8 +2975,8 @@ function start(resume){
   return;
  }
  if(!resume){
-  const cellStart=new URLSearchParams(location.search).has('cell');
-  stage=cellStart?0:-2;player.x=cellStart?-10.6:-27;player.z=0;elapsedStage=0;
+  const cellStart=cellRehearsal;
+  stage=cellStart?0:-2;player.x=cellStart?-10.6:-39;player.z=0;elapsedStage=0;
   world.handgun=cellStart;rounds=cellStart?24:0;equippedWeapon='BARE HANDS';syncEquipment();
   if(rehearsal){
    world.handgun=true;rounds=24;stage=4;player.x=15.75;player.z=.5;recoveredGear=true;
@@ -2899,7 +2986,9 @@ function start(resume){
   }else if(cellStart)say('capture');
   save();
  }
- if(!resume&&!rehearsal&&stage===-2)startCinematic('opening');
+ if(!resume&&!rehearsal&&stage===-2){
+  startCinematic('opening');say('n313Dispatch');say('n313Reply');say('n313Orders');
+ }
  last=performance.now();cam.eye=cameraSafePosition([player.x,player.stance?1.14:1.56,player.z],[player.x-2.8,2.2,player.z+1.0]);if(canvas.requestPointerLock)Promise.resolve(canvas.requestPointerLock()).catch(()=>{});}
 const titleOptions=['start','resume','brief','rehearse','menuOptions'];
 let titleChoice=0,confirmTitleChoice=0;

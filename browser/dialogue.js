@@ -1,5 +1,8 @@
 /* Independently written temporary scene dialogue; not transcribed J2ME text. */
 window.MGDialogue = Object.freeze({
+  n313Dispatch:{speaker:'BIG BOSS · 120.85',text:'Snake. Gray Fox broke contact inside Outer Heaven. We got two words from his last transmission. Metal Gear.',duration:5.4},
+  n313Reply:{speaker:'SNAKE',text:'Metal Gear? Is that what he went in to find?',duration:2.8},
+  n313Orders:{speaker:'BIG BOSS · 120.85',text:'That’s what you’re going to find out. Get inside, locate Fox and report. This frequency stays open.',duration:4.6},
   boxCall:{speaker:'BIG BOSS',text:'A packing box? Moving out already, Snake?',duration:3},
   freightShift:{speaker:'RECEIVING CLERK (OFF)',text:'Another load for the duty desk. Check the seals and keep the line moving.',duration:4.0,direction:'Mundane work talk glimpsed while the camera remains under player control; not canonical 1987 dialogue.'},
   boxInspect:{speaker:'GUARD',text:'Who left this carton here? I should check.',duration:2.4,direction:'Confused curiosity, then deliberate movement; not an automatic alarm.'},

@@ -558,7 +558,7 @@ void AMGPrototypeHUD::DrawHUD()
         TEXT("E / A INTERACT  |  F / X MELEE  |  Z / Y PRONE  |  ESC / B SKIP");
     DrawText(CoverHelp,
              HudMuted, Margin, Height - 46.f * UiScale, nullptr, 0.66f * UiScale, false);
-    DrawText(TEXT("Y / DPAD DOWN USE ITEM  |  TAB / LB ITEMS  |  G / RB WEAPONS  |  F9 RETRY CHECKPOINT"),
+    DrawText(TEXT("Y / DPAD DOWN USE ITEM  |  TAB / LB ITEMS  |  G / RB WEAPONS  |  F9 RETRY  |  F10 NEW MISSION 1"),
              HudMuted, Margin, Height - 26.f * UiScale,
              nullptr, 0.63f * UiScale, false);
 }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="theme-color" content="#091215">
-<title>Metal Gear — Gray Fox Rescue | Browser Vertical Slice</title>
+<title>Metal Gear — Operation Intrude N313 | Campaign Playtest</title>
 <style>
 :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Arial,sans-serif;color:#e9eee9;background:#071113}*{box-sizing:border-box}
 html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050b0d}canvas#gl{display:block;width:100%;height:100%;touch-action:none}
@@ -144,7 +144,7 @@ h1{font-size:clamp(26px,4.8vw,42px);line-height:1.08;letter-spacing:-.03em;margi
 <link rel="stylesheet" href="title_screen.css">
 </head><body>
 <canvas id="gl" aria-label="Real-time third person 3D prison infiltration game"></canvas><div id="grain"></div><div id="damageFlash" aria-hidden="true"></div>
-<div id="hud"><div id="top"><div id="brand"><small>OUTER HEAVEN • 1995</small><strong>METAL GEAR <span style="color:#84cfaa">//</span> GRAY FOX</strong></div><div id="meta"><span id="controller">KEYBOARD + MOUSE</span><span id="quality">PERFORMANCE</span><span id="fps">60 FPS TARGET</span></div></div>
+<div id="hud"><div id="top"><div id="brand"><small>OUTER HEAVEN • 1995</small><strong>METAL GEAR <span style="color:#84cfaa">//</span> N313</strong></div><div id="meta"><span id="controller">KEYBOARD + MOUSE</span><span id="quality">PERFORMANCE</span><span id="fps">60 FPS TARGET</span></div></div>
 <div id="objective"><div class="kicker" id="phase">INFILTRATION</div><div class="detail" id="obj">Contact the prisoner.</div><div id="hint"></div><div id="propertyCaption" class="detail"></div><div id="meters"></div></div><div id="alert">ENEMY ALERT</div><div id="radarBox"><div id="radarTitle">FIELD MAP</div><canvas id="radar" width="182" height="140" aria-label="Guard facing directions, obstacle-clipped visual ranges, Snake and Gray Fox positions; radar becomes unavailable during enemy alert"></canvas><div id="radarLegend" aria-hidden="true">◢ GUARD FOV &nbsp; △ FACING &nbsp; · NEAR DETECTION</div></div><div id="reticle"></div><div id="coverFeedback" aria-live="off"></div><div id="subtitle"></div><div id="prompt"></div><div id="tutorial" role="status" aria-live="polite"><strong id="tutorialTitle"></strong><span id="tutorialBody"></span></div><div id="equip" aria-live="off"></div><div id="foxBox" style="display:none" aria-label="Gray Fox escort health"><div class="foxTop"><span>GRAY FOX // LIFE</span><span id="foxHP">100 / 100</span></div><div id="foxTrack"><div id="foxFill"></div></div><div id="foxTactics">FOLLOWING</div></div><div id="lifeBox"><div id="lifeTop"><span>FOXHOUND // LIFE</span><span id="lifeHP">100 / 100</span></div><div id="lifeTrack"><div id="lifeFill"></div></div></div><div id="bottom"><div id="status">EQUIPMENT: CONFISCATED<br>STANCE: STANDING<br>CHECKPOINT: AUTO</div><div id="controls">WASD MOVE · MOUSE LOOK · E CONTEXT COVER · V COVER · F/N KNOCK · CTRL CROUCH<br>RMB AIM · F TAKEDOWN · J INTEL · ESC PAUSE · R RETRY CHECKPOINT<br>XBOX: LS MOVE · RS CAMERA · A CONTEXT COVER · B CROUCH · X KNOCK/CQC</div></div></div>
 <div id="fail"></div>
 <div id="intro" class="mg-title" role="dialog" aria-label="Metal Gear 1995 title screen" aria-modal="true">
@@ -155,9 +155,9 @@ h1{font-size:clamp(26px,4.8vw,42px);line-height:1.08;letter-spacing:-.03em;margi
    <h1 class="mg-title__logo" aria-label="Metal Gear"><em>METAL</em><em>GEAR</em></h1>
    <div class="mg-title__divider" aria-hidden="true"></div>
    <div class="mg-title__sub">OPERATION INTRUDE N313</div>
-   <div class="mg-title__chapter">FIRST MISSION &nbsp; / &nbsp; FIND GRAY FOX</div>
+   <div class="mg-title__chapter">MISSION 1 &nbsp; / &nbsp; OPERATION INTRUDE N313</div>
    <nav class="mg-title__menu" aria-label="Main menu">
-    <button id="start" class="mg-title__action" data-selected="true">NEW GAME <small>BEGIN INFILTRATION</small></button>
+    <button id="start" class="mg-title__action" data-selected="true">NEW GAME <small>MISSION 1 · INFILTRATE OUTER HEAVEN</small></button>
     <button id="resume" class="mg-title__action" disabled>CONTINUE <small>LAST CHECKPOINT</small></button>
     <button id="brief" class="mg-title__action">BRIEFING <small>MISSION INTELLIGENCE</small></button>
     <button id="rehearse" class="mg-title__action">VR TRAINING <small>SHOOT GUNNER · NONCANON</small></button>
@@ -233,7 +233,7 @@ h1{font-size:clamp(26px,4.8vw,42px);line-height:1.08;letter-spacing:-.03em;margi
    <div class="mg-briefing__comms"><span class="mg-briefing__freq">120.85</span><span>ENCRYPTED<br>FOXHOUND LINK</span><svg viewBox="0 0 130 25" width="100%" aria-hidden="true"><path d="M0 13H20l6 -6 8 12 7 -14 8 8 11 -3 6 -7 6 16 7 -7 10 2 12 -5 5 7 30 -3" fill="none" stroke="#8dcfb2" stroke-width="2"/></svg></div>
    <div class="mg-briefing__head"><div id="briefingBossPortrait" class="mg-title__portrait"></div><span>BIG BOSS<br><small>MISSION COMMAND</small></span></div>
   </div>
-  <p><strong>PRIMARY OBJECTIVE</strong><br>Infiltrate Outer Heaven. Locate Gray Fox, who has disappeared while investigating a suspected military weapon.</p>
+  <p><strong>PRIMARY OBJECTIVE</strong><br>Gray Fox disappeared inside Outer Heaven. His final transmission contained two words: “Metal Gear.” This is Solid Snake’s first FOXHOUND operation. Enter Building 1, locate Fox and establish what he discovered.</p>
   <p><strong>OPERATIONAL PRIORITY</strong><br>Stay undetected where possible, investigate the environment, and use the transceiver whenever you need the context you have actually earned.</p>
   <p class="mg-briefing__notice">This is a modernised, independently authored adaptation of the original mission. New dialogue, spaces and interactions are clearly distinguished from verified 1987 material.</p>
   <div class="mg-briefing__actions"><button id="briefStart">START MISSION</button><button class="secondary" id="backBrief">RETURN TO TITLE</button></div>

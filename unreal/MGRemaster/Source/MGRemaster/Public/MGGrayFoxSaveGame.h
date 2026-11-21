@@ -80,6 +80,8 @@ public:
     UPROPERTY(SaveGame) int32 TankHitsRemaining = 3;
     UPROPERTY(SaveGame) int32 Building2MinesRemaining = 4;
     UPROPERTY(SaveGame) TArray<int32> ArmedTankMineSites;
+    UPROPERTY(SaveGame) int32 BunkerBeat=0;
+    UPROPERTY(SaveGame) int32 SocketIndex=0;
     UPROPERTY(SaveGame) float TankPatrolX = 12900.f;
     UPROPERTY(SaveGame) int32 TankDirection = 1;
     UPROPERTY(SaveGame) int32 TankAttackPhase = 0;

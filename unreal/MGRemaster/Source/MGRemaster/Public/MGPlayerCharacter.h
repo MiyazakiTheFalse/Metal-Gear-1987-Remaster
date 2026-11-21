@@ -236,6 +236,8 @@ private:
     void FireStun();
     void Interact();
     void RestartRescue();
+    void RequestNewOperation();
+    double NewOperationConfirmUntil = -1.0;
     void SkipStoryCinematic();
     void ToggleMissionLog();
     void CycleGraphicsQuality();

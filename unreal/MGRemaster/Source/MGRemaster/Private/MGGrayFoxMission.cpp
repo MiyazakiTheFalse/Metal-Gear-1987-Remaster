@@ -31,8 +31,30 @@
 namespace
 {
     // Wall and floor positions are illustrative 3D blockout, not original 2D coordinates.
+    struct FBunkerBeat { const TCHAR* Room; const TCHAR* Objective; float X; float Y; int32 Kind; };
+    const FBunkerBeat BunkerRoute[] = {
+        {TEXT("Tank road"),TEXT("Enter the maintenance tunnel"),14300.f,0.f,0},
+        {TEXT("Motor pool"),TEXT("Stop the bulldozer at the red cut-off lever"),15100.f,-200.f,1},
+        {TEXT("Antenna room"),TEXT("Restore the resistance frequency and collect Card 5"),15900.f,200.f,0},
+        {TEXT("Detention ward"),TEXT("Release the prisoners and collect Card 6"),16700.f,-200.f,0},
+        {TEXT("Fire Trooper"),TEXT("Open the deluge valve between flame sweeps"),17500.f,200.f,1},
+        {TEXT("Jennifer"),TEXT("Meet Jennifer at the blue locker for the launcher"),18300.f,-200.f,0},
+        {TEXT("TX-11 hangar"),TEXT("Disable the first TX-11 from the left firing port"),19100.f,-200.f,1},
+        {TEXT("TX-11 hangar"),TEXT("Disable the second TX-11 from the right firing port"),19400.f,200.f,1},
+        {TEXT("Computer room"),TEXT("Read the bunker coordinates and take Card 7"),20200.f,-200.f,0},
+        {TEXT("Building 3 infirmary"),TEXT("Check the decoy bed against the prisoner register"),21000.f,200.f,0},
+        {TEXT("Hostage wing"),TEXT("Free Jennifer's brother before confronting the captor"),21800.f,-200.f,0},
+        {TEXT("Coward Duck"),TEXT("Flank the empty side of the barricade and recover Card 8"),22600.f,200.f,1},
+        {TEXT("Madnar's workshop"),TEXT("Record Madnar's fifteen placements at the workbench"),23400.f,-200.f,0},
+        {TEXT("TX-55 basement"),TEXT("Arm the TX-55 leg sockets"),24400.f,0.f,2},
+        {TEXT("Self-destruct"),TEXT("Release the emergency stairwell"),25400.f,-200.f,1},
+        {TEXT("Big Boss"),TEXT("Break his line of fire and counter from the side gallery"),26200.f,200.f,1},
+        {TEXT("Extraction"),TEXT("Reach the surface ladder"),27000.f,0.f,0},
+    };
+    constexpr int32 BunkerCount = UE_ARRAY_COUNT(BunkerRoute);
+    constexpr TCHAR SocketOrder[] = TEXT("RRLRLLRLLRRLRLRR");
     const FVector CellStart(-950.f, 0.f, -11.f);
-    const FVector PreludeStart(-3520.f, -50.f, -11.f);
+    const FVector PreludeStart(-4620.f, -50.f, -11.f);
     const FVector ExitPoint(1150.f, 0.f, -11.f);
     const FVector BossThreshold(1570.f, 0.f, -11.f);
     const FString SaveSlot = TEXT("GrayFoxSliceV1");
@@ -155,7 +177,10 @@ void AMGGrayFoxMission::CreatePrelude()
     // exact J2ME architecture is unverified. This is a deliberate slice lead-in.
     SpawnBlock(TEXT("PreludeFloor"), FVector(-2600.f, 0.f, -150.f),
         FVector(26.f, 10.f, 1.f), true);
-    SpawnBlock(TEXT("PreludeWestBoundary"), FVector(-3900.f, 0.f, 90.f),
+    SpawnBlock(TEXT("DrainageChannel"), FVector(-4400.f,0.f,-150.f), FVector(10.f,10.f,1.f), true);
+    for(float Side : {-500.f,500.f})
+        SpawnBlock(TEXT("ChannelRetainingWall"), FVector(-4400.f,Side,70.f),FVector(10.f,.4f,3.4f),true);
+    SpawnBlock(TEXT("PreludeWestBoundary"), FVector(-4900.f, 0.f, 90.f),
         FVector(.4f, 10.f, 3.8f), true);
     SpawnBlock(TEXT("PreludeNorthBoundary"), FVector(-2600.f, 500.f, 90.f),
         FVector(26.f, .4f, 3.8f), true);
@@ -523,9 +548,21 @@ void AMGGrayFoxMission::CreateBuilding2TankApproach()
                    FVector(28.f,.4f,3.8f),true);
     // Bounded playable road. Checkpoint validation must agree with collision;
     // without endwalls a tester could walk off the map and lose their save.
-    for (float X : {11600.f,14400.f})
+    for (float X : {11600.f,27400.f})
         SpawnBlock(TEXT("Building2RoadEndWall"), FVector(X,0.f,90.f),
                    FVector(.4f,10.f,3.8f),true);
+    // Continuous maintenance wing beyond the tank road, ending at the surface ladder.
+    SpawnBlock(TEXT("BunkerFloor"),FVector(20900.f,0.f,-150.f),FVector(130.f,10.f,1.f),true);
+    for(float Side : {-500.f,500.f})
+        SpawnBlock(TEXT("BunkerExterior"),FVector(20900.f,Side,90.f),FVector(130.f,.4f,3.8f),true);
+    for(const FBunkerBeat& Beat : BunkerRoute)
+    {
+        BunkerStations.Add(SpawnBlock(TEXT("BunkerStation"),FVector(Beat.X,Beat.Y,-48.f),FVector(.7f,.7f,1.f),false));
+        if(Beat.Kind==2)
+            for(float Side : {-200.f,200.f})
+                BunkerSockets.Add(SpawnBlock(TEXT("TX55Socket"),FVector(Beat.X,Side,-20.f),FVector(1.2f,.85f,2.f),false));
+        SpawnBlock(TEXT("GalleryPartition"),FVector(Beat.X-220.f,Beat.Y>0.f?-305.f:305.f,20.f),FVector(.65f,3.f,2.4f),true);
+    }
     for (const FVector& Shelter : {FVector(11800.f,-340.f,-40.f),
                                   FVector(12600.f,340.f,-40.f),
                                   FVector(13400.f,-340.f,-40.f),
@@ -533,7 +570,7 @@ void AMGGrayFoxMission::CreateBuilding2TankApproach()
         SpawnBlock(TEXT("TankBlastRefuge"), Shelter,FVector(1.6f,1.8f,1.7f),true);
     Building2Entry=SpawnBlock(TEXT("RoofToBuilding2"),FVector(10850.f,0.f,680.f),
                                FVector(.4f,.35f,.75f),false);
-    Building2Return=SpawnBlock(TEXT("Building2ReturnToRoof"),FVector(11550.f,0.f,-8.f),
+    Building2Return=SpawnBlock(TEXT("Building2ReturnToRoof"),FVector(11800.f,0.f,-8.f),
                                FVector(.4f,.35f,.75f),false);
     TankProxy=SpawnBlock(TEXT("Building2TankPrototype"),FVector(TankPatrolX,0.f,-5.f),
                           FVector(3.2f,2.3f,1.5f),false);
@@ -972,7 +1009,7 @@ void AMGGrayFoxMission::BeginPlay()
     StoryCamera = GetWorld()->SpawnActor<AMGStoryCameraDirector>(
         PreludeStart, FRotator::ZeroRotator);
     if (const UMGGrayFoxSaveGame* Save = Cast<UMGGrayFoxSaveGame>(
-        UGameplayStatics::LoadGameFromSlot(SaveSlot, 0)))
+        GetWorld()->URL.HasOption(TEXT("NewOperation")) ? nullptr : UGameplayStatics::LoadGameFromSlot(SaveSlot, 0)))
     {
         // Reject unknown bits and structurally impossible checkpoints.
         const uint32 F = Save->MissionFlags;
@@ -998,7 +1035,7 @@ void AMGGrayFoxMission::BeginPlay()
         const bool bBuilding2Checkpoint = Save->SchemaVersion >= 6
             && Save->bParachuteTaken && Save->bKidDefeated && Save->bHindDefeated
             && Save->bBuilding2Active && (F & MG_FOX_SLICE_COMPLETED)
-            && P.X>=11200.f && P.X<=14500.f
+            && P.X>=11200.f && P.X<=(Save->bTankDefeated ? 27380.f : 14500.f)
             && FMath::Abs(P.Y)<=450.f && P.Z>=-95.f && P.Z<=180.f;
         const bool bRoofCheckpoint = Save->SchemaVersion >= 5
             && Save->bParachuteTaken && Save->bKidDefeated
@@ -1009,7 +1046,7 @@ void AMGGrayFoxMission::BeginPlay()
             && P.Z >= 590.f && P.Z <= 850.f;
         const bool bPositionSafe = !P.ContainsNaN() && (bBuilding2Checkpoint || bRoofCheckpoint || (!P.ContainsNaN()
             && P.X >= ((F & MG_FOX_CAPTURED) && !(F & MG_FOX_GEAR_RECOVERED)
-                ? -1160.f : -3790.f)
+                ? -1160.f : -4780.f)
             && P.X <= ((F & MG_FOX_CAPTURED)
                 ? ((F & MG_FOX_SLICE_COMPLETED) ? (Save->bServiceWallOpen && Save->bServiceChargeCollected ? 7830.f : 5480.f)
                     : ((F & MG_FOX_SHOTMAKER_ENCOUNTERED) ? 3650.f : 1310.f))
@@ -1062,6 +1099,8 @@ void AMGGrayFoxMission::BeginPlay()
                 {
                     bBuilding2Active=Save->bBuilding2Active;
                     bTankDefeated=Save->bTankDefeated;
+                    BunkerBeat=bTankDefeated?FMath::Clamp(Save->BunkerBeat,0,BunkerCount):0;
+                    SocketIndex=FMath::Clamp(Save->SocketIndex,0,15);
                     TankHitsRemaining=bTankDefeated?0:FMath::Clamp(Save->TankHitsRemaining,1,3);
                     Building2MinesRemaining=FMath::Clamp(Save->Building2MinesRemaining,0,4);
                     TankPatrolX=FMath::Clamp(Save->TankPatrolX,12000.f,13800.f);
@@ -1272,7 +1311,8 @@ void AMGGrayFoxMission::InitializePlayerIfReady()
         // Open with the authentic transceiver paradigm, without stealing
         // movement. Players can close it immediately or keep walking.
         Player->OpenIncomingMissionBriefing();
-        Dialogue = TEXT("OPERATION INTRUDE N313 — BIG BOSS / 120.85.");
+        if (GetWorld()->URL.HasOption(TEXT("NewOperation"))) SaveProgress(Player);
+        Dialogue = TEXT("MISSION 1 / OPERATION INTRUDE N313 — BIG BOSS 120.85\nFox went silent here. His last transmission was 'Metal Gear'. Enter Building 1 and locate him.");
         DialogueTimeRemaining = 7.f;
     }
     else
@@ -1297,6 +1337,8 @@ void AMGGrayFoxMission::SaveProgress(AMGPlayerCharacter* Player)
     Save->bKidDefeated = bKidDefeated;
     Save->bParachuteTaken = bParachuteTaken;
     Save->bBuilding2Active = bBuilding2Active;
+    Save->BunkerBeat=BunkerBeat;
+    Save->SocketIndex=SocketIndex;
     Save->bTankDefeated = bTankDefeated;
     Save->TankHitsRemaining = TankHitsRemaining;
     Save->Building2MinesRemaining = Building2MinesRemaining;
@@ -1535,6 +1577,35 @@ bool AMGGrayFoxMission::TryServiceInteraction(AMGPlayerCharacter* Player)
                                  ETeleportType::TeleportPhysics);
         Dialogue=TEXT("BUILDING 1 ROOF — RETURN ACCESS OPEN.");
         DialogueTimeRemaining=2.5f;SaveProgress(Player);return true;
+    }
+    if (bBuilding2Active && bTankDefeated && BunkerBeat<BunkerCount)
+    {
+        const FBunkerBeat& Beat=BunkerRoute[BunkerBeat];
+        if(Beat.Kind==2)
+        {
+            const int32 Side=CanReach(Player,BunkerSockets[0],175.f)?0:
+                CanReach(Player,BunkerSockets[1],175.f)?1:-1;
+            if(Side<0)return false;
+            if((Side==0?'L':'R')!=SocketOrder[SocketIndex])
+            {
+                Dialogue=TEXT("Socket rejected. Check Madnar's sequence.");
+                DialogueTimeRemaining=2.f;return true;
+            }
+            if(++SocketIndex<16){SaveProgress(Player);return true;}
+            SocketIndex=0;
+        }
+        else
+        {
+            if(!CanReach(Player,BunkerStations[BunkerBeat],175.f))return false;
+            if(Beat.Kind==1 && FMath::Fmod(GetWorld()->GetTimeSeconds(),5.f)<2.f)
+            {
+                UGameplayStatics::ApplyDamage(Player,10.f,nullptr,this,UDamageType::StaticClass());
+                Dialogue=TEXT("Sweep active. Hold cover.");DialogueTimeRemaining=2.f;return true;
+            }
+        }
+        ++BunkerBeat;SaveProgress(Player);
+        Dialogue=BunkerBeat==BunkerCount?TEXT("Snake escaped Outer Heaven."):BunkerRoute[BunkerBeat].Room;
+        DialogueTimeRemaining=3.f;return true;
     }
     if (bBuilding2Active && !bTankDefeated)
     {
@@ -2184,7 +2255,13 @@ FString AMGGrayFoxMission::GetObjectiveText() const
         return TEXT("Find the route deeper into Outer Heaven.");
     if (bBuilding2Active || (bHindDefeated && !bRoofActive && bParachuteTaken && SavedPosition.X>11000.f))
     {
-        if(bTankDefeated)return TEXT("Tank immobilised. Scout the sealed Building 2 road.");
+        if(bTankDefeated){
+            if(BunkerBeat>=BunkerCount)return TEXT("Operation Intrude complete. Snake escaped Outer Heaven.");
+            const FBunkerBeat& Beat=BunkerRoute[BunkerBeat];
+            if(Beat.Kind==2)return FString::Printf(TEXT("Madnar: RRLR LLRL LRRL RLR? | Socket %d/16"), SocketIndex+1);
+            return FString::Printf(TEXT("%s | %s%s"),Beat.Room,Beat.Objective,Beat.Kind!=1?TEXT(""):
+                FMath::Fmod(GetWorld()->GetTimeSeconds(),5.f)<2.f?TEXT(" | Sweep active"):TEXT(" | Clear window"));
+        }
         return FString::Printf(TEXT("Lay mines on the tank track. %d mines remain."),
                                Building2MinesRemaining);
     }
@@ -2218,6 +2295,13 @@ FString AMGGrayFoxMission::GetContextActionPrompt(
             return TEXT("E / A  ENTER BUILDING 2");
         if (bBuilding2Active && Reach(Building2Return, 180.f))
             return TEXT("E / A  RETURN TO ROOF");
+        if (bBuilding2Active && bTankDefeated && BunkerBeat<BunkerCount)
+        {
+            if(BunkerRoute[BunkerBeat].Kind==2){
+                if(Reach(BunkerSockets[0],175.f))return TEXT("E / A  ARM LEFT SOCKET");
+                if(Reach(BunkerSockets[1],175.f))return TEXT("E / A  ARM RIGHT SOCKET");
+            }else if(Reach(BunkerStations[BunkerBeat],175.f))return FString(BunkerRoute[BunkerBeat].Objective);
+        }
         if (bBuilding2Active && !bTankDefeated)
             for (int32 I = 0; I < TankMineMarkers.Num(); ++I)
                 if (!ArmedTankMineSites.Contains(I) &&

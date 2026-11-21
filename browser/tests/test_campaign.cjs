@@ -615,3 +615,40 @@ tankReload.game.teleport(88.5,0);tankReload.game.act('interact');
 assert.equal(tankReload.game.state.b2.active,true,'no tank progress reset after return');
 assert.equal(tankReload.game.state.b2.mines,3);
 console.log('PASS: Building 2 roof descent, physical mine placement, checkpoint, retreat and re-entry.');
+
+const freshInsertion=boot();
+freshInsertion.button('start');
+assert.equal(freshInsertion.game.state.player.x,-39);
+const campaignBytes=freshInsertion.storage.get(tankSlot);
+boot(freshInsertion.storage,'?cell').button('start');
+assert.equal(freshInsertion.storage.get(tankSlot),campaignBytes);
+
+const bunker=loadFixture({version:10,stage:10,x:123,z:0,health:100,
+ service:{charge:true,open:true,intel:true,kidDown:true,parachute:true},
+ roof:{defeated:true}, b2:{active:true,defeated:true}});
+const stops=[[123,0,0],[131,-2,1],[139,2,0],[147,-2,0],[155,2,1],[163,-2,0],[171,-2,1],[174,2,1],[182,-2,0],[190,2,0],[198,-2,0],[206,2,1],[214,-2,0],[224,0,2],[234,-2,1],[242,2,1],[250,0,0]];
+bunker.game.testStepGuards(2.5);
+function walkTo(game,x,z){
+ const walk=(vx,vz)=>game.moveBody(vx,vz,1);
+ walk(0,-game.state.player.z);
+ walk(x-game.state.player.x,0);
+ walk(0,z-game.state.player.z);
+ assert.ok(Math.hypot(x-game.state.player.x,z-game.state.player.z)<.05,'reachable station '+x);
+}
+for(const [i,[x,z,kind]] of stops.entries()){
+ if(kind===2){
+  walkTo(bunker.game,x,-2);bunker.game.act('interact');
+  assert.equal(bunker.game.state.b2.placements,0);
+  for(const side of 'RRLRLLRLLRRLRLRR'){
+   walkTo(bunker.game,x,side==='L'?-2:2);bunker.game.act('interact');
+  }
+ }else{
+  walkTo(bunker.game,x,z);bunker.game.act('interact');
+ }
+ assert.equal(bunker.game.state.b2.beat,i+1,'campaign stop '+i);
+ if(i===13||i===stops.length-1){
+  const restored=boot(bunker.storage);restored.button('resume');
+  assert.equal(restored.game.state.b2.beat,i+1);
+ }
+}
+console.log('PASS: fresh insertion, isolated custody rehearsal, bunker progression, TX-55 order, extraction and reload.');

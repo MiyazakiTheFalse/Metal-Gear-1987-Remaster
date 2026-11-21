@@ -136,6 +136,10 @@ private:
     int32 TankHitsRemaining = 3;
     int32 Building2MinesRemaining = 4;
     TArray<int32> ArmedTankMineSites;
+    int32 BunkerBeat=0;
+    int32 SocketIndex=0;
+    UPROPERTY() TArray<AStaticMeshActor*> BunkerStations;
+    UPROPERTY() TArray<AStaticMeshActor*> BunkerSockets;
     float TankPatrolX = 12900.f;
     int32 TankDirection = 1;
     int32 TankAttackPhase = 0; // patrol, warning, recovery
