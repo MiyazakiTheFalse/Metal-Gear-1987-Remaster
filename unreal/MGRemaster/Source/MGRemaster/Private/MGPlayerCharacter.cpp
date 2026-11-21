@@ -313,10 +313,14 @@ void AMGPlayerCharacter::ShoulderSwap()
     // changes the station. Snake keeps movement/camera control.
     if (bCodecOpen)
     {
-        TransceiverChannel = (TransceiverChannel + 1) % 2;
-        NotifyFeedback(TransceiverChannel == 0 ?
-            TEXT("RADIO TUNED — SCHNEIDER / 120.79") :
-            TEXT("RADIO TUNED — BIG BOSS / 120.85"), TEXT("select"));
+        const UMGCampaignState* Story = GetWorld() && GetWorld()->GetGameInstance()
+            ? GetWorld()->GetGameInstance()->GetSubsystem<UMGCampaignState>() : nullptr;
+        const int32 Count = Story ? Story->GetRadioContactCount() : 2;
+        TransceiverChannel = (TransceiverChannel + 1) % Count;
+        NotifyFeedback(Story ?
+            FString::Printf(TEXT("RADIO TUNED — %s"),
+                            *Story->GetRadioContactLabel(TransceiverChannel)) :
+            TEXT("RADIO TUNED"), TEXT("select"));
         return;
     }
     if (AMGMissionOne* Opening = Cast<AMGMissionOne>(
@@ -906,7 +910,7 @@ void AMGPlayerCharacter::ToggleCodec()
     CloseEquipmentWindows();
     ApplyMenuTimeState();
     bCodecOpen = true;
-    TransceiverChannel = 0; // Kyle Schneider; Q changes to Big Boss.
+    TransceiverChannel = 0; // Schneider, Big Boss, then Diane once introduced by a POW.
     CodecStatus = TEXT("TRANSCEIVER ACTIVE — CHANGE CHANNEL Q / RS; CLOSE C / START");
     NotifyFeedback(TEXT("TRANSCEIVER OPEN — SCHNEIDER / 120.79"), TEXT("select"));
 }
