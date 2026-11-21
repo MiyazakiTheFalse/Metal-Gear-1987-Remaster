@@ -332,6 +332,9 @@ void AMGGrayFoxMission::PersistRecoveredInventory(AMGPlayerCharacter* Player)
     OpeningSave->Version = FMath::Max(4, OpeningSave->Version);
     OpeningSave->HandgunRounds = Player->GetEquipment()->GetHandgunRounds();
     OpeningSave->RationsRemaining = Player->GetEquipment()->GetItemQuantity(TEXT("RATION"));
+    for (const FMGEquipmentEntry& Entry:Player->GetEquipment()->GetItems())
+        if (Entry.bOwned && Entry.Id == TEXT("CARD3"))
+            OpeningSave->ExtraOwnedItems.AddUnique(Entry.Id);
     if (OpeningSave->Version >= 6)
     {
         for (const FMGEquipmentEntry& Entry : Player->GetEquipment()->GetWeapons())
@@ -367,6 +370,8 @@ void AMGGrayFoxMission::RestoreCapturedGear(AMGPlayerCharacter* Player)
         else if (Id == TEXT("P10"))
             Equipment->AwardWeapon(TEXT("GRENADE_LAUNCHER"), 6);
     }
+    for (const FName Item : OpeningSave->ExtraOwnedItems)
+        Equipment->AwardItem(Item,1);
     if (OpeningSave->Version >= 4)
     {
         Equipment->RestoreHandgunRounds(FMath::Max(0, OpeningSave->HandgunRounds));
@@ -747,6 +752,11 @@ void AMGGrayFoxMission::Tick(float Dt)
     ElapsedSinceBeat += FMath::Max(0.f, Dt);
     DialogueTimeRemaining = FMath::Max(0.f, DialogueTimeRemaining - Dt);
     UpdateGuardAlert();
+    if (IsValid(ShootGunnerCard) && GetWorld() && GetWorld()->GetGameInstance())
+        if (const UMGCampaignState* State=GetWorld()->GetGameInstance()->
+            GetSubsystem<UMGCampaignState>())
+            if (State->HasBeat(TEXT("bosses.shoot_gunner")))
+                ShootGunnerCard->SetActorHiddenInGame(false);
     AMGPlayerCharacter* Player =
         Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (Player)
