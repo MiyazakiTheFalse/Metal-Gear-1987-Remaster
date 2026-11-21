@@ -25,6 +25,7 @@ public:
     bool IsAlarmActive() const { return !bDisabled && AlertSeconds > 0.f; }
     float GetDetectionProgress() const { return Suspicion; }
     int32 GetDeck() const { return Deck; }
+    bool IsDisabled() const { return bDisabled; }
 private:
     UPROPERTY(VisibleAnywhere)
     USceneComponent* SceneRoot;
