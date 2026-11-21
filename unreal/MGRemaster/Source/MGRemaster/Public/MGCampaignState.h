@@ -25,6 +25,8 @@ public:
     bool HasBeat(FName Id) const;
     int32 GetMissionThreeIntelCount() const;
     bool RecordBeat(FName Id, const FString& Intel);
+    /** v5->v6 correction: old prototype gave Diane's frequency too early. */
+    void RevokeMisplacedDianeContact();
     bool AdvanceMission(int32 NextMissionNumber);
     FString GetIntelLog() const;
     FString GetCurrentObjective() const;
