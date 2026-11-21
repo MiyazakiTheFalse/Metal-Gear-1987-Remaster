@@ -64,6 +64,8 @@ public:
     int32 GetHandgunRounds() const;
     bool ConsumeHandgunRound();
     void RestoreHandgunRounds(int32 Rounds);
+    int32 GetItemQuantity(FName Id) const;
+    void RestoreItemQuantity(FName Id, int32 Quantity);
     bool AwardAmmunition(FName WeaponId, int32 Count);
     // Before Snake finds equipment in the 1987 opening, he has no field gear.
     // Do not alter prison confiscation semantics for the later Gray Fox slice.
