@@ -28,6 +28,26 @@
       "id": "msx2_story_summary",
       "url": "https://www.expositionbreak.com/the-story-so-far-metal-gear-msx2/",
       "tier": "comparative_analysis"
+    },
+    {
+      "id": "official_1995_history",
+      "url": "https://www.konami.com/mg/history/jp/ja/mg",
+      "tier": "official_1995"
+    },
+    {
+      "id": "msx2_full_dialogue",
+      "url": "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/30618",
+      "tier": "original_script_transcription"
+    },
+    {
+      "id": "1987_walkthrough",
+      "url": "https://gamefaqs.gamespot.com/msx/578853-metal-gear/faqs/12398",
+      "tier": "secondary_source_critical_route"
+    },
+    {
+      "id": "1987_variants",
+      "url": "https://tcrf.tiago.zip/wiki/Metal_Gear_%28MSX2%29",
+      "tier": "localization_comparison"
     }
   ],
   "stages": [
@@ -2737,5 +2757,7 @@
     "optional_radio": "Optional exposition/advice radio never gates physical progression; Jennifer's source-required equipment/door calls are explicit exceptions, with accessible POW/rank recovery",
     "hindsight": "Later-era character identity not disclosed to in-world Snake in 1995",
     "location": "Anchors provisional until verified against the chosen J2ME 3.3.0 data"
-  }
+  },
+  "chronological_sequence_file": "data/1995_campaign_sequence.json",
+  "primary_narrative_specification": "docs/1995_FULL_CAST_NARRATIVE_AND_TIMELINE.md"
 }
