@@ -1237,5 +1237,12 @@
     "Tie each critical reveal to a stable event flag, physical location, persistent transcript, and interrupted-play path",
     "Keep older rescue and radio prototypes but mark unimplemented rest of full-game arcs",
     "All beats must be reconciled against J2ME before being promoted to original-source verified"
-  ]
+  ],
+  "dependency_semantics": "Narrative ordering/context only; never wire depends_on as mandatory mission gates. Mandatory gates require explicit separately source-verified state flags.",
+  "gate_policy": {
+    "critical": "Only source-verified mission transactions may block progress",
+    "optional_radio": "Never a prerequisite for physical progression",
+    "hindsight": "Never visible in 1995 until optional postgame context",
+    "location": "Planning anchors must be reconciled to J2ME map"
+  }
 }
