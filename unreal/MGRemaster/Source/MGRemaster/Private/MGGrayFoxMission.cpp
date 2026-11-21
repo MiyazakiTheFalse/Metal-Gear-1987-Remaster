@@ -2589,8 +2589,12 @@ void AMGGrayFoxMission::Tick(float Dt)
     NotifyPacingPhaseIfChanged();
 }
 
-void AMGGrayFoxMission::RestartMission()
+void AMGGrayFoxMission::RetryFromCheckpoint()
 {
-    UGameplayStatics::DeleteGameInSlot(SaveSlot, 0);
-    UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
+    if (!GetWorld()) return;
+    // Retry is NOT a destructive New Game. All deaths and optional retries
+    // rehydrate the saved world through InitializePlayerIfReady. This also
+    // strips PIE_0 prefixes so retry works from Editor, not only packaged EXE.
+    const FString LevelName = UGameplayStatics::GetCurrentLevelName(this, true);
+    UGameplayStatics::OpenLevel(this, FName(*LevelName));
 }
