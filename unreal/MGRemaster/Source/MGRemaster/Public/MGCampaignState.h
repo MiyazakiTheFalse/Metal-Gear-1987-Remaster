@@ -17,10 +17,10 @@ class MGREMASTER_API UMGCampaignState : public UGameInstanceSubsystem
     GENERATED_BODY()
 public:
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-    int32 GetChapter() const;
+    int32 GetMissionNumber() const;
     bool HasBeat(FName Id) const;
     bool RecordBeat(FName Id, const FString& Intel);
-    bool AdvanceChapter(int32 NextChapter);
+    bool AdvanceMission(int32 NextMissionNumber);
     FString GetIntelLog() const;
     FString GetCurrentObjective() const;
     FString GetOpeningRadio(int32 Channel) const;
