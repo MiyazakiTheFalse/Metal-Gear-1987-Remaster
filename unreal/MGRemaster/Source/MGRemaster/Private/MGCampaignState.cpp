@@ -113,6 +113,24 @@ int32 UMGCampaignState::GetMissionThreeIntelCount() const
     if (HasBeat(TEXT("m03.route.archive"))) ++Leads;
     return Leads;
 }
+bool UMGCampaignState::IsMissionThreeExteriorActive() const
+{
+    return Progress && Progress->MissionNumber == 3 &&
+        Progress->bMissionThreeExteriorActive;
+}
+bool UMGCampaignState::SetMissionThreeExteriorActive(bool bExterior)
+{
+    if (!Progress || Progress->MissionNumber != 3) return false;
+    if (bExterior && !HasBeat(TEXT("m03.route.confirmed"))) return false;
+    const bool Previous=Progress->bMissionThreeExteriorActive;
+    Progress->bMissionThreeExteriorActive=bExterior;
+    if (!Commit())
+    {
+        Progress->bMissionThreeExteriorActive=Previous;
+        return false;
+    }
+    return true;
+}
 bool UMGCampaignState::HasBeat(FName Id) const
 {
     return Progress && Progress->CompletedBeatIds.Contains(Id);
