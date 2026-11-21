@@ -253,16 +253,16 @@
       "room": "m01.checkpoint",
       "spawn_xy_m": [
         8,
-        26
+        27
       ],
       "patrol_xy_m": [
         [
           8,
-          26
+          27
         ],
         [
           19,
-          26
+          27
         ],
         [
           19,
@@ -338,16 +338,16 @@
       "id": "G05",
       "room": "m01.security",
       "spawn_xy_m": [
-        67,
+        70,
         24
       ],
       "patrol_xy_m": [
         [
-          67,
+          70,
           24
         ],
         [
-          67,
+          70,
           36
         ]
       ],
@@ -394,7 +394,12 @@
       ],
       "access": "west_truck_interaction",
       "purpose": "First-truck ration, MSX2 comparative",
-      "source_alignment": "msx2_comparative_pending_j2me"
+      "source_alignment": "msx2_comparative_pending_j2me",
+      "interaction_marker_xy_m": [
+        5,
+        19.5
+      ],
+      "physical_source_container_note": "Pickup marker at accessible edge of blocking truck/storage proxy; true container interior to be modelled"
     },
     {
       "id": "P02",
@@ -406,7 +411,12 @@
       ],
       "access": "center_truck_after_guard_departure",
       "purpose": "Source critical progression and first meaningful keycard",
-      "source_alignment": "msx2_comparative_pending_j2me"
+      "source_alignment": "msx2_comparative_pending_j2me",
+      "interaction_marker_xy_m": [
+        12,
+        19.5
+      ],
+      "physical_source_container_note": "Pickup marker at accessible edge of blocking truck/storage proxy; true container interior to be modelled"
     },
     {
       "id": "P03",
@@ -418,7 +428,12 @@
       ],
       "access": "east_truck_interaction",
       "purpose": "Optional original reconnaissance pickup",
-      "source_alignment": "msx2_comparative_pending_j2me"
+      "source_alignment": "msx2_comparative_pending_j2me",
+      "interaction_marker_xy_m": [
+        20,
+        19.5
+      ],
+      "physical_source_container_note": "Pickup marker at accessible edge of blocking truck/storage proxy; true container interior to be modelled"
     },
     {
       "id": "P04",
@@ -430,7 +445,12 @@
       ],
       "access": "door_requires_card_1",
       "purpose": "Preserve original gas-mask dependency",
-      "source_alignment": "msx2_comparative_pending_j2me"
+      "source_alignment": "msx2_comparative_pending_j2me",
+      "interaction_marker_xy_m": [
+        31,
+        25
+      ],
+      "physical_source_container_note": "Pickup marker at accessible edge of blocking truck/storage proxy; true container interior to be modelled"
     },
     {
       "id": "P05",
@@ -442,7 +462,12 @@
       ],
       "access": "later_west_truck",
       "purpose": "Original delayed gun acquisition, no starting ammunition",
-      "source_alignment": "msx2_comparative_pending_j2me"
+      "source_alignment": "msx2_comparative_pending_j2me",
+      "interaction_marker_xy_m": [
+        55,
+        29.5
+      ],
+      "physical_source_container_note": "Pickup marker at accessible edge of blocking truck/storage proxy; true container interior to be modelled"
     },
     {
       "id": "P06",
@@ -454,7 +479,12 @@
       ],
       "access": "guarded_east_truck",
       "purpose": "Original later-truck risk/reward encounter",
-      "source_alignment": "msx2_comparative_pending_j2me"
+      "source_alignment": "msx2_comparative_pending_j2me",
+      "interaction_marker_xy_m": [
+        67,
+        29.5
+      ],
+      "physical_source_container_note": "Pickup marker at accessible edge of blocking truck/storage proxy; true container interior to be modelled"
     }
   ],
   "beats": [
