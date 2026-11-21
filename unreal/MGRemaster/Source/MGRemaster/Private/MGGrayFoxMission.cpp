@@ -1,6 +1,7 @@
 #include "MGGrayFoxMission.h"
 
 #include "MGGuardActor.h"
+#include "MGBodyHidingSpot.h"
 #include "MGGrayFoxSaveGame.h"
 #include "MGMissionOneSaveGame.h"
 #include "MGEquipmentComponent.h"
@@ -140,6 +141,11 @@ void AMGGrayFoxMission::CreateGreybox()
     ExitMarker = SpawnBlock(TEXT("EscapeMarker"), ExitPoint, FVector(0.5f,0.5f,1.2f), false);
     GearLocker = SpawnBlock(TEXT("ConfiscatedGearLocker"),
         FVector(725.f, -220.f, -11.f), FVector(1.2f,.65f,1.3f), false);
+    // Different cabinets have different functions: this body locker does not
+    // yield confiscated gear and cannot bypass the recovery requirement.
+    if (AMGBodyHidingSpot* Locker = GetWorld()->SpawnActor<AMGBodyHidingSpot>(
+            FVector(1240.f, -365.f, -11.f), FRotator(0.f,90.f,0.f)))
+        Locker->SetFacilityLabel(TEXT("DETENTION / SERVICE"));
 }
 
 void AMGGrayFoxMission::SpawnPerimeterGuards()
