@@ -168,8 +168,8 @@ void AMGLaterMission::BuildTX55Finale()
           FVector(155,.5f,3.7f));
     Block(TEXT("M08_SouthBulkhead"),FVector(7600,0,160),
           FVector(155,.5f,3.7f));
-    Block(TEXT("M08_CentralMetalGearTorso"),FVector(4400,2200,370),
-          FVector(5.8f,4.8f,6.8f),false);
+    TX55Torso=Block(TEXT("M08_CentralMetalGearTorso"),
+                    FVector(4400,2200,370),FVector(5.8f,4.8f,6.8f),false);
     TX55LeftFoot=Block(TEXT("M08_TX55_LeftFoot"),
         FVector(3600,3250,110),FVector(2.0f,2.f,1.9f),false);
     TX55RightFoot=Block(TEXT("M08_TX55_RightFoot"),
@@ -210,6 +210,7 @@ void AMGLaterMission::BuildTX55Finale()
         {
             if (IsValid(TX55LeftFoot)) TX55LeftFoot->Destroy();
             if (IsValid(TX55RightFoot)) TX55RightFoot->Destroy();
+            if (IsValid(TX55Torso)) TX55Torso->Destroy();
             if (IsValid(PassageGateA)) PassageGateA->Destroy();
             // Countdown retries resume from a valid post-detonation checkpoint.
             if (Story()->GetEscapeTimeRemaining()<=0.f)
@@ -546,6 +547,7 @@ bool AMGLaterMission::TryFinaleInteraction(AMGPlayerCharacter* Player)
                 {
                     if (IsValid(TX55LeftFoot)) TX55LeftFoot->Destroy();
                     if (IsValid(TX55RightFoot)) TX55RightFoot->Destroy();
+                    if (IsValid(TX55Torso)) TX55Torso->Destroy();
                     if (IsValid(PassageGateA)) PassageGateA->Destroy();
                     for (TActorIterator<AMGSecurityCamera> Camera(GetWorld());Camera;++Camera)
                         Camera->DisableForService();
