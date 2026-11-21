@@ -171,12 +171,13 @@ void AMGGuardActor::ReleaseChoke(bool bAlertOnRelease)
         LastKnownPlayerPosition = GetActorLocation() - GetActorForwardVector() * 80.f;
     CameraAlertSeconds = FMath::Max(CameraAlertSeconds, 1.8f);
 }
-void AMGGuardActor::ReactToMeleeStrike(bool bFinishingKick,
+void AMGGuardActor::ReactToMeleeStrike(int32 StrikeIndex,
                                       const FVector& StrikeSource)
 {
     if (bIncapacitated || bBeingChoked) return;
-    StaggerSeconds = bFinishingKick ? 0.4f : 0.2f;
-    if (bFinishingKick)
+    LastMeleeReaction=FMath::Clamp(StrikeIndex,1,3);
+    StaggerSeconds = StrikeIndex==3 ? 0.4f : 0.2f;
+    if (StrikeIndex==3)
     {
         MeleeKnockdownSeconds = 1.25f;
         // Small collision-tested displacement, never throw a body through
@@ -376,7 +377,9 @@ void AMGGuardActor::Tick(float DeltaSeconds)
     CameraAlertSeconds = FMath::Max(0.f, CameraAlertSeconds - DeltaSeconds);
     AttackCooldown = FMath::Max(0.f, AttackCooldown - DeltaSeconds);
     ProxyBody->SetRelativeRotation(FMath::RInterpTo(ProxyBody->GetRelativeRotation(),
-        StaggerSeconds > 0.f ? FRotator(0.f, 0.f, 12.f) : FRotator::ZeroRotator,
+        StaggerSeconds > 0.f ?
+            FRotator(0.f,0.f,LastMeleeReaction==1 ? -13.f : 13.f) :
+            FRotator::ZeroRotator,
         DeltaSeconds, 9.f));
     const AMGPlayerCharacter* Player = Cast<AMGPlayerCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
     if (!Player) return;
