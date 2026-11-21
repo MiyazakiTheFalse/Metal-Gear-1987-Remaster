@@ -132,6 +132,8 @@ void AMGLaterMission::BuildExterior()
               FVector(10400,3400,95),1);
     TransitionMarker=Block(TEXT("M03_BuildingTwoCheckpoint"),
                             FVector(13300,2200,90),FVector(.8f,.8f,1.7f),false);
+    Block(TEXT("M03_ReturnToBuildingOne"),FVector(350,2200,90),
+          FVector(.8f,.8f,1.7f),false);
     SpawnPoint=FVector(650,2200,90);
 }
 void AMGLaterMission::BuildBuildingTwo()
@@ -420,6 +422,14 @@ bool AMGLaterMission::TryInteract(AMGPlayerCharacter* Player)
     UMGCampaignState* State=Story();
     for (FWorldPickup& P:Pickups)
         if (ClaimPickup(P,Player)) return true;
+    if (Mission==3 &&
+        FVector::Dist2D(Player->GetActorLocation(),FVector(350,2200,90)) < 165.f)
+    {
+        if (State->SetMissionThreeExteriorActive(false))
+            UGameplayStatics::OpenLevel(this,FName(*GetWorld()->GetName()));
+        else Player->NotifyFeedback(TEXT("RETURN CHECKPOINT FAILED"),TEXT("denied"));
+        return true;
+    }
     if (Mission==3 && IsWithin(Player,TransitionMarker))
     {
         if (!State->HasBeat(TEXT("m03.machinegun_kid_defeated")) ||
