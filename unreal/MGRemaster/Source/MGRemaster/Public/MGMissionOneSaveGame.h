@@ -11,7 +11,7 @@ class MGREMASTER_API UMGMissionOneSaveGame : public USaveGame
     GENERATED_BODY()
 public:
     UPROPERTY()
-    int32 Version = 2;
+    int32 Version = 3;
     UPROPERTY()
     TArray<FName> CollectedPickupIds;
     UPROPERTY()
@@ -20,6 +20,10 @@ public:
     bool bElevatorReached = false;
     UPROPERTY()
     bool bPOWRescued = false;
+    UPROPERTY()
+    bool bPrisonerDoorOpened = false;
+    UPROPERTY()
+    bool bGasDoorOpened = false;
     UPROPERTY()
     int32 CurrentFloor = 1;
     UPROPERTY()
