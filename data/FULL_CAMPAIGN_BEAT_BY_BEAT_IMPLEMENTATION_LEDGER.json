@@ -7439,6 +7439,11 @@
         "saved and revisited",
         "input, caption and performance tested",
         "professional art and audio approved"
+      ],
+      "sourceEvidence": [
+        "browser/index.html",
+        "browser/game.js",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGPrototypeHUD.cpp"
       ]
     },
     {
@@ -7462,7 +7467,13 @@
         "tools/test_unreal_character_import_recovery.py",
         "tools/test_unreal_native_character_audit_source.py",
         "tools/test_unreal_packaging_cook_audit_contracts.py",
-        "tools/test_unreal_muzzle_and_fallback_source.py"
+        "tools/test_unreal_muzzle_and_fallback_source.py",
+        "browser/tests/test_campaign.cjs",
+        "browser/game.js",
+        "unreal/MGRemaster/Source/MGRemaster/Private/MGGrayFoxMission.cpp",
+        "unreal/MGRemaster/Config/DefaultInput.ini",
+        "tools/test_cross_engine_playability_source.py",
+        "docs/CROSS_ENGINE_PLAYABILITY_PASS_2026_11_21.md"
       ],
       "unverifiedGates": [
         "Unreal 5.7 C++ UBT successful compile",
@@ -7480,7 +7491,7 @@
     "sourcePrototypes": 27,
     "actualUnrealVerified": 0,
     "productionReady": 0,
-    "mandatoryNextAction": "Run preflight and UE5.7 native character import/audit on tester's Windows machine; compile and PIE with six character/weapon/KO clips and visible muzzle origins; test packaged cook roots before claiming usable Unreal build. Complete original floor atlas and MGS4-grade cast later.",
+    "mandatoryNextAction": "Real UE5.7 compile/PIE and browser localhost smoke-test side by side: verify A/X/B/Y/Down controller parity, precise context prompts, lossless death/F9/R retry, finite item use and post-Card3 paths; then original first-floor map/Card1 gates and final art. No actual Unreal-verified or production-ready beats yet.",
     "unmappedCoordinates": 52,
     "prototypeEnemyActorsMapped": 14,
     "prototypeEnemyAreasMapped": 5,
