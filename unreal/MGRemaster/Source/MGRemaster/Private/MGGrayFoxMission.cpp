@@ -293,6 +293,15 @@ void AMGGrayFoxMission::PersistRecoveredInventory(AMGPlayerCharacter* Player)
     OpeningSave->Version = FMath::Max(4, OpeningSave->Version);
     OpeningSave->HandgunRounds = Player->GetEquipment()->GetHandgunRounds();
     OpeningSave->RationsRemaining = Player->GetEquipment()->GetItemQuantity(TEXT("RATION"));
+    if (OpeningSave->Version >= 6)
+    {
+        for (const FMGEquipmentEntry& Entry : Player->GetEquipment()->GetWeapons())
+            if (Entry.Id != TEXT("NONE"))
+                OpeningSave->WeaponRounds.Add(Entry.Id, Entry.Quantity);
+        for (const FMGEquipmentEntry& Entry : Player->GetEquipment()->GetItems())
+            if (Entry.Id != TEXT("NONE"))
+                OpeningSave->ItemQuantities.Add(Entry.Id, Entry.Quantity);
+    }
     if (!UGameplayStatics::SaveGameToSlot(OpeningSave, TEXT("MissionOneV1"), 0))
         UE_LOG(LogTemp, Warning, TEXT("Prison gear usage was not persisted to Building One"));
 }
@@ -314,11 +323,20 @@ void AMGGrayFoxMission::RestoreCapturedGear(AMGPlayerCharacter* Player)
         else if (Id == TEXT("P05")) Equipment->AwardWeapon(TEXT("HANDGUN"), 0);
         else if (Id == TEXT("P06")) Equipment->AwardItem(TEXT("MINES"), 1);
         else if (Id == TEXT("P07")) Equipment->AwardAmmunition(TEXT("HANDGUN"), 12);
+        else if (Id == TEXT("P08")) Equipment->AwardItem(TEXT("CARD2"), 1);
+        else if (Id == TEXT("P09")) Equipment->AwardWeapon(TEXT("RC_MISSILE"), 4);
     }
     if (OpeningSave->Version >= 4)
     {
         Equipment->RestoreHandgunRounds(FMath::Max(0, OpeningSave->HandgunRounds));
         Equipment->RestoreItemQuantity(TEXT("RATION"), FMath::Max(0, OpeningSave->RationsRemaining));
+        if (OpeningSave->Version >= 6)
+        {
+            for (const TPair<FName, int32>& Entry : OpeningSave->WeaponRounds)
+                Equipment->RestoreWeaponAmmo(Entry.Key, Entry.Value);
+            for (const TPair<FName, int32>& Entry : OpeningSave->ItemQuantities)
+                Equipment->RestoreItemQuantity(Entry.Key, Entry.Value);
+        }
     }
 }
 
